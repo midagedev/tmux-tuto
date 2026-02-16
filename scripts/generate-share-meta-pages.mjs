@@ -27,6 +27,7 @@ function createHtml({ slug, title, description, ogImage }) {
   const escapedDescription = escapeHtml(description);
   const escapedPageUrl = escapeHtml(pageUrl);
   const escapedImageUrl = escapeHtml(imageUrl);
+  const fallbackRoot = '../../';
 
   return `<!doctype html>
 <html lang="ko">
@@ -45,7 +46,7 @@ function createHtml({ slug, title, description, ogImage }) {
     <meta name="twitter:description" content="${escapedDescription}" />
     <meta name="twitter:image" content="${escapedImageUrl}" />
     <link rel="canonical" href="${escapedPageUrl}" />
-    <meta http-equiv="refresh" content="2; url=/" />
+    <meta http-equiv="refresh" content="2; url=${fallbackRoot}" />
     <script>
       (function () {
         var targetPath = window.location.pathname + window.location.search + window.location.hash;
@@ -61,7 +62,7 @@ function createHtml({ slug, title, description, ogImage }) {
       <h1>${escapeHtml(title)}</h1>
       <p>${escapedDescription}</p>
       <p>앱으로 이동 중입니다. 자동 이동이 되지 않으면 홈에서 다시 열어 주세요.</p>
-      <p><a href="/">tmux-tuto 홈으로 이동</a></p>
+      <p><a href="${fallbackRoot}">tmux-tuto 홈으로 이동</a></p>
     </main>
   </body>
 </html>
