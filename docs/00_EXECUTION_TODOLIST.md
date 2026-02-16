@@ -62,7 +62,7 @@
 - [x] `E-064` OG 이미지 생성/버저닝
 - [x] `E-065` Cloudflare Analytics 연동
 - [x] `E-066` KPI 라우트 맵 검증
-- [ ] `E-070` Unit/Integration 테스트 세트
+- [x] `E-070` Unit/Integration 테스트 세트
 - [ ] `E-071` E2E 스모크 플로우
 - [ ] `E-072` 호환성/접근성/성능 튜닝
 - [ ] `E-073` CI 파이프라인

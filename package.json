@@ -8,6 +8,9 @@
     "generate:og": "node scripts/generate-og-images.mjs",
     "generate:share-meta": "node scripts/generate-share-meta-pages.mjs",
     "verify:kpi-routes": "node scripts/verify-kpi-route-map.mjs",
+    "typecheck": "tsc -b",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "build": "npm run generate:og && npm run generate:share-meta && tsc -b && vite build",
     "build:gh": "npm run generate:og && npm run generate:share-meta && VITE_BASE_PATH=/tmux-tuto/ tsc -b && vite build",
     "build:cf": "npm run generate:og && npm run generate:share-meta && VITE_BASE_PATH=/ tsc -b && vite build",
@@ -31,10 +34,12 @@
     "eslint": "^9.9.0",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
     "eslint-plugin-react-refresh": "^0.4.9",
+    "fake-indexeddb": "^6.2.5",
     "globals": "^15.9.0",
     "sharp": "^0.34.5",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
-    "vite": "^5.4.1"
+    "vite": "^5.4.1",
+    "vitest": "^1.6.1"
   }
 }

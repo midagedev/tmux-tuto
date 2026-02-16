@@ -20,3 +20,23 @@ export function getDb() {
 
   return dbPromise;
 }
+
+export async function resetDbForTests() {
+  if (typeof indexedDB === 'undefined') {
+    dbPromise = null;
+    return;
+  }
+
+  if (dbPromise) {
+    const db = await dbPromise;
+    db.close();
+  }
+  dbPromise = null;
+
+  await new Promise<void>((resolve, reject) => {
+    const request = indexedDB.deleteDatabase(DB_NAME);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+    request.onblocked = () => resolve();
+  });
+}
