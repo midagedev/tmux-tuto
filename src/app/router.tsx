@@ -18,12 +18,14 @@ import { OnboardingPreferencesPage } from '../pages/Onboarding/OnboardingPrefere
 import { OnboardingFirstMissionPage } from '../pages/Onboarding/OnboardingFirstMissionPage';
 import { OnboardingFirstMissionPassedPage } from '../pages/Onboarding/OnboardingFirstMissionPassedPage';
 import { OnboardingDonePage } from '../pages/Onboarding/OnboardingDonePage';
+import { RouteErrorBoundary } from '../components/system/RouteErrorBoundary';
 
 export const router = createBrowserRouter(
   [
     {
       path: '/',
       element: <AppShell />,
+      errorElement: <RouteErrorBoundary />,
       children: [
         { index: true, element: <HomePage /> },
         { path: 'learn', element: <LearnIndexPage /> },

@@ -154,6 +154,23 @@ a {
   gap: 8px;
 }
 
+.state-box {
+  border: 1px dashed var(--border);
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.state-box h2 {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+}
+
+.state-box p {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
 @media (max-width: 1080px) {
   .app-shell {
     grid-template-columns: 200px 1fr;
