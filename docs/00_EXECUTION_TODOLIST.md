@@ -63,7 +63,7 @@
 - [x] `E-065` Cloudflare Analytics 연동
 - [x] `E-066` KPI 라우트 맵 검증
 - [x] `E-070` Unit/Integration 테스트 세트
-- [ ] `E-071` E2E 스모크 플로우
+- [x] `E-071` E2E 스모크 플로우
 - [ ] `E-072` 호환성/접근성/성능 튜닝
 - [ ] `E-073` CI 파이프라인
 - [ ] `E-074` GitHub Pages 자동 배포
