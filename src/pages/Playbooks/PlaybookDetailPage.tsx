@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { getPlaybookBySlug, loadAppContent } from '../../features/curriculum/contentLoader';
 import { EmptyState } from '../../components/system/EmptyState';
 import type { AppPlaybook } from '../../features/curriculum/contentSchema';
+import { copyTextToClipboard } from '../../utils/clipboard';
 
 export function PlaybookDetailPage() {
   const { playbookSlug } = useParams();
@@ -26,7 +27,7 @@ export function PlaybookDetailPage() {
 
   const onCopyCommand = async (command: string, stepId: string) => {
     try {
-      await navigator.clipboard.writeText(command);
+      await copyTextToClipboard(command);
       setCopiedCommand(command);
       if (playbookSlug) {
         navigate(`/playbooks/${playbookSlug}/copied?step=${encodeURIComponent(stepId)}`);
@@ -71,7 +72,9 @@ export function PlaybookDetailPage() {
               ))}
             </ol>
             {hasCommands && copiedCommand ? (
-              <p className="muted">copied: <code>{copiedCommand}</code></p>
+              <p className="muted" role="status" aria-live="polite">
+                copied: <code>{copiedCommand}</code>
+              </p>
             ) : null}
           </section>
 

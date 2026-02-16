@@ -17,6 +17,9 @@ export function AppShell() {
 
   return (
     <>
+      <a className="skip-link" href="#main-content">
+        본문으로 건너뛰기
+      </a>
       <div className="app-shell">
         <aside className="left-panel" aria-label="Primary Navigation">
           <NavLink to="/" className="brand">
@@ -35,7 +38,7 @@ export function AppShell() {
           </nav>
         </aside>
 
-        <main className="main-panel">
+        <main id="main-content" className="main-panel">
           <Outlet />
         </main>
 

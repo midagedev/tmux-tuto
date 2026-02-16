@@ -1,4 +1,3 @@
-import rawContent from '../../content/v1/content.json';
 import {
   parseContent,
   type AppChapter,
@@ -10,18 +9,25 @@ import {
 } from './contentSchema';
 
 let cachedContent: AppContent | null = null;
+let rawContentPromise: Promise<unknown> | null = null;
 
 export async function loadAppContent() {
   if (cachedContent) {
     return cachedContent;
   }
 
+  if (!rawContentPromise) {
+    rawContentPromise = import('../../content/v1/content.json').then((module) => module.default);
+  }
+
+  const rawContent = await rawContentPromise;
   cachedContent = parseContent(rawContent);
   return cachedContent;
 }
 
 export function clearContentCache() {
   cachedContent = null;
+  rawContentPromise = null;
 }
 
 export function getTrackBySlug(content: AppContent, trackSlug: string): AppTrack | undefined {

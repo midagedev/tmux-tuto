@@ -9,6 +9,7 @@ import {
   isMilestoneSlug,
 } from '../../features/sharing';
 import { useProgressStore } from '../../features/progress/progressStore';
+import { copyTextToClipboard } from '../../utils/clipboard';
 
 export function ShareMilestonePage() {
   const { milestoneSlug } = useParams();
@@ -94,8 +95,7 @@ export function ShareMilestonePage() {
             type="button"
             className="secondary-btn"
             onClick={() => {
-              navigator.clipboard
-                .writeText(shareUrl)
+              copyTextToClipboard(shareUrl)
                 .then(() => setCopyStatus('공유 링크를 복사했습니다.'))
                 .catch(() => setCopyStatus('클립보드 복사에 실패했습니다.'));
             }}
@@ -111,7 +111,11 @@ export function ShareMilestonePage() {
             X에서 공유
           </a>
         </div>
-        {copyStatus ? <p className="muted">{copyStatus}</p> : null}
+        {copyStatus ? (
+          <p className="muted" role="status" aria-live="polite">
+            {copyStatus}
+          </p>
+        ) : null}
         {payloadBroken ? (
           <p className="muted">payload가 파손되어 기본값으로 렌더링했습니다.</p>
         ) : null}
