@@ -40,7 +40,7 @@
 - [x] `E-031` 키입력 파이프라인 + prefix
 - [x] `E-032` pane/window/session 핵심 조작
 - [x] `E-033` copy-mode + 검색
-- [ ] `E-034` 명령 모드(`:`) subset
+- [x] `E-034` 명령 모드(`:`) subset
 - [ ] `E-035` snapshot 저장/복원
 - [ ] `E-036` `SIMULATED` 차이 안내 UI
 - [ ] `E-040` 채점 룰 엔진

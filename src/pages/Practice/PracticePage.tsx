@@ -7,6 +7,7 @@ import { normalizeKeyboardEvent } from '../../features/simulator/input';
 export function PracticePage() {
   const [manualKey, setManualKey] = useState('');
   const [copySearchQuery, setCopySearchQuery] = useState('');
+  const [commandInput, setCommandInput] = useState('');
   const simulatorState = useSimulatorStore((store) => store.state);
   const handleKeyInput = useSimulatorStore((store) => store.handleKeyInput);
   const runCopySearch = useSimulatorStore((store) => store.runCopySearch);
@@ -17,6 +18,17 @@ export function PracticePage() {
   const sendPrefixed = (key: string) => {
     handleKeyInput(simulatorState.prefixKey);
     handleKeyInput(key);
+  };
+  const runCommand = () => {
+    const command = commandInput.trim();
+    if (!command) {
+      return;
+    }
+    handleKeyInput(simulatorState.prefixKey);
+    handleKeyInput(':');
+    command.split('').forEach((char) => handleKeyInput(char));
+    handleKeyInput('Enter');
+    setCommandInput('');
   };
 
   return (
@@ -144,6 +156,25 @@ export function PracticePage() {
               Run Search
             </button>
           </form>
+
+          <form
+            className="inline-actions"
+            onSubmit={(event) => {
+              event.preventDefault();
+              runCommand();
+            }}
+          >
+            <input
+              className="sim-input"
+              value={commandInput}
+              onChange={(event) => setCommandInput(event.target.value)}
+              placeholder="명령 예: new-window, split-window -h, kill-pane"
+              aria-label="Command mode input"
+            />
+            <button type="submit" className="secondary-btn">
+              Run Command
+            </button>
+          </form>
         </div>
 
         <div
@@ -184,6 +215,12 @@ export function PracticePage() {
             <li>query: {simulatorState.copyMode.searchQuery || '(none)'}</li>
             <li>executed: {simulatorState.copyMode.searchExecuted ? 'yes' : 'no'}</li>
             <li>match: {simulatorState.copyMode.lastMatchFound ? 'found' : 'not found'}</li>
+          </ul>
+
+          <h2>Command Mode</h2>
+          <ul className="link-list">
+            <li>buffer: {simulatorState.commandBuffer || '(empty)'}</li>
+            <li>supported: new-window, new-session, split-window -h/-v, copy-mode, kill-pane</li>
           </ul>
 
           <h2>Action History</h2>

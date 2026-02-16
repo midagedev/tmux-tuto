@@ -26,7 +26,9 @@ export type SimulatorAction =
   | { type: 'NEW_WINDOW' }
   | { type: 'NEXT_WINDOW' }
   | { type: 'PREV_WINDOW' }
+  | { type: 'KILL_ACTIVE_PANE' }
   | { type: 'NEW_SESSION' }
+  | { type: 'EXECUTE_COMMAND'; payload: string }
   | { type: 'ENTER_COPY_MODE' }
   | { type: 'EXIT_COPY_MODE' }
   | { type: 'RUN_COPY_SEARCH'; payload: string }
@@ -225,6 +227,87 @@ export function simulatorReducer(state: SimulatorState, action: SimulatorAction)
         'sim.session.new',
         `Session ${nextSession.name} created`,
       );
+    }
+
+    case 'KILL_ACTIVE_PANE': {
+      const windows = mapSessionWindows(state, (window) => {
+        if (window.panes.length <= 1) {
+          return window;
+        }
+
+        const nextPanes = window.panes.filter((pane) => pane.id !== window.activePaneId);
+        const nextActivePane = nextPanes[0];
+
+        return {
+          ...window,
+          panes: nextPanes,
+          activePaneId: nextActivePane.id,
+          layout: nextPanes.length === 1 ? 'single' : window.layout,
+        };
+      });
+
+      return withHistory(
+        { ...state, sessions: windows },
+        'sim.pane.kill',
+        'Active pane removed (if possible)',
+      );
+    }
+
+    case 'EXECUTE_COMMAND': {
+      const command = action.payload.trim();
+      if (!command) {
+        return withHistory(state, 'sim.command.empty', 'Empty command');
+      }
+
+      if (command === 'new-window') {
+        return simulatorReducer(state, { type: 'NEW_WINDOW' });
+      }
+
+      if (command === 'new-session') {
+        return simulatorReducer(state, { type: 'NEW_SESSION' });
+      }
+
+      if (command === 'next-window') {
+        return simulatorReducer(state, { type: 'NEXT_WINDOW' });
+      }
+
+      if (command === 'previous-window') {
+        return simulatorReducer(state, { type: 'PREV_WINDOW' });
+      }
+
+      if (command === 'copy-mode') {
+        return simulatorReducer(state, { type: 'ENTER_COPY_MODE' });
+      }
+
+      if (command === 'split-window -h') {
+        return simulatorReducer(state, { type: 'SPLIT_PANE', payload: 'vertical' });
+      }
+
+      if (command === 'split-window -v') {
+        return simulatorReducer(state, { type: 'SPLIT_PANE', payload: 'horizontal' });
+      }
+
+      if (command === 'kill-pane') {
+        return simulatorReducer(state, { type: 'KILL_ACTIVE_PANE' });
+      }
+
+      if (command === 'select-pane -L') {
+        return simulatorReducer(state, { type: 'FOCUS_PANE', payload: 'left' });
+      }
+
+      if (command === 'select-pane -R') {
+        return simulatorReducer(state, { type: 'FOCUS_PANE', payload: 'right' });
+      }
+
+      if (command === 'select-pane -U') {
+        return simulatorReducer(state, { type: 'FOCUS_PANE', payload: 'up' });
+      }
+
+      if (command === 'select-pane -D') {
+        return simulatorReducer(state, { type: 'FOCUS_PANE', payload: 'down' });
+      }
+
+      return withHistory(state, 'sim.command.unhandled', `Unsupported command: ${command}`);
     }
 
     case 'ENTER_COPY_MODE': {

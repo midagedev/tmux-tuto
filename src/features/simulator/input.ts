@@ -95,7 +95,8 @@ function resolveCommandMode(state: SimulatorState, key: string): SimulatorAction
 
   if (key === 'Enter') {
     return [
-      action('ADD_MESSAGE', `Command queued: ${state.commandBuffer || '(empty)'}`),
+      action('EXECUTE_COMMAND', state.commandBuffer),
+      action('CLEAR_COMMAND_BUFFER'),
       action('SET_MODE', 'NORMAL'),
     ];
   }
