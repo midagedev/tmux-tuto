@@ -1,10 +1,23 @@
-const CACHE_NAME = 'tmux-tuto-v1';
-const PRECACHE = ['/', '/index.html'];
+const CACHE_NAME = 'tmux-tuto-v2';
+
+function getBasePath() {
+  const scopePath = new URL(self.registration.scope).pathname;
+  return scopePath.endsWith('/') ? scopePath : `${scopePath}/`;
+}
+
+function getIndexPath() {
+  return `${getBasePath()}index.html`;
+}
+
+function getPrecachePaths() {
+  const base = getBasePath();
+  return [base, getIndexPath()];
+}
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(PRECACHE);
+      return cache.addAll(getPrecachePaths());
     }),
   );
   self.skipWaiting();
@@ -36,7 +49,7 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
           return response;
         })
-        .catch(() => caches.match('/index.html'));
+        .catch(() => caches.match(getIndexPath()));
     }),
   );
 });
