@@ -255,6 +255,23 @@ a {
   padding: 6px 8px;
 }
 
+.bookmark-form {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 1fr 1fr 180px 1fr auto;
+  align-items: center;
+}
+
+.bookmark-note {
+  width: 100%;
+  min-height: 80px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin: 8px 0;
+  font-family: 'JetBrains Mono', monospace;
+}
+
 .muted {
   color: var(--text-secondary);
   margin-top: 4px;
@@ -299,6 +316,10 @@ a {
   }
 
   .playbook-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bookmark-form {
     grid-template-columns: 1fr;
   }
 }
