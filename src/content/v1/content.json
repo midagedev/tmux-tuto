@@ -50,6 +50,13 @@
       "order": 1
     },
     {
+      "id": "chapter-b-02",
+      "trackSlug": "track-b-workflow",
+      "slug": "pane-navigation",
+      "title": "Pane Navigation",
+      "order": 2
+    },
+    {
       "id": "chapter-c-01",
       "trackSlug": "track-c-deepwork",
       "slug": "copy-mode-search",
@@ -84,6 +91,15 @@
       "title": "분할과 리사이즈",
       "estimatedMinutes": 10,
       "objectives": ["vertical split", "horizontal split", "resize"]
+    },
+    {
+      "id": "lesson-b-02",
+      "trackSlug": "track-b-workflow",
+      "chapterSlug": "pane-navigation",
+      "slug": "pane-focus-flow",
+      "title": "패인 이동 루틴",
+      "estimatedMinutes": 8,
+      "objectives": ["pane focus 이동", "window 순환", "작업 분배"]
     },
     {
       "id": "lesson-c-01",
@@ -147,6 +163,33 @@
         { "kind": "paneCount", "operator": ">=", "value": 2 }
       ],
       "hints": ["prefix 후 분할 키를 확인하세요.", "분할 후 활성 pane 이동도 같이 확인해 보세요."]
+    },
+    {
+      "id": "mission-b-02",
+      "lessonSlug": "pane-focus-flow",
+      "slug": "pane-grid-layout",
+      "title": "3개 이상 패인 구성",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "single-pane",
+      "passRules": [
+        { "kind": "paneCount", "operator": ">=", "value": 3 }
+      ],
+      "hints": ["세로/가로 분할을 섞어 grid 형태를 만들어 보세요.", "활성 pane 위치를 바꿔가며 분할하면 쉽습니다."]
+    },
+    {
+      "id": "mission-b-03",
+      "lessonSlug": "pane-focus-flow",
+      "slug": "window-cycle-practice",
+      "title": "윈도우 순환 이동",
+      "type": "state-check",
+      "difficulty": "advanced",
+      "initialScenario": "single-pane",
+      "passRules": [
+        { "kind": "windowCount", "operator": ">=", "value": 2 },
+        { "kind": "paneCount", "operator": ">=", "value": 1 }
+      ],
+      "hints": ["새 window를 만든 뒤 next/prev 이동을 연습하세요.", "window 이름을 지정하면 구분이 쉬워집니다."]
     },
     {
       "id": "mission-c-01",
