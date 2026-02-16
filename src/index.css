@@ -160,6 +160,28 @@ a {
   gap: 14px;
 }
 
+.simulated-note {
+  border: 1px solid #99f6e4;
+  background: #f0fdfa;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.simulated-note p {
+  margin: 0 0 8px;
+}
+
+.simulated-badge {
+  display: inline-block;
+  background: #0f766e;
+  color: #ffffff;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  margin-right: 6px;
+  font-weight: 700;
+}
+
 .sim-summary {
   border: 1px solid var(--border);
   border-radius: 10px;

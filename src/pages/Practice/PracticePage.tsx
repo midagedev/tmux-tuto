@@ -43,6 +43,17 @@ export function PracticePage() {
       description="고충실도 tmux 시뮬레이터가 이 영역에 렌더링됩니다."
     >
       <div className="sim-panel">
+        <div className="simulated-note" role="note" aria-label="Simulated behavior notice">
+          <p>
+            <span className="simulated-badge">SIMULATED</span> 실제 tmux 프로세스/셸은 실행되지 않습니다.
+          </p>
+          <ul className="link-list">
+            <li>attach/detach는 개념 모델로 동작합니다.</li>
+            <li>copy-mode 검색은 학습용 버퍼 기준으로 동작합니다.</li>
+            <li>실제 환경 검증은 Playbook 단계에서 원격 SSH와 함께 확인합니다.</li>
+          </ul>
+        </div>
+
         <div className="sim-summary">
           <p>
             <strong>Mode:</strong> {simulatorState.mode}
