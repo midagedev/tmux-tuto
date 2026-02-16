@@ -8,10 +8,9 @@ import type {
   ProfileRecord,
   ProgressRecord,
   SimulatorSnapshotRecord,
-  TmuxTutoDB,
 } from './types';
 
-const STORE_NAMES: Array<keyof TmuxTutoDB> = [
+const STORE_NAMES = [
   'profile',
   'progress',
   'mission_attempts',
@@ -20,7 +19,9 @@ const STORE_NAMES: Array<keyof TmuxTutoDB> = [
   'achievements',
   'simulator_snapshots',
   'backup_meta',
-];
+] as const;
+
+type StoreName = (typeof STORE_NAMES)[number];
 
 export async function getProfile() {
   const db = await getDb();
@@ -84,7 +85,7 @@ export async function saveNote(note: NoteRecord) {
 export async function getNoteByBookmark(bookmarkId: string) {
   const db = await getDb();
   const notes = await db.getAllFromIndex('notes', 'by-bookmarkId', bookmarkId);
-  return notes.at(0);
+  return notes[0];
 }
 
 export async function saveAchievement(achievement: AchievementRecord) {
@@ -110,7 +111,7 @@ export async function getSnapshot(snapshotId: string) {
 export async function getLatestSnapshot() {
   const db = await getDb();
   const allSnapshots = await db.getAll('simulator_snapshots');
-  return allSnapshots.sort((a, b) => b.savedAt.localeCompare(a.savedAt)).at(0);
+  return allSnapshots.sort((a, b) => b.savedAt.localeCompare(a.savedAt))[0];
 }
 
 export async function setBackupMeta(meta: BackupMetaRecord) {
@@ -125,7 +126,9 @@ export async function getBackupMeta(key: string) {
 
 export async function clearAllData() {
   const db = await getDb();
-  const tx = db.transaction(STORE_NAMES, 'readwrite');
-  await Promise.all(STORE_NAMES.map((storeName) => tx.objectStore(storeName).clear()));
+  const tx = db.transaction([...STORE_NAMES], 'readwrite');
+  await Promise.all(
+    STORE_NAMES.map((storeName: StoreName) => tx.objectStore(storeName).clear()),
+  );
   await tx.done;
 }
