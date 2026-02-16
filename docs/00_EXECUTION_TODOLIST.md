@@ -55,7 +55,7 @@
 - [x] `E-051` Quick Practice 연결
 - [x] `E-052` Bookmark/Notes CRUD
 - [x] `E-053` Progress 페이지
-- [ ] `E-060` 온보딩 라우트/화면
+- [x] `E-060` 온보딩 라우트/화면
 - [ ] `E-061` 온보딩 첫 미션 통과 라우트
 - [ ] `E-062` 공유 라우트 + payload
 - [ ] `E-063` 정적 OG/Twitter 메타 페이지
