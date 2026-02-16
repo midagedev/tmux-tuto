@@ -13,9 +13,10 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:smoke": "playwright test --grep @smoke",
-    "build": "npm run generate:og && npm run generate:share-meta && tsc -b && vite build",
-    "build:gh": "npm run generate:og && npm run generate:share-meta && VITE_BASE_PATH=/tmux-tuto/ tsc -b && vite build",
-    "build:cf": "npm run generate:og && npm run generate:share-meta && VITE_BASE_PATH=/ tsc -b && vite build",
+    "build:app": "tsc -b && vite build",
+    "build": "npm run generate:og && npm run generate:share-meta && npm run build:app",
+    "build:gh": "npm run generate:og && npm run generate:share-meta && VITE_BASE_PATH=/tmux-tuto/ npm run build:app",
+    "build:cf": "npm run generate:og && npm run generate:share-meta && VITE_BASE_PATH=/ npm run build:app",
     "lint": "eslint .",
     "preview": "vite preview"
   },
