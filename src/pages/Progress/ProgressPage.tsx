@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { EmptyState } from '../../components/system/EmptyState';
 import { PagePlaceholder } from '../../components/system/PagePlaceholder';
 import { loadAppContent } from '../../features/curriculum/contentLoader';
 import type { AppContent, AppMission } from '../../features/curriculum/contentSchema';
 import { useProgressStore } from '../../features/progress/progressStore';
+import type { MilestoneSlug } from '../../features/sharing';
+import { buildSharePath, getMilestoneMeta } from '../../features/sharing';
 
 export function ProgressPage() {
   const [content, setContent] = useState<AppContent | null>(null);
@@ -71,6 +74,49 @@ export function ProgressPage() {
     () => trackProgress.filter((row) => row.ratio >= 100).map((row) => row.trackSlug),
     [trackProgress],
   );
+
+  const milestoneLinks = useMemo(() => {
+    const milestoneSet = new Set<MilestoneSlug>();
+
+    if (completedMissionSlugs.length >= 1) {
+      milestoneSet.add('first-chapter-complete');
+    }
+    if (completedTrackSlugs.includes('track-a-foundations')) {
+      milestoneSet.add('track-a-complete');
+    }
+    if (completedTrackSlugs.includes('track-b-workflow')) {
+      milestoneSet.add('track-b-complete');
+    }
+    if (completedTrackSlugs.includes('track-c-deepwork')) {
+      milestoneSet.add('track-c-complete');
+    }
+    if (streakDays >= 7) {
+      milestoneSet.add('streak-7');
+    }
+    if (
+      completedTrackSlugs.includes('track-a-foundations') &&
+      completedTrackSlugs.includes('track-b-workflow') &&
+      completedTrackSlugs.includes('track-c-deepwork')
+    ) {
+      milestoneSet.add('final-complete');
+    }
+
+    const date = new Date().toISOString().slice(0, 10);
+
+    return Array.from(milestoneSet).map((milestoneSlug) => {
+      const meta = getMilestoneMeta(milestoneSlug);
+      return {
+        milestoneSlug,
+        title: meta?.title ?? milestoneSlug,
+        href: buildSharePath(milestoneSlug, {
+          level,
+          xp,
+          date,
+          badge: meta?.badge ?? milestoneSlug,
+        }),
+      };
+    });
+  }, [completedMissionSlugs.length, completedTrackSlugs, level, streakDays, xp]);
 
   const simulateMissionPass = (mission: AppMission) => {
     const gainedXp = recordMissionPass({
@@ -151,6 +197,23 @@ export function ProgressPage() {
                         샘플 통과 처리
                       </button>
                     </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section className="playbook-section">
+            <h2>Share Milestones</h2>
+            {milestoneLinks.length === 0 ? (
+              <p className="muted">공유 가능한 마일스톤이 아직 없습니다.</p>
+            ) : (
+              <ul className="link-list">
+                {milestoneLinks.map((item) => (
+                  <li key={item.milestoneSlug}>
+                    <Link to={item.href} className="secondary-btn">
+                      {item.title} 공유 페이지 열기
+                    </Link>
                   </li>
                 ))}
               </ul>
