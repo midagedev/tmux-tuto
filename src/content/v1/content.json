@@ -258,11 +258,35 @@
       "estimatedMinutes": 7,
       "prerequisites": ["track-a-foundations"],
       "steps": [
-        { "id": "p1", "title": "기본 설정 복사" },
-        { "id": "p2", "title": "설정 리로드" },
-        { "id": "p3", "title": "동작 확인" }
+        {
+          "id": "p1",
+          "title": "기본 설정 복사",
+          "description": "~/.tmux.conf에 권장 설정을 추가합니다.",
+          "command": "cat >> ~/.tmux.conf"
+        },
+        {
+          "id": "p2",
+          "title": "설정 리로드",
+          "description": "실행 중 세션에서 설정을 다시 읽습니다.",
+          "command": "tmux source-file ~/.tmux.conf"
+        },
+        {
+          "id": "p3",
+          "title": "동작 확인",
+          "description": "mouse/번호 시작값/이동 단축키를 확인합니다."
+        }
       ],
-      "verification": ["mouse on 확인", "base-index 1 확인", "reload 단축키 확인"]
+      "verification": ["mouse on 확인", "base-index 1 확인", "reload 단축키 확인"],
+      "troubleshooting": [
+        {
+          "issue": "설정이 반영되지 않음",
+          "resolution": "source-file 명령 실행 후 새 세션으로 재접속하세요."
+        },
+        {
+          "issue": "키 바인딩 충돌",
+          "resolution": "중복된 bind 설정을 정리하고 하나만 남기세요."
+        }
+      ]
     },
     {
       "id": "playbook-session-persistence",
@@ -272,10 +296,33 @@
       "estimatedMinutes": 6,
       "prerequisites": ["track-a-foundations"],
       "steps": [
-        { "id": "p1", "title": "tmux new -As main" },
-        { "id": "p2", "title": "detach/attach 반복" }
+        {
+          "id": "p1",
+          "title": "세션 생성 또는 재사용",
+          "command": "tmux new -As main"
+        },
+        {
+          "id": "p2",
+          "title": "세션 목록 확인",
+          "command": "tmux ls"
+        },
+        {
+          "id": "p3",
+          "title": "detach/attach 반복",
+          "command": "tmux attach -t main"
+        }
       ],
-      "verification": ["재접속 후 동일 세션 복구", "세션 목록 확인"]
+      "verification": ["재접속 후 동일 세션 복구", "세션 목록 확인"],
+      "troubleshooting": [
+        {
+          "issue": "no sessions 오류",
+          "resolution": "먼저 tmux new -As main 으로 세션을 생성하세요."
+        },
+        {
+          "issue": "원치 않는 세션에 접속됨",
+          "resolution": "tmux ls 후 정확한 이름으로 attach 하세요."
+        }
+      ]
     },
     {
       "id": "playbook-tailscale-ssh-workflow",
@@ -285,11 +332,33 @@
       "estimatedMinutes": 9,
       "prerequisites": ["track-a-foundations"],
       "steps": [
-        { "id": "p1", "title": "tailscale status 확인" },
-        { "id": "p2", "title": "원격 SSH 접속" },
-        { "id": "p3", "title": "tmux 세션 재진입" }
+        {
+          "id": "p1",
+          "title": "tailscale 상태 확인",
+          "command": "tailscale status"
+        },
+        {
+          "id": "p2",
+          "title": "원격 SSH 접속",
+          "command": "tailscale ssh user@host"
+        },
+        {
+          "id": "p3",
+          "title": "tmux 세션 진입",
+          "command": "tmux new -As work"
+        }
       ],
-      "verification": ["원격 접속 성공", "tmux 세션 유지 확인", "재접속 후 이어서 작업"]
+      "verification": ["원격 접속 성공", "tmux 세션 유지 확인", "재접속 후 이어서 작업"],
+      "troubleshooting": [
+        {
+          "issue": "tailscale ssh 연결 실패",
+          "resolution": "tailnet ACL과 호스트 로그인 상태를 확인하세요."
+        },
+        {
+          "issue": "원격 tmux 세션이 보이지 않음",
+          "resolution": "원격에서 tmux ls 후 세션명을 확인해 attach 하세요."
+        }
+      ]
     }
   ]
 }

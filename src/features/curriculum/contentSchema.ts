@@ -48,6 +48,13 @@ const missionSchema = z.object({
 const playbookStepSchema = z.object({
   id: z.string(),
   title: z.string(),
+  description: z.string().optional(),
+  command: z.string().optional(),
+});
+
+const playbookTroubleshootingSchema = z.object({
+  issue: z.string(),
+  resolution: z.string(),
 });
 
 const playbookSchema = z.object({
@@ -59,6 +66,7 @@ const playbookSchema = z.object({
   prerequisites: z.array(z.string()),
   steps: z.array(playbookStepSchema),
   verification: z.array(z.string()),
+  troubleshooting: z.array(playbookTroubleshootingSchema),
 });
 
 export const appContentSchema = z.object({
