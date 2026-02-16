@@ -34,6 +34,7 @@
 - `/cheatsheet`
 - `/playbooks`
 - `/playbooks/:playbookSlug`
+- `/playbooks/:playbookSlug/copied`
 - `/bookmarks`
 - `/progress`
 - `/share/:milestoneSlug`

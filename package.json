@@ -7,6 +7,7 @@
     "dev": "vite",
     "generate:og": "node scripts/generate-og-images.mjs",
     "generate:share-meta": "node scripts/generate-share-meta-pages.mjs",
+    "verify:kpi-routes": "node scripts/verify-kpi-route-map.mjs",
     "build": "npm run generate:og && npm run generate:share-meta && tsc -b && vite build",
     "build:gh": "npm run generate:og && npm run generate:share-meta && VITE_BASE_PATH=/tmux-tuto/ tsc -b && vite build",
     "build:cf": "npm run generate:og && npm run generate:share-meta && VITE_BASE_PATH=/ tsc -b && vite build",

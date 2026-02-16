@@ -46,6 +46,7 @@ src/
 - `/cheatsheet`
 - `/playbooks`
 - `/playbooks/:playbookSlug`
+- `/playbooks/:playbookSlug/copied` (분석용 라우트)
 - `/bookmarks`
 - `/progress`
 - `/onboarding/start`

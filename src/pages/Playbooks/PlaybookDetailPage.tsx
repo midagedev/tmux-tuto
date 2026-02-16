@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { PagePlaceholder } from '../../components/system/PagePlaceholder';
 import { useEffect, useMemo, useState } from 'react';
 import { getPlaybookBySlug, loadAppContent } from '../../features/curriculum/contentLoader';
@@ -7,6 +7,7 @@ import type { AppPlaybook } from '../../features/curriculum/contentSchema';
 
 export function PlaybookDetailPage() {
   const { playbookSlug } = useParams();
+  const navigate = useNavigate();
   const [playbook, setPlaybook] = useState<AppPlaybook | null>(null);
   const [copiedCommand, setCopiedCommand] = useState<string | null>(null);
 
@@ -23,10 +24,13 @@ export function PlaybookDetailPage() {
 
   const hasCommands = useMemo(() => playbook?.steps.some((step) => Boolean(step.command)), [playbook]);
 
-  const onCopyCommand = async (command: string) => {
+  const onCopyCommand = async (command: string, stepId: string) => {
     try {
       await navigator.clipboard.writeText(command);
       setCopiedCommand(command);
+      if (playbookSlug) {
+        navigate(`/playbooks/${playbookSlug}/copied?step=${encodeURIComponent(stepId)}`);
+      }
     } catch {
       setCopiedCommand(null);
     }
@@ -56,7 +60,7 @@ export function PlaybookDetailPage() {
                         type="button"
                         className="secondary-btn"
                         onClick={() => {
-                          void onCopyCommand(step.command as string);
+                          void onCopyCommand(step.command as string, step.id);
                         }}
                       >
                         Copy

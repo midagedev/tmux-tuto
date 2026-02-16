@@ -7,6 +7,7 @@ import { PracticePage } from '../pages/Practice/PracticePage';
 import { CheatsheetPage } from '../pages/Cheatsheet/CheatsheetPage';
 import { PlaybookIndexPage } from '../pages/Playbooks/PlaybookIndexPage';
 import { PlaybookDetailPage } from '../pages/Playbooks/PlaybookDetailPage';
+import { PlaybookCopiedPage } from '../pages/Playbooks/PlaybookCopiedPage';
 import { BookmarksPage } from '../pages/Bookmarks/BookmarksPage';
 import { ProgressPage } from '../pages/Progress/ProgressPage';
 import { MissionPassedPage } from '../pages/Progress/MissionPassedPage';
@@ -34,6 +35,7 @@ export const router = createBrowserRouter(
         { path: 'cheatsheet', element: <CheatsheetPage /> },
         { path: 'playbooks', element: <PlaybookIndexPage /> },
         { path: 'playbooks/:playbookSlug', element: <PlaybookDetailPage /> },
+        { path: 'playbooks/:playbookSlug/copied', element: <PlaybookCopiedPage /> },
         { path: 'bookmarks', element: <BookmarksPage /> },
         { path: 'progress', element: <ProgressPage /> },
         { path: 'progress/missions/:missionSlug/passed', element: <MissionPassedPage /> },
