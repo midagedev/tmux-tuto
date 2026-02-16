@@ -11,6 +11,11 @@ export function PracticePage() {
   const simulatorState = useSimulatorStore((store) => store.state);
   const handleKeyInput = useSimulatorStore((store) => store.handleKeyInput);
   const runCopySearch = useSimulatorStore((store) => store.runCopySearch);
+  const saveSnapshotToStorage = useSimulatorStore((store) => store.saveSnapshotToStorage);
+  const restoreLatestSnapshotFromStorage = useSimulatorStore(
+    (store) => store.restoreLatestSnapshotFromStorage,
+  );
+  const resetSimulator = useSimulatorStore((store) => store.reset);
 
   const activeSession = getActiveSession(simulatorState);
   const activeWindow = getActiveWindow(simulatorState);
@@ -109,6 +114,27 @@ export function PracticePage() {
             </button>
             <button type="button" className="secondary-btn" onClick={() => handleKeyInput('Escape')}>
               Exit Mode
+            </button>
+            <button
+              type="button"
+              className="secondary-btn"
+              onClick={() => {
+                void saveSnapshotToStorage();
+              }}
+            >
+              Save Snapshot
+            </button>
+            <button
+              type="button"
+              className="secondary-btn"
+              onClick={() => {
+                void restoreLatestSnapshotFromStorage();
+              }}
+            >
+              Restore Latest Snapshot
+            </button>
+            <button type="button" className="secondary-btn" onClick={() => resetSimulator()}>
+              Reset Simulator
             </button>
           </div>
 

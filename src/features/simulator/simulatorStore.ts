@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { createInitialSimulatorState, type SimulatorState } from './model';
 import { simulatorReducer, type FocusDirection, type SimulatorAction, type SplitDirection } from './reducer';
 import { resolveSimulatorInput } from './input';
+import { getLatestSnapshot, saveSnapshot as saveSnapshotRecord } from '../storage/repository';
 
 function applyActions(state: SimulatorState, actions: SimulatorAction[]) {
   if (actions.length === 0) {
@@ -29,6 +30,8 @@ type SimulatorStore = {
   exitCopyMode: () => void;
   runCopySearch: (query: string) => void;
   loadSnapshot: (snapshot: SimulatorState) => void;
+  saveSnapshotToStorage: () => Promise<void>;
+  restoreLatestSnapshotFromStorage: () => Promise<void>;
   reset: () => void;
 };
 
@@ -99,6 +102,44 @@ export const useSimulatorStore = create<SimulatorStore>((set) => ({
     set((current) => ({
       state: simulatorReducer(current.state, { type: 'LOAD_SNAPSHOT', payload: snapshot }),
     })),
+  saveSnapshotToStorage: async () => {
+    const snapshot = useSimulatorStore.getState().state;
+    const id = `snapshot-${Date.now()}`;
+    await saveSnapshotRecord({
+      id,
+      mode: snapshot.mode,
+      sessionGraph: { simulatorState: snapshot },
+      savedAt: new Date().toISOString(),
+    });
+
+    set((current) => ({
+      state: simulatorReducer(current.state, {
+        type: 'ADD_MESSAGE',
+        payload: `Snapshot saved (${id})`,
+      }),
+    }));
+  },
+  restoreLatestSnapshotFromStorage: async () => {
+    const latest = await getLatestSnapshot();
+    const candidate = latest?.sessionGraph?.simulatorState;
+    if (!candidate || typeof candidate !== 'object') {
+      set((current) => ({
+        state: simulatorReducer(current.state, {
+          type: 'ADD_MESSAGE',
+          payload: 'No restorable snapshot found',
+        }),
+      }));
+      return;
+    }
+
+    const simulatorSnapshot = candidate as SimulatorState;
+    set((current) => ({
+      state: simulatorReducer(current.state, {
+        type: 'LOAD_SNAPSHOT',
+        payload: simulatorSnapshot,
+      }),
+    }));
+  },
   reset: () =>
     set((current) => ({
       state: simulatorReducer(current.state, { type: 'RESET' }),

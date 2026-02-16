@@ -41,7 +41,7 @@
 - [x] `E-032` pane/window/session 핵심 조작
 - [x] `E-033` copy-mode + 검색
 - [x] `E-034` 명령 모드(`:`) subset
-- [ ] `E-035` snapshot 저장/복원
+- [x] `E-035` snapshot 저장/복원
 - [ ] `E-036` `SIMULATED` 차이 안내 UI
 - [ ] `E-040` 채점 룰 엔진
 - [ ] `E-041` 힌트 단계 엔진
