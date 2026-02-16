@@ -12,6 +12,10 @@ export function PracticePage() {
   const activeSession = getActiveSession(simulatorState);
   const activeWindow = getActiveWindow(simulatorState);
   const activePane = getActivePane(simulatorState);
+  const sendPrefixed = (key: string) => {
+    handleKeyInput(simulatorState.prefixKey);
+    handleKeyInput(key);
+  };
 
   return (
     <PagePlaceholder
@@ -41,14 +45,50 @@ export function PracticePage() {
             <button type="button" className="secondary-btn" onClick={() => handleKeyInput(simulatorState.prefixKey)}>
               Prefix
             </button>
-            <button type="button" className="secondary-btn" onClick={() => handleKeyInput('%')}>
+            <button type="button" className="secondary-btn" onClick={() => sendPrefixed('%')}>
               Split Vertical
             </button>
-            <button type="button" className="secondary-btn" onClick={() => handleKeyInput('"')}>
+            <button type="button" className="secondary-btn" onClick={() => sendPrefixed('"')}>
               Split Horizontal
             </button>
-            <button type="button" className="secondary-btn" onClick={() => handleKeyInput('c')}>
+            <button type="button" className="secondary-btn" onClick={() => sendPrefixed('c')}>
               New Window
+            </button>
+            <button type="button" className="secondary-btn" onClick={() => sendPrefixed('s')}>
+              New Session
+            </button>
+          </div>
+
+          <div className="inline-actions">
+            <button type="button" className="secondary-btn" onClick={() => sendPrefixed('h')}>
+              Focus Left
+            </button>
+            <button type="button" className="secondary-btn" onClick={() => sendPrefixed('j')}>
+              Focus Down
+            </button>
+            <button type="button" className="secondary-btn" onClick={() => sendPrefixed('k')}>
+              Focus Up
+            </button>
+            <button type="button" className="secondary-btn" onClick={() => sendPrefixed('l')}>
+              Focus Right
+            </button>
+            <button type="button" className="secondary-btn" onClick={() => sendPrefixed('H')}>
+              Resize -X
+            </button>
+            <button type="button" className="secondary-btn" onClick={() => sendPrefixed('L')}>
+              Resize +X
+            </button>
+            <button type="button" className="secondary-btn" onClick={() => sendPrefixed('K')}>
+              Resize -Y
+            </button>
+            <button type="button" className="secondary-btn" onClick={() => sendPrefixed('J')}>
+              Resize +Y
+            </button>
+            <button type="button" className="secondary-btn" onClick={() => sendPrefixed('n')}>
+              Next Window
+            </button>
+            <button type="button" className="secondary-btn" onClick={() => sendPrefixed('p')}>
+              Prev Window
             </button>
           </div>
 
@@ -90,6 +130,25 @@ export function PracticePage() {
         </div>
 
         <div className="sim-log">
+          <h2>Sessions</h2>
+          <ul className="link-list">
+            {simulatorState.sessions.map((session) => (
+              <li key={session.id}>
+                {session.id === simulatorState.activeSessionId ? '● ' : ''}{session.name} (
+                {session.windows.length} windows)
+              </li>
+            ))}
+          </ul>
+
+          <h2>Active Window Panes</h2>
+          <ul className="link-list">
+            {activeWindow.panes.map((pane) => (
+              <li key={pane.id}>
+                {pane.id === activeWindow.activePaneId ? '● ' : ''}{pane.id} ({pane.width}x{pane.height})
+              </li>
+            ))}
+          </ul>
+
           <h2>Action History</h2>
           <ul className="link-list">
             {simulatorState.actionHistory.slice(-8).reverse().map((log, index) => (
