@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "generate:og": "node scripts/generate-og-images.mjs",
     "generate:share-meta": "node scripts/generate-share-meta-pages.mjs",
-    "build": "npm run generate:share-meta && tsc -b && vite build",
-    "build:gh": "npm run generate:share-meta && VITE_BASE_PATH=/tmux-tuto/ tsc -b && vite build",
-    "build:cf": "npm run generate:share-meta && VITE_BASE_PATH=/ tsc -b && vite build",
+    "build": "npm run generate:og && npm run generate:share-meta && tsc -b && vite build",
+    "build:gh": "npm run generate:og && npm run generate:share-meta && VITE_BASE_PATH=/tmux-tuto/ tsc -b && vite build",
+    "build:cf": "npm run generate:og && npm run generate:share-meta && VITE_BASE_PATH=/ tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -30,6 +31,7 @@
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
     "eslint-plugin-react-refresh": "^0.4.9",
     "globals": "^15.9.0",
+    "sharp": "^0.34.5",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
     "vite": "^5.4.1"

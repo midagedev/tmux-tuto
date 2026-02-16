@@ -59,7 +59,7 @@
 - [x] `E-061` 온보딩 첫 미션 통과 라우트
 - [x] `E-062` 공유 라우트 + payload
 - [x] `E-063` 정적 OG/Twitter 메타 페이지
-- [ ] `E-064` OG 이미지 생성/버저닝
+- [x] `E-064` OG 이미지 생성/버저닝
 - [ ] `E-065` Cloudflare Analytics 연동
 - [ ] `E-066` KPI 라우트 맵 검증
 - [ ] `E-070` Unit/Integration 테스트 세트
