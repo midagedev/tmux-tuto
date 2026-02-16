@@ -52,7 +52,7 @@
 - [x] `E-046` 플레이북 UI + 명령 복사
 - [x] `E-047` XP/레벨/스트릭/업적 계산기
 - [x] `E-050` Cheatsheet 검색
-- [ ] `E-051` Quick Practice 연결
+- [x] `E-051` Quick Practice 연결
 - [ ] `E-052` Bookmark/Notes CRUD
 - [ ] `E-053` Progress 페이지
 - [ ] `E-060` 온보딩 라우트/화면

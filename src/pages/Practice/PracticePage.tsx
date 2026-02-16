@@ -1,13 +1,15 @@
 import { PagePlaceholder } from '../../components/system/PagePlaceholder';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getActivePane, getActiveSession, getActiveWindow } from '../../features/simulator/model';
 import { useSimulatorStore } from '../../features/simulator/simulatorStore';
 import { normalizeKeyboardEvent } from '../../features/simulator/input';
+import { useSearchParams } from 'react-router-dom';
 
 export function PracticePage() {
   const [manualKey, setManualKey] = useState('');
   const [copySearchQuery, setCopySearchQuery] = useState('');
   const [commandInput, setCommandInput] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
   const simulatorState = useSimulatorStore((store) => store.state);
   const handleKeyInput = useSimulatorStore((store) => store.handleKeyInput);
   const runCopySearch = useSimulatorStore((store) => store.runCopySearch);
@@ -16,10 +18,23 @@ export function PracticePage() {
     (store) => store.restoreLatestSnapshotFromStorage,
   );
   const resetSimulator = useSimulatorStore((store) => store.reset);
+  const applyQuickPreset = useSimulatorStore((store) => store.applyQuickPreset);
 
   const activeSession = getActiveSession(simulatorState);
   const activeWindow = getActiveWindow(simulatorState);
   const activePane = getActivePane(simulatorState);
+  const presetId = searchParams.get('from');
+
+  useEffect(() => {
+    if (!presetId) {
+      return;
+    }
+
+    applyQuickPreset(presetId);
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete('from');
+    setSearchParams(nextParams, { replace: true });
+  }, [applyQuickPreset, presetId, searchParams, setSearchParams]);
   const sendPrefixed = (key: string) => {
     handleKeyInput(simulatorState.prefixKey);
     handleKeyInput(key);
