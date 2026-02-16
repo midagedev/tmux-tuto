@@ -32,7 +32,7 @@
 - [x] `E-014` 에러/로딩/빈상태 컴포넌트
 - [x] `E-015` 정적 배포 기본 설정
 - [x] `E-020` IndexedDB 스키마 구현
-- [ ] `E-021` Repository 레이어 구현
+- [x] `E-021` Repository 레이어 구현
 - [ ] `E-022` DB migration 프레임워크
 - [ ] `E-023` export/import/reset 기능
 - [ ] `E-024` 콘텐츠 schema/loader
