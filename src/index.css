@@ -154,6 +154,11 @@ a {
   gap: 8px;
 }
 
+.muted {
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
 .state-box {
   border: 1px dashed var(--border);
   background: #f8fafc;

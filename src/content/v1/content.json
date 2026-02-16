@@ -1,0 +1,167 @@
+{
+  "version": "1.0.0",
+  "generatedAt": "2026-02-16T00:00:00.000Z",
+  "tracks": [
+    {
+      "id": "track-a-foundations",
+      "slug": "track-a-foundations",
+      "title": "Track A Foundations",
+      "summary": "세션/윈도우/패인 기본 개념과 조작",
+      "order": 1,
+      "status": "active"
+    },
+    {
+      "id": "track-b-workflow",
+      "slug": "track-b-workflow",
+      "title": "Track B Daily Workflow",
+      "summary": "실무에서 자주 쓰는 분할/이동/리사이즈 패턴",
+      "order": 2,
+      "status": "active"
+    },
+    {
+      "id": "track-c-deepwork",
+      "slug": "track-c-deepwork",
+      "title": "Track C Deep Work",
+      "summary": "copy-mode, 검색, 레이아웃 운영 루틴",
+      "order": 3,
+      "status": "active"
+    }
+  ],
+  "chapters": [
+    {
+      "id": "chapter-a-01",
+      "trackSlug": "track-a-foundations",
+      "slug": "session-window-pane",
+      "title": "Session Window Pane",
+      "order": 1
+    },
+    {
+      "id": "chapter-b-01",
+      "trackSlug": "track-b-workflow",
+      "slug": "split-and-move",
+      "title": "Split and Move",
+      "order": 1
+    },
+    {
+      "id": "chapter-c-01",
+      "trackSlug": "track-c-deepwork",
+      "slug": "copy-mode-search",
+      "title": "Copy Mode Search",
+      "order": 1
+    }
+  ],
+  "lessons": [
+    {
+      "id": "lesson-a-01",
+      "trackSlug": "track-a-foundations",
+      "chapterSlug": "session-window-pane",
+      "slug": "basics",
+      "title": "기본 조작",
+      "estimatedMinutes": 8,
+      "objectives": ["session 생성", "window 이동", "pane 인지"]
+    },
+    {
+      "id": "lesson-b-01",
+      "trackSlug": "track-b-workflow",
+      "chapterSlug": "split-and-move",
+      "slug": "split-resize",
+      "title": "분할과 리사이즈",
+      "estimatedMinutes": 10,
+      "objectives": ["vertical split", "horizontal split", "resize"]
+    },
+    {
+      "id": "lesson-c-01",
+      "trackSlug": "track-c-deepwork",
+      "chapterSlug": "copy-mode-search",
+      "slug": "copy-search",
+      "title": "Copy Mode 검색",
+      "estimatedMinutes": 12,
+      "objectives": ["copy-mode 진입", "검색", "선택 복사"]
+    }
+  ],
+  "missions": [
+    {
+      "id": "mission-a-01",
+      "lessonSlug": "basics",
+      "slug": "session-create",
+      "title": "첫 세션 만들기",
+      "type": "state-check",
+      "difficulty": "beginner",
+      "initialScenario": "single-pane",
+      "passRules": [
+        { "kind": "sessionCount", "operator": ">=", "value": 1 }
+      ],
+      "hints": ["tmux new -As main 형태를 떠올려 보세요.", "세션 이름을 main으로 두면 재접속이 쉽습니다."]
+    },
+    {
+      "id": "mission-b-01",
+      "lessonSlug": "split-resize",
+      "slug": "split-two-panes",
+      "title": "패인 2개 만들기",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "single-pane",
+      "passRules": [
+        { "kind": "paneCount", "operator": ">=", "value": 2 }
+      ],
+      "hints": ["prefix 후 분할 키를 확인하세요.", "분할 후 활성 pane 이동도 같이 확인해 보세요."]
+    },
+    {
+      "id": "mission-c-01",
+      "lessonSlug": "copy-search",
+      "slug": "copy-mode-search-keyword",
+      "title": "Copy Mode에서 검색",
+      "type": "state-check",
+      "difficulty": "advanced",
+      "initialScenario": "log-buffer",
+      "passRules": [
+        { "kind": "modeIs", "operator": "equals", "value": "COPY_MODE" },
+        { "kind": "searchExecuted", "operator": "equals", "value": true }
+      ],
+      "hints": ["copy-mode 진입 단축키를 사용하세요.", "검색 후 다음 결과 이동도 확인합니다."]
+    }
+  ],
+  "playbooks": [
+    {
+      "id": "playbook-recommended-config",
+      "slug": "recommended-config",
+      "title": "권장 tmux.conf 베이스",
+      "category": "config",
+      "estimatedMinutes": 7,
+      "prerequisites": ["track-a-foundations"],
+      "steps": [
+        { "id": "p1", "title": "기본 설정 복사" },
+        { "id": "p2", "title": "설정 리로드" },
+        { "id": "p3", "title": "동작 확인" }
+      ],
+      "verification": ["mouse on 확인", "base-index 1 확인", "reload 단축키 확인"]
+    },
+    {
+      "id": "playbook-session-persistence",
+      "slug": "session-persistence",
+      "title": "tmux 세션 유지 루틴",
+      "category": "workflow",
+      "estimatedMinutes": 6,
+      "prerequisites": ["track-a-foundations"],
+      "steps": [
+        { "id": "p1", "title": "tmux new -As main" },
+        { "id": "p2", "title": "detach/attach 반복" }
+      ],
+      "verification": ["재접속 후 동일 세션 복구", "세션 목록 확인"]
+    },
+    {
+      "id": "playbook-tailscale-ssh-workflow",
+      "slug": "tailscale-ssh-workflow",
+      "title": "Tailscale SSH 원격 작업",
+      "category": "remote",
+      "estimatedMinutes": 9,
+      "prerequisites": ["track-a-foundations"],
+      "steps": [
+        { "id": "p1", "title": "tailscale status 확인" },
+        { "id": "p2", "title": "원격 SSH 접속" },
+        { "id": "p3", "title": "tmux 세션 재진입" }
+      ],
+      "verification": ["원격 접속 성공", "tmux 세션 유지 확인", "재접속 후 이어서 작업"]
+    }
+  ]
+}
