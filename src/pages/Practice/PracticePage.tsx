@@ -6,8 +6,10 @@ import { normalizeKeyboardEvent } from '../../features/simulator/input';
 
 export function PracticePage() {
   const [manualKey, setManualKey] = useState('');
+  const [copySearchQuery, setCopySearchQuery] = useState('');
   const simulatorState = useSimulatorStore((store) => store.state);
   const handleKeyInput = useSimulatorStore((store) => store.handleKeyInput);
+  const runCopySearch = useSimulatorStore((store) => store.runCopySearch);
 
   const activeSession = getActiveSession(simulatorState);
   const activeWindow = getActiveWindow(simulatorState);
@@ -90,6 +92,12 @@ export function PracticePage() {
             <button type="button" className="secondary-btn" onClick={() => sendPrefixed('p')}>
               Prev Window
             </button>
+            <button type="button" className="secondary-btn" onClick={() => sendPrefixed('[')}>
+              Enter Copy Mode
+            </button>
+            <button type="button" className="secondary-btn" onClick={() => handleKeyInput('Escape')}>
+              Exit Mode
+            </button>
           </div>
 
           <form
@@ -112,6 +120,28 @@ export function PracticePage() {
             />
             <button type="submit" className="primary-btn">
               Send Key
+            </button>
+          </form>
+
+          <form
+            className="inline-actions"
+            onSubmit={(event) => {
+              event.preventDefault();
+              if (!copySearchQuery.trim()) {
+                return;
+              }
+              runCopySearch(copySearchQuery.trim());
+            }}
+          >
+            <input
+              className="sim-input"
+              value={copySearchQuery}
+              onChange={(event) => setCopySearchQuery(event.target.value)}
+              placeholder="Copy mode search query"
+              aria-label="Copy mode search query"
+            />
+            <button type="submit" className="secondary-btn">
+              Run Search
             </button>
           </form>
         </div>
@@ -147,6 +177,13 @@ export function PracticePage() {
                 {pane.id === activeWindow.activePaneId ? '● ' : ''}{pane.id} ({pane.width}x{pane.height})
               </li>
             ))}
+          </ul>
+
+          <h2>Copy Mode</h2>
+          <ul className="link-list">
+            <li>query: {simulatorState.copyMode.searchQuery || '(none)'}</li>
+            <li>executed: {simulatorState.copyMode.searchExecuted ? 'yes' : 'no'}</li>
+            <li>match: {simulatorState.copyMode.lastMatchFound ? 'found' : 'not found'}</li>
           </ul>
 
           <h2>Action History</h2>
