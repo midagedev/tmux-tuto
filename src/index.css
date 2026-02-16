@@ -134,6 +134,7 @@ a {
   padding: 10px 14px;
   border: 1px solid var(--border);
   font-size: 0.95rem;
+  cursor: pointer;
 }
 
 .primary-btn {
@@ -152,6 +153,51 @@ a {
   padding-left: 18px;
   display: grid;
   gap: 8px;
+}
+
+.sim-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.sim-summary {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #f8fafc;
+  padding: 12px;
+}
+
+.sim-summary p {
+  margin: 0 0 6px;
+}
+
+.sim-summary p:last-child {
+  margin-bottom: 0;
+}
+
+.sim-controls {
+  display: grid;
+  gap: 10px;
+}
+
+.sim-input {
+  min-width: 240px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.sim-capture {
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  background: #fbfffe;
+  padding: 12px;
+  color: var(--text-secondary);
+}
+
+.sim-log h2 {
+  margin: 0 0 8px;
+  font-size: 1rem;
 }
 
 .muted {

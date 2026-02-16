@@ -1,10 +1,20 @@
 import { create } from 'zustand';
 import { createInitialSimulatorState, type SimulatorState } from './model';
 import { simulatorReducer, type FocusDirection, type SimulatorAction, type SplitDirection } from './reducer';
+import { resolveSimulatorInput } from './input';
+
+function applyActions(state: SimulatorState, actions: SimulatorAction[]) {
+  if (actions.length === 0) {
+    return state;
+  }
+
+  return actions.reduce(simulatorReducer, state);
+}
 
 type SimulatorStore = {
   state: SimulatorState;
   dispatch: (action: SimulatorAction) => void;
+  handleKeyInput: (key: string) => void;
   setPrefixKey: (key: 'C-b' | 'C-a') => void;
   setMode: (mode: SimulatorState['mode']) => void;
   setCommandBuffer: (command: string) => void;
@@ -28,6 +38,11 @@ export const useSimulatorStore = create<SimulatorStore>((set) => ({
     set((current) => ({
       state: simulatorReducer(current.state, action),
     })),
+  handleKeyInput: (key) =>
+    set((current) => {
+      const actions = resolveSimulatorInput(current.state, key);
+      return { state: applyActions(current.state, actions) };
+    }),
   setPrefixKey: (key) =>
     set((current) => ({
       state: simulatorReducer(current.state, { type: 'SET_PREFIX_KEY', payload: key }),

@@ -37,7 +37,7 @@
 - [x] `E-023` export/import/reset 기능
 - [x] `E-024` 콘텐츠 schema/loader
 - [x] `E-030` 시뮬레이터 도메인 모델 + reducer
-- [ ] `E-031` 키입력 파이프라인 + prefix
+- [x] `E-031` 키입력 파이프라인 + prefix
 - [ ] `E-032` pane/window/session 핵심 조작
 - [ ] `E-033` copy-mode + 검색
 - [ ] `E-034` 명령 모드(`:`) subset
