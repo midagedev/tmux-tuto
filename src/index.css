@@ -222,6 +222,39 @@ a {
   font-size: 1rem;
 }
 
+.playbook-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 1fr 1fr;
+}
+
+.playbook-section {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  background: #fbfcff;
+}
+
+.playbook-section h2 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.playbook-command-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.playbook-command {
+  display: inline-block;
+  background: #ecfeff;
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+  padding: 6px 8px;
+}
+
 .muted {
   color: var(--text-secondary);
   margin-top: 4px;
@@ -263,5 +296,9 @@ a {
   .main-panel,
   .right-panel {
     width: 100%;
+  }
+
+  .playbook-grid {
+    grid-template-columns: 1fr;
   }
 }
