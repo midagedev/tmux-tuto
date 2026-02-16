@@ -67,7 +67,7 @@
 - [x] `E-072` 호환성/접근성/성능 튜닝
 - [x] `E-073` CI 파이프라인
 - [x] `E-074` GitHub Pages 자동 배포
-- [ ] `E-075` Cloudflare Pages 자동 배포
+- [x] `E-075` Cloudflare Pages 자동 배포
 - [ ] `E-076` 릴리즈 런북 + 최종 게이트
 
 ## 3. 선후관계 개요
