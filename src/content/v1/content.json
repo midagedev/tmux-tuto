@@ -62,6 +62,13 @@
       "slug": "copy-mode-search",
       "title": "Copy Mode Search",
       "order": 1
+    },
+    {
+      "id": "chapter-c-02",
+      "trackSlug": "track-c-deepwork",
+      "slug": "command-mode-workflow",
+      "title": "Command Mode Workflow",
+      "order": 2
     }
   ],
   "lessons": [
@@ -109,6 +116,15 @@
       "title": "Copy Mode 검색",
       "estimatedMinutes": 12,
       "objectives": ["copy-mode 진입", "검색", "선택 복사"]
+    },
+    {
+      "id": "lesson-c-02",
+      "trackSlug": "track-c-deepwork",
+      "chapterSlug": "command-mode-workflow",
+      "slug": "command-subset",
+      "title": "Command Mode Subset",
+      "estimatedMinutes": 10,
+      "objectives": ["new-window", "split-window", "kill-pane"]
     }
   ],
   "missions": [
@@ -204,6 +220,33 @@
         { "kind": "searchExecuted", "operator": "equals", "value": true }
       ],
       "hints": ["copy-mode 진입 단축키를 사용하세요.", "검색 후 다음 결과 이동도 확인합니다."]
+    },
+    {
+      "id": "mission-c-02",
+      "lessonSlug": "copy-search",
+      "slug": "copy-mode-no-match",
+      "title": "Copy Mode 검색 실패도 확인",
+      "type": "state-check",
+      "difficulty": "advanced",
+      "initialScenario": "log-buffer",
+      "passRules": [
+        { "kind": "modeIs", "operator": "equals", "value": "COPY_MODE" },
+        { "kind": "searchExecuted", "operator": "equals", "value": true }
+      ],
+      "hints": ["검색어를 바꿔가며 성공/실패를 모두 확인하세요.", "검색 결과가 없어도 상태가 기록되는지 봅니다."]
+    },
+    {
+      "id": "mission-c-03",
+      "lessonSlug": "command-subset",
+      "slug": "command-mode-new-window",
+      "title": "Command Mode로 window 생성",
+      "type": "state-check",
+      "difficulty": "scenario",
+      "initialScenario": "single-pane",
+      "passRules": [
+        { "kind": "windowCount", "operator": ">=", "value": 2 }
+      ],
+      "hints": [": 모드에서 new-window 명령을 사용하세요.", "명령 입력 후 Enter로 실행됩니다."]
     }
   ],
   "playbooks": [
