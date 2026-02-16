@@ -36,6 +36,13 @@
       "order": 1
     },
     {
+      "id": "chapter-a-02",
+      "trackSlug": "track-a-foundations",
+      "slug": "session-lifecycle",
+      "title": "Session Lifecycle",
+      "order": 2
+    },
+    {
       "id": "chapter-b-01",
       "trackSlug": "track-b-workflow",
       "slug": "split-and-move",
@@ -59,6 +66,15 @@
       "title": "기본 조작",
       "estimatedMinutes": 8,
       "objectives": ["session 생성", "window 이동", "pane 인지"]
+    },
+    {
+      "id": "lesson-a-02",
+      "trackSlug": "track-a-foundations",
+      "chapterSlug": "session-lifecycle",
+      "slug": "attach-detach",
+      "title": "세션 유지 루틴",
+      "estimatedMinutes": 9,
+      "objectives": ["detach", "attach", "세션 목록 확인"]
     },
     {
       "id": "lesson-b-01",
@@ -92,6 +108,32 @@
         { "kind": "sessionCount", "operator": ">=", "value": 1 }
       ],
       "hints": ["tmux new -As main 형태를 떠올려 보세요.", "세션 이름을 main으로 두면 재접속이 쉽습니다."]
+    },
+    {
+      "id": "mission-a-02",
+      "lessonSlug": "attach-detach",
+      "slug": "session-window-create",
+      "title": "윈도우 생성 후 유지",
+      "type": "state-check",
+      "difficulty": "beginner",
+      "initialScenario": "single-pane",
+      "passRules": [
+        { "kind": "windowCount", "operator": ">=", "value": 2 }
+      ],
+      "hints": ["prefix 후 c 키로 새 window를 생성하세요.", "next/prev window 이동도 같이 확인합니다."]
+    },
+    {
+      "id": "mission-a-03",
+      "lessonSlug": "attach-detach",
+      "slug": "session-multi-manage",
+      "title": "세션 2개 운영",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "single-pane",
+      "passRules": [
+        { "kind": "sessionCount", "operator": ">=", "value": 2 }
+      ],
+      "hints": ["prefix 후 s 또는 command mode에서 new-session을 사용하세요.", "작업 목적별 세션 이름을 정하면 유지가 쉽습니다."]
     },
     {
       "id": "mission-b-01",
