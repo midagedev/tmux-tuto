@@ -45,6 +45,15 @@ export function AppShell() {
           <p className="muted">
             Analytics: {consent === 'granted' ? '동의됨' : consent === 'denied' ? '거부됨' : '대기중'}
           </p>
+          {consent !== 'unknown' ? (
+            <button
+              type="button"
+              className="secondary-btn"
+              onClick={consent === 'granted' ? setDenied : setGranted}
+            >
+              {consent === 'granted' ? '분석 비활성화' : '분석 활성화'}
+            </button>
+          ) : null}
         </aside>
       </div>
 
