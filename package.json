@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
-    "build:gh": "VITE_BASE_PATH=/tmux-tuto/ tsc -b && vite build",
-    "build:cf": "VITE_BASE_PATH=/ tsc -b && vite build",
+    "generate:share-meta": "node scripts/generate-share-meta-pages.mjs",
+    "build": "npm run generate:share-meta && tsc -b && vite build",
+    "build:gh": "npm run generate:share-meta && VITE_BASE_PATH=/tmux-tuto/ tsc -b && vite build",
+    "build:cf": "npm run generate:share-meta && VITE_BASE_PATH=/ tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
