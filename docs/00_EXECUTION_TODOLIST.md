@@ -54,7 +54,7 @@
 - [x] `E-050` Cheatsheet 검색
 - [x] `E-051` Quick Practice 연결
 - [x] `E-052` Bookmark/Notes CRUD
-- [ ] `E-053` Progress 페이지
+- [x] `E-053` Progress 페이지
 - [ ] `E-060` 온보딩 라우트/화면
 - [ ] `E-061` 온보딩 첫 미션 통과 라우트
 - [ ] `E-062` 공유 라우트 + payload
