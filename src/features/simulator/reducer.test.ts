@@ -27,4 +27,32 @@ describe('simulatorReducer', () => {
     expect(getActiveWindow(killed).panes.length).toBe(1);
     expect(getActiveWindow(killedAgain).panes.length).toBe(1);
   });
+
+  it('stores executed commands in shell history', () => {
+    const initial = createInitialSimulatorState();
+    const afterFirst = simulatorReducer(initial, { type: 'EXECUTE_COMMAND', payload: 'new-window' });
+    const afterSecond = simulatorReducer(afterFirst, { type: 'EXECUTE_COMMAND', payload: 'next-window' });
+
+    expect(afterSecond.shell.sessions[0]?.history).toEqual(['new-window', 'next-window']);
+  });
+
+  it('navigates command history with up/down actions', () => {
+    const initial = createInitialSimulatorState();
+    const withHistory = [
+      { type: 'EXECUTE_COMMAND', payload: 'new-window' } as const,
+      { type: 'EXECUTE_COMMAND', payload: 'split-window -h' } as const,
+      { type: 'SET_MODE', payload: 'COMMAND_MODE' } as const,
+      { type: 'SET_COMMAND_LINE', payload: { buffer: '', cursor: 0 } } as const,
+    ].reduce(simulatorReducer, initial);
+
+    const upOnce = simulatorReducer(withHistory, { type: 'NAVIGATE_COMMAND_HISTORY', payload: 'up' });
+    const upTwice = simulatorReducer(upOnce, { type: 'NAVIGATE_COMMAND_HISTORY', payload: 'up' });
+    const downOnce = simulatorReducer(upTwice, { type: 'NAVIGATE_COMMAND_HISTORY', payload: 'down' });
+    const downTwice = simulatorReducer(downOnce, { type: 'NAVIGATE_COMMAND_HISTORY', payload: 'down' });
+
+    expect(upOnce.mode.commandBuffer).toBe('split-window -h');
+    expect(upTwice.mode.commandBuffer).toBe('new-window');
+    expect(downOnce.mode.commandBuffer).toBe('split-window -h');
+    expect(downTwice.mode.commandBuffer).toBe('');
+  });
 });

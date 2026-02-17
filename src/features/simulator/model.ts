@@ -56,6 +56,8 @@ export type ModeState = {
   value: TmuxMode;
   commandBuffer: string;
   commandCursor: number;
+  historyIndex: number | null;
+  historyDraft: string;
   copyMode: CopyModeState;
 };
 
@@ -158,6 +160,8 @@ export function createInitialSimulatorState(): SimulatorState {
       value: 'NORMAL',
       commandBuffer: '',
       commandCursor: 0,
+      historyIndex: null,
+      historyDraft: '',
       copyMode: {
         searchQuery: '',
         searchExecuted: false,

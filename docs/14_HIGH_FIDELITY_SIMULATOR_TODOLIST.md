@@ -53,7 +53,7 @@
   - 검증: unit test(key input sequences)
   - DoD: 기본 셸 입력 편집이 자연스럽게 동작
 
-- [ ] `HF-012` 셸 히스토리/프롬프트 구현
+- [x] `HF-012` 셸 히스토리/프롬프트 구현
   - 산출물: history stack + Up/Down 탐색
   - 의존: `HF-011`
   - 검증: unit/integration 테스트

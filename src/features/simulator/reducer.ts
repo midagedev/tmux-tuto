@@ -3,8 +3,10 @@ import {
   createPane,
   createSession,
   createWindow,
+  getActiveShellSession,
   getActiveSession,
   getActiveWindow,
+  type ShellSession,
   type TmuxPane,
   type SimulatorMode,
   type SimulatorState,
@@ -18,6 +20,7 @@ export type SimulatorAction =
   | { type: 'SET_MODE'; payload: SimulatorMode }
   | { type: 'SET_COMMAND_BUFFER'; payload: string }
   | { type: 'SET_COMMAND_LINE'; payload: { buffer: string; cursor: number } }
+  | { type: 'NAVIGATE_COMMAND_HISTORY'; payload: 'up' | 'down' }
   | { type: 'CLEAR_COMMAND_BUFFER' }
   | { type: 'ADD_MESSAGE'; payload: string }
   | { type: 'RECORD_ACTION'; payload: string }
@@ -51,11 +54,36 @@ function mapSessionWindows(state: SimulatorState, fn: (window: ReturnType<typeof
   });
 }
 
+function mapShellSessions(state: SimulatorState, fn: (session: ShellSession) => ShellSession) {
+  return state.shell.sessions.map((session) =>
+    session.id === state.shell.activeSessionId ? fn(session) : session,
+  );
+}
+
 function withHistory(state: SimulatorState, actionId: string, message?: string): SimulatorState {
   return {
     ...state,
     actionHistory: [...state.actionHistory.slice(-49), actionId],
     messages: message ? [...state.messages.slice(-9), message] : state.messages,
+  };
+}
+
+function withCommandHistory(state: SimulatorState, command: string): SimulatorState {
+  if (!command) {
+    return state;
+  }
+
+  const sessions = mapShellSessions(state, (session) => ({
+    ...session,
+    history: [...session.history, command].slice(-200),
+  }));
+
+  return {
+    ...state,
+    shell: {
+      ...state.shell,
+      sessions,
+    },
   };
 }
 
@@ -110,6 +138,8 @@ export function simulatorReducer(state: SimulatorState, action: SimulatorAction)
           ...state.mode,
           commandBuffer: action.payload,
           commandCursor: action.payload.length,
+          historyIndex: null,
+          historyDraft: '',
         },
       };
     }
@@ -122,6 +152,63 @@ export function simulatorReducer(state: SimulatorState, action: SimulatorAction)
           ...state.mode,
           commandBuffer: action.payload.buffer,
           commandCursor: cursor,
+          historyIndex: null,
+          historyDraft: '',
+        },
+      };
+    }
+
+    case 'NAVIGATE_COMMAND_HISTORY': {
+      const activeShellSession = getActiveShellSession(state);
+      const history = activeShellSession.history;
+      if (history.length === 0) {
+        return state;
+      }
+
+      const currentIndex = state.mode.historyIndex;
+      if (action.payload === 'up') {
+        const nextIndex = currentIndex === null ? history.length - 1 : Math.max(0, currentIndex - 1);
+        const nextBuffer = history[nextIndex] ?? '';
+
+        return {
+          ...state,
+          mode: {
+            ...state.mode,
+            commandBuffer: nextBuffer,
+            commandCursor: nextBuffer.length,
+            historyIndex: nextIndex,
+            historyDraft: currentIndex === null ? state.mode.commandBuffer : state.mode.historyDraft,
+          },
+        };
+      }
+
+      if (currentIndex === null) {
+        return state;
+      }
+
+      if (currentIndex >= history.length - 1) {
+        return {
+          ...state,
+          mode: {
+            ...state.mode,
+            commandBuffer: state.mode.historyDraft,
+            commandCursor: state.mode.historyDraft.length,
+            historyIndex: null,
+            historyDraft: '',
+          },
+        };
+      }
+
+      const nextIndex = currentIndex + 1;
+      const nextBuffer = history[nextIndex] ?? '';
+      return {
+        ...state,
+        mode: {
+          ...state.mode,
+          commandBuffer: nextBuffer,
+          commandCursor: nextBuffer.length,
+          historyIndex: nextIndex,
+          historyDraft: state.mode.historyDraft,
         },
       };
     }
@@ -133,6 +220,8 @@ export function simulatorReducer(state: SimulatorState, action: SimulatorAction)
           ...state.mode,
           commandBuffer: '',
           commandCursor: 0,
+          historyIndex: null,
+          historyDraft: '',
         },
       };
     }
@@ -345,55 +434,57 @@ export function simulatorReducer(state: SimulatorState, action: SimulatorAction)
         return withHistory(state, 'sim.command.empty', 'Empty command');
       }
 
+      const nextState = withCommandHistory(state, command);
+
       if (command === 'new-window') {
-        return simulatorReducer(state, { type: 'NEW_WINDOW' });
+        return simulatorReducer(nextState, { type: 'NEW_WINDOW' });
       }
 
       if (command === 'new-session') {
-        return simulatorReducer(state, { type: 'NEW_SESSION' });
+        return simulatorReducer(nextState, { type: 'NEW_SESSION' });
       }
 
       if (command === 'next-window') {
-        return simulatorReducer(state, { type: 'NEXT_WINDOW' });
+        return simulatorReducer(nextState, { type: 'NEXT_WINDOW' });
       }
 
       if (command === 'previous-window') {
-        return simulatorReducer(state, { type: 'PREV_WINDOW' });
+        return simulatorReducer(nextState, { type: 'PREV_WINDOW' });
       }
 
       if (command === 'copy-mode') {
-        return simulatorReducer(state, { type: 'ENTER_COPY_MODE' });
+        return simulatorReducer(nextState, { type: 'ENTER_COPY_MODE' });
       }
 
       if (command === 'split-window -h') {
-        return simulatorReducer(state, { type: 'SPLIT_PANE', payload: 'vertical' });
+        return simulatorReducer(nextState, { type: 'SPLIT_PANE', payload: 'vertical' });
       }
 
       if (command === 'split-window -v') {
-        return simulatorReducer(state, { type: 'SPLIT_PANE', payload: 'horizontal' });
+        return simulatorReducer(nextState, { type: 'SPLIT_PANE', payload: 'horizontal' });
       }
 
       if (command === 'kill-pane') {
-        return simulatorReducer(state, { type: 'KILL_ACTIVE_PANE' });
+        return simulatorReducer(nextState, { type: 'KILL_ACTIVE_PANE' });
       }
 
       if (command === 'select-pane -L') {
-        return simulatorReducer(state, { type: 'FOCUS_PANE', payload: 'left' });
+        return simulatorReducer(nextState, { type: 'FOCUS_PANE', payload: 'left' });
       }
 
       if (command === 'select-pane -R') {
-        return simulatorReducer(state, { type: 'FOCUS_PANE', payload: 'right' });
+        return simulatorReducer(nextState, { type: 'FOCUS_PANE', payload: 'right' });
       }
 
       if (command === 'select-pane -U') {
-        return simulatorReducer(state, { type: 'FOCUS_PANE', payload: 'up' });
+        return simulatorReducer(nextState, { type: 'FOCUS_PANE', payload: 'up' });
       }
 
       if (command === 'select-pane -D') {
-        return simulatorReducer(state, { type: 'FOCUS_PANE', payload: 'down' });
+        return simulatorReducer(nextState, { type: 'FOCUS_PANE', payload: 'down' });
       }
 
-      return withHistory(state, 'sim.command.unhandled', `Unsupported command: ${command}`);
+      return withHistory(nextState, 'sim.command.unhandled', `Unsupported command: ${command}`);
     }
 
     case 'ENTER_COPY_MODE': {

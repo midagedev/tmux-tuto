@@ -102,6 +102,14 @@ function resolveCommandMode(state: SimulatorState, key: string): SimulatorAction
     return [action('CLEAR_COMMAND_BUFFER'), action('SET_MODE', 'NORMAL')];
   }
 
+  if (key === 'ArrowUp') {
+    return [action('NAVIGATE_COMMAND_HISTORY', 'up')];
+  }
+
+  if (key === 'ArrowDown') {
+    return [action('NAVIGATE_COMMAND_HISTORY', 'down')];
+  }
+
   const result = applyLineEditorKey(
     {
       buffer: state.mode.commandBuffer,

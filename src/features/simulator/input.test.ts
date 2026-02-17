@@ -42,4 +42,18 @@ describe('resolveSimulatorInput', () => {
 
     expect(actions).toEqual([{ type: 'SET_COMMAND_LINE', payload: { buffer: 'n', cursor: 1 } }]);
   });
+
+  it('routes ArrowUp to command history navigation in command mode', () => {
+    const initial = createInitialSimulatorState();
+    const state = {
+      ...initial,
+      mode: {
+        ...initial.mode,
+        value: 'COMMAND_MODE' as const,
+      },
+    };
+    const actions = resolveSimulatorInput(state, 'ArrowUp');
+
+    expect(actions).toEqual([{ type: 'NAVIGATE_COMMAND_HISTORY', payload: 'up' }]);
+  });
 });

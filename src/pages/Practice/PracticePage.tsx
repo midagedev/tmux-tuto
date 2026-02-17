@@ -1,6 +1,6 @@
 import { PagePlaceholder } from '../../components/system/PagePlaceholder';
 import { useEffect, useState } from 'react';
-import { getActivePane, getActiveSession, getActiveWindow } from '../../features/simulator/model';
+import { getActivePane, getActiveSession, getActiveShellSession, getActiveWindow } from '../../features/simulator/model';
 import { useSimulatorStore } from '../../features/simulator/simulatorStore';
 import { normalizeKeyboardEvent } from '../../features/simulator/input';
 import { useSearchParams } from 'react-router-dom';
@@ -21,6 +21,7 @@ export function PracticePage() {
   const applyQuickPreset = useSimulatorStore((store) => store.applyQuickPreset);
 
   const activeSession = getActiveSession(simulatorState);
+  const activeShellSession = getActiveShellSession(simulatorState);
   const activeWindow = getActiveWindow(simulatorState);
   const activePane = getActivePane(simulatorState);
   const presetId = searchParams.get('from');
@@ -82,6 +83,9 @@ export function PracticePage() {
           </p>
           <p>
             <strong>Panes:</strong> {activeWindow.panes.length} ({activeWindow.layout})
+          </p>
+          <p>
+            <strong>Prompt:</strong> {activeShellSession.workingDirectory} {activeShellSession.prompt}
           </p>
         </div>
 
@@ -285,6 +289,17 @@ export function PracticePage() {
             {simulatorState.actionHistory.slice(-8).reverse().map((log, index) => (
               <li key={`${log}-${index}`}>{log}</li>
             ))}
+          </ul>
+
+          <h2>Shell History</h2>
+          <ul className="link-list">
+            {activeShellSession.history.length === 0 ? (
+              <li>(empty)</li>
+            ) : (
+              activeShellSession.history.slice(-8).reverse().map((command, index) => (
+                <li key={`${command}-${index}`}>{command}</li>
+              ))
+            )}
           </ul>
         </div>
       </div>
