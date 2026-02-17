@@ -54,8 +54,12 @@ export type AchievementRecord = {
 
 export type SimulatorSnapshotRecord = {
   id: string;
+  schemaVersion: 2;
   mode: 'NORMAL' | 'PREFIX_PENDING' | 'COMMAND_MODE' | 'COPY_MODE' | 'SEARCH_MODE';
-  sessionGraph: Record<string, unknown>;
+  sessionGraph: {
+    schemaVersion: 2;
+    simulatorState: unknown;
+  };
   savedAt: IsoDate;
 };
 
@@ -114,6 +118,7 @@ export interface TmuxTutoDB extends DBSchema {
     value: SimulatorSnapshotRecord;
     indexes: {
       'by-savedAt': IsoDate;
+      'by-schemaVersion': number;
     };
   };
   backup_meta: {

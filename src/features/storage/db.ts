@@ -4,7 +4,7 @@ import type { TmuxTutoDB } from './types';
 import { applyMigrations } from './migrations';
 
 export const DB_NAME = 'tmux_tuto';
-export const DB_VERSION = 2;
+export const DB_VERSION = 3;
 
 let dbPromise: Promise<IDBPDatabase<TmuxTutoDB>> | null = null;
 

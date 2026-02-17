@@ -4,6 +4,57 @@ import { simulatorReducer, type FocusDirection, type SimulatorAction, type Split
 import { resolveSimulatorInput } from './input';
 import { getLatestSnapshot, saveSnapshot as saveSnapshotRecord } from '../storage/repository';
 
+const MODE_VALUES: SimulatorMode[] = ['NORMAL', 'PREFIX_PENDING', 'COMMAND_MODE', 'COPY_MODE', 'SEARCH_MODE'];
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function isSimulatorStateV2(value: unknown): value is SimulatorState {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  const shell = value.shell;
+  const tmux = value.tmux;
+  const mode = value.mode;
+
+  if (!isRecord(shell) || !Array.isArray(shell.sessions) || typeof shell.activeSessionId !== 'string') {
+    return false;
+  }
+
+  if (!isRecord(tmux) || !Array.isArray(tmux.sessions) || typeof tmux.activeSessionId !== 'string') {
+    return false;
+  }
+
+  if (!isRecord(tmux.config) || (tmux.config.prefixKey !== 'C-b' && tmux.config.prefixKey !== 'C-a')) {
+    return false;
+  }
+
+  if (!isRecord(mode) || !MODE_VALUES.includes(mode.value as SimulatorMode) || typeof mode.commandBuffer !== 'string') {
+    return false;
+  }
+
+  if (
+    !isRecord(mode.copyMode) ||
+    typeof mode.copyMode.searchQuery !== 'string' ||
+    typeof mode.copyMode.searchExecuted !== 'boolean' ||
+    typeof mode.copyMode.lastMatchFound !== 'boolean'
+  ) {
+    return false;
+  }
+
+  if (!Array.isArray(value.messages) || !value.messages.every((item) => typeof item === 'string')) {
+    return false;
+  }
+
+  if (!Array.isArray(value.actionHistory) || !value.actionHistory.every((item) => typeof item === 'string')) {
+    return false;
+  }
+
+  return true;
+}
+
 function applyActions(state: SimulatorState, actions: SimulatorAction[]) {
   if (actions.length === 0) {
     return state;
@@ -152,8 +203,12 @@ export const useSimulatorStore = create<SimulatorStore>((set) => ({
     const id = `snapshot-${Date.now()}`;
     await saveSnapshotRecord({
       id,
+      schemaVersion: 2,
       mode: snapshot.mode.value,
-      sessionGraph: { simulatorState: snapshot },
+      sessionGraph: {
+        schemaVersion: 2,
+        simulatorState: snapshot,
+      },
       savedAt: new Date().toISOString(),
     });
 
@@ -166,18 +221,23 @@ export const useSimulatorStore = create<SimulatorStore>((set) => ({
   },
   restoreLatestSnapshotFromStorage: async () => {
     const latest = await getLatestSnapshot();
-    const candidate = latest?.sessionGraph?.simulatorState;
-    if (!candidate || typeof candidate !== 'object') {
+    const sessionGraph = latest?.sessionGraph;
+    if (
+      latest?.schemaVersion !== 2 ||
+      !isRecord(sessionGraph) ||
+      sessionGraph.schemaVersion !== 2 ||
+      !isSimulatorStateV2(sessionGraph.simulatorState)
+    ) {
       set((current) => ({
         state: simulatorReducer(current.state, {
           type: 'ADD_MESSAGE',
-          payload: 'No restorable snapshot found',
+          payload: 'No v2 restorable snapshot found',
         }),
       }));
       return;
     }
 
-    const simulatorSnapshot = candidate as SimulatorState;
+    const simulatorSnapshot = sessionGraph.simulatorState;
     set((current) => ({
       state: simulatorReducer(current.state, {
         type: 'LOAD_SNAPSHOT',

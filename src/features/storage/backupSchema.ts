@@ -54,8 +54,12 @@ const achievementSchema = z.object({
 
 const snapshotSchema = z.object({
   id: z.string(),
+  schemaVersion: z.literal(2),
   mode: z.enum(['NORMAL', 'PREFIX_PENDING', 'COMMAND_MODE', 'COPY_MODE', 'SEARCH_MODE']),
-  sessionGraph: z.record(z.string(), z.unknown()),
+  sessionGraph: z.object({
+    schemaVersion: z.literal(2),
+    simulatorState: z.unknown(),
+  }),
   savedAt: z.string(),
 });
 

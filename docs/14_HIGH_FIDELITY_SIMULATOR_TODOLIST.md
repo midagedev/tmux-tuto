@@ -34,7 +34,7 @@
   - 검증: 타입 체크 통과
   - DoD: `ShellSession`, `TmuxSession`, `TmuxPane`, `ModeState`를 타입으로 분리
 
-- [ ] `HF-002` snapshot/저장 스키마 v2 설계
+- [x] `HF-002` snapshot/저장 스키마 v2 설계
   - 산출물: storage types/migration 문서 및 코드
   - 의존: `HF-001`
   - 검증: migration 테스트 통과

@@ -32,15 +32,23 @@ describe('storage repository integration', () => {
   it('returns latest snapshot by savedAt sorting', async () => {
     await saveSnapshot({
       id: 'snapshot-1',
+      schemaVersion: 2,
       mode: 'NORMAL',
-      sessionGraph: { simulatorState: { sessions: [] } },
+      sessionGraph: {
+        schemaVersion: 2,
+        simulatorState: { shell: {}, tmux: {}, mode: {} },
+      },
       savedAt: '2026-02-16T10:00:00.000Z',
     });
 
     await saveSnapshot({
       id: 'snapshot-2',
+      schemaVersion: 2,
       mode: 'COPY_MODE',
-      sessionGraph: { simulatorState: { sessions: [] } },
+      sessionGraph: {
+        schemaVersion: 2,
+        simulatorState: { shell: {}, tmux: {}, mode: {} },
+      },
       savedAt: '2026-02-16T11:00:00.000Z',
     });
 

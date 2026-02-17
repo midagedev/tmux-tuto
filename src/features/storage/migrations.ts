@@ -60,6 +60,7 @@ function migrationV1({ db }: MigrationContext) {
   if (!db.objectStoreNames.contains('simulator_snapshots')) {
     const snapshotStore = db.createObjectStore('simulator_snapshots', { keyPath: 'id' });
     snapshotStore.createIndex('by-savedAt', 'savedAt');
+    snapshotStore.createIndex('by-schemaVersion', 'schemaVersion');
   }
 
   if (!db.objectStoreNames.contains('backup_meta')) {
@@ -72,12 +73,29 @@ function migrationV2({ db }: MigrationContext) {
   if (!hasStore) {
     const snapshotStore = db.createObjectStore('simulator_snapshots', { keyPath: 'id' });
     snapshotStore.createIndex('by-savedAt', 'savedAt');
+    snapshotStore.createIndex('by-schemaVersion', 'schemaVersion');
+  }
+}
+
+function migrationV3({ db, tx }: MigrationContext) {
+  const hasStore = db.objectStoreNames.contains('simulator_snapshots');
+  if (!hasStore) {
+    const snapshotStore = db.createObjectStore('simulator_snapshots', { keyPath: 'id' });
+    snapshotStore.createIndex('by-savedAt', 'savedAt');
+    snapshotStore.createIndex('by-schemaVersion', 'schemaVersion');
+    return;
+  }
+
+  const snapshotStore = tx.objectStore('simulator_snapshots');
+  if (!snapshotStore.indexNames.contains('by-schemaVersion')) {
+    snapshotStore.createIndex('by-schemaVersion', 'schemaVersion');
   }
 }
 
 export const MIGRATIONS: Record<number, MigrationFn> = {
   1: migrationV1,
   2: migrationV2,
+  3: migrationV3,
 };
 
 export function applyMigrations(
