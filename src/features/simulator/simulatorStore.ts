@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { createInitialSimulatorState, type SimulatorState } from './model';
+import { createInitialSimulatorState, type SimulatorMode, type SimulatorState } from './model';
 import { simulatorReducer, type FocusDirection, type SimulatorAction, type SplitDirection } from './reducer';
 import { resolveSimulatorInput } from './input';
 import { getLatestSnapshot, saveSnapshot as saveSnapshotRecord } from '../storage/repository';
@@ -18,7 +18,7 @@ type SimulatorStore = {
   handleKeyInput: (key: string) => void;
   applyQuickPreset: (presetId: string) => void;
   setPrefixKey: (key: 'C-b' | 'C-a') => void;
-  setMode: (mode: SimulatorState['mode']) => void;
+  setMode: (mode: SimulatorMode) => void;
   setCommandBuffer: (command: string) => void;
   splitPane: (direction: SplitDirection) => void;
   focusPane: (direction: FocusDirection) => void;
@@ -152,7 +152,7 @@ export const useSimulatorStore = create<SimulatorStore>((set) => ({
     const id = `snapshot-${Date.now()}`;
     await saveSnapshotRecord({
       id,
-      mode: snapshot.mode,
+      mode: snapshot.mode.value,
       sessionGraph: { simulatorState: snapshot },
       savedAt: new Date().toISOString(),
     });

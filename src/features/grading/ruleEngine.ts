@@ -47,15 +47,15 @@ function getMetricFromState(state: SimulatorState, kind: string): unknown {
     case 'paneCount':
       return activeWindow.panes.length;
     case 'windowCount': {
-      const activeSession = state.sessions.find((session) => session.id === state.activeSessionId);
+      const activeSession = state.tmux.sessions.find((session) => session.id === state.tmux.activeSessionId);
       return activeSession?.windows.length ?? 0;
     }
     case 'sessionCount':
-      return state.sessions.length;
+      return state.tmux.sessions.length;
     case 'modeIs':
-      return state.mode;
+      return state.mode.value;
     case 'searchExecuted':
-      return state.copyMode.searchExecuted;
+      return state.mode.copyMode.searchExecuted;
     case 'activePaneId':
       return activeWindow.activePaneId;
     default:

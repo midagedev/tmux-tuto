@@ -90,19 +90,19 @@ function resolveCommandMode(state: SimulatorState, key: string): SimulatorAction
   }
 
   if (key === 'Backspace') {
-    return [action('SET_COMMAND_BUFFER', state.commandBuffer.slice(0, -1))];
+    return [action('SET_COMMAND_BUFFER', state.mode.commandBuffer.slice(0, -1))];
   }
 
   if (key === 'Enter') {
     return [
-      action('EXECUTE_COMMAND', state.commandBuffer),
+      action('EXECUTE_COMMAND', state.mode.commandBuffer),
       action('CLEAR_COMMAND_BUFFER'),
       action('SET_MODE', 'NORMAL'),
     ];
   }
 
   if (key.length === 1) {
-    return [action('SET_COMMAND_BUFFER', `${state.commandBuffer}${key}`)];
+    return [action('SET_COMMAND_BUFFER', `${state.mode.commandBuffer}${key}`)];
   }
 
   return [];
@@ -114,10 +114,10 @@ function resolveCopyMode(state: SimulatorState, key: string): SimulatorAction[] 
   }
 
   if (key === '/') {
-    return [action('RUN_COPY_SEARCH', state.copyMode.searchQuery || 'error')];
+    return [action('RUN_COPY_SEARCH', state.mode.copyMode.searchQuery || 'error')];
   }
 
-  if (key.length === 1 && key !== state.prefixKey) {
+  if (key.length === 1 && key !== state.tmux.config.prefixKey) {
     return [action('RUN_COPY_SEARCH', key)];
   }
 
@@ -129,19 +129,19 @@ export function resolveSimulatorInput(state: SimulatorState, key: string): Simul
     return [];
   }
 
-  if (state.mode === 'COMMAND_MODE') {
+  if (state.mode.value === 'COMMAND_MODE') {
     return resolveCommandMode(state, key);
   }
 
-  if (state.mode === 'COPY_MODE' || state.mode === 'SEARCH_MODE') {
+  if (state.mode.value === 'COPY_MODE' || state.mode.value === 'SEARCH_MODE') {
     return resolveCopyMode(state, key);
   }
 
-  if (state.mode === 'PREFIX_PENDING') {
+  if (state.mode.value === 'PREFIX_PENDING') {
     return resolvePrefixKey(key);
   }
 
-  if (key === state.prefixKey) {
+  if (key === state.tmux.config.prefixKey) {
     return [action('SET_MODE', 'PREFIX_PENDING')];
   }
 

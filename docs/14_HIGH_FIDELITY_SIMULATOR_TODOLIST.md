@@ -28,7 +28,7 @@
   - 검증: 스펙 12/13 간 충돌 0건
   - DoD: 기능/범위/제약이 단일 기준으로 정리됨
 
-- [ ] `HF-001` Shell/Tmux 통합 상태모델 v2 정의
+- [x] `HF-001` Shell/Tmux 통합 상태모델 v2 정의
   - 산출물: `src/features/simulator/model.ts` 리팩터링
   - 의존: `HF-000`
   - 검증: 타입 체크 통과

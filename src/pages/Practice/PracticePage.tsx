@@ -36,7 +36,7 @@ export function PracticePage() {
     setSearchParams(nextParams, { replace: true });
   }, [applyQuickPreset, presetId, searchParams, setSearchParams]);
   const sendPrefixed = (key: string) => {
-    handleKeyInput(simulatorState.prefixKey);
+    handleKeyInput(simulatorState.tmux.config.prefixKey);
     handleKeyInput(key);
   };
   const runCommand = () => {
@@ -44,7 +44,7 @@ export function PracticePage() {
     if (!command) {
       return;
     }
-    handleKeyInput(simulatorState.prefixKey);
+    handleKeyInput(simulatorState.tmux.config.prefixKey);
     handleKeyInput(':');
     command.split('').forEach((char) => handleKeyInput(char));
     handleKeyInput('Enter');
@@ -71,10 +71,10 @@ export function PracticePage() {
 
         <div className="sim-summary">
           <p>
-            <strong>Mode:</strong> {simulatorState.mode}
+            <strong>Mode:</strong> {simulatorState.mode.value}
           </p>
           <p>
-            <strong>Prefix:</strong> {simulatorState.prefixKey}
+            <strong>Prefix:</strong> {simulatorState.tmux.config.prefixKey}
           </p>
           <p>
             <strong>Session/Window/Pane:</strong> {activeSession.name} / {activeWindow.name} /{' '}
@@ -87,7 +87,11 @@ export function PracticePage() {
 
         <div className="sim-controls">
           <div className="inline-actions">
-            <button type="button" className="secondary-btn" onClick={() => handleKeyInput(simulatorState.prefixKey)}>
+            <button
+              type="button"
+              className="secondary-btn"
+              onClick={() => handleKeyInput(simulatorState.tmux.config.prefixKey)}
+            >
               Prefix
             </button>
             <button type="button" className="secondary-btn" onClick={() => sendPrefixed('%')}>
@@ -245,9 +249,9 @@ export function PracticePage() {
         <div className="sim-log">
           <h2>Sessions</h2>
           <ul className="link-list">
-            {simulatorState.sessions.map((session) => (
+            {simulatorState.tmux.sessions.map((session) => (
               <li key={session.id}>
-                {session.id === simulatorState.activeSessionId ? '● ' : ''}{session.name} (
+                {session.id === simulatorState.tmux.activeSessionId ? '● ' : ''}{session.name} (
                 {session.windows.length} windows)
               </li>
             ))}
@@ -264,14 +268,14 @@ export function PracticePage() {
 
           <h2>Copy Mode</h2>
           <ul className="link-list">
-            <li>query: {simulatorState.copyMode.searchQuery || '(none)'}</li>
-            <li>executed: {simulatorState.copyMode.searchExecuted ? 'yes' : 'no'}</li>
-            <li>match: {simulatorState.copyMode.lastMatchFound ? 'found' : 'not found'}</li>
+            <li>query: {simulatorState.mode.copyMode.searchQuery || '(none)'}</li>
+            <li>executed: {simulatorState.mode.copyMode.searchExecuted ? 'yes' : 'no'}</li>
+            <li>match: {simulatorState.mode.copyMode.lastMatchFound ? 'found' : 'not found'}</li>
           </ul>
 
           <h2>Command Mode</h2>
           <ul className="link-list">
-            <li>buffer: {simulatorState.commandBuffer || '(empty)'}</li>
+            <li>buffer: {simulatorState.mode.commandBuffer || '(empty)'}</li>
             <li>supported: new-window, new-session, split-window -h/-v, copy-mode, kill-pane</li>
           </ul>
 

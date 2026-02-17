@@ -107,7 +107,7 @@ export function OnboardingFirstMissionPage() {
               <li>완료 후 제출 버튼으로 채점한다.</li>
             </ul>
             <p className="muted">
-              현재 상태: pane {activeWindow.panes.length}개 / mode {simulatorState.mode}
+              현재 상태: pane {activeWindow.panes.length}개 / mode {simulatorState.mode.value}
             </p>
           </section>
 

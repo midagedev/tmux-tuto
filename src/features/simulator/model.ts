@@ -1,32 +1,44 @@
-export type SimulatorMode =
+export type TmuxMode =
   | 'NORMAL'
   | 'PREFIX_PENDING'
   | 'COMMAND_MODE'
   | 'COPY_MODE'
   | 'SEARCH_MODE';
 
+export type SimulatorMode = TmuxMode;
+
 export type SimulatorLayout = 'single' | 'vertical' | 'horizontal' | 'grid';
 
-export type SimPane = {
+export type WorkingDirectory = string;
+
+export type ShellSession = {
+  id: string;
+  prompt: string;
+  workingDirectory: WorkingDirectory;
+  history: string[];
+};
+
+export type TmuxPane = {
   id: string;
   title: string;
+  shellSessionId: string;
   buffer: string[];
   width: number;
   height: number;
 };
 
-export type SimWindow = {
+export type TmuxWindow = {
   id: string;
   name: string;
-  panes: SimPane[];
+  panes: TmuxPane[];
   activePaneId: string;
   layout: SimulatorLayout;
 };
 
-export type SimSession = {
+export type TmuxSession = {
   id: string;
   name: string;
-  windows: SimWindow[];
+  windows: TmuxWindow[];
   activeWindowId: string;
   attached: boolean;
 };
@@ -37,13 +49,27 @@ export type CopyModeState = {
   lastMatchFound: boolean;
 };
 
-export type SimulatorState = {
-  sessions: SimSession[];
-  activeSessionId: string;
-  mode: SimulatorMode;
-  prefixKey: 'C-b' | 'C-a';
+export type ModeState = {
+  value: TmuxMode;
   commandBuffer: string;
   copyMode: CopyModeState;
+};
+
+export type TmuxConfigState = {
+  prefixKey: 'C-b' | 'C-a';
+};
+
+export type SimulatorState = {
+  shell: {
+    sessions: ShellSession[];
+    activeSessionId: string;
+  };
+  tmux: {
+    sessions: TmuxSession[];
+    activeSessionId: string;
+    config: TmuxConfigState;
+  };
+  mode: ModeState;
   messages: string[];
   actionHistory: string[];
 };
@@ -53,18 +79,28 @@ function createId(prefix: string) {
   return `${prefix}-${random.slice(0, 8)}`;
 }
 
-export function createPane(title = 'shell'): SimPane {
+export function createShellSession(): ShellSession {
+  return {
+    id: createId('shell'),
+    prompt: '$',
+    workingDirectory: '/home/user',
+    history: [],
+  };
+}
+
+export function createPane(shellSessionId: string, title = 'shell'): TmuxPane {
   return {
     id: createId('pane'),
     title,
+    shellSessionId,
     buffer: ['welcome to tmux simulator', 'log line: server ready', 'error: sample entry'],
     width: 80,
     height: 24,
   };
 }
 
-export function createWindow(name = '1'): SimWindow {
-  const firstPane = createPane();
+export function createWindow(shellSessionId: string, name = '1'): TmuxWindow {
+  const firstPane = createPane(shellSessionId);
 
   return {
     id: createId('window'),
@@ -75,8 +111,8 @@ export function createWindow(name = '1'): SimWindow {
   };
 }
 
-export function createSession(name = 'main'): SimSession {
-  const firstWindow = createWindow('1');
+export function createSession(shellSessionId: string, name = 'main'): TmuxSession {
+  const firstWindow = createWindow(shellSessionId, '1');
 
   return {
     id: createId('session'),
@@ -88,26 +124,41 @@ export function createSession(name = 'main'): SimSession {
 }
 
 export function createInitialSimulatorState(): SimulatorState {
-  const session = createSession('main');
+  const shellSession = createShellSession();
+  const tmuxSession = createSession(shellSession.id, 'main');
 
   return {
-    sessions: [session],
-    activeSessionId: session.id,
-    mode: 'NORMAL',
-    prefixKey: 'C-b',
-    commandBuffer: '',
-    copyMode: {
-      searchQuery: '',
-      searchExecuted: false,
-      lastMatchFound: false,
+    shell: {
+      sessions: [shellSession],
+      activeSessionId: shellSession.id,
+    },
+    tmux: {
+      sessions: [tmuxSession],
+      activeSessionId: tmuxSession.id,
+      config: {
+        prefixKey: 'C-b',
+      },
+    },
+    mode: {
+      value: 'NORMAL',
+      commandBuffer: '',
+      copyMode: {
+        searchQuery: '',
+        searchExecuted: false,
+        lastMatchFound: false,
+      },
     },
     messages: ['Simulator initialized'],
     actionHistory: [],
   };
 }
 
+export function getActiveShellSession(state: SimulatorState) {
+  return state.shell.sessions.find((session) => session.id === state.shell.activeSessionId) ?? state.shell.sessions[0];
+}
+
 export function getActiveSession(state: SimulatorState) {
-  return state.sessions.find((session) => session.id === state.activeSessionId) ?? state.sessions[0];
+  return state.tmux.sessions.find((session) => session.id === state.tmux.activeSessionId) ?? state.tmux.sessions[0];
 }
 
 export function getActiveWindow(state: SimulatorState) {

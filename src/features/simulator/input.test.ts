@@ -11,7 +11,14 @@ describe('resolveSimulatorInput', () => {
   });
 
   it('maps prefix + % to split action and mode reset', () => {
-    const state = { ...createInitialSimulatorState(), mode: 'PREFIX_PENDING' as const };
+    const initial = createInitialSimulatorState();
+    const state = {
+      ...initial,
+      mode: {
+        ...initial.mode,
+        value: 'PREFIX_PENDING' as const,
+      },
+    };
     const actions = resolveSimulatorInput(state, '%');
 
     expect(actions).toEqual([
@@ -21,7 +28,15 @@ describe('resolveSimulatorInput', () => {
   });
 
   it('builds command buffer in command mode', () => {
-    const state = { ...createInitialSimulatorState(), mode: 'COMMAND_MODE' as const, commandBuffer: '' };
+    const initial = createInitialSimulatorState();
+    const state = {
+      ...initial,
+      mode: {
+        ...initial.mode,
+        value: 'COMMAND_MODE' as const,
+        commandBuffer: '',
+      },
+    };
     const actions = resolveSimulatorInput(state, 'n');
 
     expect(actions).toEqual([{ type: 'SET_COMMAND_BUFFER', payload: 'n' }]);
