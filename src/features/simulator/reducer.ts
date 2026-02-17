@@ -411,7 +411,10 @@ export function simulatorReducer(state: SimulatorState, action: SimulatorAction)
     case 'RUN_COPY_SEARCH': {
       const activeWindow = getActiveWindow(state);
       const activePane = activeWindow.panes.find((pane) => pane.id === activeWindow.activePaneId);
-      const haystack = activePane?.buffer.join('\n').toLowerCase() ?? '';
+      const haystack =
+        activePane?.terminal.lines.map((line) => line.text).join('\n').toLowerCase() ??
+        activePane?.buffer.join('\n').toLowerCase() ??
+        '';
       const query = action.payload.trim().toLowerCase();
       const found = query.length > 0 ? haystack.includes(query) : false;
 

@@ -1,3 +1,5 @@
+import { appendOutput, createTerminalBuffer, type TerminalBufferState } from './terminalBuffer';
+
 export type TmuxMode =
   | 'NORMAL'
   | 'PREFIX_PENDING'
@@ -23,6 +25,7 @@ export type TmuxPane = {
   title: string;
   shellSessionId: string;
   buffer: string[];
+  terminal: TerminalBufferState;
   width: number;
   height: number;
 };
@@ -89,11 +92,22 @@ export function createShellSession(): ShellSession {
 }
 
 export function createPane(shellSessionId: string, title = 'shell'): TmuxPane {
+  const seedLines = ['welcome to tmux simulator', 'log line: server ready', 'error: sample entry'];
+  const seededTerminal = appendOutput(
+    createTerminalBuffer({
+      width: 80,
+      height: 24,
+      scrollbackLimit: 3000,
+    }),
+    seedLines.join('\n'),
+  );
+
   return {
     id: createId('pane'),
     title,
     shellSessionId,
-    buffer: ['welcome to tmux simulator', 'log line: server ready', 'error: sample entry'],
+    buffer: seedLines,
+    terminal: seededTerminal,
     width: 80,
     height: 24,
   };

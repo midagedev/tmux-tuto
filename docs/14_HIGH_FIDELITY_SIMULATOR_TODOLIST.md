@@ -41,7 +41,7 @@
   - DoD: 기존 snapshot과 호환 또는 안전 폴백 제공
 
 ### Phase 1. Shell Simulator Core
-- [ ] `HF-010` 터미널 버퍼/뷰포트 엔진 구현
+- [x] `HF-010` 터미널 버퍼/뷰포트 엔진 구현
   - 산출물: line buffer, viewport, scrollback(3000+) 관리 모듈
   - 의존: `HF-001`
   - 검증: unit test(append/scroll/wrap)
