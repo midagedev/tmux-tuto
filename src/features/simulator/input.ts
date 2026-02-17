@@ -1,5 +1,6 @@
 import type { SimulatorAction } from './reducer';
 import type { SimulatorState } from './model';
+import { applyLineEditorKey } from './lineEditor';
 
 function action(type: SimulatorAction['type'], payload?: unknown): SimulatorAction {
   if (payload === undefined) {
@@ -16,6 +17,18 @@ export function normalizeKeyboardEvent(event: KeyboardEvent) {
 
   if (event.ctrlKey && event.key.toLowerCase() === 'a') {
     return 'C-a';
+  }
+
+  if (event.ctrlKey && event.key.toLowerCase() === 'e') {
+    return 'C-e';
+  }
+
+  if (event.ctrlKey && event.key.toLowerCase() === 'u') {
+    return 'C-u';
+  }
+
+  if (event.ctrlKey && event.key.toLowerCase() === 'k') {
+    return 'C-k';
   }
 
   if (event.key === 'Escape') {
@@ -89,23 +102,33 @@ function resolveCommandMode(state: SimulatorState, key: string): SimulatorAction
     return [action('CLEAR_COMMAND_BUFFER'), action('SET_MODE', 'NORMAL')];
   }
 
-  if (key === 'Backspace') {
-    return [action('SET_COMMAND_BUFFER', state.mode.commandBuffer.slice(0, -1))];
+  const result = applyLineEditorKey(
+    {
+      buffer: state.mode.commandBuffer,
+      cursor: state.mode.commandCursor,
+    },
+    key,
+  );
+  const actions: SimulatorAction[] = [];
+
+  if (
+    result.state.buffer !== state.mode.commandBuffer ||
+    result.state.cursor !== state.mode.commandCursor
+  ) {
+    actions.push(
+      action('SET_COMMAND_LINE', {
+        buffer: result.state.buffer,
+        cursor: result.state.cursor,
+      }),
+    );
   }
 
-  if (key === 'Enter') {
-    return [
-      action('EXECUTE_COMMAND', state.mode.commandBuffer),
-      action('CLEAR_COMMAND_BUFFER'),
-      action('SET_MODE', 'NORMAL'),
-    ];
+  if (result.submitted !== undefined) {
+    actions.push(action('EXECUTE_COMMAND', result.submitted));
+    actions.push(action('SET_MODE', 'NORMAL'));
   }
 
-  if (key.length === 1) {
-    return [action('SET_COMMAND_BUFFER', `${state.mode.commandBuffer}${key}`)];
-  }
-
-  return [];
+  return actions;
 }
 
 function resolveCopyMode(state: SimulatorState, key: string): SimulatorAction[] {

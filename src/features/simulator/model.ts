@@ -55,6 +55,7 @@ export type CopyModeState = {
 export type ModeState = {
   value: TmuxMode;
   commandBuffer: string;
+  commandCursor: number;
   copyMode: CopyModeState;
 };
 
@@ -156,6 +157,7 @@ export function createInitialSimulatorState(): SimulatorState {
     mode: {
       value: 'NORMAL',
       commandBuffer: '',
+      commandCursor: 0,
       copyMode: {
         searchQuery: '',
         searchExecuted: false,

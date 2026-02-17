@@ -47,7 +47,7 @@
   - 검증: unit test(append/scroll/wrap)
   - DoD: 대량 로그에서도 정상 스크롤
 
-- [ ] `HF-011` 입력 라인 에디터 구현
+- [x] `HF-011` 입력 라인 에디터 구현
   - 산출물: 입력 줄 상태기계(Ctrl+A/E/U/K, backspace, enter)
   - 의존: `HF-010`
   - 검증: unit test(key input sequences)

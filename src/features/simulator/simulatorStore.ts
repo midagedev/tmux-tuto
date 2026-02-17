@@ -31,7 +31,12 @@ function isSimulatorStateV2(value: unknown): value is SimulatorState {
     return false;
   }
 
-  if (!isRecord(mode) || !MODE_VALUES.includes(mode.value as SimulatorMode) || typeof mode.commandBuffer !== 'string') {
+  if (
+    !isRecord(mode) ||
+    !MODE_VALUES.includes(mode.value as SimulatorMode) ||
+    typeof mode.commandBuffer !== 'string' ||
+    typeof mode.commandCursor !== 'number'
+  ) {
     return false;
   }
 

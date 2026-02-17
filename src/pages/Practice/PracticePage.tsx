@@ -276,6 +276,7 @@ export function PracticePage() {
           <h2>Command Mode</h2>
           <ul className="link-list">
             <li>buffer: {simulatorState.mode.commandBuffer || '(empty)'}</li>
+            <li>cursor: {simulatorState.mode.commandCursor}</li>
             <li>supported: new-window, new-session, split-window -h/-v, copy-mode, kill-pane</li>
           </ul>
 

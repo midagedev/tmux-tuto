@@ -17,6 +17,7 @@ export type SimulatorAction =
   | { type: 'SET_PREFIX_KEY'; payload: 'C-b' | 'C-a' }
   | { type: 'SET_MODE'; payload: SimulatorMode }
   | { type: 'SET_COMMAND_BUFFER'; payload: string }
+  | { type: 'SET_COMMAND_LINE'; payload: { buffer: string; cursor: number } }
   | { type: 'CLEAR_COMMAND_BUFFER' }
   | { type: 'ADD_MESSAGE'; payload: string }
   | { type: 'RECORD_ACTION'; payload: string }
@@ -108,6 +109,19 @@ export function simulatorReducer(state: SimulatorState, action: SimulatorAction)
         mode: {
           ...state.mode,
           commandBuffer: action.payload,
+          commandCursor: action.payload.length,
+        },
+      };
+    }
+
+    case 'SET_COMMAND_LINE': {
+      const cursor = Math.min(Math.max(0, action.payload.cursor), action.payload.buffer.length);
+      return {
+        ...state,
+        mode: {
+          ...state.mode,
+          commandBuffer: action.payload.buffer,
+          commandCursor: cursor,
         },
       };
     }
@@ -118,6 +132,7 @@ export function simulatorReducer(state: SimulatorState, action: SimulatorAction)
         mode: {
           ...state.mode,
           commandBuffer: '',
+          commandCursor: 0,
         },
       };
     }

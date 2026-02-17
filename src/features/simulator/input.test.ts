@@ -35,10 +35,11 @@ describe('resolveSimulatorInput', () => {
         ...initial.mode,
         value: 'COMMAND_MODE' as const,
         commandBuffer: '',
+        commandCursor: 0,
       },
     };
     const actions = resolveSimulatorInput(state, 'n');
 
-    expect(actions).toEqual([{ type: 'SET_COMMAND_BUFFER', payload: 'n' }]);
+    expect(actions).toEqual([{ type: 'SET_COMMAND_LINE', payload: { buffer: 'n', cursor: 1 } }]);
   });
 });
