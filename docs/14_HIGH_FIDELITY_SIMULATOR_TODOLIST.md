@@ -196,7 +196,7 @@
   - 검증: `npm run test`
   - DoD: 신규 핵심 로직 테스트 커버
 
-- [ ] `HF-061` integration 테스트 확장
+- [x] `HF-061` integration 테스트 확장
   - 산출물: shell command->buffer, tmux action->layout, snapshot restore
   - 의존: `HF-050`
   - 검증: `npm run test`
