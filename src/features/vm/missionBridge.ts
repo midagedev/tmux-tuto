@@ -22,6 +22,8 @@ const ANSI_ESCAPE_PATTERN =
   /\u001b(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])/g;
 
 const INTERNAL_PROBE_COMMAND_PATTERNS = [
+  '__tmuxweb_probe',
+  '__tmuxweb_probe(){',
   'TMUXWEB_TMUX=',
   'TMUXWEB_SESSION=',
   'TMUXWEB_WINDOW=',
@@ -30,8 +32,8 @@ const INTERNAL_PROBE_COMMAND_PATTERNS = [
   'TMUXWEB_PROBE',
 ];
 
-function isInternalProbeCommand(command: string) {
-  const normalized = command.trim();
+export function isInternalProbeLine(line: string) {
+  const normalized = stripAnsi(line).replace(/\r/g, '').trim();
   if (!normalized) {
     return false;
   }
@@ -139,7 +141,7 @@ export function extractCommandFromPromptLine(line: string) {
   }
 
   const command = match[1].trim();
-  if (!command || isInternalProbeCommand(command)) {
+  if (!command || isInternalProbeLine(command)) {
     return null;
   }
 

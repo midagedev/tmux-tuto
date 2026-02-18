@@ -11,6 +11,7 @@ import { useProgressStore } from '../../features/progress/progressStore';
 import {
   evaluateMissionWithVmSnapshot,
   extractCommandFromPromptLine,
+  isInternalProbeLine,
   parseProbeMetricFromLine,
   parseTmuxActionsFromCommand,
   type VmProbeMetric,
@@ -36,7 +37,9 @@ type CelebrationState = {
 const MAX_HISTORY = 240;
 const MAX_DEBUG_LINES = 220;
 
-const PROBE_COMMAND =
+const PROBE_FUNCTION_NAME = '__tmuxweb_probe';
+
+const PROBE_SCRIPT_BODY =
   'TMUXWEB_TMUX=0; tmux -V >/dev/null 2>&1 && TMUXWEB_TMUX=1; ' +
   'TMUXWEB_SESSION=-1; TMUXWEB_WINDOW=-1; TMUXWEB_PANE=-1; TMUXWEB_MODE=0; ' +
   'if [ "$TMUXWEB_TMUX" -eq 1 ]; then ' +
@@ -50,6 +53,9 @@ const PROBE_COMMAND =
   'echo "[[TMUXWEB_PROBE:window:${TMUXWEB_WINDOW}]]"; ' +
   'echo "[[TMUXWEB_PROBE:pane:${TMUXWEB_PANE}]]"; ' +
   'echo "[[TMUXWEB_PROBE:mode:${TMUXWEB_MODE}]]"';
+
+const PROBE_INSTALL_COMMAND = `${PROBE_FUNCTION_NAME}(){ ${PROBE_SCRIPT_BODY}; }`;
+const PROBE_TRIGGER_COMMAND = PROBE_FUNCTION_NAME;
 
 const QUICK_COMMANDS = [
   {
@@ -220,6 +226,7 @@ export function PracticeVmPocPage() {
   const fitAddonRef = useRef<FitAddon | null>(null);
   const emulatorRef = useRef<V86 | null>(null);
   const lineBufferRef = useRef('');
+  const suppressCurrentLineRef = useRef(false);
   const autoProbeRef = useRef(autoProbe);
   const probeTimerRef = useRef<number | null>(null);
   const celebratedMissionSetRef = useRef(new Set<string>());
@@ -509,7 +516,7 @@ export function PracticeVmPocPage() {
       if (!emulatorRef.current) {
         return;
       }
-      emulatorRef.current.serial0_send(`${PROBE_COMMAND}\n`);
+      emulatorRef.current.serial0_send(`${PROBE_TRIGGER_COMMAND}\n`);
     }, delayMs);
   }, []);
 
@@ -562,6 +569,7 @@ export function PracticeVmPocPage() {
     setDebugLines([]);
     setCelebration(null);
     lineBufferRef.current = '';
+    suppressCurrentLineRef.current = false;
 
     const terminal = new Terminal({
       cursorBlink: true,
@@ -601,7 +609,6 @@ export function PracticeVmPocPage() {
 
     const writeByte = (value: number) => {
       const char = String.fromCharCode(value & 0xff);
-      terminal.write(char);
 
       if (char === '\r') {
         return;
@@ -609,11 +616,23 @@ export function PracticeVmPocPage() {
 
       if (char === '\n') {
         const completedLine = lineBufferRef.current;
+        const shouldSuppressLine =
+          suppressCurrentLineRef.current || (completedLine.length > 0 && isInternalProbeLine(completedLine));
+
+        if (!shouldSuppressLine) {
+          terminal.write('\n');
+        }
+
         lineBufferRef.current = '';
+        suppressCurrentLineRef.current = false;
 
         const probeMetric = parseProbeMetricFromLine(completedLine);
         if (probeMetric) {
           updateMetricByProbe(probeMetric);
+          return;
+        }
+
+        if (shouldSuppressLine) {
           return;
         }
 
@@ -635,11 +654,23 @@ export function PracticeVmPocPage() {
 
       if (char === '\b' || char === String.fromCharCode(127)) {
         lineBufferRef.current = lineBufferRef.current.slice(0, -1);
+        if (!suppressCurrentLineRef.current) {
+          terminal.write(char);
+        }
         return;
       }
 
       if (char >= ' ') {
         lineBufferRef.current += char;
+        if (!suppressCurrentLineRef.current && isInternalProbeLine(lineBufferRef.current)) {
+          suppressCurrentLineRef.current = true;
+          terminal.write('\r\x1b[2K');
+          return;
+        }
+      }
+
+      if (!suppressCurrentLineRef.current) {
+        terminal.write(char);
       }
     };
 
@@ -703,7 +734,8 @@ export function PracticeVmPocPage() {
             return;
           }
           emulatorRef.current.serial0_send('\n');
-          emulatorRef.current.serial0_send(`${PROBE_COMMAND}\n`);
+          emulatorRef.current.serial0_send(`${PROBE_INSTALL_COMMAND}\n`);
+          emulatorRef.current.serial0_send(`${PROBE_TRIGGER_COMMAND}\n`);
         }, 2600);
       } catch {
         setVmStatus('error');
@@ -1152,7 +1184,7 @@ export function PracticeVmPocPage() {
                   type="button"
                   className="secondary-btn"
                   onClick={() => {
-                    sendCommand(PROBE_COMMAND, { trackCommand: false, probeAfter: false });
+                    sendCommand(PROBE_TRIGGER_COMMAND, { trackCommand: false, probeAfter: false });
                   }}
                 >
                   Probe 지금 실행
