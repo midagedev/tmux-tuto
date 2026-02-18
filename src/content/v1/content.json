@@ -95,7 +95,12 @@
       "goal": "tmux가 \"터미널 작업을 이어서 쓰게 해주는 도구\"라는 핵심 가치를 체감하고, 본격 레슨을 시작할 준비를 마칩니다.",
       "successCriteria": [
         "`tmux -V` 명령을 직접 실행",
-        "실습 화면에서 첫 미션 완료 상태 확인"
+        "`tmux list-sessions` 명령으로 현재 세션 상태를 확인",
+        "실습 화면에서 첫 레슨 미션 2개를 모두 완료"
+      ],
+      "failureStates": [
+        "tmux 명령 실행 기록이 없어 첫 진입 성공 신호가 부족함",
+        "세션 조회 명령을 실행하지 않아 tmux 상태 확인 루틴이 미완성임"
       ]
     },
     {
@@ -115,7 +120,11 @@
       "successCriteria": [
         "새 session 생성",
         "window 2개 이상 운영",
-        "pane 분할 상태를 읽고 설명 가능"
+        "기본 작업 공간 생성 루틴(session + window) 재현 가능"
+      ],
+      "failureStates": [
+        "session/window 중 한 축만 수행해 기본 작업 공간 구성이 불완전함",
+        "window 생성/전환이 확인되지 않아 다음 레슨 진입 준비가 부족함"
       ]
     },
     {
@@ -133,9 +142,13 @@
       "overview": "tmux를 실무에서 쓰는 가장 큰 이유인 \"작업 복구\"를 다룹니다. 터미널을 닫거나 네트워크가 끊겨도 세션을 유지하는 루틴을 익힙니다.",
       "goal": "작업을 중단하지 않고 안전하게 분리(detach)했다가 같은 상태로 복귀(attach)하는 기본 운영 습관을 만듭니다.",
       "successCriteria": [
-        "session 목록 확인",
-        "detach 후 attach 재접속",
-        "2개 이상 session 구분 운영"
+        "window 2개 이상 상태에서 세션 운영",
+        "session 2개 이상 관리",
+        "attach 명령으로 재접속 루틴을 실행"
+      ],
+      "failureStates": [
+        "복수 session 운영 기록이 없어 작업 복구 루틴이 검증되지 않음",
+        "attach 흐름이 없어 재접속 실전성이 부족함"
       ]
     },
     {
@@ -154,8 +167,12 @@
       "goal": "작업 성격에 맞게 pane을 나누고 크기를 조절해, 맥락 전환 없이 한 터미널에서 여러 작업을 처리합니다.",
       "successCriteria": [
         "pane 2개 이상 분할",
-        "분할 방향을 목적에 맞게 선택",
-        "가독성을 위한 리사이즈 적용"
+        "resize 명령으로 작업 영역을 조정",
+        "분할과 조정을 연속 수행해 실무 레이아웃 구성 가능"
+      ],
+      "failureStates": [
+        "분할만 수행하고 크기 조정을 하지 않아 레이아웃 제어 능력이 부족함",
+        "pane 가시성 조정이 없어 작업 분배 효율이 낮음"
       ]
     },
     {
@@ -173,9 +190,13 @@
       "overview": "여러 pane/window를 사용할 때 길을 잃지 않도록 이동 규칙과 분배 패턴을 만듭니다.",
       "goal": "손이 기억하는 이동 루틴을 통해 컨텍스트 전환 시간을 줄이고, 복잡한 작업에서도 집중을 유지합니다.",
       "successCriteria": [
-        "3개 이상 pane 구성",
-        "window next/prev 순환",
-        "작업별 pane 역할 분리"
+        "pane 3개 이상 구성",
+        "window 순환 이동(next/prev) 루틴 실행",
+        "활성 window 전환 상태를 인지하며 작업 지속"
+      ],
+      "failureStates": [
+        "pane 다중 구성 없이 단일 화면에 머물러 이동 루틴 검증이 부족함",
+        "window 순환 실행 기록이 없어 컨텍스트 전환 능력이 미확인 상태임"
       ]
     },
     {
@@ -195,7 +216,11 @@
       "successCriteria": [
         "copy mode 진입",
         "키워드 검색 성공",
-        "검색 실패 상황까지 판단 가능"
+        "검색 실패 케이스를 구분해 대응 가능"
+      ],
+      "failureStates": [
+        "copy-mode에서 검색 실행/매치 여부 확인이 없어 로그 탐색 루틴이 미완성임",
+        "성공/실패 케이스 구분이 없어 디버깅 판단력이 부족함"
       ]
     },
     {
@@ -213,9 +238,13 @@
       "overview": "단축키만으로 어려운 작업을 command mode로 안정적으로 실행하는 방법을 다룹니다.",
       "goal": "필요할 때 명령 기반으로 tmux 상태를 제어해 재현 가능한 작업 루틴을 구성합니다.",
       "successCriteria": [
-        "command mode에서 window 생성",
-        "명령 입력/실행 흐름 숙지",
-        "자주 쓰는 명령 3개 이상 확보"
+        "command-prompt 실행",
+        "command mode로 window 생성",
+        "choose-tree 진입으로 명령 기반 탐색 경험 확보"
+      ],
+      "failureStates": [
+        "command-prompt/choose-tree 실행 기록이 없어 명령 기반 운영 진입이 부족함",
+        "window 생성 미완료로 command mode 실전 적용이 검증되지 않음"
       ]
     }
   ],
@@ -241,6 +270,26 @@
       ]
     },
     {
+      "id": "mission-a-00b",
+      "lessonSlug": "hello-tmux",
+      "slug": "hello-tmux-session-list",
+      "title": "세션 상태 한 번 확인",
+      "type": "state-check",
+      "difficulty": "beginner",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "tmux list-sessions"
+        }
+      ],
+      "hints": [
+        "`tmux list-sessions`를 실행해 현재 세션 목록을 확인하세요.",
+        "세션이 없어도 명령 실행 기록이 남으면 통과합니다."
+      ]
+    },
+    {
       "id": "mission-a-01",
       "lessonSlug": "basics",
       "slug": "session-create",
@@ -257,8 +306,27 @@
       ],
       "hints": [
         "명령어: `tmux new -As main` 을 실행하면 세션이 없으면 생성, 있으면 재사용합니다.",
-        "이미 tmux 안이라면 command mode(`prefix` 후 `:`)에서 `new-session -s main` 으로도 가능합니다.",
-        "자동 판정 기준: session 수가 1개 이상이면 완료됩니다."
+        "이미 tmux 안이라면 command mode(`prefix` 후 `:`)에서 `new-session -s main` 으로도 가능합니다."
+      ]
+    },
+    {
+      "id": "mission-a-01b",
+      "lessonSlug": "basics",
+      "slug": "basics-window-open",
+      "title": "윈도우 2개 만들기",
+      "type": "state-check",
+      "difficulty": "beginner",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "windowCount",
+          "operator": ">=",
+          "value": 2
+        }
+      ],
+      "hints": [
+        "`tmux new-window -n work`로 새 윈도우를 만들어 보세요.",
+        "이미 세션이 있다면 `tmux new-window`만으로도 조건을 채울 수 있습니다."
       ]
     },
     {
@@ -277,13 +345,12 @@
         }
       ],
       "hints": [
-        "명령어: `tmux new-window -n editor` 로 새 window를 하나 추가하세요.",
-        "단축키: `prefix` + `c` 로도 새 window를 만들 수 있습니다.",
-        "자동 판정 기준: window 수가 2개 이상이면 완료됩니다."
+        "현재 세션에서 window를 하나 더 만든 뒤 목록을 확인하세요.",
+        "`tmux list-windows`로 생성 결과를 확인할 수 있습니다."
       ]
     },
     {
-      "id": "mission-a-03",
+      "id": "mission-a-02b",
       "lessonSlug": "attach-detach",
       "slug": "session-multi-manage",
       "title": "세션 2개 운영",
@@ -298,9 +365,28 @@
         }
       ],
       "hints": [
-        "명령어: `tmux new-session -d -s api` 와 `tmux new-session -d -s web` 처럼 2개 세션을 만드세요.",
-        "단축키 경로: `prefix` 후 `:` 입력 뒤 `new-session -s <name>` 실행을 2회 반복해도 됩니다.",
-        "자동 판정 기준: session 수가 2개 이상이면 완료됩니다."
+        "다른 이름의 세션을 하나 더 생성해 보세요. 예: `tmux new-session -d -s backup`",
+        "`tmux list-sessions`에서 2개 이상 보이면 통과입니다."
+      ]
+    },
+    {
+      "id": "mission-a-02c",
+      "lessonSlug": "attach-detach",
+      "slug": "session-attach-reconnect",
+      "title": "attach 명령으로 재접속",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "tmux attach"
+        }
+      ],
+      "hints": [
+        "`tmux attach -t main`처럼 attach 명령을 직접 실행해 보세요.",
+        "세션 이름이 다르면 `tmux attach -t <세션명>`으로 바꿔 실행하세요."
       ]
     },
     {
@@ -319,9 +405,28 @@
         }
       ],
       "hints": [
-        "명령어: `tmux split-window -h` 또는 `tmux split-window -v` 로 분할을 1회 실행하세요.",
-        "단축키: `prefix` + `%`(세로) 또는 `prefix` + `\"`(가로)도 같은 목표입니다.",
-        "자동 판정 기준: pane 수가 2개 이상이면 완료됩니다."
+        "`tmux split-window`를 실행해 패인을 분할하세요.",
+        "pane 수가 2개 이상이면 통과합니다."
+      ]
+    },
+    {
+      "id": "mission-b-01b",
+      "lessonSlug": "split-resize",
+      "slug": "split-resize-adjust",
+      "title": "resize로 레이아웃 조정",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.pane.resize"
+        }
+      ],
+      "hints": [
+        "`tmux resize-pane -R 5` 또는 `tmux resize-pane -L 5`를 실행해 보세요.",
+        "resize 명령 1회 이상 실행되면 통과합니다."
       ]
     },
     {
@@ -340,13 +445,12 @@
         }
       ],
       "hints": [
-        "명령어: 분할 명령(`split-window`)을 2회 이상 실행해 pane 3개 이상을 만드세요.",
-        "단축키: `prefix` + `%` / `prefix` + `\"`를 조합해 grid 형태를 만드는 것을 권장합니다.",
-        "자동 판정 기준: pane 수가 3개 이상이면 완료됩니다."
+        "split을 한 번 더 실행해 pane 3개를 만들어 보세요.",
+        "`tmux list-panes`로 현재 개수를 확인할 수 있습니다."
       ]
     },
     {
-      "id": "mission-b-03",
+      "id": "mission-b-02b",
       "lessonSlug": "pane-focus-flow",
       "slug": "window-cycle-practice",
       "title": "윈도우 순환 이동",
@@ -366,9 +470,8 @@
         }
       ],
       "hints": [
-        "먼저 `new-window`(또는 `prefix` + `c`)로 window를 2개 이상 만든 뒤 이동하세요.",
-        "명령어 경로: `tmux next-window`, `tmux previous-window`를 순서대로 실행해 보세요.",
-        "단축키 경로: `prefix` + `n` / `prefix` + `p`로 순환 이동해도 자동 판정됩니다."
+        "window를 2개 이상 만든 뒤 `tmux next-window` 또는 `tmux previous-window`를 실행하세요.",
+        "활성 window index가 1 이상으로 바뀌면 통과합니다."
       ]
     },
     {
@@ -397,13 +500,12 @@
         }
       ],
       "hints": [
-        "명령어 경로: `tmux copy-mode -t lesson:0.0` 후 `tmux send-keys -t lesson:0.0 -X search-backward \"keyword\"`를 실행하세요.",
-        "단축키 경로도 가능하지만, 자동 판정 안정성을 위해 위 명령어 경로를 권장합니다.",
-        "자동 판정 기준: copy-mode 상태 + 검색 실행 + 검색 결과 매치(true)입니다."
+        "`tmux copy-mode` 후 검색을 실행해 매치가 있는 키워드를 찾아보세요.",
+        "모드/검색/매치 3개 조건이 모두 참이면 통과합니다."
       ]
     },
     {
-      "id": "mission-c-02",
+      "id": "mission-c-01b",
       "lessonSlug": "copy-search",
       "slug": "copy-mode-no-match",
       "title": "Copy Mode 검색 실패도 확인",
@@ -428,13 +530,32 @@
         }
       ],
       "hints": [
-        "명령어 경로: `tmux copy-mode -t lesson:0.0` 후 존재하지 않는 키워드로 `search-backward`를 실행하세요.",
-        "예시 키워드: `__NOT_FOUND__` 같은 문자열을 사용하면 실패 케이스를 재현하기 쉽습니다.",
-        "자동 판정 기준: copy-mode 상태 + 검색 실행 + 검색 결과 매치(false)입니다."
+        "일치 결과가 없을 키워드로 검색해 실패 케이스를 재현하세요.",
+        "검색은 실행되었지만 match가 false면 통과입니다."
       ]
     },
     {
-      "id": "mission-c-03",
+      "id": "mission-c-02",
+      "lessonSlug": "command-subset",
+      "slug": "command-mode-prompt-intro",
+      "title": "command-prompt 실행",
+      "type": "state-check",
+      "difficulty": "advanced",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.command.prompt"
+        }
+      ],
+      "hints": [
+        "`tmux command-prompt -p \"cmd\"`를 실행해 명령 프롬프트를 열어 보세요.",
+        "command-prompt 액션이 기록되면 통과합니다."
+      ]
+    },
+    {
+      "id": "mission-c-02b",
       "lessonSlug": "command-subset",
       "slug": "command-mode-new-window",
       "title": "Command Mode로 window 생성",
@@ -454,9 +575,28 @@
         }
       ],
       "hints": [
-        "권장 경로: `prefix` 후 `:`로 command mode를 열고 `new-window` 입력 후 Enter를 누르세요.",
-        "대체 경로: 셸에서 `tmux new-window -n cmd` 명령을 실행해도 동일한 결과를 확인할 수 있습니다.",
-        "자동 판정 기준: window 수가 2개 이상이고, 활성 window 인덱스가 1 이상이면 완료됩니다."
+        "command mode에서 `new-window`를 실행해 새 window를 만드세요.",
+        "window 수와 활성 index 조건을 동시에 만족해야 통과입니다."
+      ]
+    },
+    {
+      "id": "mission-c-02c",
+      "lessonSlug": "command-subset",
+      "slug": "command-mode-tree-intro",
+      "title": "choose-tree 탐색 진입",
+      "type": "state-check",
+      "difficulty": "scenario",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.choose.tree"
+        }
+      ],
+      "hints": [
+        "`tmux choose-tree -Z`를 실행해 트리 탐색을 열어 보세요.",
+        "choose-tree 액션 기록이 남으면 통과합니다."
       ]
     }
   ],

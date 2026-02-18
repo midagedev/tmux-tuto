@@ -1243,6 +1243,14 @@ export function PracticeVmPocPage() {
   const hiddenObjectiveCount = selectedLesson
     ? Math.max(selectedLesson.objectives.length - lessonObjectivePreview.length, 0)
     : 0;
+  const lessonSuccessCriteriaPreview = selectedLesson?.successCriteria?.slice(0, 1) ?? [];
+  const hiddenSuccessCriteriaCount = selectedLesson
+    ? Math.max((selectedLesson.successCriteria?.length ?? 0) - lessonSuccessCriteriaPreview.length, 0)
+    : 0;
+  const lessonFailureStatePreview = selectedLesson?.failureStates?.slice(0, 1) ?? [];
+  const hiddenFailureStateCount = selectedLesson
+    ? Math.max((selectedLesson.failureStates?.length ?? 0) - lessonFailureStatePreview.length, 0)
+    : 0;
 
   if (contentState.status === 'loading') {
     return (
@@ -1452,6 +1460,18 @@ export function PracticeVmPocPage() {
                 {selectedLesson.goal ? (
                   <p>
                     <strong>레슨 목표:</strong> {selectedLesson.goal}
+                  </p>
+                ) : null}
+                {lessonSuccessCriteriaPreview.length > 0 ? (
+                  <p className="muted">
+                    <strong>완료 기준:</strong> {lessonSuccessCriteriaPreview[0]}
+                    {hiddenSuccessCriteriaCount > 0 ? ` (+${hiddenSuccessCriteriaCount}개)` : ''}
+                  </p>
+                ) : null}
+                {lessonFailureStatePreview.length > 0 ? (
+                  <p className="muted">
+                    <strong>부족 상태:</strong> {lessonFailureStatePreview[0]}
+                    {hiddenFailureStateCount > 0 ? ` (+${hiddenFailureStateCount}개)` : ''}
                   </p>
                 ) : null}
                 <ul className="link-list">
