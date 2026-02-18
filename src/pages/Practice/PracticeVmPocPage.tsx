@@ -29,6 +29,13 @@ import {
   parseTmuxShortcutTelemetry,
 } from '../../features/vm/tmuxShortcutTelemetry';
 import {
+  PROBE_LOOP_START_COMMAND,
+  PROBE_LOOP_STOP_COMMAND,
+  PROBE_TRIGGER_COMMAND,
+  SEARCH_PROBE_TRIGGER_COMMAND,
+  buildTerminalGeometrySyncCommand,
+} from './probeCommands';
+import {
   buildLessonProgressRows,
   filterLessonProgressRows,
   resolveDefaultMissionSlugForLesson,
@@ -87,24 +94,11 @@ const V86_STATE_MAGIC_LE = 0x86768676;
 const ZSTD_MAGIC_LE = 0xfd2fb528;
 const DEFAULT_TERMINAL_COLS = 80;
 const DEFAULT_TERMINAL_ROWS = 24;
-const BASE_PROBE_TRIGGER_COMMAND = '/usr/bin/tmux-tuto-probe >/dev/ttyS1 2>/dev/null';
-const SEARCH_PROBE_TRIGGER_COMMAND = [
-  'TMUXWEB_SEARCH_COUNT="$(tmux display-message -p \'#{search_count}\' 2>/dev/null | tr -d \' \')"',
-  'TMUXWEB_SEARCH_PRESENT="$(tmux display-message -p \'#{search_present}\' 2>/dev/null | tr -d \' \')"',
-  'if [ -n "${TMUXWEB_SEARCH_COUNT:-}" ] && [ "${TMUXWEB_SEARCH_COUNT}" -ge 1 ] 2>/dev/null; then',
-  'TMUXWEB_SEARCH_MATCHED=0;',
-  'if [ "${TMUXWEB_SEARCH_PRESENT:-0}" = "1" ]; then TMUXWEB_SEARCH_MATCHED=1; fi;',
-  'printf "[[TMUXWEB_PROBE:search:1]]\\n[[TMUXWEB_PROBE:searchMatched:%s]]\\n" "${TMUXWEB_SEARCH_MATCHED}" >/dev/ttyS1;',
-  'else',
-  'printf "[[TMUXWEB_PROBE:search:0]]\\n[[TMUXWEB_PROBE:searchMatched:0]]\\n" >/dev/ttyS1;',
-  'fi',
-].join(' ');
-const PROBE_TRIGGER_COMMAND = `${BASE_PROBE_TRIGGER_COMMAND}; ${SEARCH_PROBE_TRIGGER_COMMAND}`;
 const BANNER_TRIGGER_COMMAND = '/usr/bin/tmux-tuto-banner';
-const PROBE_LOOP_START_COMMAND = `if [ -z "\${TMUXWEB_PROBE_LOOP_PID:-}" ] || ! kill -0 "\${TMUXWEB_PROBE_LOOP_PID}" 2>/dev/null; then (while true; do ${PROBE_TRIGGER_COMMAND}; sleep 0.5; done) </dev/null >/dev/null 2>&1 & TMUXWEB_PROBE_LOOP_PID=$!; export TMUXWEB_PROBE_LOOP_PID; fi`;
-const PROBE_LOOP_STOP_COMMAND =
-  'if [ -n "${TMUXWEB_PROBE_LOOP_PID:-}" ]; then kill "${TMUXWEB_PROBE_LOOP_PID}" 2>/dev/null || true; unset TMUXWEB_PROBE_LOOP_PID; fi';
-const TERMINAL_GEOMETRY_SYNC_COMMAND = `stty cols ${DEFAULT_TERMINAL_COLS} rows ${DEFAULT_TERMINAL_ROWS} >/dev/null 2>&1; tmux resize-window -x ${DEFAULT_TERMINAL_COLS} -y ${DEFAULT_TERMINAL_ROWS} >/dev/null 2>&1 || true`;
+const TERMINAL_GEOMETRY_SYNC_COMMAND = buildTerminalGeometrySyncCommand(
+  DEFAULT_TERMINAL_COLS,
+  DEFAULT_TERMINAL_ROWS,
+);
 
 const QUICK_COMMANDS = [
   {
