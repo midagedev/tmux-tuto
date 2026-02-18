@@ -21,6 +21,14 @@
 | `streak-7` | `streakDays >= 7` | streak 7일 달성 시 노출 | "7일 스트릭 달성" |
 | `final-complete` | `track-a-complete && track-b-complete && track-c-complete` | 전체 트랙 100% 시 노출 | "전체 커리큘럼 완료" |
 
+### first-chapter 기준 고정(현재 버전)
+
+| 기준 | 값 |
+| --- | --- |
+| chapterSlug | `tmux-onramp` |
+| chapter order (Track A) | `0` |
+| 포함 missionSlug | `hello-tmux-version-check` |
+
 ## 3) 문구-조건 매핑표
 
 | 마일스톤 | 기존 문구 리스크 | v1 문구/설명 가이드 |
