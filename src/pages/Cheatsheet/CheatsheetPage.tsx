@@ -105,7 +105,7 @@ export function CheatsheetPage() {
         )}
         <div className="inline-actions">
           <Link to="/playbooks" className="secondary-btn">
-            전체 플레이북 목록
+            레퍼런스 라이브러리 전체 보기
           </Link>
         </div>
       </section>
