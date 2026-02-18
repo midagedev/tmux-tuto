@@ -31,6 +31,20 @@
 | copy-search | 검색 실패 케이스까지 판별 | copy-mode-no-match | modeIs, searchExecuted, searchMatchFound | mode가 copy-mode이고 검색 실행 + 매치 실패 |
 | command-subset | command mode 기반 제어 진입 | command-mode-new-window | windowCount, activeWindowIndex | window 2개 이상 + 활성 window index가 1 이상 |
 
+## 레슨별 미션 구성 요약
+
+| lessonSlug | missionCount | 종합 미션 포함 여부 | 비고 |
+| --- | --- | --- | --- |
+| hello-tmux | 1 | 아니오 | 온램프 1회 성공 경험 중심 |
+| basics | 1 | 아니오 | 핵심 개념 진입 단계 |
+| attach-detach | 2 | 예 | `session-multi-manage`가 복수 세션 운영 종합 미션 |
+| split-resize | 1 | 아니오 | 분할/리사이즈 기본기 확인 |
+| pane-focus-flow | 2 | 예 | `window-cycle-practice`가 고난도 이동 루틴 종합 미션 |
+| copy-search | 2 | 예 | 성공/실패 페어 시나리오로 검색 판단력 강화 |
+| command-subset | 1 | 아니오 | command mode 진입 및 실행 확인 |
+
+- Track B/C 난이도 상승 구간: `pane-focus-flow`, `copy-search`에서 실전형 조건(복합 rule kind, 실패 케이스 판별)을 포함해 난이도를 단계적으로 올렸다.
+
 ## 검증 요약
 
 - 전체 lesson 7개 모두 매핑표 포함
