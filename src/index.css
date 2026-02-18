@@ -770,6 +770,15 @@ a {
   padding: 12px;
 }
 
+.vm-poc-note summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.vm-poc-note[open] summary {
+  margin-bottom: 8px;
+}
+
 .vm-poc-note p {
   margin: 0 0 8px;
   line-height: 1.5;
@@ -778,7 +787,7 @@ a {
 .vm-workbench {
   display: grid;
   gap: 12px;
-  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
   align-items: start;
 }
 
@@ -787,6 +796,14 @@ a {
   display: grid;
   gap: 12px;
   min-width: 0;
+}
+
+.vm-study-panel {
+  position: sticky;
+  top: 10px;
+  max-height: calc(100vh - 30px);
+  overflow: auto;
+  padding-right: 4px;
 }
 
 .vm-curriculum-panel {
@@ -865,6 +882,9 @@ a {
 .vm-mission-list {
   display: grid;
   gap: 8px;
+  max-height: 260px;
+  overflow: auto;
+  padding-right: 4px;
 }
 
 .vm-mission-row {
@@ -1025,10 +1045,12 @@ a {
 }
 
 .vm-poc-controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  display: grid;
   gap: 10px;
+  border: 1px solid #dbe2ea;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 10px;
 }
 
 .vm-poc-image-picker {
@@ -1062,8 +1084,14 @@ a {
 
 .vm-poc-quick {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.vm-poc-quick .secondary-btn {
+  flex: 0 0 auto;
 }
 
 .vm-poc-status {
@@ -1091,12 +1119,12 @@ a {
   border: 1px solid #0f172a;
   border-radius: 10px;
   background: #020617;
-  min-height: 420px;
+  min-height: 360px;
   padding: 8px;
 }
 
 .vm-terminal-host {
-  min-height: 400px;
+  min-height: 340px;
 }
 
 .vm-poc-debug {
@@ -1150,17 +1178,29 @@ a {
     grid-template-columns: 1fr;
   }
 
+  .vm-study-panel {
+    position: static;
+    max-height: none;
+    overflow: visible;
+    padding-right: 0;
+  }
+
   .vm-poc-command-input {
     width: 100%;
     flex-basis: auto;
   }
 
+  .vm-poc-quick {
+    flex-wrap: wrap;
+    overflow-x: visible;
+  }
+
   .vm-terminal-shell {
-    min-height: 340px;
+    min-height: 300px;
   }
 
   .vm-terminal-host {
-    min-height: 320px;
+    min-height: 280px;
   }
 }
 
