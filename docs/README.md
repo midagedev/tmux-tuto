@@ -9,6 +9,12 @@
 - `/Users/hckim/repo/tmux-tuto/docs/01_PROJECT_CONVENTIONS.md`
 - `/Users/hckim/repo/tmux-tuto/docs/02_DOC_ALIGNMENT_REPORT.md`
 - `/Users/hckim/repo/tmux-tuto/docs/00_EXECUTION_TODOLIST.md`
+- `/Users/hckim/repo/tmux-tuto/docs/14_HIGH_FIDELITY_SIMULATOR_TODOLIST.md`
+- `/Users/hckim/repo/tmux-tuto/docs/15_HIGH_FIDELITY_REQUIREMENTS_SYNC.md`
+- `/Users/hckim/repo/tmux-tuto/docs/16_SIMULATOR_SNAPSHOT_SCHEMA_V2.md`
+- `/Users/hckim/repo/tmux-tuto/docs/17_CURRICULUM_SIMULATOR_COVERAGE_MATRIX.md`
+- `/Users/hckim/repo/tmux-tuto/docs/18_HIGH_FIDELITY_SIMULATOR_PERFORMANCE_REPORT.md`
+- `/Users/hckim/repo/tmux-tuto/docs/19_HIGH_FIDELITY_SIMULATOR_USER_GUIDE.md`
 - `/Users/hckim/repo/tmux-tuto/docs/specs/01_APP_ARCHITECTURE_SPEC.md`
 - `/Users/hckim/repo/tmux-tuto/docs/specs/02_TMUX_SIMULATOR_SPEC.md`
 - `/Users/hckim/repo/tmux-tuto/docs/specs/03_CURRICULUM_MISSION_SPEC.md`
