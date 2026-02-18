@@ -48,15 +48,33 @@
       ]
     },
     {
+      "missionSlug": "basics-workspace-routine",
+      "track": "A",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "session.create",
+        "window.create",
+        "window.list",
+        "workspace.checkpoint"
+      ],
+      "requiredRuleKinds": [
+        "sessionCount",
+        "windowCount",
+        "shellHistoryText"
+      ]
+    },
+    {
       "missionSlug": "session-window-create",
       "track": "A",
       "scenarioPresetId": "single-pane",
       "capabilities": [
         "window.create",
-        "window.list"
+        "window.list",
+        "workspace.checkpoint"
       ],
       "requiredRuleKinds": [
-        "windowCount"
+        "windowCount",
+        "shellHistoryText"
       ]
     },
     {
@@ -76,6 +94,7 @@
       "track": "A",
       "scenarioPresetId": "single-pane",
       "capabilities": [
+        "session.detach",
         "session.attach"
       ],
       "requiredRuleKinds": [
@@ -90,6 +109,20 @@
         "pane.split"
       ],
       "requiredRuleKinds": [
+        "paneCount"
+      ]
+    },
+    {
+      "missionSlug": "split-both-directions",
+      "track": "B",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "pane.split",
+        "pane.split.vertical",
+        "pane.split.horizontal"
+      ],
+      "requiredRuleKinds": [
+        "shellHistoryText",
         "paneCount"
       ]
     },
@@ -114,6 +147,19 @@
       ],
       "requiredRuleKinds": [
         "paneCount"
+      ]
+    },
+    {
+      "missionSlug": "pane-focus-select-practice",
+      "track": "B",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "pane.select",
+        "pane.focus.flow"
+      ],
+      "requiredRuleKinds": [
+        "paneCount",
+        "actionHistoryText"
       ]
     },
     {

@@ -88,19 +88,19 @@
       "estimatedMinutes": 3,
       "objectives": [
         "tmux 명령 1회 실행",
-        "세션이 작업을 유지한다는 개념 이해",
+        "현재 tmux 상태를 확인하는 기본 루틴 익히기",
         "다음 실습으로 넘어갈 준비"
       ],
-      "overview": "tmux를 처음 쓰는 학습자를 위한 초간단 입문 레슨입니다. 복잡한 단축키 없이 명령 한 번으로 tmux 환경이 어떤 것인지 감을 잡습니다.",
-      "goal": "tmux가 \"터미널 작업을 이어서 쓰게 해주는 도구\"라는 핵심 가치를 체감하고, 본격 레슨을 시작할 준비를 마칩니다.",
+      "overview": "tmux를 처음 켜보는 온램프 레슨입니다. SSH가 끊기거나 터미널을 닫아도 작업을 이어갈 수 있다는 핵심 가치를 3분 안에 체감합니다.",
+      "goal": "tmux를 \"작업 복구와 연속성\" 도구로 이해하고, 이후 레슨에서 계속 사용할 기본 확인 루틴(`tmux -V`, `tmux list-sessions`)을 익힙니다.",
       "successCriteria": [
         "`tmux -V` 명령을 직접 실행",
-        "`tmux list-sessions` 명령으로 현재 세션 상태를 확인",
-        "실습 화면에서 첫 레슨 미션 2개를 모두 완료"
+        "`tmux list-sessions`로 현재 상태를 직접 확인",
+        "첫 레슨 미션 2개를 순서대로 완료해 첫 성공 경험 확보"
       ],
       "failureStates": [
         "tmux 명령 실행 기록이 없어 첫 진입 성공 신호가 부족함",
-        "세션 조회 명령을 실행하지 않아 tmux 상태 확인 루틴이 미완성임"
+        "세션 조회 루틴이 없어 이후 레슨에서 현재 상태를 점검하기 어려움"
       ]
     },
     {
@@ -109,22 +109,22 @@
       "chapterSlug": "session-window-pane",
       "slug": "basics",
       "title": "기본 조작: Session/Window/Pane",
-      "estimatedMinutes": 8,
+      "estimatedMinutes": 10,
       "objectives": [
         "session 생성",
         "window 생성/전환",
-        "pane 구조 이해"
+        "기본 workspace 체크포인트 루틴 반복"
       ],
-      "overview": "tmux의 핵심 단위인 session, window, pane을 실제 조작으로 익히는 레슨입니다. 이후 모든 고급 기능의 기반이 됩니다.",
-      "goal": "하나의 tmux 세션 안에서 작업 공간을 만들고 오가며, 현재 내가 어디에서 작업 중인지 혼동 없이 인지할 수 있습니다.",
+      "overview": "Session/Window/Pane의 역할을 실습으로 익혀 \"작업 공간을 어떻게 쪼개고 유지할지\"를 결정할 수 있게 만듭니다. 실무에서 서비스별 창 분리에 바로 연결됩니다.",
+      "goal": "한 세션 안에서 윈도우를 만들고 전환하며 현재 작업 위치를 잃지 않는 기본 루틴을 반복해 손에 익힙니다.",
       "successCriteria": [
         "새 session 생성",
         "window 2개 이상 운영",
-        "기본 작업 공간 생성 루틴(session + window) 재현 가능"
+        "`tmux list-windows`로 현재 workspace 상태를 점검"
       ],
       "failureStates": [
         "session/window 중 한 축만 수행해 기본 작업 공간 구성이 불완전함",
-        "window 생성/전환이 확인되지 않아 다음 레슨 진입 준비가 부족함"
+        "workspace 점검 루틴이 없어 다음 작업 전환 시 위치를 잃기 쉬움"
       ]
     },
     {
@@ -133,22 +133,22 @@
       "chapterSlug": "session-lifecycle",
       "slug": "attach-detach",
       "title": "세션 유지 루틴",
-      "estimatedMinutes": 9,
+      "estimatedMinutes": 10,
       "objectives": [
-        "detach/attach",
+        "detach/attach 루틴 실행",
         "세션 목록 확인",
-        "세션 재접속 루틴"
+        "복수 세션 재접속 루틴"
       ],
-      "overview": "tmux를 실무에서 쓰는 가장 큰 이유인 \"작업 복구\"를 다룹니다. 터미널을 닫거나 네트워크가 끊겨도 세션을 유지하는 루틴을 익힙니다.",
-      "goal": "작업을 중단하지 않고 안전하게 분리(detach)했다가 같은 상태로 복귀(attach)하는 기본 운영 습관을 만듭니다.",
+      "overview": "tmux를 쓰는 가장 큰 이유인 \"작업 복구\"를 다룹니다. 네트워크 단절이나 터미널 종료 상황에서도 세션을 잃지 않는 운영 습관을 만듭니다.",
+      "goal": "분리(detach)와 복귀(attach)를 반복해 중단 없는 원격/로컬 작업 루틴을 만들고, 복수 세션도 안정적으로 관리합니다.",
       "successCriteria": [
         "window 2개 이상 상태에서 세션 운영",
         "session 2개 이상 관리",
-        "attach 명령으로 재접속 루틴을 실행"
+        "detach 후 attach로 같은 상태 복귀"
       ],
       "failureStates": [
         "복수 session 운영 기록이 없어 작업 복구 루틴이 검증되지 않음",
-        "attach 흐름이 없어 재접속 실전성이 부족함"
+        "detach 후 재접속 흐름이 없어 실전 장애 상황 대응력이 부족함"
       ]
     },
     {
@@ -157,22 +157,22 @@
       "chapterSlug": "split-and-move",
       "slug": "split-resize",
       "title": "분할과 리사이즈",
-      "estimatedMinutes": 10,
+      "estimatedMinutes": 12,
       "objectives": [
-        "vertical split",
-        "horizontal split",
-        "pane 크기 조절"
+        "세로/가로 분할 모두 실행",
+        "pane 크기 조절",
+        "분할-조정 루틴 반복"
       ],
-      "overview": "한 화면에서 로그/코드/테스트를 동시에 보는 멀티패인 작업의 기본을 학습합니다.",
-      "goal": "작업 성격에 맞게 pane을 나누고 크기를 조절해, 맥락 전환 없이 한 터미널에서 여러 작업을 처리합니다.",
+      "overview": "한 화면에서 코드/테스트/로그를 동시에 다루는 멀티패인 작업의 기본을 익힙니다. 분할 방향 선택과 크기 조절을 반복해 레이아웃 감각을 만듭니다.",
+      "goal": "작업 성격에 맞게 세로/가로 분할을 모두 사용하고, resize로 화면 비율을 조정해 맥락 전환 비용을 줄입니다.",
       "successCriteria": [
         "pane 2개 이상 분할",
-        "resize 명령으로 작업 영역을 조정",
-        "분할과 조정을 연속 수행해 실무 레이아웃 구성 가능"
+        "세로/가로 분할을 각각 1회 이상 실행",
+        "resize 명령으로 작업 영역을 직접 조정"
       ],
       "failureStates": [
-        "분할만 수행하고 크기 조정을 하지 않아 레이아웃 제어 능력이 부족함",
-        "pane 가시성 조정이 없어 작업 분배 효율이 낮음"
+        "분할 방향을 한쪽만 사용해 상황별 레이아웃 선택 능력이 부족함",
+        "크기 조정 없이 고정 레이아웃만 사용해 작업 분배 효율이 낮음"
       ]
     },
     {
@@ -181,22 +181,22 @@
       "chapterSlug": "pane-navigation",
       "slug": "pane-focus-flow",
       "title": "패인 이동 루틴",
-      "estimatedMinutes": 8,
+      "estimatedMinutes": 10,
       "objectives": [
         "pane focus 이동",
         "window 순환",
-        "작업 분배"
+        "포커스 이동 반복 숙달"
       ],
-      "overview": "여러 pane/window를 사용할 때 길을 잃지 않도록 이동 규칙과 분배 패턴을 만듭니다.",
-      "goal": "손이 기억하는 이동 루틴을 통해 컨텍스트 전환 시간을 줄이고, 복잡한 작업에서도 집중을 유지합니다.",
+      "overview": "여러 pane/window를 사용할 때 길을 잃지 않도록 포커스 이동 루틴을 훈련합니다. 반복 이동으로 손이 기억하는 탐색 흐름을 만듭니다.",
+      "goal": "pane 포커스 이동과 window 순환을 결합해 복잡한 세션에서도 빠르게 원하는 작업 지점으로 복귀합니다.",
       "successCriteria": [
         "pane 3개 이상 구성",
-        "window 순환 이동(next/prev) 루틴 실행",
-        "활성 window 전환 상태를 인지하며 작업 지속"
+        "pane select 이동을 명시적으로 실행",
+        "window 순환 이동(next/prev) 루틴 실행"
       ],
       "failureStates": [
         "pane 다중 구성 없이 단일 화면에 머물러 이동 루틴 검증이 부족함",
-        "window 순환 실행 기록이 없어 컨텍스트 전환 능력이 미확인 상태임"
+        "포커스 이동 실행 기록이 없어 컨텍스트 전환 능력이 미확인 상태임"
       ]
     },
     {
@@ -209,14 +209,14 @@
       "objectives": [
         "copy-mode 진입",
         "검색 실행",
-        "성공/실패 케이스 확인"
+        "성공/실패 케이스 반복 확인"
       ],
-      "overview": "긴 로그/출력에서 필요한 정보를 빠르게 찾는 검색 루틴을 학습합니다.",
-      "goal": "마우스 없이 copy mode로 텍스트를 탐색해, 디버깅과 장애 대응 속도를 높입니다.",
+      "overview": "긴 로그/출력에서 필요한 정보를 빠르게 찾는 검색 루틴을 학습합니다. 성공/실패 케이스를 모두 훈련해 디버깅 속도를 높입니다.",
+      "goal": "마우스 없이 copy mode로 텍스트를 탐색하고, 검색 성공/실패를 빠르게 판단해 장애 대응 시간을 줄입니다.",
       "successCriteria": [
         "copy mode 진입",
         "키워드 검색 성공",
-        "검색 실패 케이스를 구분해 대응 가능"
+        "검색 실패 케이스를 재현하고 원인 구분"
       ],
       "failureStates": [
         "copy-mode에서 검색 실행/매치 여부 확인이 없어 로그 탐색 루틴이 미완성임",
@@ -233,10 +233,10 @@
       "objectives": [
         "명령 모드 진입",
         "new-window 실행",
-        "split-window/kill-pane 이해"
+        "choose-tree 기반 탐색 진입"
       ],
-      "overview": "단축키만으로 어려운 작업을 command mode로 안정적으로 실행하는 방법을 다룹니다.",
-      "goal": "필요할 때 명령 기반으로 tmux 상태를 제어해 재현 가능한 작업 루틴을 구성합니다.",
+      "overview": "단축키로 하기 까다로운 작업을 command mode로 안정적으로 실행하는 방법을 다룹니다. 재현 가능한 명령 기반 운영 루틴에 집중합니다.",
+      "goal": "필요할 때 명령 기반으로 tmux 상태를 제어하고, command-prompt/choose-tree를 통해 복잡한 세션 탐색 속도를 높입니다.",
       "successCriteria": [
         "command-prompt 실행",
         "command mode로 window 생성",
@@ -330,6 +330,36 @@
       ]
     },
     {
+      "id": "mission-a-01c",
+      "lessonSlug": "basics",
+      "slug": "basics-workspace-routine",
+      "title": "기본 워크스페이스 루틴 반복",
+      "type": "state-check",
+      "difficulty": "beginner",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "sessionCount",
+          "operator": ">=",
+          "value": 1
+        },
+        {
+          "kind": "windowCount",
+          "operator": ">=",
+          "value": 2
+        },
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "tmux list-windows"
+        }
+      ],
+      "hints": [
+        "`tmux new -As main` → `tmux new-window -n work` → `tmux list-windows` 순서로 한 번에 실행하세요.",
+        "단축키를 쓰려면 `prefix + c`로 window를 만든 뒤 `tmux list-windows`로 체크포인트를 남기세요."
+      ]
+    },
+    {
       "id": "mission-a-02",
       "lessonSlug": "attach-detach",
       "slug": "session-window-create",
@@ -342,11 +372,16 @@
           "kind": "windowCount",
           "operator": ">=",
           "value": 2
+        },
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "tmux list-windows"
         }
       ],
       "hints": [
-        "현재 세션에서 window를 하나 더 만든 뒤 목록을 확인하세요.",
-        "`tmux list-windows`로 생성 결과를 확인할 수 있습니다."
+        "현재 세션에서 window를 하나 더 만든 뒤 `tmux list-windows`로 상태를 확인하세요.",
+        "`prefix + c`로 window를 만든 뒤 확인 명령을 실행해도 통과합니다."
       ]
     },
     {
@@ -381,12 +416,17 @@
         {
           "kind": "shellHistoryText",
           "operator": "contains",
+          "value": "tmux detach-client"
+        },
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
           "value": "tmux attach"
         }
       ],
       "hints": [
-        "`tmux attach -t main`처럼 attach 명령을 직접 실행해 보세요.",
-        "세션 이름이 다르면 `tmux attach -t <세션명>`으로 바꿔 실행하세요."
+        "`tmux detach-client`로 분리한 뒤 `tmux attach -t main`으로 다시 붙어 보세요.",
+        "단축키로는 `prefix + d`로 detach 후 `tmux attach -t <세션명>`으로 복귀할 수 있습니다."
       ]
     },
     {
@@ -406,7 +446,37 @@
       ],
       "hints": [
         "`tmux split-window`를 실행해 패인을 분할하세요.",
-        "pane 수가 2개 이상이면 통과합니다."
+        "처음에는 2개 패인만 만들어도 통과합니다. 이후 방향별 분할 미션에서 확장합니다."
+      ]
+    },
+    {
+      "id": "mission-b-01c",
+      "lessonSlug": "split-resize",
+      "slug": "split-both-directions",
+      "title": "세로/가로 분할 모두 실행",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "split-window -h"
+        },
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "split-window -v"
+        },
+        {
+          "kind": "paneCount",
+          "operator": ">=",
+          "value": 3
+        }
+      ],
+      "hints": [
+        "`tmux split-window -h`와 `tmux split-window -v`를 각각 한 번씩 실행해 보세요.",
+        "코드/테스트/로그 3영역을 만든다고 생각하고 pane 3개 이상 상태를 유지하세요."
       ]
     },
     {
@@ -426,7 +496,7 @@
       ],
       "hints": [
         "`tmux resize-pane -R 5` 또는 `tmux resize-pane -L 5`를 실행해 보세요.",
-        "resize 명령 1회 이상 실행되면 통과합니다."
+        "코드/로그 비중에 맞춰 비율을 바꿔 본 뒤 다시 `resize-pane`을 반대로 실행해 조정 감각을 익히세요."
       ]
     },
     {
@@ -447,6 +517,31 @@
       "hints": [
         "split을 한 번 더 실행해 pane 3개를 만들어 보세요.",
         "`tmux list-panes`로 현재 개수를 확인할 수 있습니다."
+      ]
+    },
+    {
+      "id": "mission-b-02c",
+      "lessonSlug": "pane-focus-flow",
+      "slug": "pane-focus-select-practice",
+      "title": "패인 포커스 이동 반복",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "paneCount",
+          "operator": ">=",
+          "value": 2
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.pane.select"
+        }
+      ],
+      "hints": [
+        "`tmux select-pane -L` 또는 `tmux select-pane -R`를 여러 번 실행해 포커스를 이동하세요.",
+        "단축키(`prefix + 방향키`)를 병행해도 좋고, 채점 기록을 위해 명령형 이동을 최소 1회 실행하세요."
       ]
     },
     {
@@ -471,7 +566,7 @@
       ],
       "hints": [
         "window를 2개 이상 만든 뒤 `tmux next-window` 또는 `tmux previous-window`를 실행하세요.",
-        "활성 window index가 1 이상으로 바뀌면 통과합니다."
+        "왕복 이동(next 후 prev)을 반복해도 조건을 충족할 수 있습니다."
       ]
     },
     {
@@ -576,7 +671,7 @@
       ],
       "hints": [
         "command mode에서 `new-window`를 실행해 새 window를 만드세요.",
-        "window 수와 활성 index 조건을 동시에 만족해야 통과입니다."
+        "예: `tmux command-prompt -I \"new-window\"`로 진입 후 실행하면 조건 확인이 쉽습니다."
       ]
     },
     {
@@ -596,7 +691,7 @@
       ],
       "hints": [
         "`tmux choose-tree -Z`를 실행해 트리 탐색을 열어 보세요.",
-        "choose-tree 액션 기록이 남으면 통과합니다."
+        "세션/윈도우가 많아졌을 때 빠르게 이동할 대상 탐색에 유용합니다."
       ]
     }
   ],
