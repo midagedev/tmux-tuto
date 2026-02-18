@@ -171,7 +171,7 @@
   - DoD: 재진입 후 상태 일치
 
 ### Phase 5. Persistence & Recovery
-- [ ] `HF-050` IndexedDB 저장 확장
+- [x] `HF-050` IndexedDB 저장 확장
   - 산출물: shell history/tmux config/simulator v2 snapshot 저장
   - 의존: `HF-002`
   - 검증: repository integration test

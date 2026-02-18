@@ -4,10 +4,13 @@ import { simulatorReducer, type FocusDirection, type SimulatorAction, type Split
 import { resolveSimulatorInput } from './input';
 import { getLatestSnapshot, getSnapshot, saveSnapshot as saveSnapshotRecord } from '../storage/repository';
 import type { AppMission } from '../curriculum/contentSchema';
+import type { SimulatorSnapshotRecord } from '../storage/types';
 import { createMissionScenarioState } from './scenarioEngine';
 import { resolveQuickPreset } from './quickPresets';
 
 const MODE_VALUES: SimulatorMode[] = ['NORMAL', 'PREFIX_PENDING', 'COMMAND_MODE', 'COPY_MODE', 'SEARCH_MODE'];
+const AUTO_SNAPSHOT_ID = 'snapshot-auto-latest';
+const AUTO_SNAPSHOT_DEBOUNCE_MS = 350;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
@@ -92,8 +95,40 @@ function applyActions(state: SimulatorState, actions: SimulatorAction[]) {
   return actions.reduce(simulatorReducer, state);
 }
 
+function buildSnapshotRecord(snapshot: SimulatorState, id: string): SimulatorSnapshotRecord {
+  return {
+    id,
+    schemaVersion: 2,
+    mode: snapshot.mode.value,
+    sessionGraph: {
+      schemaVersion: 2,
+      simulatorState: snapshot,
+    },
+    savedAt: new Date().toISOString(),
+  };
+}
+
+function extractRestorableSimulatorState(snapshot: SimulatorSnapshotRecord | undefined) {
+  if (!snapshot) {
+    return null;
+  }
+
+  const sessionGraph = snapshot.sessionGraph;
+  if (
+    snapshot.schemaVersion !== 2 ||
+    !isRecord(sessionGraph) ||
+    sessionGraph.schemaVersion !== 2 ||
+    !isSimulatorStateV2(sessionGraph.simulatorState)
+  ) {
+    return null;
+  }
+
+  return sessionGraph.simulatorState;
+}
+
 type SimulatorStore = {
   state: SimulatorState;
+  hydratedFromStorage: boolean;
   dispatch: (action: SimulatorAction) => void;
   handleKeyInput: (key: string) => void;
   applyQuickPreset: (presetId: string) => void;
@@ -115,6 +150,7 @@ type SimulatorStore = {
   exitCopyMode: () => void;
   runCopySearch: (query: string) => void;
   loadSnapshot: (snapshot: SimulatorState) => void;
+  hydrateFromStorage: () => Promise<void>;
   saveSnapshotToStorage: () => Promise<void>;
   restoreSnapshotByIdFromStorage: (snapshotId: string) => Promise<void>;
   restoreLatestSnapshotFromStorage: () => Promise<void>;
@@ -123,6 +159,7 @@ type SimulatorStore = {
 
 export const useSimulatorStore = create<SimulatorStore>((set) => ({
   state: createInitialSimulatorState(),
+  hydratedFromStorage: false,
   dispatch: (action) =>
     set((current) => ({
       state: simulatorReducer(current.state, action),
@@ -223,19 +260,26 @@ export const useSimulatorStore = create<SimulatorStore>((set) => ({
     set((current) => ({
       state: simulatorReducer(current.state, { type: 'LOAD_SNAPSHOT', payload: snapshot }),
     })),
+  hydrateFromStorage: async () => {
+    const latest = await getLatestSnapshot();
+    const simulatorSnapshot = extractRestorableSimulatorState(latest);
+    if (!simulatorSnapshot) {
+      set(() => ({ hydratedFromStorage: true }));
+      return;
+    }
+
+    set((current) => ({
+      state: simulatorReducer(current.state, {
+        type: 'LOAD_SNAPSHOT',
+        payload: simulatorSnapshot,
+      }),
+      hydratedFromStorage: true,
+    }));
+  },
   saveSnapshotToStorage: async () => {
     const snapshot = useSimulatorStore.getState().state;
     const id = `snapshot-${Date.now()}`;
-    await saveSnapshotRecord({
-      id,
-      schemaVersion: 2,
-      mode: snapshot.mode.value,
-      sessionGraph: {
-        schemaVersion: 2,
-        simulatorState: snapshot,
-      },
-      savedAt: new Date().toISOString(),
-    });
+    await saveSnapshotRecord(buildSnapshotRecord(snapshot, id));
 
     set((current) => ({
       state: simulatorReducer(current.state, {
@@ -246,32 +290,14 @@ export const useSimulatorStore = create<SimulatorStore>((set) => ({
   },
   restoreSnapshotByIdFromStorage: async (snapshotId) => {
     const snapshot = await getSnapshot(snapshotId);
-    if (!snapshot) {
+    const simulatorSnapshot = extractRestorableSimulatorState(snapshot);
+    if (!simulatorSnapshot) {
       set((current) => ({
         state: simulatorReducer(current.state, {
           type: 'ADD_MESSAGE',
-          payload: `Snapshot not found (${snapshotId})`,
-        }),
-      }));
-      return;
-    }
-
-    if (snapshot.schemaVersion !== 2) {
-      set((current) => ({
-        state: simulatorReducer(current.state, {
-          type: 'ADD_MESSAGE',
-          payload: `Unsupported snapshot schema version (${snapshot.schemaVersion})`,
-        }),
-      }));
-      return;
-    }
-
-    const simulatorSnapshot = snapshot.sessionGraph.simulatorState;
-    if (!isSimulatorStateV2(simulatorSnapshot)) {
-      set((current) => ({
-        state: simulatorReducer(current.state, {
-          type: 'ADD_MESSAGE',
-          payload: `Snapshot ${snapshot.id} is not simulator schema v2`,
+          payload: snapshot
+            ? `Snapshot ${snapshot.id} is not simulator schema v2`
+            : `Snapshot not found (${snapshotId})`,
         }),
       }));
       return;
@@ -286,13 +312,8 @@ export const useSimulatorStore = create<SimulatorStore>((set) => ({
   },
   restoreLatestSnapshotFromStorage: async () => {
     const latest = await getLatestSnapshot();
-    const sessionGraph = latest?.sessionGraph;
-    if (
-      latest?.schemaVersion !== 2 ||
-      !isRecord(sessionGraph) ||
-      sessionGraph.schemaVersion !== 2 ||
-      !isSimulatorStateV2(sessionGraph.simulatorState)
-    ) {
+    const simulatorSnapshot = extractRestorableSimulatorState(latest);
+    if (!simulatorSnapshot) {
       set((current) => ({
         state: simulatorReducer(current.state, {
           type: 'ADD_MESSAGE',
@@ -301,8 +322,6 @@ export const useSimulatorStore = create<SimulatorStore>((set) => ({
       }));
       return;
     }
-
-    const simulatorSnapshot = sessionGraph.simulatorState;
     set((current) => ({
       state: simulatorReducer(current.state, {
         type: 'LOAD_SNAPSHOT',
@@ -315,3 +334,20 @@ export const useSimulatorStore = create<SimulatorStore>((set) => ({
       state: simulatorReducer(current.state, { type: 'RESET' }),
     })),
 }));
+
+let autoSnapshotTimer: ReturnType<typeof setTimeout> | null = null;
+
+useSimulatorStore.subscribe((current, previous) => {
+  if (!current.hydratedFromStorage || current.state === previous.state) {
+    return;
+  }
+
+  if (autoSnapshotTimer) {
+    clearTimeout(autoSnapshotTimer);
+  }
+
+  autoSnapshotTimer = setTimeout(() => {
+    const snapshot = useSimulatorStore.getState().state;
+    void saveSnapshotRecord(buildSnapshotRecord(snapshot, AUTO_SNAPSHOT_ID));
+  }, AUTO_SNAPSHOT_DEBOUNCE_MS);
+});

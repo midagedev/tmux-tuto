@@ -1,6 +1,8 @@
+import { useEffect } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { AnalyticsConsentBanner } from '../../components/system/AnalyticsConsentBanner';
 import { useAnalyticsConsentState, useCloudflareAnalytics } from '../../features/analytics';
+import { useSimulatorStore } from '../../features/simulator/simulatorStore';
 
 const mainLinks = [
   { to: '/learn', label: 'Learn' },
@@ -14,6 +16,11 @@ const mainLinks = [
 export function AppShell() {
   const { consent, setGranted, setDenied } = useAnalyticsConsentState();
   useCloudflareAnalytics(consent);
+  const hydrateSimulatorFromStorage = useSimulatorStore((store) => store.hydrateFromStorage);
+
+  useEffect(() => {
+    void hydrateSimulatorFromStorage();
+  }, [hydrateSimulatorFromStorage]);
 
   return (
     <>

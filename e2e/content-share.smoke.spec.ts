@@ -73,7 +73,7 @@ test('bookmark snapshot deep-link restores simulator state @smoke', async ({ pag
   await page.goto('/bookmarks');
   await page.getByLabel('Bookmark title').fill('e2e snapshot bookmark');
   await page.getByLabel('Bookmark target id').fill(snapshotId ?? '');
-  await page.selectOption('select.sim-input', 'snapshot');
+  await page.locator('form.bookmark-form select').selectOption('snapshot');
   await page.getByLabel('Bookmark tags').fill('snapshot,e2e');
   await page.getByRole('button', { name: '북마크 저장' }).click();
 

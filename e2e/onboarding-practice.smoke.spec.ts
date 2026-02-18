@@ -24,6 +24,7 @@ test('onboarding first mission flow completes @smoke', async ({ page }) => {
 test('practice pane split click-focus and pane-scroll works @smoke', async ({ page }) => {
   await page.goto('/practice');
   await dismissAnalyticsBanner(page);
+  await page.getByRole('button', { name: 'Reset Simulator' }).click();
 
   await page.getByRole('button', { name: 'Split Vertical' }).click();
   const paneCards = page.locator('.sim-pane-card');
@@ -56,9 +57,25 @@ test('practice pane split click-focus and pane-scroll works @smoke', async ({ pa
   await expect(page.getByText('Action History')).toBeVisible();
 });
 
+test('practice state is restored after page reload @smoke', async ({ page }) => {
+  await page.goto('/practice');
+  await dismissAnalyticsBanner(page);
+  await page.getByRole('button', { name: 'Reset Simulator' }).click();
+
+  await page.getByRole('button', { name: 'Split Vertical' }).click();
+  await expect(page.locator('.sim-pane-card')).toHaveCount(2);
+
+  await page.waitForTimeout(500);
+  await page.reload();
+
+  const panesSummary = page.locator('.sim-summary p').filter({ hasText: 'Panes:' });
+  await expect(panesSummary).toContainText('2');
+});
+
 test('practice command-mode overlay flow works @smoke', async ({ page }) => {
   await page.goto('/practice');
   await dismissAnalyticsBanner(page);
+  await page.getByRole('button', { name: 'Reset Simulator' }).click();
 
   const modeIndicator = page.locator('.terminal-mode-indicator');
   await expect(modeIndicator).toContainText('NORMAL');
@@ -80,6 +97,7 @@ test('practice command-mode overlay flow works @smoke', async ({ page }) => {
 test('practice keyboard-only routing works @smoke', async ({ page }) => {
   await page.goto('/practice');
   await dismissAnalyticsBanner(page);
+  await page.getByRole('button', { name: 'Reset Simulator' }).click();
 
   const terminalShell = page.locator('.terminal-shell');
   await terminalShell.focus();
@@ -104,6 +122,7 @@ test('practice keyboard-only routing works @smoke', async ({ page }) => {
 test('practice copy-mode search highlights and match navigation works @smoke', async ({ page }) => {
   await page.goto('/practice');
   await dismissAnalyticsBanner(page);
+  await page.getByRole('button', { name: 'Reset Simulator' }).click();
 
   const commandInput = page.getByLabel('Command mode input');
   const runCommandButton = page.getByRole('button', { name: 'Run Command' });
