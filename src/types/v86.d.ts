@@ -35,6 +35,9 @@ declare module 'v86' {
     bzimage_initrd_from_filesystem?: boolean;
     net_device_type?: string;
     network_relay_url?: string;
+    uart1?: boolean;
+    uart2?: boolean;
+    uart3?: boolean;
     autostart?: boolean;
     disable_keyboard?: boolean;
     disable_mouse?: boolean;

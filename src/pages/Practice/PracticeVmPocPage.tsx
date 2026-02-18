@@ -1218,6 +1218,7 @@ export function PracticeVmPocPage() {
           bzimage_initrd_from_filesystem: true,
           cmdline:
             'rw root=host9p rootfstype=9p rootflags=trans=virtio,cache=loose console=ttyS0 init=/sbin/init quiet loglevel=3',
+          uart1: true,
           disable_keyboard: true,
           disable_mouse: true,
           autostart: true,

@@ -12,10 +12,9 @@ RUN apk add --no-cache openrc alpine-base agetty alpine-conf linux-$KERNEL linux
 
 RUN adduser -D -s /bin/ash tuto
 RUN addgroup tuto dialout
-RUN sed -i 's#^ttyS\\[0-9\\]\\*.*#ttyS[0-9]*\\troot:tuto 0660#' /etc/mdev.conf
+RUN sed -i 's#^ttyS\[0-9\]\*.*#ttyS[0-9]* root:tuto 0666#' /etc/mdev.conf
 RUN sed -i 's/getty 38400 tty1/agetty --autologin tuto tty1 linux/' /etc/inittab
 RUN echo 'ttyS0::respawn:/sbin/agetty --autologin tuto -s ttyS0 115200 vt100' >> /etc/inittab
-RUN echo 'ttyS1::respawn:/sbin/agetty -L -s ttyS1 115200 vt100' >> /etc/inittab
 RUN echo "root:" | chpasswd
 RUN echo "tuto:" | chpasswd
 RUN chmod +x /etc/profile.d/tmux-tuto-banner.sh

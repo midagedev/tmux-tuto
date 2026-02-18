@@ -1,6 +1,6 @@
 #!/sbin/openrc-run
 
-description="Set ttyS* permissions for tmux-tuto probe channel"
+description="Set ttyS1 permissions for tmux-tuto probe channel"
 
 depend() {
   need devfs mdev
@@ -8,10 +8,8 @@ depend() {
 }
 
 start() {
-  for dev in /dev/ttyS0 /dev/ttyS1; do
-    if [ -e "$dev" ]; then
-      chgrp tuto "$dev" || true
-      chmod 0660 "$dev" || true
-    fi
-  done
+  if [ -e /dev/ttyS1 ]; then
+    chgrp tuto /dev/ttyS1 || true
+    chmod 0666 /dev/ttyS1 || true
+  fi
 }
