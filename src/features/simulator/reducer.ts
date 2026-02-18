@@ -11,6 +11,8 @@ import {
   type SimulatorMode,
   type SimulatorState,
 } from './model';
+import { executeShellCommand } from './shellCommands';
+import { appendOutput, clearTerminal } from './terminalBuffer';
 
 export type SplitDirection = 'vertical' | 'horizontal';
 export type FocusDirection = 'left' | 'right' | 'up' | 'down';
@@ -85,6 +87,47 @@ function withCommandHistory(state: SimulatorState, command: string): SimulatorSt
       sessions,
     },
   };
+}
+
+function withActivePane(
+  state: SimulatorState,
+  fn: (pane: TmuxPane) => TmuxPane,
+): SimulatorState {
+  const sessions = mapSessionWindows(state, (window) => ({
+    ...window,
+    panes: window.panes.map((pane) => (pane.id === window.activePaneId ? fn(pane) : pane)),
+  }));
+
+  return {
+    ...state,
+    tmux: {
+      ...state.tmux,
+      sessions,
+    },
+  };
+}
+
+function appendOutputToActivePane(state: SimulatorState, outputLines: string[]) {
+  if (outputLines.length === 0) {
+    return state;
+  }
+
+  return withActivePane(state, (pane) => {
+    const terminal = appendOutput(pane.terminal, outputLines.join('\n'));
+    return {
+      ...pane,
+      terminal,
+      buffer: terminal.lines.map((line) => line.text),
+    };
+  });
+}
+
+function clearActivePane(state: SimulatorState) {
+  return withActivePane(state, (pane) => ({
+    ...pane,
+    terminal: clearTerminal(pane.terminal),
+    buffer: [],
+  }));
 }
 
 function moveFocus(panes: TmuxPane[], activePaneId: string, direction: FocusDirection) {
@@ -435,52 +478,72 @@ export function simulatorReducer(state: SimulatorState, action: SimulatorAction)
       }
 
       const nextState = withCommandHistory(state, command);
+      const activeShellSession = getActiveShellSession(nextState);
+      const shellResult = executeShellCommand(activeShellSession, command);
+      if (shellResult.handled) {
+        let shellState: SimulatorState = {
+          ...nextState,
+          shell: {
+            ...nextState.shell,
+            sessions: mapShellSessions(nextState, () => shellResult.shellSession),
+          },
+        };
 
-      if (command === 'new-window') {
+        if (shellResult.clearScreen) {
+          shellState = clearActivePane(shellState);
+        }
+
+        shellState = appendOutputToActivePane(shellState, shellResult.outputLines);
+        return withHistory(shellState, 'sim.command.shell');
+      }
+
+      const tmuxCommand = command.startsWith('tmux ') ? command.slice(5).trim() : command;
+
+      if (tmuxCommand === 'new-window') {
         return simulatorReducer(nextState, { type: 'NEW_WINDOW' });
       }
 
-      if (command === 'new-session') {
+      if (tmuxCommand === 'new-session') {
         return simulatorReducer(nextState, { type: 'NEW_SESSION' });
       }
 
-      if (command === 'next-window') {
+      if (tmuxCommand === 'next-window') {
         return simulatorReducer(nextState, { type: 'NEXT_WINDOW' });
       }
 
-      if (command === 'previous-window') {
+      if (tmuxCommand === 'previous-window') {
         return simulatorReducer(nextState, { type: 'PREV_WINDOW' });
       }
 
-      if (command === 'copy-mode') {
+      if (tmuxCommand === 'copy-mode') {
         return simulatorReducer(nextState, { type: 'ENTER_COPY_MODE' });
       }
 
-      if (command === 'split-window -h') {
+      if (tmuxCommand === 'split-window -h') {
         return simulatorReducer(nextState, { type: 'SPLIT_PANE', payload: 'vertical' });
       }
 
-      if (command === 'split-window -v') {
+      if (tmuxCommand === 'split-window -v') {
         return simulatorReducer(nextState, { type: 'SPLIT_PANE', payload: 'horizontal' });
       }
 
-      if (command === 'kill-pane') {
+      if (tmuxCommand === 'kill-pane') {
         return simulatorReducer(nextState, { type: 'KILL_ACTIVE_PANE' });
       }
 
-      if (command === 'select-pane -L') {
+      if (tmuxCommand === 'select-pane -L') {
         return simulatorReducer(nextState, { type: 'FOCUS_PANE', payload: 'left' });
       }
 
-      if (command === 'select-pane -R') {
+      if (tmuxCommand === 'select-pane -R') {
         return simulatorReducer(nextState, { type: 'FOCUS_PANE', payload: 'right' });
       }
 
-      if (command === 'select-pane -U') {
+      if (tmuxCommand === 'select-pane -U') {
         return simulatorReducer(nextState, { type: 'FOCUS_PANE', payload: 'up' });
       }
 
-      if (command === 'select-pane -D') {
+      if (tmuxCommand === 'select-pane -D') {
         return simulatorReducer(nextState, { type: 'FOCUS_PANE', payload: 'down' });
       }
 

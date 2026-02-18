@@ -114,6 +114,14 @@ export function setViewportToBottom(state: TerminalBufferState): TerminalBufferS
   };
 }
 
+export function clearTerminal(state: TerminalBufferState): TerminalBufferState {
+  return {
+    ...state,
+    lines: [],
+    viewportTop: 0,
+  };
+}
+
 export function scrollViewport(state: TerminalBufferState, delta: number): TerminalBufferState {
   const maxTop = getMaxViewportTop(state);
   const nextTop = clamp(state.viewportTop - delta, 0, maxTop);

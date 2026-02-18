@@ -13,11 +13,17 @@ export type SimulatorLayout = 'single' | 'vertical' | 'horizontal' | 'grid';
 
 export type WorkingDirectory = string;
 
+export type PseudoFileSystem = {
+  directories: string[];
+  files: Record<string, string>;
+};
+
 export type ShellSession = {
   id: string;
   prompt: string;
   workingDirectory: WorkingDirectory;
   history: string[];
+  fileSystem: PseudoFileSystem;
 };
 
 export type TmuxPane = {
@@ -91,6 +97,13 @@ export function createShellSession(): ShellSession {
     prompt: '$',
     workingDirectory: '/home/user',
     history: [],
+    fileSystem: {
+      directories: ['/', '/home', '/home/user', '/home/user/logs'],
+      files: {
+        '/home/user/README.md': 'tmux-tuto practice workspace',
+        '/home/user/logs/app.log': 'boot completed\nworker ready\nerror sample line',
+      },
+    },
   };
 }
 

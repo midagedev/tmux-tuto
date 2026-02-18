@@ -59,7 +59,7 @@
   - 검증: unit/integration 테스트
   - DoD: 커맨드 재실행이 즉시 가능
 
-- [ ] `HF-013` pseudo command set v1 구현
+- [x] `HF-013` pseudo command set v1 구현
   - 산출물: `pwd/ls/cd/mkdir/touch/cat/echo/grep/tail/clear/history/help`
   - 의존: `HF-011`
   - 검증: integration test(command -> output)
