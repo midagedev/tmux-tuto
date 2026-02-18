@@ -70,6 +70,13 @@ interface CompletionFeedbackState {
 | active card | dismiss | queue head를 active로 승격 |
 | queue empty | dismiss | idle |
 
+### 큐 경계 시나리오
+
+| 시나리오 | 입력 이벤트 | 기대 결과 |
+| --- | --- | --- |
+| 동시 해금 | missionComplete + achievementUnlocked 3건 동시 발생 | mission 카드 먼저 노출 후 achievement 3건이 순차 노출 |
+| 재진입 | achievement 카드 2건 노출 중 새로고침 후 재진입 | 이전 큐는 초기화되고 이미 해금된 업적이 중복 토스트되지 않음 |
+
 ## 6) 모바일 요구사항
 
 - 기본 위치: 하단 sheet 스타일(모바일), 우상단 카드(데스크톱)
