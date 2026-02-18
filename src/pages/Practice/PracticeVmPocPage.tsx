@@ -344,6 +344,24 @@ function formatLayout(layout: string | null) {
   return `${layout.slice(0, 28)}...`;
 }
 
+function formatSessionDateTime(iso: string | null) {
+  if (!iso) {
+    return '-';
+  }
+
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) {
+    return '-';
+  }
+
+  return date.toLocaleString('ko-KR', {
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
 function getLessonStatusLabel(status: LessonCompletionStatus) {
   switch (status) {
     case 'completed':
@@ -397,8 +415,10 @@ export function PracticeVmPocPage() {
   const [mobileWorkbenchView, setMobileWorkbenchView] = useState<'mission' | 'terminal'>('terminal');
 
   const completedMissionSlugs = useProgressStore((store) => store.completedMissionSlugs);
+  const missionSessions = useProgressStore((store) => store.missionSessions);
   const recordMissionPass = useProgressStore((store) => store.recordMissionPass);
   const recordTmuxActivity = useProgressStore((store) => store.recordTmuxActivity);
+  const startMissionSession = useProgressStore((store) => store.startMissionSession);
 
   const terminalHostRef = useRef<HTMLDivElement | null>(null);
   const terminalRef = useRef<Terminal | null>(null);
@@ -567,6 +587,20 @@ export function PracticeVmPocPage() {
     }
     return completedMissionSlugs.includes(selectedMission.slug);
   }, [completedMissionSlugs, selectedMission]);
+  const selectedMissionSession = useMemo(() => {
+    if (!selectedMission) {
+      return null;
+    }
+
+    for (let index = missionSessions.length - 1; index >= 0; index -= 1) {
+      const session = missionSessions[index];
+      if (session.missionSlug === selectedMission.slug) {
+        return session;
+      }
+    }
+
+    return null;
+  }, [missionSessions, selectedMission]);
 
   const firstIncompleteMissionInLesson = useMemo(() => {
     return lessonMissions.find((mission) => !completedMissionSlugs.includes(mission.slug)) ?? null;
@@ -612,17 +646,31 @@ export function PracticeVmPocPage() {
       }
 
       const nextLessonMissions = content.missions.filter((mission) => mission.lessonSlug === lessonSlug);
+      const nextMissionSlug = resolveDefaultMissionSlugForLesson(nextLessonMissions, completedMissionSlugs);
       setSelectedLessonSlug(lessonSlug);
-      setSelectedMissionSlug(resolveDefaultMissionSlugForLesson(nextLessonMissions, completedMissionSlugs));
+      setSelectedMissionSlug(nextMissionSlug);
+      if (nextMissionSlug) {
+        startMissionSession({
+          missionSlug: nextMissionSlug,
+          lessonSlug,
+        });
+      }
       setMobileWorkbenchView('mission');
     },
-    [completedMissionSlugs, content],
+    [completedMissionSlugs, content, startMissionSession],
   );
 
-  const selectMissionForAction = useCallback((missionSlug: string) => {
-    setSelectedMissionSlug(missionSlug);
-    setMobileWorkbenchView('mission');
-  }, []);
+  const selectMissionForAction = useCallback(
+    (missionSlug: string) => {
+      setSelectedMissionSlug(missionSlug);
+      startMissionSession({
+        missionSlug,
+        lessonSlug: selectedLessonSlugRef.current,
+      });
+      setMobileWorkbenchView('mission');
+    },
+    [startMissionSession],
+  );
 
   const selectNextLessonForAction = useCallback(() => {
     if (!content || !nextLesson) {
@@ -631,9 +679,16 @@ export function PracticeVmPocPage() {
 
     setSelectedLessonSlug(nextLesson.slug);
     const nextLessonMissions = content.missions.filter((mission) => mission.lessonSlug === nextLesson.slug);
-    setSelectedMissionSlug(resolveDefaultMissionSlugForLesson(nextLessonMissions, completedMissionSlugs));
+    const nextMissionSlug = resolveDefaultMissionSlugForLesson(nextLessonMissions, completedMissionSlugs);
+    setSelectedMissionSlug(nextMissionSlug);
+    if (nextMissionSlug) {
+      startMissionSession({
+        missionSlug: nextMissionSlug,
+        lessonSlug: nextLesson.slug,
+      });
+    }
     setMobileWorkbenchView('mission');
-  }, [completedMissionSlugs, content, nextLesson]);
+  }, [completedMissionSlugs, content, nextLesson, startMissionSession]);
 
   const celebration = celebrationState.active;
   const celebrationQueueCount = celebrationState.queue.length;
@@ -794,6 +849,21 @@ export function PracticeVmPocPage() {
     const fromParam = missions.some((mission) => mission.slug === missionParam) ? missionParam : '';
     setSelectedMissionSlug(fromParam || resolveDefaultMissionSlugForLesson(missions, completedMissionSlugs));
   }, [completedMissionSlugs, content, missionParam, selectedLessonSlug, selectedMissionSlug]);
+
+  useEffect(() => {
+    if (!selectedLessonSlug || !selectedMissionSlug) {
+      return;
+    }
+
+    if (completedMissionSlugs.includes(selectedMissionSlug)) {
+      return;
+    }
+
+    startMissionSession({
+      missionSlug: selectedMissionSlug,
+      lessonSlug: selectedLessonSlug,
+    });
+  }, [completedMissionSlugs, selectedLessonSlug, selectedMissionSlug, startMissionSession]);
 
   useEffect(() => {
     if (!selectedLessonSlug) {
@@ -1925,6 +1995,24 @@ export function PracticeVmPocPage() {
                 </p>
               ) : null}
             </section>
+
+            {selectedMissionSession ? (
+              <section className="vm-session-card">
+                <p className="vm-session-card-eyebrow">현재 세션 상태</p>
+                <p>
+                  <strong>
+                    {selectedMissionSession.status === 'completed' ? '완료됨' : '진행 중'}
+                  </strong>
+                </p>
+                <p className="muted">시작: {formatSessionDateTime(selectedMissionSession.startedAt)}</p>
+                {selectedMissionSession.completedAt ? (
+                  <p className="muted">완료: {formatSessionDateTime(selectedMissionSession.completedAt)}</p>
+                ) : null}
+                {selectedMissionSession.gainedXp !== null ? (
+                  <p className="muted">획득 XP: +{selectedMissionSession.gainedXp}</p>
+                ) : null}
+              </section>
+            ) : null}
 
             <section className="vm-mission-list-card">
               <h2>미션 목록</h2>

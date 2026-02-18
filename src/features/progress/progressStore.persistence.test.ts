@@ -74,6 +74,12 @@ describe('progressStore persistence', () => {
       streakDays: 1,
       completedMissionSlugs: ['hello-tmux-version-check'],
       completedTrackSlugs: ['track-a-foundations'],
+      missionSessions: [
+        expect.objectContaining({
+          missionSlug: 'hello-tmux-version-check',
+          status: 'completed',
+        }),
+      ],
     });
     expect(partialized).not.toHaveProperty('recordMissionPass');
     expect(partialized).not.toHaveProperty('recordTmuxActivity');

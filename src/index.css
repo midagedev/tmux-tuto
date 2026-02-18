@@ -1043,6 +1043,28 @@ a {
   color: #0f766e;
 }
 
+.vm-session-card {
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  background: #f8fbff;
+  padding: 10px 12px;
+  display: grid;
+  gap: 4px;
+}
+
+.vm-session-card-eyebrow {
+  margin: 0;
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+.vm-session-card p {
+  margin: 0;
+}
+
 .vm-mission-list-card {
   border: 1px solid #dbe2ea;
   border-radius: 10px;
@@ -1637,6 +1659,24 @@ a {
 .playbook-section h2 {
   margin: 0 0 8px;
   font-size: 1rem;
+}
+
+.progress-session-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.progress-session-grid article {
+  border: 1px solid #dbeafe;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 10px;
+}
+
+.progress-session-grid h3 {
+  margin: 0 0 8px;
+  font-size: 0.94rem;
 }
 
 .playbook-command-row {
