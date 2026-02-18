@@ -78,7 +78,7 @@
   - 검증: reducer unit test
   - DoD: split/focus/kill/resize 안정성 확보
 
-- [ ] `HF-021` 패인 클릭 포커스 + 휠 스크롤
+- [x] `HF-021` 패인 클릭 포커스 + 휠 스크롤
   - 산출물: active pane 클릭 전환, pane별 scroll state
   - 의존: `HF-020`, `HF-010`
   - 검증: e2e smoke(클릭 포커스, 스크롤)

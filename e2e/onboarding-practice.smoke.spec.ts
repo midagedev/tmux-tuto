@@ -18,13 +18,32 @@ test('onboarding first mission flow completes @smoke', async ({ page }) => {
   await expect(page).toHaveURL('/onboarding/done');
 });
 
-test('practice pane split and movement scenario works @smoke', async ({ page }) => {
+test('practice pane split click-focus and pane-scroll works @smoke', async ({ page }) => {
   await page.goto('/practice');
   await dismissAnalyticsBanner(page);
 
   await page.getByRole('button', { name: 'Split Vertical' }).click();
-  await page.getByRole('button', { name: 'Focus Left' }).click();
-  await page.getByRole('button', { name: 'Resize +X' }).click();
+  const paneCards = page.locator('.sim-pane-card');
+  await expect(paneCards).toHaveCount(2);
+
+  const targetPane = paneCards.nth(1);
+  await targetPane.click();
+  await expect(targetPane).toHaveAttribute('data-active', 'true');
+
+  const commandInput = page.getByLabel('Command mode input');
+  const runCommandButton = page.getByRole('button', { name: 'Run Command' });
+  for (let index = 0; index < 3; index += 1) {
+    await commandInput.fill('cat logs/app.log');
+    await runCommandButton.click();
+  }
+
+  const scrollInfo = targetPane.locator('.sim-pane-foot');
+  const beforeScroll = Number((await scrollInfo.getAttribute('data-scroll-top')) ?? '0');
+  await targetPane.dispatchEvent('wheel', { deltaY: -300 });
+
+  await expect
+    .poll(async () => Number((await scrollInfo.getAttribute('data-scroll-top')) ?? '0'))
+    .toBeLessThan(beforeScroll);
 
   const panesSummary = page.locator('.sim-summary p').filter({ hasText: 'Panes:' });
   await expect(panesSummary).toContainText('2');

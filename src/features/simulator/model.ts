@@ -113,7 +113,7 @@ export function createPane(shellSessionId: string, title = 'shell', seedLines?: 
   const seededTerminal = appendOutput(
     createTerminalBuffer({
       width: 80,
-      height: 24,
+      height: 8,
       scrollbackLimit: 3000,
     }),
     lines.join('\n'),

@@ -12,7 +12,7 @@ import {
   type SimulatorState,
 } from './model';
 import { executeShellCommand } from './shellCommands';
-import { appendOutput, clearTerminal } from './terminalBuffer';
+import { appendOutput, clearTerminal, scrollViewport } from './terminalBuffer';
 import { applyPaneLayout, resolveLayoutForPaneCount } from './layout';
 
 export type SplitDirection = 'vertical' | 'horizontal';
@@ -28,6 +28,8 @@ export type SimulatorAction =
   | { type: 'ADD_MESSAGE'; payload: string }
   | { type: 'RECORD_ACTION'; payload: string }
   | { type: 'SPLIT_PANE'; payload: SplitDirection }
+  | { type: 'SET_ACTIVE_PANE'; payload: string }
+  | { type: 'SCROLL_PANE'; payload: { paneId: string; delta: number } }
   | { type: 'FOCUS_PANE'; payload: FocusDirection }
   | { type: 'RESIZE_PANE'; payload: { axis: 'x' | 'y'; delta: number } }
   | { type: 'NEW_WINDOW' }
@@ -393,6 +395,56 @@ export function simulatorReducer(state: SimulatorState, action: SimulatorAction)
         },
         `sim.pane.focus.${action.payload}`,
       );
+    }
+
+    case 'SET_ACTIVE_PANE': {
+      const windows = mapSessionWindows(state, (window) => {
+        const exists = window.panes.some((pane) => pane.id === action.payload);
+        if (!exists) {
+          return window;
+        }
+
+        return {
+          ...window,
+          activePaneId: action.payload,
+        };
+      });
+
+      return withHistory(
+        {
+          ...state,
+          tmux: {
+            ...state.tmux,
+            sessions: windows,
+          },
+        },
+        'sim.pane.focus.click',
+      );
+    }
+
+    case 'SCROLL_PANE': {
+      const windows = mapSessionWindows(state, (window) => ({
+        ...window,
+        panes: window.panes.map((pane) => {
+          if (pane.id !== action.payload.paneId) {
+            return pane;
+          }
+
+          const terminal = scrollViewport(pane.terminal, action.payload.delta);
+          return {
+            ...pane,
+            terminal,
+          };
+        }),
+      }));
+
+      return {
+        ...state,
+        tmux: {
+          ...state.tmux,
+          sessions: windows,
+        },
+      };
     }
 
     case 'RESIZE_PANE': {

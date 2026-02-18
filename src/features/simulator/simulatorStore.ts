@@ -84,7 +84,9 @@ type SimulatorStore = {
   setMode: (mode: SimulatorMode) => void;
   setCommandBuffer: (command: string) => void;
   splitPane: (direction: SplitDirection) => void;
+  focusPaneById: (paneId: string) => void;
   focusPane: (direction: FocusDirection) => void;
+  scrollPane: (paneId: string, delta: number) => void;
   resizePane: (axis: 'x' | 'y', delta: number) => void;
   newWindow: () => void;
   nextWindow: () => void;
@@ -177,9 +179,17 @@ export const useSimulatorStore = create<SimulatorStore>((set) => ({
     set((current) => ({
       state: simulatorReducer(current.state, { type: 'SPLIT_PANE', payload: direction }),
     })),
+  focusPaneById: (paneId) =>
+    set((current) => ({
+      state: simulatorReducer(current.state, { type: 'SET_ACTIVE_PANE', payload: paneId }),
+    })),
   focusPane: (direction) =>
     set((current) => ({
       state: simulatorReducer(current.state, { type: 'FOCUS_PANE', payload: direction }),
+    })),
+  scrollPane: (paneId, delta) =>
+    set((current) => ({
+      state: simulatorReducer(current.state, { type: 'SCROLL_PANE', payload: { paneId, delta } }),
     })),
   resizePane: (axis, delta) =>
     set((current) => ({

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { getActivePane, getActiveSession, getActiveShellSession, getActiveWindow } from '../../features/simulator/model';
 import { useSimulatorStore } from '../../features/simulator/simulatorStore';
 import { normalizeKeyboardEvent } from '../../features/simulator/input';
+import { getViewportLines } from '../../features/simulator/terminalBuffer';
 import { useSearchParams } from 'react-router-dom';
 
 export function PracticePage() {
@@ -13,6 +14,8 @@ export function PracticePage() {
   const simulatorState = useSimulatorStore((store) => store.state);
   const handleKeyInput = useSimulatorStore((store) => store.handleKeyInput);
   const runCopySearch = useSimulatorStore((store) => store.runCopySearch);
+  const focusPaneById = useSimulatorStore((store) => store.focusPaneById);
+  const scrollPane = useSimulatorStore((store) => store.scrollPane);
   const saveSnapshotToStorage = useSimulatorStore((store) => store.saveSnapshotToStorage);
   const restoreLatestSnapshotFromStorage = useSimulatorStore(
     (store) => store.restoreLatestSnapshotFromStorage,
@@ -87,6 +90,45 @@ export function PracticePage() {
           <p>
             <strong>Prompt:</strong> {activeShellSession.workingDirectory} {activeShellSession.prompt}
           </p>
+        </div>
+
+        <div className="sim-pane-grid" aria-label="Pane viewport grid">
+          {activeWindow.panes.map((pane) => {
+            const isActive = pane.id === activeWindow.activePaneId;
+            const viewportLines = getViewportLines(pane.terminal);
+            return (
+              <div
+                key={pane.id}
+                className={`sim-pane-card${isActive ? ' is-active' : ''}`}
+                data-active={isActive ? 'true' : 'false'}
+                onClick={() => focusPaneById(pane.id)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    focusPaneById(pane.id);
+                  }
+                }}
+                onWheel={(event) => {
+                  event.preventDefault();
+                  const delta = event.deltaY < 0 ? 2 : -2;
+                  scrollPane(pane.id, delta);
+                }}
+                role="button"
+                tabIndex={0}
+              >
+                <div className="sim-pane-head">
+                  <strong>{isActive ? '●' : '○'} {pane.id}</strong>
+                  <span>
+                    {pane.width}x{pane.height}
+                  </span>
+                </div>
+                <pre className="sim-pane-body">{viewportLines.map((line) => line.text).join('\n') || '(empty)'}</pre>
+                <div className="sim-pane-foot" data-scroll-top={pane.terminal.viewportTop}>
+                  scrollTop: {pane.terminal.viewportTop}
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         <div className="sim-controls">
