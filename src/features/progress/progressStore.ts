@@ -19,6 +19,30 @@ type MissionPassPayload = {
   completedTrackSlugs?: string[];
 };
 
+export type MissionSessionStatus = 'in_progress' | 'completed';
+
+export type MissionSessionRecord = {
+  id: string;
+  missionSlug: string;
+  lessonSlug: string | null;
+  status: MissionSessionStatus;
+  startedAt: string;
+  completedAt: string | null;
+  gainedXp: number | null;
+};
+
+type MissionSessionStartPayload = {
+  missionSlug: string;
+  lessonSlug?: string | null;
+  nowIso?: string;
+};
+
+type MissionSessionCompletePayload = {
+  missionSlug: string;
+  gainedXp?: number;
+  nowIso?: string;
+};
+
 export type TmuxSkillStats = {
   splitCount: number;
   maxPaneCount: number;
@@ -60,8 +84,11 @@ export type ProgressState = {
   unlockedFunAchievements: string[];
   unlockedAchievements: string[];
   tmuxSkillStats: TmuxSkillStats;
+  missionSessions: MissionSessionRecord[];
   recordMissionPass: (payload: MissionPassPayload) => number;
   recordTmuxActivity: (payload: TmuxActivityPayload) => string[];
+  startMissionSession: (payload: MissionSessionStartPayload) => string;
+  completeMissionSession: (payload: MissionSessionCompletePayload) => boolean;
   addCompletedMission: (missionSlug: string) => void;
   setProgressSummary: (payload: { xp: number; level: number; streakDays: number }) => void;
 };
@@ -78,6 +105,7 @@ type PersistedProgressSlice = Pick<
   | 'unlockedFunAchievements'
   | 'unlockedAchievements'
   | 'tmuxSkillStats'
+  | 'missionSessions'
 >;
 
 export const PROGRESS_PERSIST_KEY = 'tmux_tuto_progress_v1';
@@ -102,6 +130,7 @@ const INITIAL_TMUX_SKILL_STATS: TmuxSkillStats = {
   syncObserved: false,
   lessonSlugs: [],
 };
+const MAX_MISSION_SESSION_HISTORY = 240;
 
 const noopStorage: StateStorage = {
   getItem: () => null,
@@ -133,7 +162,91 @@ export function createInitialProgressSnapshot(): PersistedProgressSlice {
     unlockedFunAchievements: [],
     unlockedAchievements: [],
     tmuxSkillStats: { ...INITIAL_TMUX_SKILL_STATS },
+    missionSessions: [],
   };
+}
+
+function trimMissionSessions(sessions: MissionSessionRecord[]) {
+  if (sessions.length <= MAX_MISSION_SESSION_HISTORY) {
+    return sessions;
+  }
+
+  return sessions.slice(sessions.length - MAX_MISSION_SESSION_HISTORY);
+}
+
+function createMissionSessionId(missionSlug: string, nowIso: string, historySize: number) {
+  const normalized = nowIso.replace(/[^\d]/g, '').slice(0, 14);
+  return `ms_${missionSlug}_${normalized}_${historySize + 1}`;
+}
+
+function startMissionSessionRecord(
+  sessions: MissionSessionRecord[],
+  payload: MissionSessionStartPayload,
+): { sessions: MissionSessionRecord[]; sessionId: string } {
+  const missionSlug = payload.missionSlug.trim();
+  if (!missionSlug) {
+    return { sessions, sessionId: '' };
+  }
+
+  const inProgressFromLatest = [...sessions]
+    .reverse()
+    .find((session) => session.missionSlug === missionSlug && session.status === 'in_progress');
+  if (inProgressFromLatest) {
+    return { sessions, sessionId: inProgressFromLatest.id };
+  }
+
+  const nowIso = payload.nowIso ?? new Date().toISOString();
+  const nextSession: MissionSessionRecord = {
+    id: createMissionSessionId(missionSlug, nowIso, sessions.length),
+    missionSlug,
+    lessonSlug: payload.lessonSlug?.trim() || null,
+    status: 'in_progress',
+    startedAt: nowIso,
+    completedAt: null,
+    gainedXp: null,
+  };
+
+  return { sessions: trimMissionSessions([...sessions, nextSession]), sessionId: nextSession.id };
+}
+
+function completeMissionSessionRecord(
+  sessions: MissionSessionRecord[],
+  payload: MissionSessionCompletePayload,
+): { sessions: MissionSessionRecord[]; completed: boolean } {
+  const missionSlug = payload.missionSlug.trim();
+  if (!missionSlug) {
+    return { sessions, completed: false };
+  }
+
+  const nowIso = payload.nowIso ?? new Date().toISOString();
+  for (let index = sessions.length - 1; index >= 0; index -= 1) {
+    const session = sessions[index];
+    if (session.missionSlug !== missionSlug || session.status !== 'in_progress') {
+      continue;
+    }
+
+    const nextSessions = [...sessions];
+    nextSessions[index] = {
+      ...session,
+      status: 'completed',
+      completedAt: nowIso,
+      gainedXp: payload.gainedXp ?? session.gainedXp ?? null,
+    };
+
+    return { sessions: nextSessions, completed: true };
+  }
+
+  const fallbackSession: MissionSessionRecord = {
+    id: createMissionSessionId(missionSlug, nowIso, sessions.length),
+    missionSlug,
+    lessonSlug: null,
+    status: 'completed',
+    startedAt: nowIso,
+    completedAt: nowIso,
+    gainedXp: payload.gainedXp ?? null,
+  };
+
+  return { sessions: trimMissionSessions([...sessions, fallbackSession]), completed: true };
 }
 
 function buildAchievementInput(
@@ -206,6 +319,11 @@ export const useProgressStore = create<ProgressState>()(
           : [...state.completedMissionSlugs, payload.missionSlug];
         const nextStreak = calculateNextStreak(state.lastMissionPassDate, nowIso, state.streakDays);
         const nextCompletedTrackSlugs = unique([...state.completedTrackSlugs, ...(payload.completedTrackSlugs ?? [])]);
+        const missionSessionResult = completeMissionSessionRecord(state.missionSessions, {
+          missionSlug: payload.missionSlug,
+          gainedXp,
+          nowIso,
+        });
 
         const achievementInput = buildAchievementInput(
           nextCompletedMissionSlugs,
@@ -225,6 +343,7 @@ export const useProgressStore = create<ProgressState>()(
           unlockedCoreAchievements: nextAchievementState.unlockedCoreAchievements,
           unlockedFunAchievements: nextAchievementState.unlockedFunAchievements,
           unlockedAchievements: nextAchievementState.unlockedAchievements,
+          missionSessions: missionSessionResult.sessions,
         });
 
         return gainedXp;
@@ -323,6 +442,28 @@ export const useProgressStore = create<ProgressState>()(
 
         return nextAchievementState.newlyUnlocked;
       },
+      startMissionSession: (payload) => {
+        const state = get();
+        const missionSessionResult = startMissionSessionRecord(state.missionSessions, payload);
+        if (!missionSessionResult.sessionId) {
+          return '';
+        }
+
+        if (missionSessionResult.sessions !== state.missionSessions) {
+          set({ missionSessions: missionSessionResult.sessions });
+        }
+
+        return missionSessionResult.sessionId;
+      },
+      completeMissionSession: (payload) => {
+        const state = get();
+        const missionSessionResult = completeMissionSessionRecord(state.missionSessions, payload);
+        if (missionSessionResult.sessions !== state.missionSessions) {
+          set({ missionSessions: missionSessionResult.sessions });
+        }
+
+        return missionSessionResult.completed;
+      },
       addCompletedMission: (missionSlug) =>
         set((state) => ({
           completedMissionSlugs: state.completedMissionSlugs.includes(missionSlug)
@@ -346,6 +487,7 @@ export const useProgressStore = create<ProgressState>()(
         unlockedFunAchievements: state.unlockedFunAchievements,
         unlockedAchievements: state.unlockedAchievements,
         tmuxSkillStats: state.tmuxSkillStats,
+        missionSessions: state.missionSessions,
       }),
     },
   ),

@@ -9,6 +9,24 @@ import { useProgressStore } from '../../features/progress/progressStore';
 import type { MilestoneSlug } from '../../features/sharing';
 import { buildSharePath, buildTwitterIntentUrl, computeMilestoneProgress, getMilestoneMeta } from '../../features/sharing';
 
+function formatSessionDateTime(iso: string | null) {
+  if (!iso) {
+    return '-';
+  }
+
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) {
+    return '-';
+  }
+
+  return date.toLocaleString('ko-KR', {
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
 export function ProgressPage() {
   const [content, setContent] = useState<AppContent | null>(null);
 
@@ -16,6 +34,7 @@ export function ProgressPage() {
   const level = useProgressStore((store) => store.level);
   const streakDays = useProgressStore((store) => store.streakDays);
   const completedMissionSlugs = useProgressStore((store) => store.completedMissionSlugs);
+  const missionSessions = useProgressStore((store) => store.missionSessions);
   const unlockedCoreAchievements = useProgressStore((store) => store.unlockedCoreAchievements);
   const unlockedFunAchievements = useProgressStore((store) => store.unlockedFunAchievements);
   const tmuxSkillStats = useProgressStore((store) => store.tmuxSkillStats);
@@ -72,6 +91,31 @@ export function ProgressPage() {
 
     return content.missions.filter((mission) => !completedMissionSlugs.includes(mission.slug)).slice(0, 3);
   }, [content, completedMissionSlugs]);
+  const missionBySlug = useMemo(() => {
+    if (!content) {
+      return new Map<string, AppMission>();
+    }
+
+    return new Map(content.missions.map((mission) => [mission.slug, mission]));
+  }, [content]);
+  const lessonBySlug = useMemo(() => {
+    if (!content) {
+      return new Map<string, AppContent['lessons'][number]>();
+    }
+
+    return new Map(content.lessons.map((lesson) => [lesson.slug, lesson]));
+  }, [content]);
+  const inProgressSessions = useMemo(() => {
+    return missionSessions
+      .filter((session) => session.status === 'in_progress')
+      .sort((left, right) => right.startedAt.localeCompare(left.startedAt));
+  }, [missionSessions]);
+  const recentCompletedSessions = useMemo(() => {
+    return missionSessions
+      .filter((session) => session.status === 'completed')
+      .sort((left, right) => (right.completedAt ?? '').localeCompare(left.completedAt ?? ''))
+      .slice(0, 8);
+  }, [missionSessions]);
 
   const milestoneProgress = useMemo(() => {
     if (!content) {
@@ -169,6 +213,65 @@ export function ProgressPage() {
               <strong>Skill Splits:</strong> {tmuxSkillStats.splitCount}
             </p>
           </div>
+
+          <section className="playbook-section">
+            <h2>Session History</h2>
+            <div className="progress-session-grid">
+              <article>
+                <h3>진행 중 세션</h3>
+                {inProgressSessions.length === 0 ? (
+                  <p className="muted">진행 중인 세션이 없습니다.</p>
+                ) : (
+                  <ul className="link-list">
+                    {inProgressSessions.map((session) => {
+                      const mission = missionBySlug.get(session.missionSlug);
+                      const lessonSlug = session.lessonSlug ?? mission?.lessonSlug ?? '';
+                      const lesson = lessonBySlug.get(lessonSlug);
+                      return (
+                        <li key={session.id}>
+                          <strong>{mission?.title ?? session.missionSlug}</strong>
+                          <p className="muted">시작: {formatSessionDateTime(session.startedAt)}</p>
+                          <p className="muted">{lesson?.title ?? lessonSlug}</p>
+                          {lessonSlug ? (
+                            <Link
+                              className="secondary-btn"
+                              to={`/practice?lesson=${lessonSlug}&mission=${session.missionSlug}`}
+                            >
+                              이어서 실습
+                            </Link>
+                          ) : null}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </article>
+              <article>
+                <h3>최근 완료 세션</h3>
+                {recentCompletedSessions.length === 0 ? (
+                  <p className="muted">완료한 세션이 없습니다.</p>
+                ) : (
+                  <ul className="link-list">
+                    {recentCompletedSessions.map((session) => {
+                      const mission = missionBySlug.get(session.missionSlug);
+                      const lessonSlug = session.lessonSlug ?? mission?.lessonSlug ?? '';
+                      const lesson = lessonBySlug.get(lessonSlug);
+                      return (
+                        <li key={session.id}>
+                          <strong>{mission?.title ?? session.missionSlug}</strong>
+                          <p className="muted">
+                            완료: {formatSessionDateTime(session.completedAt)} · XP +
+                            {session.gainedXp ?? 0}
+                          </p>
+                          <p className="muted">{lesson?.title ?? lessonSlug}</p>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </article>
+            </div>
+          </section>
 
           <section className="playbook-section">
             <h2>Track Progress</h2>
