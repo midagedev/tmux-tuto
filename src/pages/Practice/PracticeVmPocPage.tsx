@@ -76,26 +76,52 @@ const MAX_HISTORY = 240;
 const MAX_DEBUG_LINES = 220;
 const V86_STATE_MAGIC_LE = 0x86768676;
 const ZSTD_MAGIC_LE = 0xfd2fb528;
-
-const PROBE_EXTRA_METRICS_COMMAND =
-  'TMUXWEB_SESSION_NAME=""; TMUXWEB_ACTIVE_WINDOW=-1; TMUXWEB_LAYOUT=""; TMUXWEB_ZOOMED=0; TMUXWEB_SYNC=0; ' +
-  'if tmux -V >/dev/null 2>&1; then ' +
-  'TMUXWEB_SESSION_NAME=$(tmux display-message -p "#S" 2>/dev/null | tr -d "\\n\\r"); ' +
-  'TMUXWEB_ACTIVE_WINDOW=$(tmux display-message -p "#{window_index}" 2>/dev/null | tr -d " "); ' +
-  '[ -z "$TMUXWEB_ACTIVE_WINDOW" ] && TMUXWEB_ACTIVE_WINDOW=-1; ' +
-  'TMUXWEB_LAYOUT=$(tmux display-message -p "#{window_layout}" 2>/dev/null | tr -d "\\n\\r"); ' +
-  'TMUXWEB_ZOOMED=$(tmux display-message -p "#{window_zoomed_flag}" 2>/dev/null | tr -d " "); ' +
-  '[ -z "$TMUXWEB_ZOOMED" ] && TMUXWEB_ZOOMED=0; ' +
-  'TMUXWEB_SYNC_RAW=$(tmux show-window-options -v synchronize-panes 2>/dev/null | tr -d "\\n\\r"); ' +
-  'if [ "$TMUXWEB_SYNC_RAW" = "on" ]; then TMUXWEB_SYNC=1; else TMUXWEB_SYNC=0; fi; ' +
-  'fi; ' +
-  'echo "[[TMUXWEB_PROBE:sessionName:${TMUXWEB_SESSION_NAME}]]"; ' +
-  'echo "[[TMUXWEB_PROBE:activeWindow:${TMUXWEB_ACTIVE_WINDOW}]]"; ' +
-  'echo "[[TMUXWEB_PROBE:layout:${TMUXWEB_LAYOUT}]]"; ' +
-  'echo "[[TMUXWEB_PROBE:zoomed:${TMUXWEB_ZOOMED}]]"; ' +
-  'echo "[[TMUXWEB_PROBE:sync:${TMUXWEB_SYNC}]]"';
-const PROBE_TRIGGER_COMMAND = `/usr/bin/tmux-tuto-probe; ${PROBE_EXTRA_METRICS_COMMAND}`;
+const INTERNAL_ECHO_TIMEOUT_MS = 2500;
+const PROBE_TRIGGER_COMMAND = '/usr/bin/tmux-tuto-probe >/dev/ttyS1 2>/dev/null || /usr/bin/tmux-tuto-probe';
 const BANNER_TRIGGER_COMMAND = '/usr/bin/tmux-tuto-banner';
+
+type PendingInternalEcho = {
+  command: string;
+  sentAt: number;
+};
+
+type SuppressedLineKind = 'probe-output' | 'internal-echo';
+
+function pruneStaleInternalEchoQueue(queue: PendingInternalEcho[], now = Date.now()) {
+  return queue.filter((entry) => now - entry.sentAt <= INTERNAL_ECHO_TIMEOUT_MS);
+}
+
+function extractPromptCommand(line: string) {
+  const cleaned = stripAnsi(line).replace(/\r/g, '').trimEnd();
+  if (!cleaned) {
+    return null;
+  }
+
+  const match = cleaned.match(/[#$%]\s+(.+)$/);
+  if (!match) {
+    return null;
+  }
+
+  return match[1].trimStart();
+}
+
+function isInternalCommandEchoPrefix(line: string, expectedCommand: string) {
+  const promptCommand = extractPromptCommand(line);
+  if (!promptCommand) {
+    return false;
+  }
+
+  return expectedCommand.startsWith(promptCommand);
+}
+
+function isInternalCommandEchoLine(line: string, expectedCommand: string) {
+  const promptCommand = extractPromptCommand(line);
+  if (!promptCommand) {
+    return false;
+  }
+
+  return promptCommand.includes(expectedCommand);
+}
 
 const QUICK_COMMANDS = [
   {
@@ -120,12 +146,12 @@ const QUICK_COMMANDS = [
   {
     label: 'Copy Search 성공',
     command:
-      'tmux has-session -t lesson 2>/dev/null || tmux new-session -d -s lesson; tmux copy-mode -t lesson:0.0; tmux send-keys -t lesson:0.0 -X search-backward "bin"; echo "[[TMUXWEB_PROBE:search:1]]"; echo "[[TMUXWEB_PROBE:searchMatched:1]]"',
+      'tmux has-session -t lesson 2>/dev/null || tmux new-session -d -s lesson; tmux copy-mode -t lesson:0.0; tmux send-keys -t lesson:0.0 -X search-backward "bin"; if [ -w /dev/ttyS1 ]; then printf "[[TMUXWEB_PROBE:search:1]]\\n[[TMUXWEB_PROBE:searchMatched:1]]\\n" > /dev/ttyS1; else echo "[[TMUXWEB_PROBE:search:1]]"; echo "[[TMUXWEB_PROBE:searchMatched:1]]"; fi',
   },
   {
     label: 'Copy Search 실패',
     command:
-      'tmux has-session -t lesson 2>/dev/null || tmux new-session -d -s lesson; tmux copy-mode -t lesson:0.0; tmux send-keys -t lesson:0.0 -X search-backward "__TMUXWEB_NOT_FOUND__"; echo "[[TMUXWEB_PROBE:search:1]]"; echo "[[TMUXWEB_PROBE:searchMatched:0]]"',
+      'tmux has-session -t lesson 2>/dev/null || tmux new-session -d -s lesson; tmux copy-mode -t lesson:0.0; tmux send-keys -t lesson:0.0 -X search-backward "__TMUXWEB_NOT_FOUND__"; if [ -w /dev/ttyS1 ]; then printf "[[TMUXWEB_PROBE:search:1]]\\n[[TMUXWEB_PROBE:searchMatched:0]]\\n" > /dev/ttyS1; else echo "[[TMUXWEB_PROBE:search:1]]"; echo "[[TMUXWEB_PROBE:searchMatched:0]]"; fi',
   },
   {
     label: '레이아웃 변경',
@@ -342,7 +368,10 @@ export function PracticeVmPocPage() {
   const emulatorRef = useRef<V86 | null>(null);
   const celebrationCloseButtonRef = useRef<HTMLButtonElement | null>(null);
   const lineBufferRef = useRef('');
+  const probeLineBufferRef = useRef('');
   const suppressCurrentLineRef = useRef(false);
+  const suppressedLineKindRef = useRef<SuppressedLineKind | null>(null);
+  const pendingInternalEchoCommandsRef = useRef<PendingInternalEcho[]>([]);
   const autoProbeRef = useRef(autoProbe);
   const probeTimerRef = useRef<number | null>(null);
   const celebratedMissionSetRef = useRef(new Set<string>());
@@ -808,6 +837,25 @@ export function PracticeVmPocPage() {
     [announceAchievement],
   );
 
+  const sendInternalCommand = useCallback((command: string) => {
+    const normalized = command.trim();
+    if (!normalized || !emulatorRef.current) {
+      return;
+    }
+
+    const now = Date.now();
+    pendingInternalEchoCommandsRef.current = pruneStaleInternalEchoQueue(
+      pendingInternalEchoCommandsRef.current,
+      now,
+    );
+    pendingInternalEchoCommandsRef.current.push({
+      command: normalized,
+      sentAt: now,
+    });
+
+    emulatorRef.current.serial0_send(`${normalized}\n`);
+  }, []);
+
   const scheduleProbe = useCallback((delayMs = 450) => {
     if (!autoProbeRef.current) {
       return;
@@ -819,12 +867,9 @@ export function PracticeVmPocPage() {
 
     probeTimerRef.current = window.setTimeout(() => {
       probeTimerRef.current = null;
-      if (!emulatorRef.current) {
-        return;
-      }
-      emulatorRef.current.serial0_send(`${PROBE_TRIGGER_COMMAND}\n`);
+      sendInternalCommand(PROBE_TRIGGER_COMMAND);
     }, delayMs);
-  }, []);
+  }, [sendInternalCommand]);
 
   const sendCommand = useCallback(
     (command: string, options?: { trackCommand?: boolean; probeAfter?: boolean }) => {
@@ -875,10 +920,7 @@ export function PracticeVmPocPage() {
         return state instanceof ArrayBuffer ? state : null;
       },
       sendProbe: () => {
-        if (!emulatorRef.current) {
-          return;
-        }
-        emulatorRef.current.serial0_send(`${PROBE_TRIGGER_COMMAND}\n`);
+        sendInternalCommand(PROBE_TRIGGER_COMMAND);
       },
       sendCommand: (command: string) => {
         sendCommand(command);
@@ -890,7 +932,7 @@ export function PracticeVmPocPage() {
     return () => {
       delete window.__tmuxwebVmBridge;
     };
-  }, [actionHistory, commandHistory, debugLines, metrics, sendCommand, vmStatus, vmStatusText]);
+  }, [actionHistory, commandHistory, debugLines, metrics, sendCommand, sendInternalCommand, vmStatus, vmStatusText]);
 
   useEffect(() => {
     if (contentState.status !== 'ready') {
@@ -899,6 +941,7 @@ export function PracticeVmPocPage() {
 
     let isMounted = true;
     let serialListener: ((value?: unknown) => void) | null = null;
+    let serialProbeListener: ((value?: unknown) => void) | null = null;
     let loadedListener: ((value?: unknown) => void) | null = null;
     let stopListener: ((value?: unknown) => void) | null = null;
 
@@ -919,7 +962,10 @@ export function PracticeVmPocPage() {
     setCelebrationState({ active: null, queue: [] });
     seenCelebrationKeysRef.current.clear();
     lineBufferRef.current = '';
+    probeLineBufferRef.current = '';
     suppressCurrentLineRef.current = false;
+    suppressedLineKindRef.current = null;
+    pendingInternalEchoCommandsRef.current = [];
     vmInternalBridgeReadyRef.current = false;
     vmWarmBannerPendingRef.current = false;
 
@@ -968,15 +1014,37 @@ export function PracticeVmPocPage() {
 
       if (char === '\n') {
         const completedLine = lineBufferRef.current;
-        const shouldSuppressLine =
-          suppressCurrentLineRef.current || (completedLine.length > 0 && isInternalProbeLine(completedLine));
+        pendingInternalEchoCommandsRef.current = pruneStaleInternalEchoQueue(
+          pendingInternalEchoCommandsRef.current,
+        );
+        const expectedInternalCommand = pendingInternalEchoCommandsRef.current[0]?.command ?? null;
+        const matchesInternalEcho =
+          expectedInternalCommand !== null && isInternalCommandEchoLine(completedLine, expectedInternalCommand);
 
-        if (!shouldSuppressLine) {
+        let suppressedLineKind = suppressedLineKindRef.current;
+        if (!suppressedLineKind) {
+          if (matchesInternalEcho) {
+            suppressedLineKind = 'internal-echo';
+          } else if (completedLine.length > 0 && isInternalProbeLine(completedLine)) {
+            suppressedLineKind = 'probe-output';
+          }
+        }
+
+        if (matchesInternalEcho && pendingInternalEchoCommandsRef.current.length > 0) {
+          pendingInternalEchoCommandsRef.current.shift();
+        }
+
+        if (suppressedLineKind === 'internal-echo') {
+          terminal.write('\r\x1b[2K');
+        }
+
+        if (suppressedLineKind === null) {
           terminal.write('\n');
         }
 
         lineBufferRef.current = '';
         suppressCurrentLineRef.current = false;
+        suppressedLineKindRef.current = null;
 
         const probeMetric = parseProbeMetricFromLine(completedLine);
         if (probeMetric) {
@@ -984,7 +1052,7 @@ export function PracticeVmPocPage() {
           return;
         }
 
-        if (shouldSuppressLine) {
+        if (suppressedLineKind) {
           return;
         }
 
@@ -1007,10 +1075,10 @@ export function PracticeVmPocPage() {
         if (hasShellPrompt && !vmInternalBridgeReadyRef.current && emulatorRef.current) {
           vmInternalBridgeReadyRef.current = true;
           if (vmWarmBannerPendingRef.current) {
-            emulatorRef.current.serial0_send(`${BANNER_TRIGGER_COMMAND}\n`);
+            sendInternalCommand(BANNER_TRIGGER_COMMAND);
             vmWarmBannerPendingRef.current = false;
           }
-          emulatorRef.current.serial0_send(`${PROBE_TRIGGER_COMMAND}\n`);
+          sendInternalCommand(PROBE_TRIGGER_COMMAND);
         }
         return;
       }
@@ -1025,8 +1093,25 @@ export function PracticeVmPocPage() {
 
       if (char >= ' ') {
         lineBufferRef.current += char;
+
+        pendingInternalEchoCommandsRef.current = pruneStaleInternalEchoQueue(
+          pendingInternalEchoCommandsRef.current,
+        );
+        const expectedInternalCommand = pendingInternalEchoCommandsRef.current[0]?.command ?? null;
+        if (
+          expectedInternalCommand &&
+          !suppressCurrentLineRef.current &&
+          isInternalCommandEchoPrefix(lineBufferRef.current, expectedInternalCommand)
+        ) {
+          suppressCurrentLineRef.current = true;
+          suppressedLineKindRef.current = 'internal-echo';
+          terminal.write('\r\x1b[2K');
+          return;
+        }
+
         if (!suppressCurrentLineRef.current && isInternalProbeLine(lineBufferRef.current)) {
           suppressCurrentLineRef.current = true;
+          suppressedLineKindRef.current = 'probe-output';
           terminal.write('\r\x1b[2K');
           return;
         }
@@ -1034,6 +1119,27 @@ export function PracticeVmPocPage() {
 
       if (!suppressCurrentLineRef.current) {
         terminal.write(char);
+      }
+    };
+
+    const writeProbeByte = (value: number) => {
+      const char = String.fromCharCode(value & 0xff);
+      if (char === '\r') {
+        return;
+      }
+
+      if (char === '\n') {
+        const completedLine = probeLineBufferRef.current;
+        probeLineBufferRef.current = '';
+        const probeMetric = parseProbeMetricFromLine(completedLine);
+        if (probeMetric) {
+          updateMetricByProbe(probeMetric);
+        }
+        return;
+      }
+
+      if (char >= ' ') {
+        probeLineBufferRef.current += char;
       }
     };
 
@@ -1118,9 +1224,17 @@ export function PracticeVmPocPage() {
           writeByte(value);
         };
 
+        serialProbeListener = (value) => {
+          if (typeof value !== 'number') {
+            return;
+          }
+          writeProbeByte(value);
+        };
+
         emulator.add_listener('emulator-loaded', loadedListener);
         emulator.add_listener('emulator-stopped', stopListener);
         emulator.add_listener('serial0-output-byte', serialListener);
+        emulator.add_listener('serial1-output-byte', serialProbeListener);
 
         setVmStatus('booting');
         setVmStatusText('VM 부팅 중...');
@@ -1136,8 +1250,8 @@ export function PracticeVmPocPage() {
               if (!emulatorRef.current) {
                 return;
               }
-              emulatorRef.current.serial0_send(`${BANNER_TRIGGER_COMMAND}\n`);
-              emulatorRef.current.serial0_send(`${PROBE_TRIGGER_COMMAND}\n`);
+              sendInternalCommand(BANNER_TRIGGER_COMMAND);
+              sendInternalCommand(PROBE_TRIGGER_COMMAND);
               vmInternalBridgeReadyRef.current = true;
               vmWarmBannerPendingRef.current = false;
             }, 180);
@@ -1156,6 +1270,10 @@ export function PracticeVmPocPage() {
         window.clearTimeout(probeTimerRef.current);
         probeTimerRef.current = null;
       }
+
+      pendingInternalEchoCommandsRef.current = [];
+      suppressedLineKindRef.current = null;
+      probeLineBufferRef.current = '';
 
       dataDisposable.dispose();
       window.removeEventListener('resize', resizeHandler);
@@ -1180,6 +1298,9 @@ export function PracticeVmPocPage() {
         if (serialListener) {
           emulator.remove_listener('serial0-output-byte', serialListener);
         }
+        if (serialProbeListener) {
+          emulator.remove_listener('serial1-output-byte', serialProbeListener);
+        }
 
         void Promise.resolve(emulator.stop()).catch(() => undefined);
         void Promise.resolve(emulator.destroy()).catch(() => undefined);
@@ -1191,6 +1312,7 @@ export function PracticeVmPocPage() {
     pushDebugLine,
     registerCommand,
     scheduleProbe,
+    sendInternalCommand,
     updateMetricByProbe,
     vmEpoch,
   ]);
@@ -1677,7 +1799,7 @@ export function PracticeVmPocPage() {
                   type="button"
                   className="secondary-btn"
                   onClick={() => {
-                    sendCommand(PROBE_TRIGGER_COMMAND, { trackCommand: false, probeAfter: false });
+                    sendInternalCommand(PROBE_TRIGGER_COMMAND);
                   }}
                 >
                   Probe 지금 실행
