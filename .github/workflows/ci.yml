@@ -35,6 +35,12 @@ jobs:
       - name: KPI route map verification
         run: npm run verify:kpi-routes
 
+      - name: Coverage matrix verification
+        run: npm run verify:coverage-matrix
+
+      - name: Simulator benchmark gate
+        run: npm run benchmark:simulator
+
       - name: Build
         run: npm run build
 

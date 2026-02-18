@@ -221,7 +221,7 @@
   - 검증: 문서 리뷰
   - DoD: 기대치 관리 명확
 
-- [ ] `HF-071` CI 게이트 확장
+- [x] `HF-071` CI 게이트 확장
   - 산출물: lint/type/test/e2e/build 파이프라인 반영
   - 의존: `HF-060~062`
   - 검증: GitHub Actions 통과
