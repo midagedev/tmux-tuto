@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { FitAddon } from '@xterm/addon-fit';
 import { Terminal } from '@xterm/xterm';
 import '@xterm/xterm/css/xterm.css';
 import type V86 from 'v86';
@@ -19,8 +18,6 @@ import { useProgressStore } from '../../features/progress/progressStore';
 import { buildTwitterIntentUrl } from '../../features/sharing';
 import {
   evaluateMissionWithVmSnapshot,
-  extractCommandFromPromptLine,
-  isInternalProbeLine,
   parseProbeMetricFromLine,
   parseTmuxActionsFromCommand,
   stripAnsi,
@@ -83,52 +80,15 @@ const MAX_HISTORY = 240;
 const MAX_DEBUG_LINES = 220;
 const V86_STATE_MAGIC_LE = 0x86768676;
 const ZSTD_MAGIC_LE = 0xfd2fb528;
-const INTERNAL_ECHO_TIMEOUT_MS = 2500;
-const PROBE_TRIGGER_COMMAND = '/usr/bin/tmux-tuto-probe > /dev/ttyS1';
+const DEFAULT_TERMINAL_COLS = 80;
+const DEFAULT_TERMINAL_ROWS = 24;
+const PROBE_TRIGGER_COMMAND = '/usr/bin/tmux-tuto-probe >/dev/ttyS1 2>/dev/null';
 const BANNER_TRIGGER_COMMAND = '/usr/bin/tmux-tuto-banner';
-
-type PendingInternalEcho = {
-  command: string;
-  sentAt: number;
-};
-
-type SuppressedLineKind = 'probe-output' | 'internal-echo';
-
-function pruneStaleInternalEchoQueue(queue: PendingInternalEcho[], now = Date.now()) {
-  return queue.filter((entry) => now - entry.sentAt <= INTERNAL_ECHO_TIMEOUT_MS);
-}
-
-function extractPromptCommand(line: string) {
-  const cleaned = stripAnsi(line).replace(/\r/g, '').trimEnd();
-  if (!cleaned) {
-    return null;
-  }
-
-  const match = cleaned.match(/[#$%]\s+(.+)$/);
-  if (!match) {
-    return null;
-  }
-
-  return match[1].trimStart();
-}
-
-function isInternalCommandEchoPrefix(line: string, expectedCommand: string) {
-  const promptCommand = extractPromptCommand(line);
-  if (!promptCommand) {
-    return false;
-  }
-
-  return expectedCommand.startsWith(promptCommand);
-}
-
-function isInternalCommandEchoLine(line: string, expectedCommand: string) {
-  const promptCommand = extractPromptCommand(line);
-  if (!promptCommand) {
-    return false;
-  }
-
-  return promptCommand.includes(expectedCommand);
-}
+const PROBE_LOOP_START_COMMAND =
+  'if [ -z "${TMUXWEB_PROBE_LOOP_PID:-}" ] || ! kill -0 "${TMUXWEB_PROBE_LOOP_PID}" 2>/dev/null; then (while true; do /usr/bin/tmux-tuto-probe >/dev/ttyS1 2>/dev/null; sleep 0.5; done) </dev/null >/dev/null 2>&1 & TMUXWEB_PROBE_LOOP_PID=$!; export TMUXWEB_PROBE_LOOP_PID; fi';
+const PROBE_LOOP_STOP_COMMAND =
+  'if [ -n "${TMUXWEB_PROBE_LOOP_PID:-}" ]; then kill "${TMUXWEB_PROBE_LOOP_PID}" 2>/dev/null || true; unset TMUXWEB_PROBE_LOOP_PID; fi';
+const TERMINAL_GEOMETRY_SYNC_COMMAND = `stty cols ${DEFAULT_TERMINAL_COLS} rows ${DEFAULT_TERMINAL_ROWS} >/dev/null 2>&1; tmux resize-window -x ${DEFAULT_TERMINAL_COLS} -y ${DEFAULT_TERMINAL_ROWS} >/dev/null 2>&1 || true`;
 
 const QUICK_COMMANDS = [
   {
@@ -422,16 +382,14 @@ export function PracticeVmPocPage() {
 
   const terminalHostRef = useRef<HTMLDivElement | null>(null);
   const terminalRef = useRef<Terminal | null>(null);
-  const fitAddonRef = useRef<FitAddon | null>(null);
   const emulatorRef = useRef<V86 | null>(null);
   const celebrationCloseButtonRef = useRef<HTMLButtonElement | null>(null);
+  const inputLineBufferRef = useRef('');
+  const inputEscapeSequenceRef = useRef(false);
+  const outputEscapeSequenceRef = useRef(false);
   const lineBufferRef = useRef('');
   const probeLineBufferRef = useRef('');
-  const suppressCurrentLineRef = useRef(false);
-  const suppressedLineKindRef = useRef<SuppressedLineKind | null>(null);
-  const pendingInternalEchoCommandsRef = useRef<PendingInternalEcho[]>([]);
   const autoProbeRef = useRef(autoProbe);
-  const probeTimerRef = useRef<number | null>(null);
   const celebratedMissionSetRef = useRef(new Set<string>());
   const celebratedLessonSetRef = useRef(new Set<string>());
   const seenCelebrationKeysRef = useRef(new Set<string>());
@@ -1052,36 +1010,53 @@ export function PracticeVmPocPage() {
       return;
     }
 
-    const now = Date.now();
-    pendingInternalEchoCommandsRef.current = pruneStaleInternalEchoQueue(
-      pendingInternalEchoCommandsRef.current,
-      now,
-    );
-    pendingInternalEchoCommandsRef.current.push({
-      command: normalized,
-      sentAt: now,
-    });
-
     emulatorRef.current.serial0_send(`${normalized}\n`);
   }, []);
 
-  const scheduleProbe = useCallback((delayMs = 450) => {
-    if (!autoProbeRef.current) {
-      return;
-    }
+  const captureInteractiveCommandInput = useCallback(
+    (data: string) => {
+      for (const char of data) {
+        if (inputEscapeSequenceRef.current) {
+          if (char >= '@' && char <= '~') {
+            inputEscapeSequenceRef.current = false;
+          }
+          continue;
+        }
 
-    if (probeTimerRef.current !== null) {
-      window.clearTimeout(probeTimerRef.current);
-    }
+        if (char === '\u001b') {
+          inputEscapeSequenceRef.current = true;
+          continue;
+        }
 
-    probeTimerRef.current = window.setTimeout(() => {
-      probeTimerRef.current = null;
-      sendInternalCommand(PROBE_TRIGGER_COMMAND);
-    }, delayMs);
-  }, [sendInternalCommand]);
+        if (char === '\r' || char === '\n') {
+          const command = inputLineBufferRef.current.trim();
+          inputLineBufferRef.current = '';
+          if (command) {
+            registerCommand(command);
+          }
+          continue;
+        }
+
+        if (char === '\u0003' || char === '\u0004' || char === '\u0015') {
+          inputLineBufferRef.current = '';
+          continue;
+        }
+
+        if (char === '\b' || char === String.fromCharCode(127)) {
+          inputLineBufferRef.current = inputLineBufferRef.current.slice(0, -1);
+          continue;
+        }
+
+        if (char >= ' ') {
+          inputLineBufferRef.current += char;
+        }
+      }
+    },
+    [registerCommand],
+  );
 
   const sendCommand = useCallback(
-    (command: string, options?: { trackCommand?: boolean; probeAfter?: boolean }) => {
+    (command: string, options?: { trackCommand?: boolean }) => {
       const normalized = command.trim();
       if (!normalized || !emulatorRef.current) {
         return;
@@ -1090,17 +1065,12 @@ export function PracticeVmPocPage() {
       emulatorRef.current.serial0_send(`${normalized}\n`);
 
       const trackCommand = options?.trackCommand ?? true;
-      const probeAfter = options?.probeAfter ?? true;
 
       if (trackCommand) {
         registerCommand(normalized);
       }
-
-      if (probeAfter) {
-        scheduleProbe();
-      }
     },
-    [registerCommand, scheduleProbe],
+    [registerCommand],
   );
 
   useEffect(() => {
@@ -1144,6 +1114,20 @@ export function PracticeVmPocPage() {
   }, [actionHistory, commandHistory, debugLines, metrics, sendCommand, sendInternalCommand, vmStatus, vmStatusText]);
 
   useEffect(() => {
+    if (!vmInternalBridgeReadyRef.current || !emulatorRef.current) {
+      return;
+    }
+
+    if (autoProbe) {
+      sendInternalCommand(PROBE_LOOP_START_COMMAND);
+      sendInternalCommand(PROBE_TRIGGER_COMMAND);
+      return;
+    }
+
+    sendInternalCommand(PROBE_LOOP_STOP_COMMAND);
+  }, [autoProbe, sendInternalCommand]);
+
+  useEffect(() => {
     if (contentState.status !== 'ready') {
       return undefined;
     }
@@ -1170,19 +1154,18 @@ export function PracticeVmPocPage() {
     setDebugLines([]);
     setCelebrationState({ active: null, queue: [] });
     seenCelebrationKeysRef.current.clear();
+    inputLineBufferRef.current = '';
+    inputEscapeSequenceRef.current = false;
+    outputEscapeSequenceRef.current = false;
     lineBufferRef.current = '';
     probeLineBufferRef.current = '';
-    suppressCurrentLineRef.current = false;
-    suppressedLineKindRef.current = null;
-    pendingInternalEchoCommandsRef.current = [];
     vmInternalBridgeReadyRef.current = false;
     vmWarmBannerPendingRef.current = false;
 
     const terminal = new Terminal({
       cursorBlink: true,
-      convertEol: true,
-      cols: 120,
-      rows: 30,
+      cols: DEFAULT_TERMINAL_COLS,
+      rows: DEFAULT_TERMINAL_ROWS,
       fontFamily: 'IBM Plex Mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
       fontSize: 14,
       theme: {
@@ -1192,30 +1175,35 @@ export function PracticeVmPocPage() {
       },
     });
 
-    const fitAddon = new FitAddon();
-    terminal.loadAddon(fitAddon);
     terminal.open(host);
-    fitAddon.fit();
     terminal.focus();
 
     terminalRef.current = terminal;
-    fitAddonRef.current = fitAddon;
-
-    const resizeHandler = () => {
-      fitAddon.fit();
-    };
-
-    window.addEventListener('resize', resizeHandler);
 
     const dataDisposable = terminal.onData((data) => {
       if (!emulatorRef.current) {
         return;
       }
+      captureInteractiveCommandInput(data);
       emulatorRef.current.serial0_send(data);
     });
 
     const writeByte = (value: number) => {
+      terminal.write(Uint8Array.of(value & 0xff));
+
       const char = String.fromCharCode(value & 0xff);
+
+      if (outputEscapeSequenceRef.current) {
+        if (char >= '@' && char <= '~') {
+          outputEscapeSequenceRef.current = false;
+        }
+        return;
+      }
+
+      if (char === '\u001b') {
+        outputEscapeSequenceRef.current = true;
+        return;
+      }
 
       if (char === '\r') {
         return;
@@ -1223,52 +1211,12 @@ export function PracticeVmPocPage() {
 
       if (char === '\n') {
         const completedLine = lineBufferRef.current;
-        pendingInternalEchoCommandsRef.current = pruneStaleInternalEchoQueue(
-          pendingInternalEchoCommandsRef.current,
-        );
-        const expectedInternalCommand = pendingInternalEchoCommandsRef.current[0]?.command ?? null;
-        const matchesInternalEcho =
-          expectedInternalCommand !== null && isInternalCommandEchoLine(completedLine, expectedInternalCommand);
-
-        let suppressedLineKind = suppressedLineKindRef.current;
-        if (!suppressedLineKind) {
-          if (matchesInternalEcho) {
-            suppressedLineKind = 'internal-echo';
-          } else if (completedLine.length > 0 && isInternalProbeLine(completedLine)) {
-            suppressedLineKind = 'probe-output';
-          }
-        }
-
-        if (matchesInternalEcho && pendingInternalEchoCommandsRef.current.length > 0) {
-          pendingInternalEchoCommandsRef.current.shift();
-        }
-
-        if (suppressedLineKind === 'internal-echo') {
-          terminal.write('\r\x1b[2K');
-        }
-
-        if (suppressedLineKind === null) {
-          terminal.write('\n');
-        }
-
         lineBufferRef.current = '';
-        suppressCurrentLineRef.current = false;
-        suppressedLineKindRef.current = null;
 
         const probeMetric = parseProbeMetricFromLine(completedLine);
         if (probeMetric) {
           updateMetricByProbe(probeMetric);
           return;
-        }
-
-        if (suppressedLineKind) {
-          return;
-        }
-
-        const extractedCommand = extractCommandFromPromptLine(completedLine);
-        if (extractedCommand) {
-          registerCommand(extractedCommand);
-          scheduleProbe();
         }
 
         pushDebugLine(completedLine);
@@ -1287,6 +1235,10 @@ export function PracticeVmPocPage() {
             sendInternalCommand(BANNER_TRIGGER_COMMAND);
             vmWarmBannerPendingRef.current = false;
           }
+          sendInternalCommand(TERMINAL_GEOMETRY_SYNC_COMMAND);
+          if (autoProbeRef.current) {
+            sendInternalCommand(PROBE_LOOP_START_COMMAND);
+          }
           sendInternalCommand(PROBE_TRIGGER_COMMAND);
         }
         return;
@@ -1294,40 +1246,11 @@ export function PracticeVmPocPage() {
 
       if (char === '\b' || char === String.fromCharCode(127)) {
         lineBufferRef.current = lineBufferRef.current.slice(0, -1);
-        if (!suppressCurrentLineRef.current) {
-          terminal.write(char);
-        }
         return;
       }
 
       if (char >= ' ') {
         lineBufferRef.current += char;
-
-        pendingInternalEchoCommandsRef.current = pruneStaleInternalEchoQueue(
-          pendingInternalEchoCommandsRef.current,
-        );
-        const expectedInternalCommand = pendingInternalEchoCommandsRef.current[0]?.command ?? null;
-        if (
-          expectedInternalCommand &&
-          !suppressCurrentLineRef.current &&
-          isInternalCommandEchoPrefix(lineBufferRef.current, expectedInternalCommand)
-        ) {
-          suppressCurrentLineRef.current = true;
-          suppressedLineKindRef.current = 'internal-echo';
-          terminal.write('\r\x1b[2K');
-          return;
-        }
-
-        if (!suppressCurrentLineRef.current && isInternalProbeLine(lineBufferRef.current)) {
-          suppressCurrentLineRef.current = true;
-          suppressedLineKindRef.current = 'probe-output';
-          terminal.write('\r\x1b[2K');
-          return;
-        }
-      }
-
-      if (!suppressCurrentLineRef.current) {
-        terminal.write(char);
       }
     };
 
@@ -1461,6 +1384,10 @@ export function PracticeVmPocPage() {
                 return;
               }
               sendInternalCommand(BANNER_TRIGGER_COMMAND);
+              sendInternalCommand(TERMINAL_GEOMETRY_SYNC_COMMAND);
+              if (autoProbeRef.current) {
+                sendInternalCommand(PROBE_LOOP_START_COMMAND);
+              }
               sendInternalCommand(PROBE_TRIGGER_COMMAND);
               vmInternalBridgeReadyRef.current = true;
               vmWarmBannerPendingRef.current = false;
@@ -1476,24 +1403,17 @@ export function PracticeVmPocPage() {
     return () => {
       isMounted = false;
 
-      if (probeTimerRef.current !== null) {
-        window.clearTimeout(probeTimerRef.current);
-        probeTimerRef.current = null;
-      }
-
-      pendingInternalEchoCommandsRef.current = [];
-      suppressedLineKindRef.current = null;
+      inputLineBufferRef.current = '';
+      inputEscapeSequenceRef.current = false;
+      outputEscapeSequenceRef.current = false;
       probeLineBufferRef.current = '';
 
       dataDisposable.dispose();
-      window.removeEventListener('resize', resizeHandler);
 
       if (terminalRef.current) {
         terminalRef.current.dispose();
         terminalRef.current = null;
       }
-
-      fitAddonRef.current = null;
 
       const emulator = emulatorRef.current;
       emulatorRef.current = null;
@@ -1517,11 +1437,10 @@ export function PracticeVmPocPage() {
       }
     };
   }, [
+    captureInteractiveCommandInput,
     contentState.status,
     disableWarmStart,
     pushDebugLine,
-    registerCommand,
-    scheduleProbe,
     sendInternalCommand,
     updateMetricByProbe,
     vmEpoch,
