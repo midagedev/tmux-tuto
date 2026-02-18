@@ -42,6 +42,13 @@ async function runCommandAndProbe(page: Page, command: string) {
   await sendVmProbe(page);
 }
 
+async function selectLessonByTitle(page: Page, title: string) {
+  const row = page.locator('.vm-lesson-row').filter({ hasText: title }).first();
+  await expect(row).toBeVisible();
+  await row.click();
+  await expect(row).toHaveClass(/is-active/);
+}
+
 test.describe('achievement + probe e2e', () => {
   test.setTimeout(180_000);
 
@@ -124,11 +131,11 @@ test.describe('achievement + probe e2e', () => {
       await sendVmCommand(page, 'tmux split-window -t lesson; tmux kill-pane -a -t lesson:0.0');
     }
 
-    await page.selectOption('#lesson-select', 'hello-tmux');
+    await selectLessonByTitle(page, '첫 3분: tmux 맛보기');
     await sendVmCommand(page, 'tmux list-sessions');
-    await page.selectOption('#lesson-select', 'basics');
+    await selectLessonByTitle(page, '기본 조작: Session/Window/Pane');
     await sendVmCommand(page, 'tmux list-sessions');
-    await page.selectOption('#lesson-select', 'attach-detach');
+    await selectLessonByTitle(page, '세션 유지 루틴');
     await sendVmCommand(page, 'tmux list-sessions');
 
     await page.getByRole('link', { name: '진행도' }).click();

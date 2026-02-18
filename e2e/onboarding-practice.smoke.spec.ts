@@ -16,8 +16,8 @@ test.describe('vm practice smoke', () => {
     await page.getByRole('link', { name: '초급 실습 바로 시작' }).click();
 
     await expect(page).toHaveURL(/\/practice\?.*lesson=hello-tmux/);
-    await expect(page.locator('#lesson-select')).toHaveValue('hello-tmux');
-    await expect(page.locator('#mission-select')).toHaveValue(/.+/);
+    await expect(page.locator('.vm-lesson-row.is-active')).toContainText('첫 3분: tmux 맛보기');
+    await expect(page.locator('.vm-mission-row.is-active')).toBeVisible();
   });
 
   test('practice completion feedback supports queue, esc dismiss, and CTA flow @smoke', async ({ page }) => {
@@ -35,14 +35,14 @@ test.describe('vm practice smoke', () => {
     await sendVmCommand(page, 'tmux -V');
     await expect(feedback).toContainText('미션 완료: tmux 명령 첫 실행');
     await feedback.getByRole('button', { name: '다음 미션' }).click();
-    await expect(page.locator('#mission-select')).toHaveValue('hello-tmux-session-list');
+    await expect(page).toHaveURL(/\/practice\?.*mission=hello-tmux-session-list/);
 
     await sendVmCommand(page, 'tmux list-sessions');
     await expect(feedback).toContainText('미션 완료: 세션 상태 한 번 확인');
     await page.keyboard.press('Escape');
     await expect(feedback).toContainText('레슨 완료: 첫 3분: tmux 맛보기');
     await feedback.getByRole('button', { name: '다음 레슨' }).click();
-    await expect(page.locator('#lesson-select')).toHaveValue('basics');
+    await expect(page).toHaveURL(/\/practice\?.*lesson=basics/);
 
     await expect
       .poll(async () => {
