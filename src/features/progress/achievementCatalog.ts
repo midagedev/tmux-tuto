@@ -1,131 +1,125 @@
 export type AchievementCategory = 'core' | 'fun';
-
 export type AchievementDefinition = {
-  id: string;
-  category: AchievementCategory;
-  title: string;
-  description: string;
-  shareText: string;
+    id: string;
+    category: AchievementCategory;
+    title: string;
+    description: string;
+    shareText: string;
 };
-
 const ACHIEVEMENTS: AchievementDefinition[] = [
-  {
-    id: 'first_mission_passed',
-    category: 'core',
-    title: '첫 미션 완료',
-    description: '첫 실습 미션을 통과했습니다.',
-    shareText: '첫 미션을 통과했어요.',
-  },
-  {
-    id: 'workspace_bootstrap',
-    category: 'core',
-    title: '워크스페이스 부트스트랩',
-    description: '세션/윈도우/분할 기본기를 한 번에 완성했습니다.',
-    shareText: '세션/윈도우/분할 기본 루틴을 완성했어요.',
-  },
-  {
-    id: 'copy_mode_starter',
-    category: 'core',
-    title: 'Copy 모드 입문',
-    description: 'copy-mode를 실행해 로그 탐색 루틴에 진입했습니다.',
-    shareText: 'Copy 모드 입문 업적을 달성했어요.',
-  },
-  {
-    id: 'command_flow_starter',
-    category: 'core',
-    title: '명령 흐름 입문',
-    description: 'command-prompt 또는 choose-tree를 실행했습니다.',
-    shareText: '명령 흐름 입문 업적을 달성했어요.',
-  },
-  {
-    id: 'track_a_completed',
-    category: 'core',
-    title: 'Track A 완료',
-    description: '기초 트랙 실습을 완료했습니다.',
-    shareText: 'Track A를 완료했어요.',
-  },
-  {
-    id: 'track_b_completed',
-    category: 'core',
-    title: 'Track B 완료',
-    description: '워크플로우 트랙 실습을 완료했습니다.',
-    shareText: 'Track B를 완료했어요.',
-  },
-  {
-    id: 'track_c_completed',
-    category: 'core',
-    title: 'Track C 완료',
-    description: '확장 트랙 실습을 완료했습니다.',
-    shareText: 'Track C를 완료했어요.',
-  },
-  {
-    id: 'full_curriculum_completed',
-    category: 'core',
-    title: '커리큘럼 완주',
-    description: 'Track A~C 전체를 완료했습니다.',
-    shareText: '전체 커리큘럼을 완주했어요.',
-  },
-  {
-    id: 'streak_7_days',
-    category: 'core',
-    title: '7일 스트릭',
-    description: '7일 연속 학습을 달성했습니다.',
-    shareText: '7일 연속 학습 스트릭을 달성했어요.',
-  },
-  {
-    id: 'lesson_explorer',
-    category: 'core',
-    title: '레슨 탐험가',
-    description: '서로 다른 레슨 3개 이상에서 실습했습니다.',
-    shareText: '레슨 탐험가 업적을 달성했어요.',
-  },
-  {
-    id: 'pane_runner_30',
-    category: 'fun',
-    title: 'Pane 러너',
-    description: 'pane 분할 누적 30회를 달성했습니다.',
-    shareText: 'Pane 러너 업적을 달성했어요.',
-  },
-  {
-    id: 'pane_hundred',
-    category: 'fun',
-    title: 'Pane 백장',
-    description: 'pane 분할 누적 100회를 달성했습니다.',
-    shareText: 'Pane 백장 업적을 달성했어요.',
-  },
-  {
-    id: 'layout_alchemist',
-    category: 'fun',
-    title: '레이아웃 연금술사',
-    description: '레이아웃을 바꾸거나 다양한 레이아웃을 실험했습니다.',
-    shareText: '레이아웃 연금술사 업적을 달성했어요.',
-  },
-  {
-    id: 'focus_navigator',
-    category: 'fun',
-    title: '포커스 네비게이터',
-    description: 'pane 이동/리사이즈를 충분히 반복해 포커스 제어 루틴을 만들었습니다.',
-    shareText: '포커스 네비게이터 업적을 달성했어요.',
-  },
-  {
-    id: 'hidden_trickster',
-    category: 'fun',
-    title: '숨은 트릭스터',
-    description: 'command-prompt와 choose-tree를 모두 사용했습니다.',
-    shareText: '숨은 트릭스터 업적을 달성했어요.',
-  },
+    {
+        id: 'first_mission_passed',
+        category: 'core',
+        title: __tx("\uCCAB \uBBF8\uC158 \uC644\uB8CC"),
+        description: __tx("\uCCAB \uC2E4\uC2B5 \uBBF8\uC158\uC744 \uD1B5\uACFC\uD588\uC2B5\uB2C8\uB2E4."),
+        shareText: __tx("\uCCAB \uBBF8\uC158\uC744 \uD1B5\uACFC\uD588\uC5B4\uC694."),
+    },
+    {
+        id: 'workspace_bootstrap',
+        category: 'core',
+        title: __tx("\uC6CC\uD06C\uC2A4\uD398\uC774\uC2A4 \uBD80\uD2B8\uC2A4\uD2B8\uB7A9"),
+        description: __tx("\uC138\uC158/\uC708\uB3C4\uC6B0/\uBD84\uD560 \uAE30\uBCF8\uAE30\uB97C \uD55C \uBC88\uC5D0 \uC644\uC131\uD588\uC2B5\uB2C8\uB2E4."),
+        shareText: __tx("\uC138\uC158/\uC708\uB3C4\uC6B0/\uBD84\uD560 \uAE30\uBCF8 \uB8E8\uD2F4\uC744 \uC644\uC131\uD588\uC5B4\uC694."),
+    },
+    {
+        id: 'copy_mode_starter',
+        category: 'core',
+        title: __tx("Copy \uBAA8\uB4DC \uC785\uBB38"),
+        description: __tx("copy-mode\uB97C \uC2E4\uD589\uD574 \uB85C\uADF8 \uD0D0\uC0C9 \uB8E8\uD2F4\uC5D0 \uC9C4\uC785\uD588\uC2B5\uB2C8\uB2E4."),
+        shareText: __tx("Copy \uBAA8\uB4DC \uC785\uBB38 \uC5C5\uC801\uC744 \uB2EC\uC131\uD588\uC5B4\uC694."),
+    },
+    {
+        id: 'command_flow_starter',
+        category: 'core',
+        title: __tx("\uBA85\uB839 \uD750\uB984 \uC785\uBB38"),
+        description: __tx("command-prompt \uB610\uB294 choose-tree\uB97C \uC2E4\uD589\uD588\uC2B5\uB2C8\uB2E4."),
+        shareText: __tx("\uBA85\uB839 \uD750\uB984 \uC785\uBB38 \uC5C5\uC801\uC744 \uB2EC\uC131\uD588\uC5B4\uC694."),
+    },
+    {
+        id: 'track_a_completed',
+        category: 'core',
+        title: __tx("Track A \uC644\uB8CC"),
+        description: __tx("\uAE30\uCD08 \uD2B8\uB799 \uC2E4\uC2B5\uC744 \uC644\uB8CC\uD588\uC2B5\uB2C8\uB2E4."),
+        shareText: __tx("Track A\uB97C \uC644\uB8CC\uD588\uC5B4\uC694."),
+    },
+    {
+        id: 'track_b_completed',
+        category: 'core',
+        title: __tx("Track B \uC644\uB8CC"),
+        description: __tx("\uC6CC\uD06C\uD50C\uB85C\uC6B0 \uD2B8\uB799 \uC2E4\uC2B5\uC744 \uC644\uB8CC\uD588\uC2B5\uB2C8\uB2E4."),
+        shareText: __tx("Track B\uB97C \uC644\uB8CC\uD588\uC5B4\uC694."),
+    },
+    {
+        id: 'track_c_completed',
+        category: 'core',
+        title: __tx("Track C \uC644\uB8CC"),
+        description: __tx("\uD655\uC7A5 \uD2B8\uB799 \uC2E4\uC2B5\uC744 \uC644\uB8CC\uD588\uC2B5\uB2C8\uB2E4."),
+        shareText: __tx("Track C\uB97C \uC644\uB8CC\uD588\uC5B4\uC694."),
+    },
+    {
+        id: 'full_curriculum_completed',
+        category: 'core',
+        title: __tx("\uCEE4\uB9AC\uD058\uB7FC \uC644\uC8FC"),
+        description: __tx("Track A~C \uC804\uCCB4\uB97C \uC644\uB8CC\uD588\uC2B5\uB2C8\uB2E4."),
+        shareText: __tx("\uC804\uCCB4 \uCEE4\uB9AC\uD058\uB7FC\uC744 \uC644\uC8FC\uD588\uC5B4\uC694."),
+    },
+    {
+        id: 'streak_7_days',
+        category: 'core',
+        title: __tx("7\uC77C \uC2A4\uD2B8\uB9AD"),
+        description: __tx("7\uC77C \uC5F0\uC18D \uD559\uC2B5\uC744 \uB2EC\uC131\uD588\uC2B5\uB2C8\uB2E4."),
+        shareText: __tx("7\uC77C \uC5F0\uC18D \uD559\uC2B5 \uC2A4\uD2B8\uB9AD\uC744 \uB2EC\uC131\uD588\uC5B4\uC694."),
+    },
+    {
+        id: 'lesson_explorer',
+        category: 'core',
+        title: __tx("\uB808\uC2A8 \uD0D0\uD5D8\uAC00"),
+        description: __tx("\uC11C\uB85C \uB2E4\uB978 \uB808\uC2A8 3\uAC1C \uC774\uC0C1\uC5D0\uC11C \uC2E4\uC2B5\uD588\uC2B5\uB2C8\uB2E4."),
+        shareText: __tx("\uB808\uC2A8 \uD0D0\uD5D8\uAC00 \uC5C5\uC801\uC744 \uB2EC\uC131\uD588\uC5B4\uC694."),
+    },
+    {
+        id: 'pane_runner_30',
+        category: 'fun',
+        title: __tx("Pane \uB7EC\uB108"),
+        description: __tx("pane \uBD84\uD560 \uB204\uC801 30\uD68C\uB97C \uB2EC\uC131\uD588\uC2B5\uB2C8\uB2E4."),
+        shareText: __tx("Pane \uB7EC\uB108 \uC5C5\uC801\uC744 \uB2EC\uC131\uD588\uC5B4\uC694."),
+    },
+    {
+        id: 'pane_hundred',
+        category: 'fun',
+        title: __tx("Pane \uBC31\uC7A5"),
+        description: __tx("pane \uBD84\uD560 \uB204\uC801 100\uD68C\uB97C \uB2EC\uC131\uD588\uC2B5\uB2C8\uB2E4."),
+        shareText: __tx("Pane \uBC31\uC7A5 \uC5C5\uC801\uC744 \uB2EC\uC131\uD588\uC5B4\uC694."),
+    },
+    {
+        id: 'layout_alchemist',
+        category: 'fun',
+        title: __tx("\uB808\uC774\uC544\uC6C3 \uC5F0\uAE08\uC220\uC0AC"),
+        description: __tx("\uB808\uC774\uC544\uC6C3\uC744 \uBC14\uAFB8\uAC70\uB098 \uB2E4\uC591\uD55C \uB808\uC774\uC544\uC6C3\uC744 \uC2E4\uD5D8\uD588\uC2B5\uB2C8\uB2E4."),
+        shareText: __tx("\uB808\uC774\uC544\uC6C3 \uC5F0\uAE08\uC220\uC0AC \uC5C5\uC801\uC744 \uB2EC\uC131\uD588\uC5B4\uC694."),
+    },
+    {
+        id: 'focus_navigator',
+        category: 'fun',
+        title: __tx("\uD3EC\uCEE4\uC2A4 \uB124\uBE44\uAC8C\uC774\uD130"),
+        description: __tx("pane \uC774\uB3D9/\uB9AC\uC0AC\uC774\uC988\uB97C \uCDA9\uBD84\uD788 \uBC18\uBCF5\uD574 \uD3EC\uCEE4\uC2A4 \uC81C\uC5B4 \uB8E8\uD2F4\uC744 \uB9CC\uB4E4\uC5C8\uC2B5\uB2C8\uB2E4."),
+        shareText: __tx("\uD3EC\uCEE4\uC2A4 \uB124\uBE44\uAC8C\uC774\uD130 \uC5C5\uC801\uC744 \uB2EC\uC131\uD588\uC5B4\uC694."),
+    },
+    {
+        id: 'hidden_trickster',
+        category: 'fun',
+        title: __tx("\uC228\uC740 \uD2B8\uB9AD\uC2A4\uD130"),
+        description: __tx("command-prompt\uC640 choose-tree\uB97C \uBAA8\uB450 \uC0AC\uC6A9\uD588\uC2B5\uB2C8\uB2E4."),
+        shareText: __tx("\uC228\uC740 \uD2B8\uB9AD\uC2A4\uD130 \uC5C5\uC801\uC744 \uB2EC\uC131\uD588\uC5B4\uC694."),
+    },
 ];
-
 const ACHIEVEMENT_MAP = new Map(ACHIEVEMENTS.map((achievement) => [achievement.id, achievement]));
-
 export function listAchievementDefinitions(category?: AchievementCategory) {
-  if (!category) {
-    return ACHIEVEMENTS;
-  }
-
-  return ACHIEVEMENTS.filter((achievement) => achievement.category === category);
+    if (!category) {
+        return ACHIEVEMENTS;
+    }
+    return ACHIEVEMENTS.filter((achievement) => achievement.category === category);
 }
-
 export function getAchievementDefinition(id: string) {
-  return ACHIEVEMENT_MAP.get(id) ?? null;
+    return ACHIEVEMENT_MAP.get(id) ?? null;
 }

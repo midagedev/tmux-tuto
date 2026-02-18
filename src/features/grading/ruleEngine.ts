@@ -1,114 +1,103 @@
 import type { AppMission } from '../curriculum/contentSchema';
 import { getActiveShellSession, getActiveWindow, type SimulatorState } from '../simulator/model';
-
 type RuleResult = {
-  passed: boolean;
-  expected: unknown;
-  actual: unknown;
-};
-
-export type MissionGradeResult = {
-  missionSlug: string;
-  passed: boolean;
-  failedRules: Array<{
-    kind: string;
-    operator: string;
+    passed: boolean;
     expected: unknown;
     actual: unknown;
-    reason: string;
-  }>;
 };
-
+export type MissionGradeResult = {
+    missionSlug: string;
+    passed: boolean;
+    failedRules: Array<{
+        kind: string;
+        operator: string;
+        expected: unknown;
+        actual: unknown;
+        reason: string;
+    }>;
+};
 function evaluateOperator(actual: unknown, operator: string, expected: unknown): RuleResult {
-  switch (operator) {
-    case 'equals':
-      return { passed: actual === expected, expected, actual };
-    case '>=':
-      return {
-        passed: typeof actual === 'number' && typeof expected === 'number' ? actual >= expected : false,
-        expected,
-        actual,
-      };
-    case '<=':
-      return {
-        passed: typeof actual === 'number' && typeof expected === 'number' ? actual <= expected : false,
-        expected,
-        actual,
-      };
-    case 'contains':
-      if (typeof actual === 'string' && typeof expected === 'string') {
-        return {
-          passed: actual.includes(expected),
-          expected,
-          actual,
-        };
-      }
-
-      if (Array.isArray(actual)) {
-        return {
-          passed: actual.some((value) => value === expected),
-          expected,
-          actual,
-        };
-      }
-
-      return { passed: false, expected, actual };
-    default:
-      return { passed: false, expected, actual };
-  }
+    switch (operator) {
+        case 'equals':
+            return { passed: actual === expected, expected, actual };
+        case '>=':
+            return {
+                passed: typeof actual === 'number' && typeof expected === 'number' ? actual >= expected : false,
+                expected,
+                actual,
+            };
+        case '<=':
+            return {
+                passed: typeof actual === 'number' && typeof expected === 'number' ? actual <= expected : false,
+                expected,
+                actual,
+            };
+        case 'contains':
+            if (typeof actual === 'string' && typeof expected === 'string') {
+                return {
+                    passed: actual.includes(expected),
+                    expected,
+                    actual,
+                };
+            }
+            if (Array.isArray(actual)) {
+                return {
+                    passed: actual.some((value) => value === expected),
+                    expected,
+                    actual,
+                };
+            }
+            return { passed: false, expected, actual };
+        default:
+            return { passed: false, expected, actual };
+    }
 }
-
 function getMetricFromState(state: SimulatorState, kind: string): unknown {
-  const activeWindow = getActiveWindow(state);
-  const activeShellSession = getActiveShellSession(state);
-
-  switch (kind) {
-    case 'paneCount':
-      return activeWindow.panes.length;
-    case 'windowCount': {
-      const activeSession = state.tmux.sessions.find((session) => session.id === state.tmux.activeSessionId);
-      return activeSession?.windows.length ?? 0;
+    const activeWindow = getActiveWindow(state);
+    const activeShellSession = getActiveShellSession(state);
+    switch (kind) {
+        case 'paneCount':
+            return activeWindow.panes.length;
+        case 'windowCount': {
+            const activeSession = state.tmux.sessions.find((session) => session.id === state.tmux.activeSessionId);
+            return activeSession?.windows.length ?? 0;
+        }
+        case 'sessionCount':
+            return state.tmux.sessions.length;
+        case 'modeIs':
+            return state.mode.value;
+        case 'searchExecuted':
+            return state.mode.copyMode.searchExecuted;
+        case 'searchMatchFound':
+            return state.mode.copyMode.lastMatchFound;
+        case 'activePaneId':
+            return activeWindow.activePaneId;
+        case 'actionHistoryText':
+            return state.actionHistory.join(' ');
+        case 'shellHistoryText':
+            return activeShellSession.history.join(' ');
+        default:
+            return undefined;
     }
-    case 'sessionCount':
-      return state.tmux.sessions.length;
-    case 'modeIs':
-      return state.mode.value;
-    case 'searchExecuted':
-      return state.mode.copyMode.searchExecuted;
-    case 'searchMatchFound':
-      return state.mode.copyMode.lastMatchFound;
-    case 'activePaneId':
-      return activeWindow.activePaneId;
-    case 'actionHistoryText':
-      return state.actionHistory.join(' ');
-    case 'shellHistoryText':
-      return activeShellSession.history.join(' ');
-    default:
-      return undefined;
-  }
 }
-
 export function evaluateMission(state: SimulatorState, mission: AppMission): MissionGradeResult {
-  const failedRules: MissionGradeResult['failedRules'] = [];
-
-  mission.passRules.forEach((rule) => {
-    const actual = getMetricFromState(state, rule.kind);
-    const result = evaluateOperator(actual, rule.operator, rule.value);
-
-    if (!result.passed) {
-      failedRules.push({
-        kind: rule.kind,
-        operator: rule.operator,
-        expected: rule.value,
-        actual,
-        reason: `${rule.kind} ${rule.operator} ${JSON.stringify(rule.value)} 조건을 충족하지 못했습니다.`,
-      });
-    }
-  });
-
-  return {
-    missionSlug: mission.slug,
-    passed: failedRules.length === 0,
-    failedRules,
-  };
+    const failedRules: MissionGradeResult['failedRules'] = [];
+    mission.passRules.forEach((rule) => {
+        const actual = getMetricFromState(state, rule.kind);
+        const result = evaluateOperator(actual, rule.operator, rule.value);
+        if (!result.passed) {
+            failedRules.push({
+                kind: rule.kind,
+                operator: rule.operator,
+                expected: rule.value,
+                actual,
+                reason: `${rule.kind} ${rule.operator} ${JSON.stringify(rule.value)} 조건을 충족하지 못했습니다.`,
+            });
+        }
+    });
+    return {
+        missionSlug: mission.slug,
+        passed: failedRules.length === 0,
+        failedRules,
+    };
 }

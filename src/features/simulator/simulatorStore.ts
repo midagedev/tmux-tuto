@@ -8,395 +8,337 @@ import { loadAppContent } from '../curriculum/contentLoader';
 import type { SimulatorSnapshotRecord } from '../storage/types';
 import { createMissionScenarioState } from './scenarioEngine';
 import { resolveQuickPreset } from './quickPresets';
-
 const MODE_VALUES: SimulatorMode[] = ['NORMAL', 'PREFIX_PENDING', 'COMMAND_MODE', 'COPY_MODE', 'SEARCH_MODE'];
 const AUTO_SNAPSHOT_ID = 'snapshot-auto-latest';
 const AUTO_SNAPSHOT_DEBOUNCE_MS = 350;
-
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
+    return typeof value === 'object' && value !== null;
 }
-
 function isSimulatorStateV2(value: unknown): value is SimulatorState {
-  if (!isRecord(value)) {
-    return false;
-  }
-
-  if (typeof value.scenarioPresetId !== 'string') {
-    return false;
-  }
-
-  const shell = value.shell;
-  const tmux = value.tmux;
-  const mode = value.mode;
-
-  if (!isRecord(shell) || !Array.isArray(shell.sessions) || typeof shell.activeSessionId !== 'string') {
-    return false;
-  }
-
-  if (!isRecord(tmux) || !Array.isArray(tmux.sessions) || typeof tmux.activeSessionId !== 'string') {
-    return false;
-  }
-
-  if (
-    !isRecord(tmux.config) ||
-    (tmux.config.prefixKey !== 'C-b' && tmux.config.prefixKey !== 'C-a') ||
-    typeof tmux.config.mouse !== 'boolean' ||
-    (tmux.config.modeKeys !== 'vi' && tmux.config.modeKeys !== 'emacs') ||
-    !isRecord(tmux.config.binds) ||
-    !Object.values(tmux.config.binds).every((value) => typeof value === 'string') ||
-    (tmux.config.lastAppliedSource !== null && typeof tmux.config.lastAppliedSource !== 'string') ||
-    !Array.isArray(tmux.config.errors) ||
-    !tmux.config.errors.every((value) => typeof value === 'string')
-  ) {
-    return false;
-  }
-
-  if (
-    !isRecord(mode) ||
-    !MODE_VALUES.includes(mode.value as SimulatorMode) ||
-    (mode.prefixEnteredAt !== null && typeof mode.prefixEnteredAt !== 'number') ||
-    (mode.repeatUntil !== null && typeof mode.repeatUntil !== 'number') ||
-    typeof mode.commandBuffer !== 'string' ||
-    typeof mode.commandCursor !== 'number' ||
-    (mode.historyIndex !== null && typeof mode.historyIndex !== 'number') ||
-    typeof mode.historyDraft !== 'string'
-  ) {
-    return false;
-  }
-
-  if (
-    !isRecord(mode.copyMode) ||
-    typeof mode.copyMode.searchQuery !== 'string' ||
-    typeof mode.copyMode.searchExecuted !== 'boolean' ||
-    typeof mode.copyMode.lastMatchFound !== 'boolean' ||
-    !Array.isArray(mode.copyMode.matchLineIndices) ||
-    !mode.copyMode.matchLineIndices.every((item) => typeof item === 'number') ||
-    typeof mode.copyMode.activeMatchIndex !== 'number'
-  ) {
-    return false;
-  }
-
-  if (!Array.isArray(value.messages) || !value.messages.every((item) => typeof item === 'string')) {
-    return false;
-  }
-
-  if (!Array.isArray(value.actionHistory) || !value.actionHistory.every((item) => typeof item === 'string')) {
-    return false;
-  }
-
-  return true;
+    if (!isRecord(value)) {
+        return false;
+    }
+    if (typeof value.scenarioPresetId !== 'string') {
+        return false;
+    }
+    const shell = value.shell;
+    const tmux = value.tmux;
+    const mode = value.mode;
+    if (!isRecord(shell) || !Array.isArray(shell.sessions) || typeof shell.activeSessionId !== 'string') {
+        return false;
+    }
+    if (!isRecord(tmux) || !Array.isArray(tmux.sessions) || typeof tmux.activeSessionId !== 'string') {
+        return false;
+    }
+    if (!isRecord(tmux.config) ||
+        (tmux.config.prefixKey !== 'C-b' && tmux.config.prefixKey !== 'C-a') ||
+        typeof tmux.config.mouse !== 'boolean' ||
+        (tmux.config.modeKeys !== 'vi' && tmux.config.modeKeys !== 'emacs') ||
+        !isRecord(tmux.config.binds) ||
+        !Object.values(tmux.config.binds).every((value) => typeof value === 'string') ||
+        (tmux.config.lastAppliedSource !== null && typeof tmux.config.lastAppliedSource !== 'string') ||
+        !Array.isArray(tmux.config.errors) ||
+        !tmux.config.errors.every((value) => typeof value === 'string')) {
+        return false;
+    }
+    if (!isRecord(mode) ||
+        !MODE_VALUES.includes(mode.value as SimulatorMode) ||
+        (mode.prefixEnteredAt !== null && typeof mode.prefixEnteredAt !== 'number') ||
+        (mode.repeatUntil !== null && typeof mode.repeatUntil !== 'number') ||
+        typeof mode.commandBuffer !== 'string' ||
+        typeof mode.commandCursor !== 'number' ||
+        (mode.historyIndex !== null && typeof mode.historyIndex !== 'number') ||
+        typeof mode.historyDraft !== 'string') {
+        return false;
+    }
+    if (!isRecord(mode.copyMode) ||
+        typeof mode.copyMode.searchQuery !== 'string' ||
+        typeof mode.copyMode.searchExecuted !== 'boolean' ||
+        typeof mode.copyMode.lastMatchFound !== 'boolean' ||
+        !Array.isArray(mode.copyMode.matchLineIndices) ||
+        !mode.copyMode.matchLineIndices.every((item) => typeof item === 'number') ||
+        typeof mode.copyMode.activeMatchIndex !== 'number') {
+        return false;
+    }
+    if (!Array.isArray(value.messages) || !value.messages.every((item) => typeof item === 'string')) {
+        return false;
+    }
+    if (!Array.isArray(value.actionHistory) || !value.actionHistory.every((item) => typeof item === 'string')) {
+        return false;
+    }
+    return true;
 }
-
 function applyActions(state: SimulatorState, actions: SimulatorAction[]) {
-  if (actions.length === 0) {
-    return state;
-  }
-
-  return actions.reduce(simulatorReducer, state);
+    if (actions.length === 0) {
+        return state;
+    }
+    return actions.reduce(simulatorReducer, state);
 }
-
 function buildSnapshotRecord(snapshot: SimulatorState, id: string): SimulatorSnapshotRecord {
-  return {
-    id,
-    schemaVersion: 2,
-    mode: snapshot.mode.value,
-    sessionGraph: {
-      schemaVersion: 2,
-      simulatorState: snapshot,
-    },
-    savedAt: new Date().toISOString(),
-  };
+    return {
+        id,
+        schemaVersion: 2,
+        mode: snapshot.mode.value,
+        sessionGraph: {
+            schemaVersion: 2,
+            simulatorState: snapshot,
+        },
+        savedAt: new Date().toISOString(),
+    };
 }
-
 function extractRestorableSimulatorState(snapshot: SimulatorSnapshotRecord | undefined) {
-  if (!snapshot) {
-    return null;
-  }
-
-  const sessionGraph = snapshot.sessionGraph;
-  if (
-    snapshot.schemaVersion !== 2 ||
-    !isRecord(sessionGraph) ||
-    sessionGraph.schemaVersion !== 2 ||
-    !isSimulatorStateV2(sessionGraph.simulatorState)
-  ) {
-    return null;
-  }
-
-  return sessionGraph.simulatorState;
+    if (!snapshot) {
+        return null;
+    }
+    const sessionGraph = snapshot.sessionGraph;
+    if (snapshot.schemaVersion !== 2 ||
+        !isRecord(sessionGraph) ||
+        sessionGraph.schemaVersion !== 2 ||
+        !isSimulatorStateV2(sessionGraph.simulatorState)) {
+        return null;
+    }
+    return sessionGraph.simulatorState;
 }
-
 type SimulatorStore = {
-  state: SimulatorState;
-  hydratedFromStorage: boolean;
-  dispatch: (action: SimulatorAction) => void;
-  handleKeyInput: (key: string) => void;
-  applyQuickPreset: (presetId: string) => void;
-  initScenario: (scenarioPresetId: string) => void;
-  initMissionScenario: (mission: AppMission) => void;
-  setPrefixKey: (key: 'C-b' | 'C-a') => void;
-  setMode: (mode: SimulatorMode) => void;
-  setCommandBuffer: (command: string) => void;
-  splitPane: (direction: SplitDirection) => void;
-  focusPaneById: (paneId: string) => void;
-  focusPane: (direction: FocusDirection) => void;
-  scrollPane: (paneId: string, delta: number) => void;
-  resizePane: (axis: 'x' | 'y', delta: number) => void;
-  newWindow: () => void;
-  nextWindow: () => void;
-  prevWindow: () => void;
-  newSession: () => void;
-  enterCopyMode: () => void;
-  exitCopyMode: () => void;
-  runCopySearch: (query: string) => void;
-  loadSnapshot: (snapshot: SimulatorState) => void;
-  hydrateFromStorage: () => Promise<void>;
-  saveSnapshotToStorage: () => Promise<void>;
-  restoreSnapshotByIdFromStorage: (snapshotId: string) => Promise<boolean>;
-  restoreLessonDefaultScenario: (lessonSlug: string | null) => Promise<boolean>;
-  restoreLatestSnapshotFromStorage: () => Promise<boolean>;
-  reset: () => void;
+    state: SimulatorState;
+    hydratedFromStorage: boolean;
+    dispatch: (action: SimulatorAction) => void;
+    handleKeyInput: (key: string) => void;
+    applyQuickPreset: (presetId: string) => void;
+    initScenario: (scenarioPresetId: string) => void;
+    initMissionScenario: (mission: AppMission) => void;
+    setPrefixKey: (key: 'C-b' | 'C-a') => void;
+    setMode: (mode: SimulatorMode) => void;
+    setCommandBuffer: (command: string) => void;
+    splitPane: (direction: SplitDirection) => void;
+    focusPaneById: (paneId: string) => void;
+    focusPane: (direction: FocusDirection) => void;
+    scrollPane: (paneId: string, delta: number) => void;
+    resizePane: (axis: 'x' | 'y', delta: number) => void;
+    newWindow: () => void;
+    nextWindow: () => void;
+    prevWindow: () => void;
+    newSession: () => void;
+    enterCopyMode: () => void;
+    exitCopyMode: () => void;
+    runCopySearch: (query: string) => void;
+    loadSnapshot: (snapshot: SimulatorState) => void;
+    hydrateFromStorage: () => Promise<void>;
+    saveSnapshotToStorage: () => Promise<void>;
+    restoreSnapshotByIdFromStorage: (snapshotId: string) => Promise<boolean>;
+    restoreLessonDefaultScenario: (lessonSlug: string | null) => Promise<boolean>;
+    restoreLatestSnapshotFromStorage: () => Promise<boolean>;
+    reset: () => void;
 };
-
 export const useSimulatorStore = create<SimulatorStore>((set) => ({
-  state: createInitialSimulatorState(),
-  hydratedFromStorage: false,
-  dispatch: (action) =>
-    set((current) => ({
-      state: simulatorReducer(current.state, action),
+    state: createInitialSimulatorState(),
+    hydratedFromStorage: false,
+    dispatch: (action) => set((current) => ({
+        state: simulatorReducer(current.state, action),
     })),
-  handleKeyInput: (key) =>
-    set((current) => {
-      const actions = resolveSimulatorInput(current.state, key);
-      return { state: applyActions(current.state, actions) };
+    handleKeyInput: (key) => set((current) => {
+        const actions = resolveSimulatorInput(current.state, key);
+        return { state: applyActions(current.state, actions) };
     }),
-  applyQuickPreset: (presetId) =>
-    set((current) => {
-      let nextState = simulatorReducer(current.state, { type: 'RESET' });
-      const preset = resolveQuickPreset(presetId);
-      if (!preset) {
-        nextState = applyActions(nextState, [{ type: 'ADD_MESSAGE', payload: `No preset found for ${presetId}` }]);
-      } else {
-        nextState = applyActions(nextState, preset.actions);
-        nextState = applyActions(nextState, [
-          { type: 'ADD_MESSAGE', payload: `Quick preset applied (${presetId})` },
-          { type: 'RECORD_ACTION', payload: `sim.preset.${preset.id}` },
-        ]);
-      }
-
-      return { state: nextState };
+    applyQuickPreset: (presetId) => set((current) => {
+        let nextState = simulatorReducer(current.state, { type: 'RESET' });
+        const preset = resolveQuickPreset(presetId);
+        if (!preset) {
+            nextState = applyActions(nextState, [{ type: 'ADD_MESSAGE', payload: `No preset found for ${presetId}` }]);
+        }
+        else {
+            nextState = applyActions(nextState, preset.actions);
+            nextState = applyActions(nextState, [
+                { type: 'ADD_MESSAGE', payload: `Quick preset applied (${presetId})` },
+                { type: 'RECORD_ACTION', payload: `sim.preset.${preset.id}` },
+            ]);
+        }
+        return { state: nextState };
     }),
-  initScenario: (scenarioPresetId) =>
-    set((current) => ({
-      state: simulatorReducer(current.state, {
-        type: 'INIT_SCENARIO',
-        payload: scenarioPresetId,
-      }),
-    })),
-  initMissionScenario: (mission) =>
-    set(() => ({
-      state: createMissionScenarioState(mission),
-    })),
-  setPrefixKey: (key) =>
-    set((current) => ({
-      state: simulatorReducer(current.state, { type: 'SET_PREFIX_KEY', payload: key }),
-    })),
-  setMode: (mode) =>
-    set((current) => ({
-      state: simulatorReducer(current.state, { type: 'SET_MODE', payload: mode }),
-    })),
-  setCommandBuffer: (command) =>
-    set((current) => ({
-      state: simulatorReducer(current.state, { type: 'SET_COMMAND_BUFFER', payload: command }),
-    })),
-  splitPane: (direction) =>
-    set((current) => ({
-      state: simulatorReducer(current.state, { type: 'SPLIT_PANE', payload: direction }),
-    })),
-  focusPaneById: (paneId) =>
-    set((current) => ({
-      state: simulatorReducer(current.state, { type: 'SET_ACTIVE_PANE', payload: paneId }),
-    })),
-  focusPane: (direction) =>
-    set((current) => ({
-      state: simulatorReducer(current.state, { type: 'FOCUS_PANE', payload: direction }),
-    })),
-  scrollPane: (paneId, delta) =>
-    set((current) => ({
-      state: simulatorReducer(current.state, { type: 'SCROLL_PANE', payload: { paneId, delta } }),
-    })),
-  resizePane: (axis, delta) =>
-    set((current) => ({
-      state: simulatorReducer(current.state, { type: 'RESIZE_PANE', payload: { axis, delta } }),
-    })),
-  newWindow: () =>
-    set((current) => ({
-      state: simulatorReducer(current.state, { type: 'NEW_WINDOW' }),
-    })),
-  nextWindow: () =>
-    set((current) => ({
-      state: simulatorReducer(current.state, { type: 'NEXT_WINDOW' }),
-    })),
-  prevWindow: () =>
-    set((current) => ({
-      state: simulatorReducer(current.state, { type: 'PREV_WINDOW' }),
-    })),
-  newSession: () =>
-    set((current) => ({
-      state: simulatorReducer(current.state, { type: 'NEW_SESSION' }),
-    })),
-  enterCopyMode: () =>
-    set((current) => ({
-      state: simulatorReducer(current.state, { type: 'ENTER_COPY_MODE' }),
-    })),
-  exitCopyMode: () =>
-    set((current) => ({
-      state: simulatorReducer(current.state, { type: 'EXIT_COPY_MODE' }),
-    })),
-  runCopySearch: (query) =>
-    set((current) => ({
-      state: simulatorReducer(current.state, { type: 'RUN_COPY_SEARCH', payload: query }),
-    })),
-  loadSnapshot: (snapshot) =>
-    set((current) => ({
-      state: simulatorReducer(current.state, { type: 'LOAD_SNAPSHOT', payload: snapshot }),
-    })),
-  hydrateFromStorage: async () => {
-    const latest = await getLatestSnapshot();
-    const simulatorSnapshot = extractRestorableSimulatorState(latest);
-    if (!simulatorSnapshot) {
-      set(() => ({ hydratedFromStorage: true }));
-      return;
-    }
-
-    set((current) => ({
-      state: simulatorReducer(current.state, {
-        type: 'LOAD_SNAPSHOT',
-        payload: simulatorSnapshot,
-      }),
-      hydratedFromStorage: true,
-    }));
-  },
-  saveSnapshotToStorage: async () => {
-    const snapshot = useSimulatorStore.getState().state;
-    const id = `snapshot-${Date.now()}`;
-    await saveSnapshotRecord(buildSnapshotRecord(snapshot, id));
-
-    set((current) => ({
-      state: simulatorReducer(current.state, {
-        type: 'ADD_MESSAGE',
-        payload: `Snapshot saved (${id})`,
-      }),
-    }));
-  },
-  restoreSnapshotByIdFromStorage: async (snapshotId) => {
-    const snapshot = await getSnapshot(snapshotId);
-    const simulatorSnapshot = extractRestorableSimulatorState(snapshot);
-    if (!simulatorSnapshot) {
-      set((current) => ({
+    initScenario: (scenarioPresetId) => set((current) => ({
         state: simulatorReducer(current.state, {
-          type: 'ADD_MESSAGE',
-          payload: snapshot
-            ? `Snapshot ${snapshot.id} is not simulator schema v2`
-            : `Snapshot not found (${snapshotId})`,
+            type: 'INIT_SCENARIO',
+            payload: scenarioPresetId,
         }),
-      }));
-      return false;
-    }
-
-    set((current) => ({
-      state: simulatorReducer(current.state, {
-        type: 'LOAD_SNAPSHOT',
-        payload: simulatorSnapshot,
-      }),
-    }));
-    return true;
-  },
-  restoreLessonDefaultScenario: async (lessonSlug) => {
-    const normalizedLessonSlug = lessonSlug?.trim() ?? '';
-    if (!normalizedLessonSlug) {
-      set((current) => ({
-        state: simulatorReducer(simulatorReducer(current.state, { type: 'RESET' }), {
-          type: 'ADD_MESSAGE',
-          payload: 'Lesson restore failed (missing lesson slug), fallback to reset',
-        }),
-      }));
-      return false;
-    }
-
-    try {
-      const content = await loadAppContent();
-      const firstMission = content.missions.find((mission) => mission.lessonSlug === normalizedLessonSlug);
-      if (!firstMission) {
-        throw new Error('lesson not found');
-      }
-      const lessonState = createMissionScenarioState(firstMission);
-      set((current) => {
-        const restored = simulatorReducer(current.state, {
-          type: 'LOAD_SNAPSHOT',
-          payload: lessonState,
-        });
-        return {
-          state: simulatorReducer(restored, {
-            type: 'ADD_MESSAGE',
-            payload: `Lesson default restored (${normalizedLessonSlug})`,
-          }),
-        };
-      });
-      return true;
-    } catch {
-      set((current) => {
-        const fallback = simulatorReducer(current.state, { type: 'RESET' });
-        return {
-          state: simulatorReducer(fallback, {
-            type: 'ADD_MESSAGE',
-            payload: `Lesson restore failed (${normalizedLessonSlug}), fallback to reset`,
-          }),
-        };
-      });
-      return false;
-    }
-  },
-  restoreLatestSnapshotFromStorage: async () => {
-    const latest = await getLatestSnapshot();
-    const simulatorSnapshot = extractRestorableSimulatorState(latest);
-    if (!simulatorSnapshot) {
-      set((current) => ({
-        state: simulatorReducer(current.state, {
-          type: 'ADD_MESSAGE',
-          payload: 'No v2 restorable snapshot found',
-        }),
-      }));
-      return false;
-    }
-    set((current) => ({
-      state: simulatorReducer(current.state, {
-        type: 'LOAD_SNAPSHOT',
-        payload: simulatorSnapshot,
-      }),
-    }));
-    return true;
-  },
-  reset: () =>
-    set((current) => ({
-      state: simulatorReducer(current.state, { type: 'RESET' }),
+    })),
+    initMissionScenario: (mission) => set(() => ({
+        state: createMissionScenarioState(mission),
+    })),
+    setPrefixKey: (key) => set((current) => ({
+        state: simulatorReducer(current.state, { type: 'SET_PREFIX_KEY', payload: key }),
+    })),
+    setMode: (mode) => set((current) => ({
+        state: simulatorReducer(current.state, { type: 'SET_MODE', payload: mode }),
+    })),
+    setCommandBuffer: (command) => set((current) => ({
+        state: simulatorReducer(current.state, { type: 'SET_COMMAND_BUFFER', payload: command }),
+    })),
+    splitPane: (direction) => set((current) => ({
+        state: simulatorReducer(current.state, { type: 'SPLIT_PANE', payload: direction }),
+    })),
+    focusPaneById: (paneId) => set((current) => ({
+        state: simulatorReducer(current.state, { type: 'SET_ACTIVE_PANE', payload: paneId }),
+    })),
+    focusPane: (direction) => set((current) => ({
+        state: simulatorReducer(current.state, { type: 'FOCUS_PANE', payload: direction }),
+    })),
+    scrollPane: (paneId, delta) => set((current) => ({
+        state: simulatorReducer(current.state, { type: 'SCROLL_PANE', payload: { paneId, delta } }),
+    })),
+    resizePane: (axis, delta) => set((current) => ({
+        state: simulatorReducer(current.state, { type: 'RESIZE_PANE', payload: { axis, delta } }),
+    })),
+    newWindow: () => set((current) => ({
+        state: simulatorReducer(current.state, { type: 'NEW_WINDOW' }),
+    })),
+    nextWindow: () => set((current) => ({
+        state: simulatorReducer(current.state, { type: 'NEXT_WINDOW' }),
+    })),
+    prevWindow: () => set((current) => ({
+        state: simulatorReducer(current.state, { type: 'PREV_WINDOW' }),
+    })),
+    newSession: () => set((current) => ({
+        state: simulatorReducer(current.state, { type: 'NEW_SESSION' }),
+    })),
+    enterCopyMode: () => set((current) => ({
+        state: simulatorReducer(current.state, { type: 'ENTER_COPY_MODE' }),
+    })),
+    exitCopyMode: () => set((current) => ({
+        state: simulatorReducer(current.state, { type: 'EXIT_COPY_MODE' }),
+    })),
+    runCopySearch: (query) => set((current) => ({
+        state: simulatorReducer(current.state, { type: 'RUN_COPY_SEARCH', payload: query }),
+    })),
+    loadSnapshot: (snapshot) => set((current) => ({
+        state: simulatorReducer(current.state, { type: 'LOAD_SNAPSHOT', payload: snapshot }),
+    })),
+    hydrateFromStorage: async () => {
+        const latest = await getLatestSnapshot();
+        const simulatorSnapshot = extractRestorableSimulatorState(latest);
+        if (!simulatorSnapshot) {
+            set(() => ({ hydratedFromStorage: true }));
+            return;
+        }
+        set((current) => ({
+            state: simulatorReducer(current.state, {
+                type: 'LOAD_SNAPSHOT',
+                payload: simulatorSnapshot,
+            }),
+            hydratedFromStorage: true,
+        }));
+    },
+    saveSnapshotToStorage: async () => {
+        const snapshot = useSimulatorStore.getState().state;
+        const id = `snapshot-${Date.now()}`;
+        await saveSnapshotRecord(buildSnapshotRecord(snapshot, id));
+        set((current) => ({
+            state: simulatorReducer(current.state, {
+                type: 'ADD_MESSAGE',
+                payload: `Snapshot saved (${id})`,
+            }),
+        }));
+    },
+    restoreSnapshotByIdFromStorage: async (snapshotId) => {
+        const snapshot = await getSnapshot(snapshotId);
+        const simulatorSnapshot = extractRestorableSimulatorState(snapshot);
+        if (!simulatorSnapshot) {
+            set((current) => ({
+                state: simulatorReducer(current.state, {
+                    type: 'ADD_MESSAGE',
+                    payload: snapshot
+                        ? `Snapshot ${snapshot.id} is not simulator schema v2`
+                        : `Snapshot not found (${snapshotId})`,
+                }),
+            }));
+            return false;
+        }
+        set((current) => ({
+            state: simulatorReducer(current.state, {
+                type: 'LOAD_SNAPSHOT',
+                payload: simulatorSnapshot,
+            }),
+        }));
+        return true;
+    },
+    restoreLessonDefaultScenario: async (lessonSlug) => {
+        const normalizedLessonSlug = lessonSlug?.trim() ?? '';
+        if (!normalizedLessonSlug) {
+            set((current) => ({
+                state: simulatorReducer(simulatorReducer(current.state, { type: 'RESET' }), {
+                    type: 'ADD_MESSAGE',
+                    payload: 'Lesson restore failed (missing lesson slug), fallback to reset',
+                }),
+            }));
+            return false;
+        }
+        try {
+            const content = await loadAppContent();
+            const firstMission = content.missions.find((mission) => mission.lessonSlug === normalizedLessonSlug);
+            if (!firstMission) {
+                throw new Error('lesson not found');
+            }
+            const lessonState = createMissionScenarioState(firstMission);
+            set((current) => {
+                const restored = simulatorReducer(current.state, {
+                    type: 'LOAD_SNAPSHOT',
+                    payload: lessonState,
+                });
+                return {
+                    state: simulatorReducer(restored, {
+                        type: 'ADD_MESSAGE',
+                        payload: `Lesson default restored (${normalizedLessonSlug})`,
+                    }),
+                };
+            });
+            return true;
+        }
+        catch {
+            set((current) => {
+                const fallback = simulatorReducer(current.state, { type: 'RESET' });
+                return {
+                    state: simulatorReducer(fallback, {
+                        type: 'ADD_MESSAGE',
+                        payload: `Lesson restore failed (${normalizedLessonSlug}), fallback to reset`,
+                    }),
+                };
+            });
+            return false;
+        }
+    },
+    restoreLatestSnapshotFromStorage: async () => {
+        const latest = await getLatestSnapshot();
+        const simulatorSnapshot = extractRestorableSimulatorState(latest);
+        if (!simulatorSnapshot) {
+            set((current) => ({
+                state: simulatorReducer(current.state, {
+                    type: 'ADD_MESSAGE',
+                    payload: 'No v2 restorable snapshot found',
+                }),
+            }));
+            return false;
+        }
+        set((current) => ({
+            state: simulatorReducer(current.state, {
+                type: 'LOAD_SNAPSHOT',
+                payload: simulatorSnapshot,
+            }),
+        }));
+        return true;
+    },
+    reset: () => set((current) => ({
+        state: simulatorReducer(current.state, { type: 'RESET' }),
     })),
 }));
-
 let autoSnapshotTimer: ReturnType<typeof setTimeout> | null = null;
-
 useSimulatorStore.subscribe((current, previous) => {
-  if (!current.hydratedFromStorage || current.state === previous.state) {
-    return;
-  }
-
-  if (autoSnapshotTimer) {
-    clearTimeout(autoSnapshotTimer);
-  }
-
-  autoSnapshotTimer = setTimeout(() => {
-    const snapshot = useSimulatorStore.getState().state;
-    void saveSnapshotRecord(buildSnapshotRecord(snapshot, AUTO_SNAPSHOT_ID));
-  }, AUTO_SNAPSHOT_DEBOUNCE_MS);
+    if (!current.hydratedFromStorage || current.state === previous.state) {
+        return;
+    }
+    if (autoSnapshotTimer) {
+        clearTimeout(autoSnapshotTimer);
+    }
+    autoSnapshotTimer = setTimeout(() => {
+        const snapshot = useSimulatorStore.getState().state;
+        void saveSnapshotRecord(buildSnapshotRecord(snapshot, AUTO_SNAPSHOT_ID));
+    }, AUTO_SNAPSHOT_DEBOUNCE_MS);
 });
