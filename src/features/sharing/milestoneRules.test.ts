@@ -6,6 +6,12 @@ describe('milestoneRules', () => {
   it('requires all first chapter missions before unlocking first-chapter milestone', async () => {
     const content = await loadAppContent();
 
+    const otherChapterOnly = computeMilestoneProgress({
+      content,
+      completedMissionSlugs: ['session-create', 'basics-window-open'],
+      streakDays: 0,
+    });
+
     const partial = computeMilestoneProgress({
       content,
       completedMissionSlugs: ['hello-tmux-version-check'],
@@ -18,6 +24,7 @@ describe('milestoneRules', () => {
       streakDays: 0,
     });
 
+    expect(otherChapterOnly.unlockedMilestones).not.toContain('first-chapter-complete');
     expect(partial.unlockedMilestones).not.toContain('first-chapter-complete');
     expect(complete.unlockedMilestones).toContain('first-chapter-complete');
     expect(complete.firstChapterSlug).toBe('tmux-onramp');
