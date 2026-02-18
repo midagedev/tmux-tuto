@@ -1,0 +1,68 @@
+{
+  "version": "1",
+  "rows": [
+    {
+      "missionSlug": "session-create",
+      "track": "A",
+      "scenarioPresetId": "single-pane",
+      "capabilities": ["session.create", "session.attach.simulated"],
+      "requiredRuleKinds": ["sessionCount", "actionHistoryText"]
+    },
+    {
+      "missionSlug": "session-window-create",
+      "track": "A",
+      "scenarioPresetId": "single-pane",
+      "capabilities": ["window.create"],
+      "requiredRuleKinds": ["windowCount", "actionHistoryText"]
+    },
+    {
+      "missionSlug": "session-multi-manage",
+      "track": "A",
+      "scenarioPresetId": "single-pane",
+      "capabilities": ["session.create", "session.multi_manage"],
+      "requiredRuleKinds": ["sessionCount", "actionHistoryText"]
+    },
+    {
+      "missionSlug": "split-two-panes",
+      "track": "A",
+      "scenarioPresetId": "single-pane",
+      "capabilities": ["pane.split"],
+      "requiredRuleKinds": ["paneCount", "actionHistoryText"]
+    },
+    {
+      "missionSlug": "pane-grid-layout",
+      "track": "B",
+      "scenarioPresetId": "single-pane",
+      "capabilities": ["pane.split", "pane.grid"],
+      "requiredRuleKinds": ["paneCount", "actionHistoryText"]
+    },
+    {
+      "missionSlug": "window-cycle-practice",
+      "track": "B",
+      "scenarioPresetId": "single-pane",
+      "capabilities": ["window.create", "window.next", "window.prev"],
+      "requiredRuleKinds": ["windowCount", "paneCount", "actionHistoryText"]
+    },
+    {
+      "missionSlug": "copy-mode-search-keyword",
+      "track": "B",
+      "scenarioPresetId": "log-buffer",
+      "capabilities": ["copy-mode.enter", "copy-mode.search", "copy-mode.match"],
+      "requiredRuleKinds": ["modeIs", "searchExecuted", "searchMatchFound"]
+    },
+    {
+      "missionSlug": "copy-mode-no-match",
+      "track": "B",
+      "scenarioPresetId": "log-buffer",
+      "capabilities": ["copy-mode.enter", "copy-mode.search", "copy-mode.no-match"],
+      "requiredRuleKinds": ["modeIs", "searchExecuted", "searchMatchFound"]
+    },
+    {
+      "missionSlug": "command-mode-new-window",
+      "track": "C",
+      "scenarioPresetId": "single-pane",
+      "capabilities": ["command-mode.enter", "command-mode.execute", "window.create"],
+      "requiredRuleKinds": ["windowCount", "shellHistoryText"]
+    }
+  ]
+}

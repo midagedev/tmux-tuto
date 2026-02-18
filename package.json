@@ -8,6 +8,7 @@
     "generate:og": "node scripts/generate-og-images.mjs",
     "generate:share-meta": "node scripts/generate-share-meta-pages.mjs",
     "verify:kpi-routes": "node scripts/verify-kpi-route-map.mjs",
+    "verify:coverage-matrix": "node scripts/check-coverage-matrix.mjs",
     "typecheck": "tsc -b",
     "test": "vitest run",
     "test:watch": "vitest",

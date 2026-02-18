@@ -152,7 +152,7 @@
   - 검증: integration/e2e
   - DoD: 힌트가 실제 실패 원인과 일치
 
-- [ ] `HF-043` coverage matrix 구현 반영
+- [x] `HF-043` coverage matrix 구현 반영
   - 산출물: 스펙 13 matrix 기준 미션-기능 매핑 테이블 코드/문서
   - 의존: `HF-041`
   - 검증: 누락 항목 체크 스크립트
