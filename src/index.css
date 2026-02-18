@@ -244,6 +244,10 @@ a {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
+.sim-pane-grid.is-single {
+  grid-template-columns: 1fr;
+}
+
 .terminal-shell {
   border: 1px solid #1f2937;
   border-radius: 12px;
@@ -251,6 +255,7 @@ a {
   padding: 10px;
   display: grid;
   gap: 10px;
+  min-height: 420px;
 }
 
 .terminal-shell:focus-visible {
@@ -297,6 +302,7 @@ a {
 
 .terminal-stage {
   position: relative;
+  min-height: 280px;
 }
 
 .terminal-overlay {
@@ -333,12 +339,7 @@ a {
 }
 
 .terminal-command-overlay {
-  pointer-events: none;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(4px);
-  transition: opacity 120ms ease, transform 120ms ease;
-  display: flex;
+  display: none;
   flex-wrap: nowrap;
   gap: 8px;
   align-items: center;
@@ -349,10 +350,8 @@ a {
 }
 
 .terminal-command-overlay.is-active {
+  display: flex;
   pointer-events: auto;
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
   border-color: #fbbf24;
   box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.25) inset;
 }
@@ -402,9 +401,15 @@ a {
   background: #f8fafc;
   padding: 10px;
   display: grid;
+  grid-template-rows: auto 1fr auto;
   gap: 6px;
   cursor: pointer;
   user-select: none;
+  min-height: 0;
+}
+
+.sim-pane-grid.is-single .sim-pane-card {
+  min-height: clamp(280px, 45vh, 520px);
 }
 
 .sim-pane-card:focus-visible {
@@ -435,10 +440,15 @@ a {
   color: #e2e8f0;
   font-size: 0.72rem;
   line-height: 1.3;
-  min-height: 90px;
-  max-height: 140px;
-  overflow: hidden;
+  min-height: 140px;
+  max-height: 220px;
+  overflow: auto;
   font-family: 'SFMono-Regular', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+}
+
+.sim-pane-grid.is-single .sim-pane-body {
+  min-height: clamp(220px, 36vh, 420px);
+  max-height: none;
 }
 
 .sim-pane-body.is-active {
@@ -493,6 +503,22 @@ a {
     min-width: 0;
     width: 100%;
     flex-basis: 100%;
+  }
+
+  .terminal-shell {
+    min-height: 360px;
+  }
+
+  .terminal-stage {
+    min-height: 220px;
+  }
+
+  .sim-pane-grid.is-single .sim-pane-card {
+    min-height: 250px;
+  }
+
+  .sim-pane-grid.is-single .sim-pane-body {
+    min-height: 180px;
   }
 }
 

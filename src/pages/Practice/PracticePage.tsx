@@ -57,6 +57,7 @@ export function PracticePage() {
   const commandPreview = `${commandBuffer.slice(0, commandCursor)}|${commandBuffer.slice(commandCursor)}`;
   const modeClass = simulatorState.mode.value.toLowerCase().replace('_', '-');
   const liveAnnouncement = `Mode ${simulatorState.mode.value}. Active pane ${activePane.id}. Panes ${activeWindow.panes.length}.`;
+  const isSinglePane = activeWindow.panes.length === 1;
 
   useEffect(() => {
     if (!hydratedFromStorage) {
@@ -211,7 +212,10 @@ export function PracticePage() {
           </div>
 
           <div className="terminal-stage">
-            <div className="sim-pane-grid" aria-label="Pane viewport grid">
+            <div
+              className={`sim-pane-grid${isSinglePane ? ' is-single' : ''}`}
+              aria-label="Pane viewport grid"
+            >
               {activeWindow.panes.map((pane) => {
                 const isActive = pane.id === activeWindow.activePaneId;
                 return (
