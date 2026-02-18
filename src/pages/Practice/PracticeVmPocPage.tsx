@@ -38,7 +38,7 @@ type VmMetricState = {
 };
 
 type CelebrationState = {
-  kind: 'mission' | 'lesson' | 'skill';
+  kind: 'mission' | 'lesson' | 'achievement';
   message: string;
   detail: string;
   achievementId?: string;
@@ -606,7 +606,7 @@ export function PracticeVmPocPage() {
     setDebugLines((previous) => trimHistory([...previous, normalized], MAX_DEBUG_LINES));
   }, []);
 
-  const announceSkillAchievement = useCallback((achievementId: string) => {
+  const announceAchievement = useCallback((achievementId: string) => {
     const definition = getAchievementDefinition(achievementId);
     if (!definition) {
       return;
@@ -618,7 +618,7 @@ export function PracticeVmPocPage() {
       }
 
       return {
-        kind: 'skill',
+        kind: 'achievement',
         message: `업적 달성: ${definition.title}`,
         detail: definition.description,
         achievementId: definition.id,
@@ -707,11 +707,11 @@ export function PracticeVmPocPage() {
           lessonSlug: selectedLessonSlugRef.current,
         });
         if (unlocked.length > 0) {
-          announceSkillAchievement(unlocked[0]);
+          announceAchievement(unlocked[0]);
         }
       }
     },
-    [announceSkillAchievement],
+    [announceAchievement],
   );
 
   const registerCommand = useCallback(
@@ -732,7 +732,7 @@ export function PracticeVmPocPage() {
           lessonSlug: selectedLessonSlugRef.current,
         });
         if (unlocked.length > 0) {
-          announceSkillAchievement(unlocked[0]);
+          announceAchievement(unlocked[0]);
         }
       }
 
@@ -752,7 +752,7 @@ export function PracticeVmPocPage() {
         }));
       }
     },
-    [announceSkillAchievement],
+    [announceAchievement],
   );
 
   const scheduleProbe = useCallback((delayMs = 450) => {
