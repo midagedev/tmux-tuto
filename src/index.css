@@ -1082,30 +1082,96 @@ a {
 }
 
 .lesson-section {
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: #f8fafc;
-  padding: 12px;
-  margin-top: 10px;
+  border: 1px solid #dde6f3;
+  border-radius: 12px;
+  background: #fbfdff;
+  padding: 14px;
 }
 
 .lesson-section h2 {
-  margin: 0 0 8px;
-  font-size: 1rem;
+  margin: 0 0 10px;
+  font-size: 0.98rem;
+}
+
+.lesson-action-panel {
+  background: linear-gradient(150deg, #f2f8ff 0%, #f4fbf8 100%);
+  border-color: #c7d8ee;
+  display: grid;
+  gap: 12px;
+}
+
+.lesson-pill-row {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lesson-pill {
+  border: 1px solid #bdd1ea;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #1f3f66;
+  font-size: 0.79rem;
+  font-weight: 600;
+  padding: 3px 9px;
 }
 
 .lesson-brief {
-  background: #f0fdf4;
-  border-color: #86efac;
+  background: #f4fbf7;
+  border-color: #c7eadf;
 }
 
-.lesson-brief p {
-  margin: 0 0 8px;
-  line-height: 1.5;
+.lesson-summary {
+  display: grid;
+  gap: 8px;
 }
 
-.lesson-brief p:last-of-type {
-  margin-bottom: 0;
+.lesson-summary p {
+  margin: 0;
+  line-height: 1.55;
+}
+
+.lesson-detail-group {
+  margin-top: 10px;
+  border: 1px dashed #cad7ea;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 8px 10px;
+}
+
+.lesson-detail-group summary {
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.lesson-detail-group[open] summary {
+  margin-bottom: 8px;
+}
+
+.lesson-detail-group .link-list {
+  margin-top: 0;
+}
+
+.shortcut-token {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #cfe0f6;
+  border-radius: 6px;
+  background: #f3f7ff;
+  padding: 0 4px;
+  margin: 0 1px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82em;
+}
+
+.shortcut-token-tooltip {
+  cursor: help;
+  text-decoration: underline dotted #6b7f9d;
+  text-underline-offset: 2px;
 }
 
 .vm-poc-panel {
@@ -2138,19 +2204,46 @@ a {
 .lesson-mission-grid {
   display: grid;
   gap: 10px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
 }
 
 .lesson-mission-card {
   border: 1px solid #dbe2ea;
   border-radius: 10px;
   background: #ffffff;
-  padding: 10px;
+  padding: 12px;
+  display: grid;
+  gap: 8px;
 }
 
 .lesson-mission-card h3 {
-  margin: 0 0 6px;
+  margin: 0;
   font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.lesson-mission-meta {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+}
+
+.lesson-mission-hints {
+  gap: 6px;
+}
+
+.lesson-mission-more summary {
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+}
+
+.lesson-mission-more[open] summary {
+  margin-bottom: 6px;
+}
+
+.lesson-mission-more .link-list {
+  margin-top: 0;
 }
 
 .sim-capture {

@@ -28,6 +28,36 @@ type LessonPageState =
       status: 'error';
     };
 
+const SHORTCUT_TOOLTIPS: Record<string, string> = {
+  'Ctrl+b': 'Ctrl를 누른 상태에서 b를 누른 뒤 손을 떼고 다음 키를 입력하세요.',
+  c: 'Ctrl+b 다음 c: 새 window를 만듭니다.',
+  d: 'Ctrl+b 다음 d: 현재 세션에서 분리(detach)합니다.',
+  ':': 'Ctrl+b 다음 : : command prompt를 엽니다.',
+  '%': 'Shift+5',
+  '"': "Shift+'",
+};
+
+function renderTextWithShortcutTooltip(text: string, keyPrefix: string) {
+  return text.split(/(`[^`]+`)/g).map((segment, index) => {
+    if (segment.startsWith('`') && segment.endsWith('`')) {
+      const token = segment.slice(1, -1);
+      const tooltip = SHORTCUT_TOOLTIPS[token];
+
+      return (
+        <code
+          key={`${keyPrefix}-token-${index}`}
+          className={`shortcut-token${tooltip ? ' shortcut-token-tooltip' : ''}`}
+          title={tooltip}
+        >
+          {token}
+        </code>
+      );
+    }
+
+    return <span key={`${keyPrefix}-text-${index}`}>{segment}</span>;
+  });
+}
+
 export function LessonPage() {
   const { trackSlug, chapterSlug, lessonSlug } = useParams();
   const [pageState, setPageState] = useState<LessonPageState>({ status: 'loading' });
@@ -116,7 +146,11 @@ export function LessonPage() {
   }
 
   const { track, chapter, lesson, missions } = pageState;
-  const hasPrefixShortcutMission = missions.some((mission) => mission.hints.some((hint) => hint.includes('Ctrl+b')));
+  const hasLessonBrief =
+    Boolean(lesson.overview) ||
+    Boolean(lesson.goal) ||
+    (lesson.successCriteria?.length ?? 0) > 0 ||
+    (lesson.failureStates?.length ?? 0) > 0;
 
   return (
     <PagePlaceholder
@@ -124,40 +158,56 @@ export function LessonPage() {
       title={`${track.title} · ${chapter.title}`}
       description={`${lesson.title} · 예상 ${lesson.estimatedMinutes}분`}
     >
-      {lesson.overview ||
-      lesson.goal ||
-      (lesson.successCriteria?.length ?? 0) > 0 ||
-      (lesson.failureStates?.length ?? 0) > 0 ? (
+      <section className="lesson-section lesson-action-panel">
+        <ul className="lesson-pill-row">
+          <li className="lesson-pill">예상 {lesson.estimatedMinutes}분</li>
+          <li className="lesson-pill">학습 목표 {lesson.objectives.length}개</li>
+          <li className="lesson-pill">미션 {missions.length}개</li>
+        </ul>
+        <div className="inline-actions">
+          <Link className="primary-btn" to={`/practice?lesson=${lesson.slug}`}>
+            시뮬레이터에서 레슨 시작
+          </Link>
+          <Link className="secondary-btn" to="/learn">
+            커리큘럼 목록
+          </Link>
+        </div>
+      </section>
+
+      {hasLessonBrief ? (
         <section className="lesson-section lesson-brief">
-          {lesson.overview ? (
-            <p>
-              <strong>레슨 소개:</strong> {lesson.overview}
-            </p>
-          ) : null}
-          {lesson.goal ? (
-            <p>
-              <strong>이 레슨의 목표:</strong> {lesson.goal}
-            </p>
-          ) : null}
+          <h2>레슨 요약</h2>
+          <div className="lesson-summary">
+            {lesson.overview ? (
+              <p>
+                <strong>레슨 소개:</strong> {renderTextWithShortcutTooltip(lesson.overview, 'lesson-overview')}
+              </p>
+            ) : null}
+            {lesson.goal ? (
+              <p>
+                <strong>이 레슨의 목표:</strong> {renderTextWithShortcutTooltip(lesson.goal, 'lesson-goal')}
+              </p>
+            ) : null}
+          </div>
           {lesson.successCriteria && lesson.successCriteria.length > 0 ? (
-            <>
-              <h2>완료 기준</h2>
+            <details className="lesson-detail-group">
+              <summary>완료 기준 {lesson.successCriteria.length}개</summary>
               <ul className="link-list">
-                {lesson.successCriteria.map((item) => (
-                  <li key={item}>{item}</li>
+                {lesson.successCriteria.map((item, index) => (
+                  <li key={item}>{renderTextWithShortcutTooltip(item, `success-${index}`)}</li>
                 ))}
               </ul>
-            </>
+            </details>
           ) : null}
           {lesson.failureStates && lesson.failureStates.length > 0 ? (
-            <>
-              <h2>부족 상태</h2>
+            <details className="lesson-detail-group">
+              <summary>부족 상태 {lesson.failureStates.length}개</summary>
               <ul className="link-list">
-                {lesson.failureStates.map((item) => (
-                  <li key={item}>{item}</li>
+                {lesson.failureStates.map((item, index) => (
+                  <li key={item}>{renderTextWithShortcutTooltip(item, `failure-${index}`)}</li>
                 ))}
               </ul>
-            </>
+            </details>
           ) : null}
         </section>
       ) : null}
@@ -165,32 +215,11 @@ export function LessonPage() {
       <section className="lesson-section">
         <h2>학습 목표</h2>
         <ul className="link-list">
-          {lesson.objectives.map((objective) => (
-            <li key={objective}>{objective}</li>
+          {lesson.objectives.map((objective, index) => (
+            <li key={objective}>{renderTextWithShortcutTooltip(objective, `objective-${index}`)}</li>
           ))}
         </ul>
       </section>
-
-      {hasPrefixShortcutMission ? (
-        <section className="lesson-section">
-          <h2>첫 단축키 입력법</h2>
-          <ol className="link-list">
-            <li>`Ctrl` 키를 누른 상태에서 `b`를 한 번 누른 뒤 손을 뗍니다.</li>
-            <li>1초 안에 다음 키를 누릅니다. 예: `c`, `%`, `"`, `d`.</li>
-            <li>즉, `Ctrl+b`를 계속 누르는 방식이 아니라 `Ctrl+b` 다음 키 순서입니다.</li>
-          </ol>
-          <p className="muted">xterm.js 실습 터미널도 같은 입력 순서를 사용합니다.</p>
-        </section>
-      ) : null}
-
-      <div className="inline-actions">
-        <Link className="primary-btn" to={`/practice?lesson=${lesson.slug}`}>
-          시뮬레이터에서 레슨 시작
-        </Link>
-        <Link className="secondary-btn" to="/learn">
-          커리큘럼 목록
-        </Link>
-      </div>
 
       <section className="lesson-section">
         <h2>미션 목록 ({missions.length})</h2>
@@ -198,19 +227,38 @@ export function LessonPage() {
           <p className="muted">등록된 미션이 없습니다.</p>
         ) : (
           <div className="lesson-mission-grid">
-            {missions.map((mission) => (
-              <article key={mission.id} className="lesson-mission-card">
-                <h3>{mission.title}</h3>
-                <p className="muted">
-                  난이도 {mission.difficulty} · 초기 시나리오 {mission.initialScenario}
-                </p>
-                <ul className="link-list">
-                  {mission.hints.map((hint) => (
-                    <li key={hint}>{hint}</li>
-                  ))}
-                </ul>
-              </article>
-            ))}
+            {missions.map((mission) => {
+              const previewHints = mission.hints.slice(0, 2);
+              const restHints = mission.hints.slice(2);
+
+              return (
+                <article key={mission.id} className="lesson-mission-card">
+                  <h3>{mission.title}</h3>
+                  <p className="lesson-mission-meta">
+                    난이도 {mission.difficulty} · 초기 시나리오 {mission.initialScenario}
+                  </p>
+                  {previewHints.length > 0 ? (
+                    <ul className="link-list lesson-mission-hints">
+                      {previewHints.map((hint, index) => (
+                        <li key={hint}>{renderTextWithShortcutTooltip(hint, `${mission.id}-hint-preview-${index}`)}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="muted">힌트가 없습니다.</p>
+                  )}
+                  {restHints.length > 0 ? (
+                    <details className="lesson-mission-more">
+                      <summary>힌트 {restHints.length}개 더 보기</summary>
+                      <ul className="link-list lesson-mission-hints">
+                        {restHints.map((hint, index) => (
+                          <li key={hint}>{renderTextWithShortcutTooltip(hint, `${mission.id}-hint-rest-${index}`)}</li>
+                        ))}
+                      </ul>
+                    </details>
+                  ) : null}
+                </article>
+              );
+            })}
           </div>
         )}
       </section>
