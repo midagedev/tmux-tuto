@@ -89,6 +89,9 @@ export function HomePage() {
               학습 경로 보기
             </Link>
           </div>
+          <p className="home-desktop-hint">
+            원활한 실습을 위해 데스크톱 환경을 권장합니다.
+          </p>
         </div>
 
         <aside className="home-hero-panel" aria-label="학습 핵심 포인트">

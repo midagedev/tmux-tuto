@@ -308,6 +308,12 @@ a {
   font-size: 0.95rem;
 }
 
+.home-desktop-hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
 .home-pillar-list {
   margin: 0;
   padding: 0;
