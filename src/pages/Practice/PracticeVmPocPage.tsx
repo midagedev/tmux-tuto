@@ -15,6 +15,7 @@ import {
   isInternalProbeLine,
   parseProbeMetricFromLine,
   parseTmuxActionsFromCommand,
+  stripAnsi,
   type VmProbeMetric,
 } from '../../features/vm/missionBridge';
 
@@ -64,25 +65,8 @@ const MAX_DEBUG_LINES = 220;
 const V86_STATE_MAGIC_LE = 0x86768676;
 const ZSTD_MAGIC_LE = 0xfd2fb528;
 
-const PROBE_FUNCTION_NAME = '__tmuxweb_probe';
-
-const PROBE_SCRIPT_BODY =
-  'TMUXWEB_TMUX=0; tmux -V >/dev/null 2>&1 && TMUXWEB_TMUX=1; ' +
-  'TMUXWEB_SESSION=-1; TMUXWEB_WINDOW=-1; TMUXWEB_PANE=-1; TMUXWEB_MODE=0; ' +
-  'if [ "$TMUXWEB_TMUX" -eq 1 ]; then ' +
-  'TMUXWEB_SESSION=$(tmux list-sessions 2>/dev/null | wc -l | tr -d " "); ' +
-  'TMUXWEB_WINDOW=$(tmux list-windows 2>/dev/null | wc -l | tr -d " "); ' +
-  'TMUXWEB_PANE=$(tmux list-panes 2>/dev/null | wc -l | tr -d " "); ' +
-  'TMUXWEB_MODE=$(tmux display-message -p "#{?pane_in_mode,1,0}" 2>/dev/null || echo 0); ' +
-  'fi; ' +
-  'echo "[[TMUXWEB_PROBE:tmux:${TMUXWEB_TMUX}]]"; ' +
-  'echo "[[TMUXWEB_PROBE:session:${TMUXWEB_SESSION}]]"; ' +
-  'echo "[[TMUXWEB_PROBE:window:${TMUXWEB_WINDOW}]]"; ' +
-  'echo "[[TMUXWEB_PROBE:pane:${TMUXWEB_PANE}]]"; ' +
-  'echo "[[TMUXWEB_PROBE:mode:${TMUXWEB_MODE}]]"';
-
-const PROBE_INSTALL_COMMAND = `${PROBE_FUNCTION_NAME}(){ ${PROBE_SCRIPT_BODY}; }`;
-const PROBE_TRIGGER_COMMAND = PROBE_FUNCTION_NAME;
+const PROBE_TRIGGER_COMMAND = '/usr/bin/tmux-tuto-probe';
+const BANNER_TRIGGER_COMMAND = '/usr/bin/tmux-tuto-banner';
 
 const QUICK_COMMANDS = [
   {
@@ -298,9 +282,13 @@ export function PracticeVmPocPage() {
   const celebratedMissionSetRef = useRef(new Set<string>());
   const celebratedLessonSetRef = useRef(new Set<string>());
   const lastEmulatorOptionsRef = useRef<V86Options | null>(null);
+  const vmInternalBridgeReadyRef = useRef(false);
+  const vmWarmBannerPendingRef = useRef(false);
 
   const lessonParam = searchParams.get('lesson') ?? '';
   const missionParam = searchParams.get('mission') ?? '';
+  const warmParam = searchParams.get('warm') ?? '';
+  const disableWarmStart = warmParam === '0' || warmParam.toLowerCase() === 'off';
 
   const content = contentState.content;
 
@@ -678,6 +666,8 @@ export function PracticeVmPocPage() {
     setCelebration(null);
     lineBufferRef.current = '';
     suppressCurrentLineRef.current = false;
+    vmInternalBridgeReadyRef.current = false;
+    vmWarmBannerPendingRef.current = false;
 
     const terminal = new Terminal({
       cursorBlink: true,
@@ -752,10 +742,21 @@ export function PracticeVmPocPage() {
 
         pushDebugLine(completedLine);
 
-        const normalizedLine = completedLine.toLowerCase();
-        if (normalizedLine.includes('login:') || /[#$]\s*$/.test(normalizedLine)) {
+        const plainLine = stripAnsi(completedLine).replace(/\r/g, '');
+        const normalizedLine = plainLine.toLowerCase();
+        const hasShellPrompt = /[#$]\s*$/.test(plainLine.trimEnd());
+        if (normalizedLine.includes('login:') || hasShellPrompt) {
           setVmStatusText('부팅 완료, 명령 입력 가능');
           setVmStatus('running');
+        }
+
+        if (hasShellPrompt && !vmInternalBridgeReadyRef.current && emulatorRef.current) {
+          vmInternalBridgeReadyRef.current = true;
+          if (vmWarmBannerPendingRef.current) {
+            emulatorRef.current.serial0_send(`${BANNER_TRIGGER_COMMAND}\n`);
+            vmWarmBannerPendingRef.current = false;
+          }
+          emulatorRef.current.serial0_send(`${PROBE_TRIGGER_COMMAND}\n`);
         }
         return;
       }
@@ -792,7 +793,7 @@ export function PracticeVmPocPage() {
         const V86Ctor = module.default;
         setVmStatusText('VM 시작 이미지 확인 중...');
 
-        const initialState = await loadVmInitialState(VM_BOOT_CONFIG.initialStatePath);
+        const initialState = disableWarmStart ? null : await loadVmInitialState(VM_BOOT_CONFIG.initialStatePath);
         if (!isMounted) {
           return;
         }
@@ -843,6 +844,7 @@ export function PracticeVmPocPage() {
           ...baseOptions,
           ...(useWarmStart ? { initial_state: initialState ?? undefined } : {}),
         };
+        vmWarmBannerPendingRef.current = useWarmStart;
 
         emulatorRef.current = emulator;
 
@@ -875,8 +877,17 @@ export function PracticeVmPocPage() {
             return;
           }
           emulatorRef.current.serial0_send('\n');
-          emulatorRef.current.serial0_send(`${PROBE_INSTALL_COMMAND}\n`);
-          emulatorRef.current.serial0_send(`${PROBE_TRIGGER_COMMAND}\n`);
+          if (useWarmStart) {
+            window.setTimeout(() => {
+              if (!emulatorRef.current) {
+                return;
+              }
+              emulatorRef.current.serial0_send(`${BANNER_TRIGGER_COMMAND}\n`);
+              emulatorRef.current.serial0_send(`${PROBE_TRIGGER_COMMAND}\n`);
+              vmInternalBridgeReadyRef.current = true;
+              vmWarmBannerPendingRef.current = false;
+            }, 180);
+          }
         }, probeBootstrapDelayMs);
       } catch {
         setVmStatus('error');
@@ -922,6 +933,7 @@ export function PracticeVmPocPage() {
     };
   }, [
     contentState.status,
+    disableWarmStart,
     pushDebugLine,
     registerCommand,
     scheduleProbe,

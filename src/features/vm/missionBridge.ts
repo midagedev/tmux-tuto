@@ -24,6 +24,10 @@ const ANSI_ESCAPE_PATTERN =
 const INTERNAL_PROBE_COMMAND_PATTERNS = [
   '__tmuxweb_probe',
   '__tmuxweb_probe(){',
+  '__tmuxweb_banner',
+  'tmux-tuto-probe',
+  '/usr/bin/tmux-tuto-probe',
+  '/usr/bin/tmux-tuto-banner',
   'TMUXWEB_',
   'TMUXWEB_TMUX=',
   'TMUXWEB_SESSION=',

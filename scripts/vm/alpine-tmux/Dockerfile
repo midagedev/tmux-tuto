@@ -4,15 +4,21 @@ ENV KERNEL=virt
 ENV ADDPKGS="nodejs tmux"
 
 COPY profile.d/tmux-tuto-banner.sh /etc/profile.d/tmux-tuto-banner.sh
+COPY usr-local-bin/tmux-tuto-banner /usr/bin/tmux-tuto-banner
+COPY usr-local-bin/tmux-tuto-probe /usr/bin/tmux-tuto-probe
 
 RUN apk add --no-cache openrc alpine-base agetty alpine-conf linux-$KERNEL linux-firmware-none $ADDPKGS
 
-RUN sed -i 's/getty 38400 tty1/agetty --autologin root tty1 linux/' /etc/inittab
-RUN echo 'ttyS0::respawn:/sbin/agetty --autologin root -s ttyS0 115200 vt100' >> /etc/inittab
+RUN adduser -D -s /bin/ash tuto
+RUN sed -i 's/getty 38400 tty1/agetty --autologin tuto tty1 linux/' /etc/inittab
+RUN echo 'ttyS0::respawn:/sbin/agetty --autologin tuto -s ttyS0 115200 vt100' >> /etc/inittab
 RUN echo "root:" | chpasswd
+RUN echo "tuto:" | chpasswd
 RUN chmod +x /etc/profile.d/tmux-tuto-banner.sh
+RUN chmod +x /usr/bin/tmux-tuto-banner
+RUN chmod +x /usr/bin/tmux-tuto-probe
 
-RUN setup-hostname localhost
+RUN printf 'tmux-tuto\n' > /etc/hostname
 
 # Networking helper for environments where virtio/ne2k is hot-swapped
 RUN echo -e "rmmod ne2k-pci && modprobe ne2k-pci\nrmmod virtio-net && modprobe virtio-net\nhwclock -s\nsetup-interfaces -a -r" > /root/networking.sh \

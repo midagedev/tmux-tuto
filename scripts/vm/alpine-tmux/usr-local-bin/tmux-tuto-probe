@@ -1,0 +1,24 @@
+#!/bin/sh
+
+TMUXWEB_TMUX=0
+if tmux -V >/dev/null 2>&1; then
+  TMUXWEB_TMUX=1
+fi
+
+TMUXWEB_SESSION=-1
+TMUXWEB_WINDOW=-1
+TMUXWEB_PANE=-1
+TMUXWEB_MODE=0
+
+if [ "$TMUXWEB_TMUX" -eq 1 ]; then
+  TMUXWEB_SESSION="$(tmux list-sessions 2>/dev/null | wc -l | tr -d ' ')"
+  TMUXWEB_WINDOW="$(tmux list-windows 2>/dev/null | wc -l | tr -d ' ')"
+  TMUXWEB_PANE="$(tmux list-panes 2>/dev/null | wc -l | tr -d ' ')"
+  TMUXWEB_MODE="$(tmux display-message -p '#{?pane_in_mode,1,0}' 2>/dev/null || echo 0)"
+fi
+
+echo "[[TMUXWEB_PROBE:tmux:${TMUXWEB_TMUX}]]"
+echo "[[TMUXWEB_PROBE:session:${TMUXWEB_SESSION}]]"
+echo "[[TMUXWEB_PROBE:window:${TMUXWEB_WINDOW}]]"
+echo "[[TMUXWEB_PROBE:pane:${TMUXWEB_PANE}]]"
+echo "[[TMUXWEB_PROBE:mode:${TMUXWEB_MODE}]]"

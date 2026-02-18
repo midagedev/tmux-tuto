@@ -11,7 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, '..');
 const devServerUrl = 'http://127.0.0.1:4173';
-const practiceUrl = `${devServerUrl}/practice?lesson=hello-tmux&mission=hello-tmux-version-check`;
+const practiceUrl = `${devServerUrl}/practice?lesson=hello-tmux&mission=hello-tmux-version-check&warm=0`;
 const outputPath = path.resolve(repoRoot, 'public/vm/alpine-tmux-ready.bin.zst');
 const tempDir = path.resolve(repoRoot, 'tmp');
 const rawStatePath = path.resolve(tempDir, 'alpine-tmux-ready.raw.bin');
