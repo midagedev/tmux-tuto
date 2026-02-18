@@ -4,17 +4,17 @@ import { BRAND } from '../app/brand';
 
 const STAGE_ITEMS = [
   {
-    title: '초급 코어 루프',
-    summary: 'session/window/pane 조작과 detach/attach 루틴을 빠르게 체득합니다.',
+    title: '기초 운영 루프',
+    summary: 'session/window/pane 조작, detach/attach, pane 이동까지 빠르게 체득합니다.',
     detail: '핵심 레슨을 짧게 끝내고 바로 실습으로 연결합니다.',
-    actionLabel: '초급 경로 보기',
+    actionLabel: '학습 경로 보기',
     to: '/learn',
   },
   {
-    title: '심화 운영 루프',
+    title: '운영 확장 루프',
     summary: 'copy-mode, command-mode, tmux 설정 적용과 원격 운영 루틴으로 확장합니다.',
     detail: '실무에서 자주 부딪히는 상황 중심으로 반복 훈련합니다.',
-    actionLabel: '심화 실습 시작',
+    actionLabel: '운영 루프 시작',
     to: '/practice?lesson=copy-search',
   },
 ] as const;
@@ -22,7 +22,7 @@ const STAGE_ITEMS = [
 const MENU_ITEMS = [
   {
     title: '학습 경로',
-    description: '초급/심화 레슨 구조를 확인하고 현재 위치를 명확히 잡습니다.',
+    description: '하나의 통합 레슨 경로에서 현재 위치를 확인하고 다음 실습을 이어갑니다.',
     cta: '경로 열기',
     to: '/learn',
   },
@@ -70,7 +70,7 @@ export function HomePage() {
     <PagePlaceholder
       eyebrow={BRAND.name}
       title="tmux를 실전 운영 루틴으로 익히는 가장 빠른 학습 플로우"
-      description="설명보다 실행을 앞세우고, 초급 코어에서 심화 루틴까지 자연스럽게 이어지는 실습 중심 구조로 설계했습니다."
+      description="설명보다 실행을 앞세우고, 첫 레슨부터 운영 루틴까지 하나의 흐름으로 이어지는 실습 중심 구조로 설계했습니다."
     >
       <section className="home-hero">
         <div className="home-hero-main">
@@ -86,7 +86,7 @@ export function HomePage() {
               바로 실습 시작
             </Link>
             <Link to="/learn" className="secondary-btn">
-              초급/심화 경로 보기
+              학습 경로 보기
             </Link>
           </div>
         </div>

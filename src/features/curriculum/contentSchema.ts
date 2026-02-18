@@ -38,6 +38,21 @@ const learningJourneySchema = z.object({
   principles: z.array(z.string()),
 });
 
+const learningPathSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+  entryLessonSlug: z.string(),
+  paneNavigationLessonSlug: z.string(),
+  lessonSlugs: z.array(z.string()),
+});
+
+const termGlossaryEntrySchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  aliases: z.array(z.string()),
+  description: z.string(),
+});
+
 const missionRuleSchema = z.object({
   kind: z.string(),
   operator: z.string(),
@@ -84,6 +99,8 @@ export const appContentSchema = z.object({
   version: z.string(),
   generatedAt: z.string(),
   learningJourney: learningJourneySchema.optional(),
+  learningPath: learningPathSchema.optional(),
+  termGlossary: z.array(termGlossaryEntrySchema).optional(),
   tracks: z.array(trackSchema),
   chapters: z.array(chapterSchema),
   lessons: z.array(lessonSchema),

@@ -10,9 +10,10 @@ type LearnPageData = {
   lessons: AppLesson[];
   missionCounts: Record<string, number>;
   learningJourney: AppContent['learningJourney'] | null;
+  learningPath: AppContent['learningPath'] | null;
 };
 
-const BEGINNER_LESSON_ORDER = [
+const LEARNING_PATH_ORDER = [
   'hello-tmux',
   'basics',
   'basics-shortcuts',
@@ -20,8 +21,6 @@ const BEGINNER_LESSON_ORDER = [
   'attach-detach-shortcuts',
   'split-resize',
   'split-resize-shortcuts',
-] as const;
-const ADVANCED_LESSON_ORDER = [
   'pane-focus-flow',
   'pane-focus-flow-shortcuts',
   'copy-search',
@@ -49,6 +48,7 @@ export function LearnIndexPage() {
     lessons: [],
     missionCounts: {},
     learningJourney: null,
+    learningPath: null,
   });
 
   useEffect(() => {
@@ -58,6 +58,7 @@ export function LearnIndexPage() {
           lessons: content.lessons,
           missionCounts: buildMissionCountMap(content.missions),
           learningJourney: content.learningJourney ?? null,
+          learningPath: content.learningPath ?? null,
         });
       })
       .catch(() => {
@@ -65,27 +66,33 @@ export function LearnIndexPage() {
           lessons: [],
           missionCounts: {},
           learningJourney: null,
+          learningPath: null,
         });
       });
   }, []);
 
-  const beginnerLessons = useMemo(
-    () => sortLessonsByOrder(pageData.lessons, BEGINNER_LESSON_ORDER),
-    [pageData.lessons],
-  );
-  const advancedLessons = useMemo(
-    () => sortLessonsByOrder(pageData.lessons, ADVANCED_LESSON_ORDER),
-    [pageData.lessons],
+  const learningPathOrder = pageData.learningPath?.lessonSlugs?.length
+    ? pageData.learningPath.lessonSlugs
+    : LEARNING_PATH_ORDER;
+  const orderedLessons = useMemo(
+    () => sortLessonsByOrder(pageData.lessons, learningPathOrder),
+    [learningPathOrder, pageData.lessons],
   );
 
-  const beginnerEntry = beginnerLessons[0] ?? null;
-  const advancedEntry = advancedLessons[0] ?? null;
+  const learningPathEntry =
+    orderedLessons.find((lesson) => lesson.slug === pageData.learningPath?.entryLessonSlug) ??
+    orderedLessons[0] ??
+    null;
+  const paneNavigationEntry =
+    orderedLessons.find((lesson) => lesson.slug === pageData.learningPath?.paneNavigationLessonSlug) ??
+    orderedLessons.find((lesson) => lesson.slug === 'pane-focus-flow') ??
+    null;
 
   return (
     <PagePlaceholder
       eyebrow={`${BRAND.name} Learn`}
-      title="학습 경로: 초급 / 심화"
-      description="복잡한 선택 없이 초급 코어를 먼저 완료하고, 이후 심화 루틴으로 확장합니다."
+      title="학습 경로"
+      description="초급/심화를 나누지 않고, 하나의 통합 실습 경로로 처음부터 운영 루틴까지 이어집니다."
     >
       {pageData.lessons.length === 0 ? (
         <EmptyState title="로드된 레슨이 없습니다" description="콘텐츠 파일을 확인해 주세요." />
@@ -100,14 +107,14 @@ export function LearnIndexPage() {
                 <strong>최종 목표:</strong> {pageData.learningJourney.targetOutcome}
               </p>
               <div className="inline-actions">
-                {beginnerEntry ? (
-                  <Link className="primary-btn" to={`/practice?lesson=${beginnerEntry.slug}`}>
-                    초급 실습 바로 시작
+                {learningPathEntry ? (
+                  <Link className="primary-btn" to={`/practice?lesson=${learningPathEntry.slug}`}>
+                    통합 경로 바로 시작
                   </Link>
                 ) : null}
-                {advancedEntry ? (
-                  <Link className="secondary-btn" to={`/practice?lesson=${advancedEntry.slug}`}>
-                    심화 실습 바로 시작
+                {paneNavigationEntry ? (
+                  <Link className="secondary-btn" to={`/practice?lesson=${paneNavigationEntry.slug}`}>
+                    pane 이동부터 시작
                   </Link>
                 ) : null}
               </div>
@@ -117,49 +124,19 @@ export function LearnIndexPage() {
           <section className="curriculum-track-card learning-level-card">
             <header className="curriculum-track-head">
               <div>
-                <h2>초급 코어</h2>
+                <h2>{pageData.learningPath?.title ?? '통합 레슨 경로'}</h2>
                 <p className="muted">
-                  목표: session/window/pane 기본 조작과 detach/attach 복귀 루틴을 혼자 수행
+                  목표: {pageData.learningPath?.description ?? 'session/window/pane 기초 조작부터 pane 이동, copy-mode, command-mode, 원격 운영까지 한 흐름으로 완료'}
                 </p>
               </div>
-              {beginnerEntry ? (
-                <Link className="primary-btn" to={`/practice?lesson=${beginnerEntry.slug}`}>
-                  초급 시작
+              {learningPathEntry ? (
+                <Link className="primary-btn" to={`/practice?lesson=${learningPathEntry.slug}`}>
+                  처음부터 시작
                 </Link>
               ) : null}
             </header>
             <div className="curriculum-lesson-list">
-              {beginnerLessons.map((lesson) => (
-                <div key={lesson.id} className="curriculum-lesson-row">
-                  <Link
-                    className="curriculum-lesson-link"
-                    to={`/learn/${lesson.trackSlug}/${lesson.chapterSlug}/${lesson.slug}`}
-                  >
-                    <strong>{lesson.title}</strong>
-                    <span>{lesson.estimatedMinutes}분 · 미션 {pageData.missionCounts[lesson.slug] ?? 0}개</span>
-                  </Link>
-                  <Link className="secondary-btn" to={`/practice?lesson=${lesson.slug}`}>
-                    실습
-                  </Link>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section className="curriculum-track-card learning-level-card">
-            <header className="curriculum-track-head">
-              <div>
-                <h2>심화 과정</h2>
-                <p className="muted">목표: copy-mode/command-mode/원격 루틴까지 실무형으로 확장</p>
-              </div>
-              {advancedEntry ? (
-                <Link className="secondary-btn" to={`/practice?lesson=${advancedEntry.slug}`}>
-                  심화 시작
-                </Link>
-              ) : null}
-            </header>
-            <div className="curriculum-lesson-list">
-              {advancedLessons.map((lesson) => (
+              {orderedLessons.map((lesson) => (
                 <div key={lesson.id} className="curriculum-lesson-row">
                   <Link
                     className="curriculum-lesson-link"

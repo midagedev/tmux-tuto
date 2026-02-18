@@ -8,7 +8,7 @@ import {
   getTrackBySlug,
   loadAppContent,
 } from '../../features/curriculum/contentLoader';
-import type { AppChapter, AppLesson, AppMission, AppTrack } from '../../features/curriculum/contentSchema';
+import type { AppChapter, AppContent, AppLesson, AppMission, AppTrack } from '../../features/curriculum/contentSchema';
 
 type LessonPageState =
   | {
@@ -20,6 +20,7 @@ type LessonPageState =
       chapter: AppChapter;
       lesson: AppLesson;
       missions: AppMission[];
+      termGlossary: AppContent['termGlossary'] | null;
     }
   | {
       status: 'not-found';
@@ -36,6 +37,64 @@ const SHORTCUT_TOOLTIPS: Record<string, string> = {
   '%': 'Shift+5',
   '"': "Shift+'",
 };
+
+type LessonTerm = {
+  id: string;
+  title: string;
+  aliases: string[];
+  description: string;
+};
+
+const DEFAULT_TERM_GLOSSARY: LessonTerm[] = [
+  {
+    id: 'session',
+    title: 'Session',
+    aliases: ['session', '세션'],
+    description: '작업 컨텍스트를 유지하는 최상위 단위입니다. SSH가 끊겨도 다시 붙어 이어서 작업할 수 있습니다.',
+  },
+  {
+    id: 'window',
+    title: 'Window',
+    aliases: ['window', '윈도우'],
+    description: '세션 안의 탭 단위 작업 공간입니다. 서비스/역할별로 분리해 전환합니다.',
+  },
+  {
+    id: 'pane',
+    title: 'Pane',
+    aliases: ['pane', '패인'],
+    description: '한 윈도우를 분할한 터미널 영역입니다. 코드/로그/테스트를 병렬로 볼 때 사용합니다.',
+  },
+  {
+    id: 'prefix',
+    title: 'Prefix Key',
+    aliases: ['prefix', 'ctrl+b', 'ctrl+a'],
+    description: 'tmux 단축키 입력의 시작 키입니다. 기본값은 `Ctrl+b`입니다.',
+  },
+  {
+    id: 'detach-attach',
+    title: 'Detach / Attach',
+    aliases: ['detach', 'attach', '분리', '재접속'],
+    description: '세션에서 빠져나왔다가 다시 붙는 동작입니다. 세션 복구 루틴의 핵심입니다.',
+  },
+  {
+    id: 'copy-mode',
+    title: 'Copy Mode',
+    aliases: ['copy-mode', 'copy mode', '검색', 'scroll'],
+    description: '스크롤, 검색, 선택 복사를 위한 모드입니다. 긴 로그 탐색에 사용합니다.',
+  },
+  {
+    id: 'command-mode',
+    title: 'Command Mode',
+    aliases: ['command mode', 'command-mode', 'command-prompt', 'choose-tree'],
+    description: 'tmux 명령을 직접 실행하는 모드입니다. 복합 동작 자동화에 유용합니다.',
+  },
+  {
+    id: 'layout',
+    title: 'Layout',
+    aliases: ['layout', '레이아웃', 'resize', 'split'],
+    description: '패인 배치를 의미합니다. 작업 성격에 맞춰 분할/크기/포커스를 조정합니다.',
+  },
+];
 
 function renderTextWithShortcutTooltip(text: string, keyPrefix: string) {
   return text.split(/(`[^`]+`)/g).map((segment, index) => {
@@ -56,6 +115,23 @@ function renderTextWithShortcutTooltip(text: string, keyPrefix: string) {
 
     return <span key={`${keyPrefix}-text-${index}`}>{segment}</span>;
   });
+}
+
+function resolveLessonTerms(lesson: AppLesson, missions: AppMission[], termGlossary: LessonTerm[] | null) {
+  const corpus = [
+    lesson.title,
+    lesson.overview ?? '',
+    lesson.goal ?? '',
+    ...lesson.objectives,
+    ...(lesson.successCriteria ?? []),
+    ...(lesson.failureStates ?? []),
+    ...missions.flatMap((mission) => [mission.title, ...mission.hints]),
+  ]
+    .join(' ')
+    .toLowerCase();
+
+  const source = termGlossary ?? DEFAULT_TERM_GLOSSARY;
+  return source.filter((term) => term.aliases.some((alias) => corpus.includes(alias.toLowerCase()))).slice(0, 6);
 }
 
 export function LessonPage() {
@@ -96,6 +172,7 @@ export function LessonPage() {
           chapter,
           lesson,
           missions,
+          termGlossary: content.termGlossary ?? null,
         });
       })
       .catch(() => {
@@ -145,12 +222,8 @@ export function LessonPage() {
     );
   }
 
-  const { track, chapter, lesson, missions } = pageState;
-  const hasLessonBrief =
-    Boolean(lesson.overview) ||
-    Boolean(lesson.goal) ||
-    (lesson.successCriteria?.length ?? 0) > 0 ||
-    (lesson.failureStates?.length ?? 0) > 0;
+  const { track, chapter, lesson, missions, termGlossary } = pageState;
+  const lessonTerms = resolveLessonTerms(lesson, missions, termGlossary ?? null);
 
   return (
     <PagePlaceholder
@@ -174,55 +247,65 @@ export function LessonPage() {
         </div>
       </section>
 
-      {hasLessonBrief ? (
-        <section className="lesson-section lesson-brief">
-          <h2>레슨 요약</h2>
-          <div className="lesson-summary">
-            {lesson.overview ? (
-              <p>
-                <strong>레슨 소개:</strong> {renderTextWithShortcutTooltip(lesson.overview, 'lesson-overview')}
-              </p>
-            ) : null}
-            {lesson.goal ? (
-              <p>
-                <strong>이 레슨의 목표:</strong> {renderTextWithShortcutTooltip(lesson.goal, 'lesson-goal')}
-              </p>
-            ) : null}
-          </div>
-          {lesson.successCriteria && lesson.successCriteria.length > 0 ? (
-            <details className="lesson-detail-group">
-              <summary>완료 기준 {lesson.successCriteria.length}개</summary>
-              <ul className="link-list">
-                {lesson.successCriteria.map((item, index) => (
-                  <li key={item}>{renderTextWithShortcutTooltip(item, `success-${index}`)}</li>
-                ))}
-              </ul>
-            </details>
+      <section className="lesson-section lesson-brief">
+        <h2>레슨 가이드</h2>
+        <div className="lesson-summary">
+          {lesson.overview ? (
+            <p>
+              <strong>레슨 소개:</strong> {renderTextWithShortcutTooltip(lesson.overview, 'lesson-overview')}
+            </p>
           ) : null}
-          {lesson.failureStates && lesson.failureStates.length > 0 ? (
-            <details className="lesson-detail-group">
-              <summary>부족 상태 {lesson.failureStates.length}개</summary>
-              <ul className="link-list">
-                {lesson.failureStates.map((item, index) => (
-                  <li key={item}>{renderTextWithShortcutTooltip(item, `failure-${index}`)}</li>
-                ))}
-              </ul>
-            </details>
+          {lesson.goal ? (
+            <p>
+              <strong>이 레슨의 목표:</strong> {renderTextWithShortcutTooltip(lesson.goal, 'lesson-goal')}
+            </p>
           ) : null}
-        </section>
-      ) : null}
+        </div>
 
-      <section className="lesson-section">
-        <h2>학습 목표</h2>
+        <h3>학습 목표</h3>
         <ul className="link-list">
           {lesson.objectives.map((objective, index) => (
-            <li key={objective}>{renderTextWithShortcutTooltip(objective, `objective-${index}`)}</li>
+            <li key={`${lesson.id}-objective-${index}`}>
+              {renderTextWithShortcutTooltip(objective, `objective-${index}`)}
+            </li>
           ))}
         </ul>
-      </section>
 
-      <section className="lesson-section">
-        <h2>미션 목록 ({missions.length})</h2>
+        {lesson.successCriteria && lesson.successCriteria.length > 0 ? (
+          <details className="lesson-detail-group">
+            <summary>완료 기준 {lesson.successCriteria.length}개</summary>
+            <ul className="link-list">
+              {lesson.successCriteria.map((item, index) => (
+                <li key={`${lesson.id}-success-${index}`}>{renderTextWithShortcutTooltip(item, `success-${index}`)}</li>
+              ))}
+            </ul>
+          </details>
+        ) : null}
+        {lesson.failureStates && lesson.failureStates.length > 0 ? (
+          <details className="lesson-detail-group">
+            <summary>부족 상태 {lesson.failureStates.length}개</summary>
+            <ul className="link-list">
+              {lesson.failureStates.map((item, index) => (
+                <li key={`${lesson.id}-failure-${index}`}>{renderTextWithShortcutTooltip(item, `failure-${index}`)}</li>
+              ))}
+            </ul>
+          </details>
+        ) : null}
+
+        {lessonTerms.length > 0 ? (
+          <>
+            <h3>용어 빠른 설명</h3>
+            <ul className="link-list">
+              {lessonTerms.map((term) => (
+                <li key={term.id}>
+                  <strong>{term.title}:</strong> {term.description}
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : null}
+
+        <h3>미션 실행 순서 ({missions.length})</h3>
         {missions.length === 0 ? (
           <p className="muted">등록된 미션이 없습니다.</p>
         ) : (
@@ -233,14 +316,16 @@ export function LessonPage() {
 
               return (
                 <article key={mission.id} className="lesson-mission-card">
-                  <h3>{mission.title}</h3>
+                  <h4>{mission.title}</h4>
                   <p className="lesson-mission-meta">
                     난이도 {mission.difficulty} · 초기 시나리오 {mission.initialScenario}
                   </p>
                   {previewHints.length > 0 ? (
                     <ul className="link-list lesson-mission-hints">
                       {previewHints.map((hint, index) => (
-                        <li key={hint}>{renderTextWithShortcutTooltip(hint, `${mission.id}-hint-preview-${index}`)}</li>
+                        <li key={`${mission.id}-hint-preview-${index}`}>
+                          {renderTextWithShortcutTooltip(hint, `${mission.id}-hint-preview-${index}`)}
+                        </li>
                       ))}
                     </ul>
                   ) : (
@@ -251,7 +336,9 @@ export function LessonPage() {
                       <summary>힌트 {restHints.length}개 더 보기</summary>
                       <ul className="link-list lesson-mission-hints">
                         {restHints.map((hint, index) => (
-                          <li key={hint}>{renderTextWithShortcutTooltip(hint, `${mission.id}-hint-rest-${index}`)}</li>
+                          <li key={`${mission.id}-hint-rest-${index}`}>
+                            {renderTextWithShortcutTooltip(hint, `${mission.id}-hint-rest-${index}`)}
+                          </li>
                         ))}
                       </ul>
                     </details>

@@ -147,8 +147,7 @@ const QUICK_COMMANDS = [
   },
 ] as const;
 
-const BEGINNER_ENTRY_LESSON = 'hello-tmux';
-const ADVANCED_ENTRY_LESSON = 'copy-search';
+const LEARNING_PATH_ENTRY_LESSON = 'hello-tmux';
 const LESSON_FILTER_OPTIONS: Array<{ value: LessonFilter; label: string }> = [
   { value: 'all', label: '전체' },
   { value: 'continue', label: '이어하기' },
@@ -2465,16 +2464,9 @@ export function PracticeVmPocPage() {
                 <button
                   type="button"
                   className="secondary-btn"
-                  onClick={() => selectLessonForAction(BEGINNER_ENTRY_LESSON, { resetFilter: true })}
+                  onClick={() => selectLessonForAction(LEARNING_PATH_ENTRY_LESSON, { resetFilter: true })}
                 >
-                  초급 코어
-                </button>
-                <button
-                  type="button"
-                  className="secondary-btn"
-                  onClick={() => selectLessonForAction(ADVANCED_ENTRY_LESSON, { resetFilter: true })}
-                >
-                  심화 과정
+                  통합 학습 경로 처음으로
                 </button>
               </div>
               <div className="vm-lesson-filter" role="tablist" aria-label="레슨 필터">

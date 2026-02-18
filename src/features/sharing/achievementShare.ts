@@ -38,7 +38,7 @@ const ACHIEVEMENT_TARGETS: Record<string, AchievementShareTarget> = {
   },
   track_c_completed: {
     path: '/practice?lesson=command-subset&mission=command-mode-prompt-intro',
-    challengeLabel: '심화: Command Mode 운영',
+    challengeLabel: '확장: Command Mode 운영',
   },
   full_curriculum_completed: {
     path: '/practice?lesson=command-subset&mission=command-mode-tree-intro',

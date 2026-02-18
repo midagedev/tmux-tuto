@@ -55,7 +55,7 @@ const ACHIEVEMENTS: AchievementDefinition[] = [
     id: 'track_c_completed',
     category: 'core',
     title: 'Track C 완료',
-    description: '심화 트랙 실습을 완료했습니다.',
+    description: '확장 트랙 실습을 완료했습니다.',
     shareText: 'Track C를 완료했어요.',
   },
   {
