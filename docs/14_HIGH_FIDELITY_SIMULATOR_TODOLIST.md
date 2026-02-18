@@ -90,7 +90,7 @@
   - 검증: unit test(prefix sequence)
   - DoD: tmux key 느낌의 반응성 확보
 
-- [ ] `HF-023` command-mode parser/dispatcher 확장
+- [x] `HF-023` command-mode parser/dispatcher 확장
   - 산출물: 명령 파서 + registry 구조
   - 의존: `HF-022`
   - 검증: unit test(command parse + dispatch)

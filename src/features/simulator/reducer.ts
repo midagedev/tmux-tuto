@@ -14,6 +14,7 @@ import {
 import { executeShellCommand } from './shellCommands';
 import { appendOutput, clearTerminal, scrollViewport } from './terminalBuffer';
 import { applyPaneLayout, resolveLayoutForPaneCount } from './layout';
+import { parseTmuxCommand } from './tmuxCommand';
 
 export type SplitDirection = 'vertical' | 'horizontal';
 export type FocusDirection = 'left' | 'right' | 'up' | 'down';
@@ -639,53 +640,9 @@ export function simulatorReducer(state: SimulatorState, action: SimulatorAction)
       }
 
       const tmuxCommand = command.startsWith('tmux ') ? command.slice(5).trim() : command;
-
-      if (tmuxCommand === 'new-window') {
-        return simulatorReducer(nextState, { type: 'NEW_WINDOW' });
-      }
-
-      if (tmuxCommand === 'new-session') {
-        return simulatorReducer(nextState, { type: 'NEW_SESSION' });
-      }
-
-      if (tmuxCommand === 'next-window') {
-        return simulatorReducer(nextState, { type: 'NEXT_WINDOW' });
-      }
-
-      if (tmuxCommand === 'previous-window') {
-        return simulatorReducer(nextState, { type: 'PREV_WINDOW' });
-      }
-
-      if (tmuxCommand === 'copy-mode') {
-        return simulatorReducer(nextState, { type: 'ENTER_COPY_MODE' });
-      }
-
-      if (tmuxCommand === 'split-window -h') {
-        return simulatorReducer(nextState, { type: 'SPLIT_PANE', payload: 'vertical' });
-      }
-
-      if (tmuxCommand === 'split-window -v') {
-        return simulatorReducer(nextState, { type: 'SPLIT_PANE', payload: 'horizontal' });
-      }
-
-      if (tmuxCommand === 'kill-pane') {
-        return simulatorReducer(nextState, { type: 'KILL_ACTIVE_PANE' });
-      }
-
-      if (tmuxCommand === 'select-pane -L') {
-        return simulatorReducer(nextState, { type: 'FOCUS_PANE', payload: 'left' });
-      }
-
-      if (tmuxCommand === 'select-pane -R') {
-        return simulatorReducer(nextState, { type: 'FOCUS_PANE', payload: 'right' });
-      }
-
-      if (tmuxCommand === 'select-pane -U') {
-        return simulatorReducer(nextState, { type: 'FOCUS_PANE', payload: 'up' });
-      }
-
-      if (tmuxCommand === 'select-pane -D') {
-        return simulatorReducer(nextState, { type: 'FOCUS_PANE', payload: 'down' });
+      const tmuxAction = parseTmuxCommand(tmuxCommand);
+      if (tmuxAction) {
+        return simulatorReducer(nextState, tmuxAction);
       }
 
       return withHistory(nextState, 'sim.command.unhandled', `Unsupported command: ${command}`);
