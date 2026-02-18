@@ -202,7 +202,7 @@
   - 검증: `npm run test`
   - DoD: 데이터 플로우 검증 통과
 
-- [ ] `HF-062` e2e 시나리오 확장
+- [x] `HF-062` e2e 시나리오 확장
   - 산출물: pane split/focus/scroll, copy-mode, config apply 플로우
   - 의존: Phase 3~4
   - 검증: `npm run test:e2e:smoke`

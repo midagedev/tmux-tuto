@@ -143,3 +143,36 @@ test('practice copy-mode search highlights and match navigation works @smoke', a
   await page.getByRole('button', { name: 'Send Key' }).click();
   await expect(copyModePanel).toContainText('active: 2');
 });
+
+test('practice tmux config apply flow works @smoke', async ({ page }) => {
+  await page.goto('/practice');
+  await dismissAnalyticsBanner(page);
+  await page.getByRole('button', { name: 'Reset Simulator' }).click();
+
+  const commandInput = page.getByLabel('Command mode input');
+  const runCommandButton = page.getByRole('button', { name: 'Run Command' });
+  await commandInput.fill('echo "set -g prefix C-a" > .tmux.conf');
+  await runCommandButton.click();
+  await commandInput.fill('echo "set -g mouse off" >> .tmux.conf');
+  await runCommandButton.click();
+  await commandInput.fill('echo "setw -g mode-keys vi" >> .tmux.conf');
+  await runCommandButton.click();
+  await commandInput.fill('echo "bind x split-window -h" >> .tmux.conf');
+  await runCommandButton.click();
+  await commandInput.fill('tmux source-file .tmux.conf');
+  await runCommandButton.click();
+
+  const prefixSummary = page.locator('.sim-summary p').filter({ hasText: 'Prefix:' });
+  const configSummary = page.locator('.sim-summary p').filter({ hasText: 'Config:' });
+  await expect(prefixSummary).toContainText('C-a');
+  await expect(configSummary).toContainText('mouse off');
+  await expect(configSummary).toContainText('mode-keys vi');
+  await expect(page.locator('.sim-log')).toContainText('sim.config.apply');
+
+  await page.getByRole('button', { name: 'Prefix' }).click();
+  await page.getByLabel('Manual key input').fill('x');
+  await page.getByRole('button', { name: 'Send Key' }).click();
+
+  const panesSummary = page.locator('.sim-summary p').filter({ hasText: 'Panes:' });
+  await expect(panesSummary).toContainText('2');
+});
