@@ -47,14 +47,22 @@
 | Integration | content-schema + coverage-matrix 정합, Progress 렌더와 unlock 조건 일치 |
 | E2E | P0/P1 시나리오 중심 smoke 재구성, 레거시 시나리오는 non-smoke 회귀군으로 이동 |
 
-## 5) 구현 입력 체크리스트 (이슈 #14 전달)
+## 5) 전환 리스크 및 대응
+
+| 리스크 | 영향 | 대응 |
+| --- | --- | --- |
+| 레거시 셀렉터 제거로 테스트 대량 실패 | smoke 신뢰도 저하 | VM 브리지 기반 헬퍼로 검증 포인트를 셀렉터 의존에서 상태 의존으로 전환 |
+| VM 부팅 지연/환경 편차 | 간헐적 flaky 발생 | `waitForVmReady` 타임아웃/재시도 정책 표준화 |
+| 업적 카탈로그 ID 변경 | E2E 기대값 불일치 | 업적 제목 대신 ID 매핑 상수 사용 + #10 머지 후 일괄 갱신 |
+
+## 6) 구현 입력 체크리스트 (이슈 #14 전달)
 
 - smoke 태그는 P0 시나리오만 유지
 - VM 브리지 헬퍼(`waitForVmReady`, `sendVmProbe`)를 공통 유틸로 통합
 - 완료 피드백 UI 검증에 `aria-live`, `Escape dismiss`, CTA 이동 포함
 - 최종 게이트는 `npm run test`, `npm run test:e2e:smoke`, `npm run verify:coverage-matrix`
 
-## 6) 완료 기준 점검
+## 7) 완료 기준 점검
 
 - 기존->신규 매핑표: 완료
 - 우선순위 실행 계획: 완료
