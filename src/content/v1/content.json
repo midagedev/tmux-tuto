@@ -541,7 +541,8 @@
         }
       ],
       "hints": [
-        "`tmux select-pane -L` 또는 `tmux select-pane -R`를 여러 번 실행해 포커스를 이동하세요.",
+        "기본 분할(`tmux split-window`) 기준으로 `tmux select-pane -U` 또는 `tmux select-pane -D`를 실행해 포커스를 이동하세요.",
+        "좌우 분할(`tmux split-window -h`)에서는 `tmux select-pane -L`/`tmux select-pane -R`를 사용하면 됩니다.",
         "단축키(`Ctrl+b` 후 방향키)를 병행해도 좋고, 채점 기록을 위해 명령형 이동을 최소 1회 실행하세요."
       ]
     },
