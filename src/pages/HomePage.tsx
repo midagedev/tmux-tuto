@@ -40,8 +40,8 @@ const MENU_ITEMS = [
   },
   {
     title: '진행도',
-    description: 'XP, 트랙 진행률, 업적, 마일스톤 공유까지 성과를 관리합니다.',
-    cta: '진행도 보기',
+    description: '보조 메뉴입니다. 필요할 때만 XP/트랙 진행률/업적을 확인합니다.',
+    cta: '진행도(선택) 보기',
     to: '/progress',
   },
 ] as const;
