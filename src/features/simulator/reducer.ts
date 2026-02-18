@@ -21,6 +21,8 @@ export type FocusDirection = 'left' | 'right' | 'up' | 'down';
 export type SimulatorAction =
   | { type: 'SET_PREFIX_KEY'; payload: 'C-b' | 'C-a' }
   | { type: 'SET_MODE'; payload: SimulatorMode }
+  | { type: 'ENTER_PREFIX_PENDING'; payload: { at: number } }
+  | { type: 'SET_REPEAT_WINDOW'; payload: number | null }
   | { type: 'SET_COMMAND_BUFFER'; payload: string }
   | { type: 'SET_COMMAND_LINE'; payload: { buffer: string; cursor: number } }
   | { type: 'NAVIGATE_COMMAND_HISTORY'; payload: 'up' | 'down' }
@@ -233,6 +235,28 @@ export function simulatorReducer(state: SimulatorState, action: SimulatorAction)
         mode: {
           ...state.mode,
           value: action.payload,
+          prefixEnteredAt: action.payload === 'PREFIX_PENDING' ? state.mode.prefixEnteredAt : null,
+        },
+      };
+    }
+
+    case 'ENTER_PREFIX_PENDING': {
+      return {
+        ...state,
+        mode: {
+          ...state.mode,
+          value: 'PREFIX_PENDING',
+          prefixEnteredAt: action.payload.at,
+        },
+      };
+    }
+
+    case 'SET_REPEAT_WINDOW': {
+      return {
+        ...state,
+        mode: {
+          ...state.mode,
+          repeatUntil: action.payload,
         },
       };
     }

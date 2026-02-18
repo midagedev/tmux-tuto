@@ -38,6 +38,8 @@ function isSimulatorStateV2(value: unknown): value is SimulatorState {
   if (
     !isRecord(mode) ||
     !MODE_VALUES.includes(mode.value as SimulatorMode) ||
+    (mode.prefixEnteredAt !== null && typeof mode.prefixEnteredAt !== 'number') ||
+    (mode.repeatUntil !== null && typeof mode.repeatUntil !== 'number') ||
     typeof mode.commandBuffer !== 'string' ||
     typeof mode.commandCursor !== 'number' ||
     (mode.historyIndex !== null && typeof mode.historyIndex !== 'number') ||

@@ -63,6 +63,8 @@ export type CopyModeState = {
 
 export type ModeState = {
   value: TmuxMode;
+  prefixEnteredAt: number | null;
+  repeatUntil: number | null;
   commandBuffer: string;
   commandCursor: number;
   historyIndex: number | null;
@@ -176,6 +178,8 @@ export function createInitialSimulatorState(options?: { scenarioPresetId?: strin
     },
     mode: {
       value: 'NORMAL',
+      prefixEnteredAt: null,
+      repeatUntil: null,
       commandBuffer: '',
       commandCursor: 0,
       historyIndex: null,

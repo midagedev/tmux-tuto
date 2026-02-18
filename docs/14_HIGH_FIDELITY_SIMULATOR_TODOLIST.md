@@ -84,7 +84,7 @@
   - 검증: e2e smoke(클릭 포커스, 스크롤)
   - DoD: 마우스 기반 조작이 실제감 있게 동작
 
-- [ ] `HF-022` 키 테이블/프리픽스 처리 고도화
+- [x] `HF-022` 키 테이블/프리픽스 처리 고도화
   - 산출물: prefix timeout/repeat-table 포함 입력 파이프라인
   - 의존: `HF-020`
   - 검증: unit test(prefix sequence)

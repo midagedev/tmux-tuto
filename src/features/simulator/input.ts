@@ -2,6 +2,9 @@ import type { SimulatorAction } from './reducer';
 import type { SimulatorState } from './model';
 import { applyLineEditorKey } from './lineEditor';
 
+const PREFIX_TIMEOUT_MS = 1200;
+const REPEAT_TIMEOUT_MS = 900;
+
 function action(type: SimulatorAction['type'], payload?: unknown): SimulatorAction {
   if (payload === undefined) {
     return { type } as SimulatorAction;
@@ -48,6 +51,10 @@ export function normalizeKeyboardEvent(event: KeyboardEvent) {
   }
 
   return event.key;
+}
+
+function isRepeatablePrefixKey(key: string) {
+  return ['h', 'j', 'k', 'l', 'H', 'J', 'K', 'L'].includes(key);
 }
 
 function resolvePrefixKey(key: string): SimulatorAction[] {
@@ -156,6 +163,10 @@ function resolveCopyMode(state: SimulatorState, key: string): SimulatorAction[] 
 }
 
 export function resolveSimulatorInput(state: SimulatorState, key: string): SimulatorAction[] {
+  return resolveSimulatorInputAt(state, key, Date.now());
+}
+
+export function resolveSimulatorInputAt(state: SimulatorState, key: string, nowMs: number): SimulatorAction[] {
   if (!key) {
     return [];
   }
@@ -169,12 +180,40 @@ export function resolveSimulatorInput(state: SimulatorState, key: string): Simul
   }
 
   if (state.mode.value === 'PREFIX_PENDING') {
-    return resolvePrefixKey(key);
+    if (state.mode.prefixEnteredAt !== null && nowMs - state.mode.prefixEnteredAt > PREFIX_TIMEOUT_MS) {
+      const timedOutState = {
+        ...state,
+        mode: {
+          ...state.mode,
+          value: 'NORMAL' as const,
+          prefixEnteredAt: null,
+        },
+      };
+
+      return [action('SET_MODE', 'NORMAL'), action('SET_REPEAT_WINDOW', null), ...resolveSimulatorInputAt(timedOutState, key, nowMs)];
+    }
+
+    const prefixActions = resolvePrefixKey(key);
+    if (isRepeatablePrefixKey(key)) {
+      return [...prefixActions, action('SET_REPEAT_WINDOW', nowMs + REPEAT_TIMEOUT_MS)];
+    }
+
+    return [...prefixActions, action('SET_REPEAT_WINDOW', null)];
   }
+
+  if (state.mode.repeatUntil !== null && nowMs <= state.mode.repeatUntil && isRepeatablePrefixKey(key)) {
+    const repeatActions = resolvePrefixKey(key).filter(
+      (item) => !(item.type === 'SET_MODE' && item.payload === 'NORMAL'),
+    );
+    return [...repeatActions, action('SET_REPEAT_WINDOW', nowMs + REPEAT_TIMEOUT_MS)];
+  }
+
+  const repeatResetAction =
+    state.mode.repeatUntil !== null ? [action('SET_REPEAT_WINDOW', null)] : [];
 
   if (key === state.tmux.config.prefixKey) {
-    return [action('SET_MODE', 'PREFIX_PENDING')];
+    return [...repeatResetAction, action('ENTER_PREFIX_PENDING', { at: nowMs })];
   }
 
-  return [action('RECORD_ACTION', `sim.key.raw.${key}`)];
+  return [...repeatResetAction, action('RECORD_ACTION', `sim.key.raw.${key}`)];
 }

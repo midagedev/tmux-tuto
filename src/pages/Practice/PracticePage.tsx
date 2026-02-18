@@ -90,6 +90,9 @@ export function PracticePage() {
           <p>
             <strong>Prompt:</strong> {activeShellSession.workingDirectory} {activeShellSession.prompt}
           </p>
+          <p>
+            <strong>Repeat Table:</strong> {simulatorState.mode.repeatUntil ? 'active' : 'idle'}
+          </p>
         </div>
 
         <div className="sim-pane-grid" aria-label="Pane viewport grid">

@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { createInitialSimulatorState } from './model';
-import { resolveSimulatorInput } from './input';
+import { resolveSimulatorInput, resolveSimulatorInputAt } from './input';
 
 describe('resolveSimulatorInput', () => {
   it('enters PREFIX_PENDING when prefix key is pressed', () => {
     const state = createInitialSimulatorState();
-    const actions = resolveSimulatorInput(state, 'C-b');
+    const actions = resolveSimulatorInputAt(state, 'C-b', 1000);
 
-    expect(actions).toEqual([{ type: 'SET_MODE', payload: 'PREFIX_PENDING' }]);
+    expect(actions).toEqual([{ type: 'ENTER_PREFIX_PENDING', payload: { at: 1000 } }]);
   });
 
   it('maps prefix + % to split action and mode reset', () => {
@@ -24,6 +24,7 @@ describe('resolveSimulatorInput', () => {
     expect(actions).toEqual([
       { type: 'SPLIT_PANE', payload: 'vertical' },
       { type: 'SET_MODE', payload: 'NORMAL' },
+      { type: 'SET_REPEAT_WINDOW', payload: null },
     ]);
   });
 
@@ -55,5 +56,41 @@ describe('resolveSimulatorInput', () => {
     const actions = resolveSimulatorInput(state, 'ArrowUp');
 
     expect(actions).toEqual([{ type: 'NAVIGATE_COMMAND_HISTORY', payload: 'up' }]);
+  });
+
+  it('supports repeat table movement without pressing prefix repeatedly', () => {
+    const initial = createInitialSimulatorState();
+    const state = {
+      ...initial,
+      mode: {
+        ...initial.mode,
+        repeatUntil: 2000,
+      },
+    };
+    const actions = resolveSimulatorInputAt(state, 'h', 1500);
+
+    expect(actions).toEqual([
+      { type: 'FOCUS_PANE', payload: 'left' },
+      { type: 'SET_REPEAT_WINDOW', payload: 2400 },
+    ]);
+  });
+
+  it('falls back to normal input when prefix timeout is exceeded', () => {
+    const initial = createInitialSimulatorState();
+    const state = {
+      ...initial,
+      mode: {
+        ...initial.mode,
+        value: 'PREFIX_PENDING' as const,
+        prefixEnteredAt: 0,
+      },
+    };
+    const actions = resolveSimulatorInputAt(state, '%', 2000);
+
+    expect(actions).toEqual([
+      { type: 'SET_MODE', payload: 'NORMAL' },
+      { type: 'SET_REPEAT_WINDOW', payload: null },
+      { type: 'RECORD_ACTION', payload: 'sim.key.raw.%' },
+    ]);
   });
 });
