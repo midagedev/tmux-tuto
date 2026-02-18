@@ -4,9 +4,10 @@ import { EmptyState } from '../../components/system/EmptyState';
 import { PagePlaceholder } from '../../components/system/PagePlaceholder';
 import { loadAppContent } from '../../features/curriculum/contentLoader';
 import type { AppContent, AppMission } from '../../features/curriculum/contentSchema';
+import { listAchievementDefinitions } from '../../features/progress';
 import { useProgressStore } from '../../features/progress/progressStore';
 import type { MilestoneSlug } from '../../features/sharing';
-import { buildSharePath, getMilestoneMeta } from '../../features/sharing';
+import { buildSharePath, buildTwitterIntentUrl, getMilestoneMeta } from '../../features/sharing';
 
 export function ProgressPage() {
   const [content, setContent] = useState<AppContent | null>(null);
@@ -15,7 +16,9 @@ export function ProgressPage() {
   const level = useProgressStore((store) => store.level);
   const streakDays = useProgressStore((store) => store.streakDays);
   const completedMissionSlugs = useProgressStore((store) => store.completedMissionSlugs);
-  const unlockedAchievements = useProgressStore((store) => store.unlockedAchievements);
+  const unlockedCourseAchievements = useProgressStore((store) => store.unlockedCourseAchievements);
+  const unlockedSkillAchievements = useProgressStore((store) => store.unlockedSkillAchievements);
+  const tmuxSkillStats = useProgressStore((store) => store.tmuxSkillStats);
   const recordMissionPass = useProgressStore((store) => store.recordMissionPass);
 
   useEffect(() => {
@@ -74,6 +77,28 @@ export function ProgressPage() {
     () => trackProgress.filter((row) => row.ratio >= 100).map((row) => row.trackSlug),
     [trackProgress],
   );
+
+  const courseAchievementRows = useMemo(() => {
+    const unlockedSet = new Set(unlockedCourseAchievements);
+    return listAchievementDefinitions('course').map((achievement) => ({
+      ...achievement,
+      unlocked: unlockedSet.has(achievement.id),
+    }));
+  }, [unlockedCourseAchievements]);
+
+  const skillAchievementRows = useMemo(() => {
+    const unlockedSet = new Set(unlockedSkillAchievements);
+    return listAchievementDefinitions('skill').map((achievement) => ({
+      ...achievement,
+      unlocked: unlockedSet.has(achievement.id),
+    }));
+  }, [unlockedSkillAchievements]);
+
+  const progressShareUrl = useMemo(() => {
+    const basePath = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
+    const progressPath = `${basePath}/progress`.replace(/\/{2,}/g, '/');
+    return new URL(progressPath, window.location.origin).toString();
+  }, []);
 
   const milestoneLinks = useMemo(() => {
     const milestoneSet = new Set<MilestoneSlug>();
@@ -153,6 +178,9 @@ export function ProgressPage() {
             <p>
               <strong>Completed Missions:</strong> {completedMissionSlugs.length}
             </p>
+            <p>
+              <strong>Skill Splits:</strong> {tmuxSkillStats.splitCount}
+            </p>
           </div>
 
           <section className="playbook-section">
@@ -167,16 +195,81 @@ export function ProgressPage() {
           </section>
 
           <section className="playbook-section">
-            <h2>Achievements</h2>
-            {unlockedAchievements.length === 0 ? (
-              <p className="muted">아직 해금된 업적이 없습니다.</p>
-            ) : (
-              <ul className="link-list">
-                {unlockedAchievements.map((achievement) => (
-                  <li key={achievement}>{achievement}</li>
-                ))}
-              </ul>
-            )}
+            <h2>코스 업적</h2>
+            <p className="muted">
+              {unlockedCourseAchievements.length}/{courseAchievementRows.length} 달성
+            </p>
+            <div className="achievement-grid">
+              {courseAchievementRows.map((achievement) => (
+                <article
+                  key={achievement.id}
+                  className={`achievement-card ${achievement.unlocked ? 'is-unlocked' : 'is-locked'}`}
+                >
+                  <h3>{achievement.title}</h3>
+                  <p>{achievement.description}</p>
+                  <p className="muted">{achievement.unlocked ? '달성됨' : '미달성'}</p>
+                  {achievement.unlocked ? (
+                    <a
+                      className="text-link"
+                      href={buildTwitterIntentUrl(
+                        progressShareUrl,
+                        `tmux-tuto 업적 달성: ${achievement.shareText}`,
+                      )}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      X 공유
+                    </a>
+                  ) : null}
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="playbook-section">
+            <h2>tmux 스킬 업적</h2>
+            <p className="muted">
+              {unlockedSkillAchievements.length}/{skillAchievementRows.length} 달성
+            </p>
+            <ul className="link-list">
+              <li>pane 분할 누적: {tmuxSkillStats.splitCount}</li>
+              <li>최대 pane 수: {tmuxSkillStats.maxPaneCount}</li>
+              <li>window 생성: {tmuxSkillStats.newWindowCount}</li>
+              <li>session 생성: {tmuxSkillStats.newSessionCount}</li>
+              <li>copy-mode 진입: {tmuxSkillStats.copyModeCount}</li>
+              <li>pane resize 누적: {tmuxSkillStats.paneResizeCount}</li>
+              <li>pane 이동/선택 누적: {tmuxSkillStats.paneSelectCount}</li>
+              <li>layout 변경 누적: {tmuxSkillStats.layoutSelectCount}</li>
+              <li>zoom 토글 누적: {tmuxSkillStats.zoomToggleCount}</li>
+              <li>sync 토글 누적: {tmuxSkillStats.syncToggleCount}</li>
+              <li>command-prompt 실행: {tmuxSkillStats.commandPromptCount}</li>
+              <li>choose-tree 실행: {tmuxSkillStats.chooseTreeCount}</li>
+            </ul>
+            <div className="achievement-grid">
+              {skillAchievementRows.map((achievement) => (
+                <article
+                  key={achievement.id}
+                  className={`achievement-card ${achievement.unlocked ? 'is-unlocked' : 'is-locked'}`}
+                >
+                  <h3>{achievement.title}</h3>
+                  <p>{achievement.description}</p>
+                  <p className="muted">{achievement.unlocked ? '달성됨' : '미달성'}</p>
+                  {achievement.unlocked ? (
+                    <a
+                      className="text-link"
+                      href={buildTwitterIntentUrl(
+                        progressShareUrl,
+                        `tmux-tuto 업적 달성: ${achievement.shareText}`,
+                      )}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      X 공유
+                    </a>
+                  ) : null}
+                </article>
+              ))}
+            </div>
           </section>
 
           <section className="playbook-section">

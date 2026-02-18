@@ -6,10 +6,31 @@ type XpInput = {
   hintLevel: 0 | 1 | 2 | 3;
 };
 
-type AchievementInput = {
+export type CourseAchievementInput = {
   completedMissionCount: number;
   streakDays: number;
   completedTrackSlugs: string[];
+};
+
+export type SkillAchievementInput = {
+  splitCount: number;
+  maxPaneCount: number;
+  newWindowCount: number;
+  newSessionCount: number;
+  copyModeCount: number;
+  paneResizeCount: number;
+  paneSelectCount: number;
+  paneSwapCount: number;
+  windowRotateCount: number;
+  layoutSelectCount: number;
+  zoomToggleCount: number;
+  syncToggleCount: number;
+  commandPromptCount: number;
+  chooseTreeCount: number;
+  uniqueLayoutCount: number;
+  zoomObserved: boolean;
+  syncObserved: boolean;
+  lessonCount: number;
 };
 
 const DIFFICULTY_BONUS: Record<MissionDifficulty, number> = {
@@ -109,7 +130,7 @@ export function calculateNextStreak(lastPassDate: string | null, nowIso: string,
   return 1;
 }
 
-export function computeAchievements(input: AchievementInput) {
+export function computeCourseAchievements(input: CourseAchievementInput) {
   const unlocked: string[] = [];
 
   if (input.completedMissionCount >= 1) {
@@ -138,6 +159,84 @@ export function computeAchievements(input: AchievementInput) {
     input.completedTrackSlugs.includes('track-c-deepwork')
   ) {
     unlocked.push('full_curriculum_completed');
+  }
+
+  return unlocked;
+}
+
+export function computeAchievements(input: CourseAchievementInput) {
+  return computeCourseAchievements(input);
+}
+
+export function computeSkillAchievements(input: SkillAchievementInput) {
+  const unlocked: string[] = [];
+
+  if (input.splitCount >= 1) {
+    unlocked.push('skill_first_split');
+  }
+
+  if (input.maxPaneCount >= 3) {
+    unlocked.push('skill_triple_panes');
+  }
+
+  if (input.splitCount >= 20) {
+    unlocked.push('skill_split_20');
+  }
+
+  if (input.splitCount >= 100) {
+    unlocked.push('skill_split_100');
+  }
+
+  if (input.newWindowCount >= 1) {
+    unlocked.push('skill_first_window');
+  }
+
+  if (input.newSessionCount >= 1) {
+    unlocked.push('skill_first_session');
+  }
+
+  if (input.copyModeCount >= 1) {
+    unlocked.push('skill_first_copy_mode');
+  }
+
+  if (input.layoutSelectCount >= 1 || input.uniqueLayoutCount >= 2) {
+    unlocked.push('skill_layout_first');
+  }
+
+  if (input.zoomToggleCount >= 1 || input.zoomObserved) {
+    unlocked.push('skill_zoom_control');
+  }
+
+  if (input.syncToggleCount >= 1 || input.syncObserved) {
+    unlocked.push('skill_sync_control');
+  }
+
+  if (input.commandPromptCount >= 1) {
+    unlocked.push('skill_command_prompt');
+  }
+
+  if (input.chooseTreeCount >= 1) {
+    unlocked.push('skill_choose_tree');
+  }
+
+  if (input.paneResizeCount >= 5) {
+    unlocked.push('skill_resize_5');
+  }
+
+  if (input.paneSelectCount >= 10) {
+    unlocked.push('skill_pane_navigator');
+  }
+
+  if (input.paneSwapCount >= 1) {
+    unlocked.push('skill_swap_first');
+  }
+
+  if (input.windowRotateCount >= 1) {
+    unlocked.push('skill_rotate_first');
+  }
+
+  if (input.lessonCount >= 3) {
+    unlocked.push('skill_three_lessons');
   }
 
   return unlocked;

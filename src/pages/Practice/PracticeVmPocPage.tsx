@@ -8,7 +8,9 @@ import type { V86Options } from 'v86';
 import { PagePlaceholder } from '../../components/system/PagePlaceholder';
 import { loadAppContent } from '../../features/curriculum/contentLoader';
 import type { AppContent, AppMission } from '../../features/curriculum/contentSchema';
+import { getAchievementDefinition } from '../../features/progress';
 import { useProgressStore } from '../../features/progress/progressStore';
+import { buildTwitterIntentUrl } from '../../features/sharing';
 import {
   evaluateMissionWithVmSnapshot,
   extractCommandFromPromptLine,
@@ -26,14 +28,20 @@ type VmMetricState = {
   windowCount: number | null;
   paneCount: number | null;
   modeIs: string | null;
+  sessionName: string | null;
+  activeWindowIndex: number | null;
+  windowLayout: string | null;
+  windowZoomed: boolean | null;
+  paneSynchronized: boolean | null;
   searchExecuted: boolean | null;
   searchMatchFound: boolean | null;
 };
 
 type CelebrationState = {
-  kind: 'mission' | 'lesson';
+  kind: 'mission' | 'lesson' | 'skill';
   message: string;
   detail: string;
+  achievementId?: string;
 };
 
 type VmInitialState = {
@@ -48,6 +56,8 @@ declare global {
         status: VmStatus;
         text: string;
         metrics: VmMetricState;
+        actionHistory: string[];
+        commandHistory: string[];
         debugLineCount: number;
         lastDebugLine: string | null;
       };
@@ -65,7 +75,24 @@ const MAX_DEBUG_LINES = 220;
 const V86_STATE_MAGIC_LE = 0x86768676;
 const ZSTD_MAGIC_LE = 0xfd2fb528;
 
-const PROBE_TRIGGER_COMMAND = '/usr/bin/tmux-tuto-probe';
+const PROBE_EXTRA_METRICS_COMMAND =
+  'TMUXWEB_SESSION_NAME=""; TMUXWEB_ACTIVE_WINDOW=-1; TMUXWEB_LAYOUT=""; TMUXWEB_ZOOMED=0; TMUXWEB_SYNC=0; ' +
+  'if tmux -V >/dev/null 2>&1; then ' +
+  'TMUXWEB_SESSION_NAME=$(tmux display-message -p "#S" 2>/dev/null | tr -d "\\n\\r"); ' +
+  'TMUXWEB_ACTIVE_WINDOW=$(tmux display-message -p "#{window_index}" 2>/dev/null | tr -d " "); ' +
+  '[ -z "$TMUXWEB_ACTIVE_WINDOW" ] && TMUXWEB_ACTIVE_WINDOW=-1; ' +
+  'TMUXWEB_LAYOUT=$(tmux display-message -p "#{window_layout}" 2>/dev/null | tr -d "\\n\\r"); ' +
+  'TMUXWEB_ZOOMED=$(tmux display-message -p "#{window_zoomed_flag}" 2>/dev/null | tr -d " "); ' +
+  '[ -z "$TMUXWEB_ZOOMED" ] && TMUXWEB_ZOOMED=0; ' +
+  'TMUXWEB_SYNC_RAW=$(tmux show-window-options -v synchronize-panes 2>/dev/null | tr -d "\\n\\r"); ' +
+  'if [ "$TMUXWEB_SYNC_RAW" = "on" ]; then TMUXWEB_SYNC=1; else TMUXWEB_SYNC=0; fi; ' +
+  'fi; ' +
+  'echo "[[TMUXWEB_PROBE:sessionName:${TMUXWEB_SESSION_NAME}]]"; ' +
+  'echo "[[TMUXWEB_PROBE:activeWindow:${TMUXWEB_ACTIVE_WINDOW}]]"; ' +
+  'echo "[[TMUXWEB_PROBE:layout:${TMUXWEB_LAYOUT}]]"; ' +
+  'echo "[[TMUXWEB_PROBE:zoomed:${TMUXWEB_ZOOMED}]]"; ' +
+  'echo "[[TMUXWEB_PROBE:sync:${TMUXWEB_SYNC}]]"';
+const PROBE_TRIGGER_COMMAND = `/usr/bin/tmux-tuto-probe; ${PROBE_EXTRA_METRICS_COMMAND}`;
 const BANNER_TRIGGER_COMMAND = '/usr/bin/tmux-tuto-banner';
 
 const QUICK_COMMANDS = [
@@ -97,6 +124,21 @@ const QUICK_COMMANDS = [
     label: 'Copy Search 실패',
     command:
       'tmux has-session -t lesson 2>/dev/null || tmux new-session -d -s lesson; tmux copy-mode -t lesson:0.0; tmux send-keys -t lesson:0.0 -X search-backward "__TMUXWEB_NOT_FOUND__"; echo "[[TMUXWEB_PROBE:search:1]]"; echo "[[TMUXWEB_PROBE:searchMatched:0]]"',
+  },
+  {
+    label: '레이아웃 변경',
+    command:
+      'tmux has-session -t lesson 2>/dev/null || tmux new-session -d -s lesson; tmux select-layout -t lesson:0 even-horizontal; tmux display-message -p "#{window_layout}"',
+  },
+  {
+    label: 'Pane 줌 토글',
+    command:
+      'tmux has-session -t lesson 2>/dev/null || tmux new-session -d -s lesson; tmux resize-pane -t lesson:0.0 -Z; tmux display-message -p "#{window_zoomed_flag}"',
+  },
+  {
+    label: 'Pane Sync ON',
+    command:
+      'tmux has-session -t lesson 2>/dev/null || tmux new-session -d -s lesson; tmux set-window-option -t lesson:0 synchronize-panes on; tmux show-window-options -t lesson:0 -v synchronize-panes',
   },
 ] as const;
 
@@ -239,9 +281,26 @@ function createInitialMetrics(): VmMetricState {
     windowCount: null,
     paneCount: null,
     modeIs: null,
+    sessionName: null,
+    activeWindowIndex: null,
+    windowLayout: null,
+    windowZoomed: null,
+    paneSynchronized: null,
     searchExecuted: null,
     searchMatchFound: null,
   };
+}
+
+function formatLayout(layout: string | null) {
+  if (!layout) {
+    return '-';
+  }
+
+  if (layout.length <= 28) {
+    return layout;
+  }
+
+  return `${layout.slice(0, 28)}...`;
 }
 
 export function PracticeVmPocPage() {
@@ -270,6 +329,7 @@ export function PracticeVmPocPage() {
 
   const completedMissionSlugs = useProgressStore((store) => store.completedMissionSlugs);
   const recordMissionPass = useProgressStore((store) => store.recordMissionPass);
+  const recordTmuxActivity = useProgressStore((store) => store.recordTmuxActivity);
 
   const terminalHostRef = useRef<HTMLDivElement | null>(null);
   const terminalRef = useRef<Terminal | null>(null);
@@ -284,6 +344,8 @@ export function PracticeVmPocPage() {
   const lastEmulatorOptionsRef = useRef<V86Options | null>(null);
   const vmInternalBridgeReadyRef = useRef(false);
   const vmWarmBannerPendingRef = useRef(false);
+  const selectedLessonSlugRef = useRef(selectedLessonSlug);
+  const recordTmuxActivityRef = useRef(recordTmuxActivity);
 
   const lessonParam = searchParams.get('lesson') ?? '';
   const missionParam = searchParams.get('mission') ?? '';
@@ -314,6 +376,11 @@ export function PracticeVmPocPage() {
       windowCount: metrics.windowCount,
       paneCount: metrics.paneCount,
       modeIs: metrics.modeIs,
+      sessionName: metrics.sessionName,
+      activeWindowIndex: metrics.activeWindowIndex,
+      windowLayout: metrics.windowLayout,
+      windowZoomed: metrics.windowZoomed,
+      paneSynchronized: metrics.paneSynchronized,
       searchExecuted: metrics.searchExecuted,
       searchMatchFound: metrics.searchMatchFound,
       actionHistory,
@@ -382,9 +449,63 @@ export function PracticeVmPocPage() {
     return index === -1 ? null : index + 1;
   }, [lessonMissions, selectedMission]);
 
+  const nextMission = useMemo(() => {
+    if (!selectedMission) {
+      return null;
+    }
+
+    const index = lessonMissions.findIndex((mission) => mission.slug === selectedMission.slug);
+    if (index === -1) {
+      return null;
+    }
+
+    return lessonMissions[index + 1] ?? null;
+  }, [lessonMissions, selectedMission]);
+
+  const nextLesson = useMemo(() => {
+    if (!content || !selectedLesson) {
+      return null;
+    }
+
+    const index = content.lessons.findIndex((lesson) => lesson.slug === selectedLesson.slug);
+    if (index === -1) {
+      return null;
+    }
+
+    return content.lessons[index + 1] ?? null;
+  }, [content, selectedLesson]);
+
+  const celebrationAchievement = useMemo(() => {
+    if (!celebration?.achievementId) {
+      return null;
+    }
+
+    return getAchievementDefinition(celebration.achievementId);
+  }, [celebration?.achievementId]);
+
+  const celebrationShareHref = useMemo(() => {
+    if (!celebrationAchievement) {
+      return null;
+    }
+
+    const basePath = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
+    const progressPath = `${basePath}/progress`.replace(/\/{2,}/g, '/');
+    const shareUrl = new URL(progressPath, window.location.origin).toString();
+    const shareText = `tmux-tuto 업적 달성: ${celebrationAchievement.shareText}`;
+    return buildTwitterIntentUrl(shareUrl, shareText);
+  }, [celebrationAchievement]);
+
   useEffect(() => {
     autoProbeRef.current = autoProbe;
   }, [autoProbe]);
+
+  useEffect(() => {
+    selectedLessonSlugRef.current = selectedLessonSlug;
+  }, [selectedLessonSlug]);
+
+  useEffect(() => {
+    recordTmuxActivityRef.current = recordTmuxActivity;
+  }, [recordTmuxActivity]);
 
   useEffect(() => {
     let isMounted = true;
@@ -485,77 +606,154 @@ export function PracticeVmPocPage() {
     setDebugLines((previous) => trimHistory([...previous, normalized], MAX_DEBUG_LINES));
   }, []);
 
-  const updateMetricByProbe = useCallback((metric: VmProbeMetric) => {
-    setVmStatus('running');
-    setVmStatusText('부팅 완료, 명령 입력 가능');
-
-    setMetrics((previous) => {
-      switch (metric.key) {
-        case 'session':
-          return {
-            ...previous,
-            sessionCount: metric.value >= 0 ? metric.value : null,
-          };
-        case 'window':
-          return {
-            ...previous,
-            windowCount: metric.value >= 0 ? metric.value : null,
-          };
-        case 'pane':
-          return {
-            ...previous,
-            paneCount: metric.value >= 0 ? metric.value : null,
-          };
-        case 'mode':
-          return {
-            ...previous,
-            modeIs: metric.value === 1 ? 'COPY_MODE' : null,
-          };
-        case 'search':
-          return {
-            ...previous,
-            searchExecuted: metric.value === 1,
-          };
-        case 'searchMatched':
-          return {
-            ...previous,
-            searchMatchFound: metric.value === 1,
-          };
-        default:
-          return previous;
-      }
-    });
-  }, []);
-
-  const registerCommand = useCallback((command: string) => {
-    const normalizedCommand = command.trim();
-    if (!normalizedCommand) {
+  const announceSkillAchievement = useCallback((achievementId: string) => {
+    const definition = getAchievementDefinition(achievementId);
+    if (!definition || definition.category !== 'skill') {
       return;
     }
 
-    setCommandHistory((previous) => appendHistory(previous, normalizedCommand, MAX_HISTORY));
+    setCelebration((previous) => {
+      if (previous?.kind === 'lesson') {
+        return previous;
+      }
 
-    const actions = parseTmuxActionsFromCommand(normalizedCommand);
-    if (actions.length > 0) {
-      setActionHistory((previous) => appendActions(previous, actions, MAX_HISTORY));
-    }
-
-    const lower = normalizedCommand.toLowerCase();
-
-    if (/\btmux\s+copy-mode\b/.test(lower)) {
-      setMetrics((previous) => ({
-        ...previous,
-        modeIs: 'COPY_MODE',
-      }));
-    }
-
-    if (/(search-forward|search-backward|search -)/.test(lower) || /send-keys\s+.*-x\s+search/.test(lower)) {
-      setMetrics((previous) => ({
-        ...previous,
-        searchExecuted: true,
-      }));
-    }
+      return {
+        kind: 'skill',
+        message: `스킬 업적 달성: ${definition.title}`,
+        detail: definition.description,
+        achievementId: definition.id,
+      };
+    });
   }, []);
+
+  const updateMetricByProbe = useCallback(
+    (metric: VmProbeMetric) => {
+      setVmStatus('running');
+      setVmStatusText('부팅 완료, 명령 입력 가능');
+
+      setMetrics((previous) => {
+        switch (metric.key) {
+          case 'session':
+            return {
+              ...previous,
+              sessionCount: metric.value >= 0 ? metric.value : null,
+            };
+          case 'window':
+            return {
+              ...previous,
+              windowCount: metric.value >= 0 ? metric.value : null,
+            };
+          case 'pane':
+            return {
+              ...previous,
+              paneCount: metric.value >= 0 ? metric.value : null,
+            };
+          case 'mode':
+            return {
+              ...previous,
+              modeIs: metric.value === 1 ? 'COPY_MODE' : null,
+            };
+          case 'sessionName':
+            return {
+              ...previous,
+              sessionName: metric.value.trim() || null,
+            };
+          case 'activeWindow':
+            return {
+              ...previous,
+              activeWindowIndex: metric.value >= 0 ? metric.value : null,
+            };
+          case 'layout':
+            return {
+              ...previous,
+              windowLayout: metric.value.trim() || null,
+            };
+          case 'zoomed':
+            return {
+              ...previous,
+              windowZoomed: metric.value === 1,
+            };
+          case 'sync':
+            return {
+              ...previous,
+              paneSynchronized: metric.value === 1,
+            };
+          case 'search':
+            return {
+              ...previous,
+              searchExecuted: metric.value === 1,
+            };
+          case 'searchMatched':
+            return {
+              ...previous,
+              searchMatchFound: metric.value === 1,
+            };
+          default:
+            return previous;
+        }
+      });
+
+      if (metric.key === 'pane' || metric.key === 'layout' || metric.key === 'zoomed' || metric.key === 'sync') {
+        const nextPaneCount = metric.key === 'pane' ? (metric.value >= 0 ? metric.value : null) : undefined;
+        const nextLayout = metric.key === 'layout' ? metric.value.trim() || null : undefined;
+        const nextZoomed = metric.key === 'zoomed' ? metric.value === 1 : undefined;
+        const nextSynchronized = metric.key === 'sync' ? metric.value === 1 : undefined;
+        const unlocked = recordTmuxActivityRef.current({
+          actions: [],
+          paneCount: nextPaneCount,
+          windowLayout: nextLayout,
+          windowZoomed: nextZoomed,
+          paneSynchronized: nextSynchronized,
+          lessonSlug: selectedLessonSlugRef.current,
+        });
+        if (unlocked.length > 0) {
+          announceSkillAchievement(unlocked[0]);
+        }
+      }
+    },
+    [announceSkillAchievement],
+  );
+
+  const registerCommand = useCallback(
+    (command: string) => {
+      const normalizedCommand = command.trim();
+      if (!normalizedCommand) {
+        return;
+      }
+
+      setCommandHistory((previous) => appendHistory(previous, normalizedCommand, MAX_HISTORY));
+
+      const actions = parseTmuxActionsFromCommand(normalizedCommand);
+      if (actions.length > 0) {
+        setActionHistory((previous) => appendActions(previous, actions, MAX_HISTORY));
+
+        const unlocked = recordTmuxActivityRef.current({
+          actions,
+          lessonSlug: selectedLessonSlugRef.current,
+        });
+        if (unlocked.length > 0) {
+          announceSkillAchievement(unlocked[0]);
+        }
+      }
+
+      const lower = normalizedCommand.toLowerCase();
+
+      if (/\btmux\s+copy-mode\b/.test(lower)) {
+        setMetrics((previous) => ({
+          ...previous,
+          modeIs: 'COPY_MODE',
+        }));
+      }
+
+      if (/(search-forward|search-backward|search -)/.test(lower) || /send-keys\s+.*-x\s+search/.test(lower)) {
+        setMetrics((previous) => ({
+          ...previous,
+          searchExecuted: true,
+        }));
+      }
+    },
+    [announceSkillAchievement],
+  );
 
   const scheduleProbe = useCallback((delayMs = 450) => {
     if (!autoProbeRef.current) {
@@ -609,6 +807,8 @@ export function PracticeVmPocPage() {
         status: vmStatus,
         text: vmStatusText,
         metrics,
+        actionHistory,
+        commandHistory,
         debugLineCount: debugLines.length,
         lastDebugLine: debugLines.length > 0 ? debugLines[debugLines.length - 1] : null,
       }),
@@ -637,7 +837,7 @@ export function PracticeVmPocPage() {
     return () => {
       delete window.__tmuxwebVmBridge;
     };
-  }, [debugLines, metrics, sendCommand, vmStatus, vmStatusText]);
+  }, [actionHistory, commandHistory, debugLines, metrics, sendCommand, vmStatus, vmStatusText]);
 
   useEffect(() => {
     if (contentState.status !== 'ready') {
@@ -1100,6 +1300,49 @@ export function PracticeVmPocPage() {
               <strong>{celebration.message}</strong>
             </p>
             <p>{celebration.detail}</p>
+            <div className="inline-actions vm-celebration-actions">
+              {celebration.kind === 'mission' && nextMission ? (
+                <button
+                  type="button"
+                  className="primary-btn"
+                  onClick={() => {
+                    setSelectedMissionSlug(nextMission.slug);
+                    setMobileWorkbenchView('mission');
+                    setCelebration(null);
+                  }}
+                >
+                  다음 미션
+                </button>
+              ) : null}
+              {celebration.kind === 'lesson' && nextLesson ? (
+                <button
+                  type="button"
+                  className="primary-btn"
+                  onClick={() => {
+                    setSelectedLessonSlug(nextLesson.slug);
+                    const nextMissionInLesson = content.missions.find(
+                      (mission) => mission.lessonSlug === nextLesson.slug,
+                    );
+                    setSelectedMissionSlug(nextMissionInLesson?.slug ?? '');
+                    setMobileWorkbenchView('mission');
+                    setCelebration(null);
+                  }}
+                >
+                  다음 레슨
+                </button>
+              ) : null}
+              <Link className="secondary-btn" to="/progress">
+                업적 보기
+              </Link>
+              {celebrationShareHref ? (
+                <a className="text-link" href={celebrationShareHref} target="_blank" rel="noreferrer">
+                  X 공유
+                </a>
+              ) : null}
+              <button type="button" className="secondary-btn" onClick={() => setCelebration(null)}>
+                닫기
+              </button>
+            </div>
           </section>
         ) : null}
 
@@ -1375,8 +1618,12 @@ export function PracticeVmPocPage() {
               </details>
 
               <p className="vm-poc-status">
-                metrics · sessions {metrics.sessionCount ?? '-'} / windows {metrics.windowCount ?? '-'} / panes{' '}
-                {metrics.paneCount ?? '-'} / mode {metrics.modeIs ?? '-'} / search{' '}
+                metrics · sessions {metrics.sessionCount ?? '-'} / sessionName {metrics.sessionName ?? '-'} / windows{' '}
+                {metrics.windowCount ?? '-'} / panes {metrics.paneCount ?? '-'} / activeWindow{' '}
+                {metrics.activeWindowIndex ?? '-'} / zoom{' '}
+                {metrics.windowZoomed === null ? '-' : metrics.windowZoomed ? 'yes' : 'no'} / sync{' '}
+                {metrics.paneSynchronized === null ? '-' : metrics.paneSynchronized ? 'yes' : 'no'} / layout{' '}
+                {formatLayout(metrics.windowLayout)} / mode {metrics.modeIs ?? '-'} / search{' '}
                 {metrics.searchExecuted === null ? '-' : metrics.searchExecuted ? 'yes' : 'no'} / match{' '}
                 {metrics.searchMatchFound === null ? '-' : metrics.searchMatchFound ? 'yes' : 'no'}
               </p>

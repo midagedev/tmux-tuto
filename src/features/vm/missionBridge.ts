@@ -5,6 +5,11 @@ export type VmBridgeSnapshot = {
   windowCount: number | null;
   paneCount: number | null;
   modeIs: string | null;
+  sessionName: string | null;
+  activeWindowIndex: number | null;
+  windowLayout: string | null;
+  windowZoomed: boolean | null;
+  paneSynchronized: boolean | null;
   searchExecuted: boolean | null;
   searchMatchFound: boolean | null;
   actionHistory: string[];
@@ -34,6 +39,11 @@ const INTERNAL_PROBE_COMMAND_PATTERNS = [
   'TMUXWEB_WINDOW=',
   'TMUXWEB_PANE=',
   'TMUXWEB_MODE=',
+  'TMUXWEB_SESSION_NAME=',
+  'TMUXWEB_ACTIVE_WINDOW=',
+  'TMUXWEB_LAYOUT=',
+  'TMUXWEB_ZOOMED=',
+  'TMUXWEB_SYNC=',
   'TMUXWEB_PROBE',
 ];
 
@@ -77,6 +87,16 @@ function getMetricFromSnapshot(snapshot: VmBridgeSnapshot, kind: string): unknow
       return snapshot.paneCount;
     case 'modeIs':
       return snapshot.modeIs;
+    case 'sessionName':
+      return snapshot.sessionName;
+    case 'activeWindowIndex':
+      return snapshot.activeWindowIndex;
+    case 'windowLayout':
+      return snapshot.windowLayout;
+    case 'windowZoomed':
+      return snapshot.windowZoomed;
+    case 'paneSynchronized':
+      return snapshot.paneSynchronized;
     case 'searchExecuted':
       return snapshot.searchExecuted;
     case 'searchMatchFound':
@@ -178,6 +198,29 @@ export function parseTmuxActionsFromCommand(command: string) {
     actions.add('sim.pane.split');
   }
 
+  if (/\btmux\s+(select-pane|selectp|last-pane)\b/.test(normalized)) {
+    actions.add('sim.pane.select');
+  }
+
+  if (/\btmux\s+(resize-pane|resizep)\b/.test(normalized)) {
+    actions.add('sim.pane.resize');
+    if (/\btmux\s+(resize-pane|resizep)\b[^;]*\s-z\b/.test(normalized)) {
+      actions.add('sim.pane.zoom.toggle');
+    }
+  }
+
+  if (/\btmux\s+(swap-pane|swapp)\b/.test(normalized)) {
+    actions.add('sim.pane.swap');
+  }
+
+  if (/\btmux\s+(rotate-window|rotatew)\b/.test(normalized)) {
+    actions.add('sim.window.rotate');
+  }
+
+  if (/\btmux\s+(select-layout|selectl)\b/.test(normalized)) {
+    actions.add('sim.layout.select');
+  }
+
   if (/\btmux\s+(next-window|nextw)\b/.test(normalized)) {
     actions.add('sim.window.next');
   }
@@ -194,25 +237,66 @@ export function parseTmuxActionsFromCommand(command: string) {
     actions.add('sim.pane.kill');
   }
 
+  if (/\btmux\s+(set-window-option|setw)\b/.test(normalized) && /\bsynchronize-panes\b/.test(normalized)) {
+    actions.add('sim.panes.sync.toggle');
+  }
+
+  if (/\btmux\s+(command-prompt|commandp)\b/.test(normalized)) {
+    actions.add('sim.command.prompt');
+  }
+
+  if (/\btmux\s+choose-tree\b/.test(normalized)) {
+    actions.add('sim.choose.tree');
+  }
+
   return Array.from(actions);
 }
 
-export type VmProbeMetric = {
-  key: 'session' | 'window' | 'pane' | 'tmux' | 'mode' | 'search' | 'searchMatched';
-  value: number;
-};
+type VmProbeNumericKey =
+  | 'session'
+  | 'window'
+  | 'pane'
+  | 'tmux'
+  | 'mode'
+  | 'search'
+  | 'searchMatched'
+  | 'activeWindow'
+  | 'zoomed'
+  | 'sync';
+
+type VmProbeTextKey = 'sessionName' | 'layout';
+
+export type VmProbeMetric =
+  | {
+      key: VmProbeNumericKey;
+      value: number;
+    }
+  | {
+      key: VmProbeTextKey;
+      value: string;
+    };
 
 export function parseProbeMetricFromLine(line: string): VmProbeMetric | null {
   const cleaned = stripAnsi(line).replace(/\r/g, '');
-  const match = cleaned.match(
-    /\[\[TMUXWEB_PROBE:(session|window|pane|tmux|mode|search|searchMatched):(-?\d+)\]\]/,
-  );
+  const match = cleaned.match(/\[\[TMUXWEB_PROBE:(session|window|pane|tmux|mode|search|searchMatched|activeWindow|zoomed|sync|sessionName|layout):([^\]]*)\]\]/);
   if (!match) {
     return null;
   }
 
+  if (match[1] === 'sessionName' || match[1] === 'layout') {
+    return {
+      key: match[1] as VmProbeTextKey,
+      value: match[2].trim(),
+    };
+  }
+
+  const value = Number.parseInt(match[2], 10);
+  if (Number.isNaN(value)) {
+    return null;
+  }
+
   return {
-    key: match[1] as VmProbeMetric['key'],
-    value: Number.parseInt(match[2], 10),
+    key: match[1] as VmProbeNumericKey,
+    value,
   };
 }

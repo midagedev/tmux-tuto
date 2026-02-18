@@ -1095,6 +1095,10 @@ a {
   margin-bottom: 0;
 }
 
+.vm-celebration-actions {
+  margin-top: 8px;
+}
+
 .vm-celebration-mission {
   background: #ecfeff;
   border-color: #67e8f9;
@@ -1105,6 +1109,12 @@ a {
   background: #ecfdf5;
   border-color: #6ee7b7;
   color: #065f46;
+}
+
+.vm-celebration-skill {
+  background: #fff7ed;
+  border-color: #fdba74;
+  color: #9a3412;
 }
 
 .vm-poc-controls {
@@ -1490,6 +1500,50 @@ a {
 
 .onboarding-radio small {
   color: var(--text-secondary);
+}
+
+.achievement-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.achievement-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  background: #ffffff;
+  display: grid;
+  gap: 6px;
+}
+
+.achievement-card h3 {
+  margin: 0;
+  font-size: 0.96rem;
+}
+
+.achievement-card p {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.achievement-card.is-unlocked {
+  border-color: #67e8f9;
+  background: linear-gradient(145deg, #f0fdfa 0%, #ecfeff 100%);
+}
+
+.achievement-card.is-locked {
+  opacity: 0.8;
+}
+
+.text-link {
+  display: inline-flex;
+  width: fit-content;
+  color: #0369a1;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-size: 0.86rem;
 }
 
 .share-preview-card {
