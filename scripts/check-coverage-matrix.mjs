@@ -46,6 +46,10 @@ for (const mission of content.missions) {
   const missionRuleKinds = new Set(mission.passRules.map((rule) => rule.kind));
   const missionRuleKindsSorted = Array.from(missionRuleKinds).sort();
   const requiredKinds = Array.isArray(row.requiredRuleKinds) ? row.requiredRuleKinds : [];
+  const duplicateRequiredKinds = requiredKinds.filter((kind, index) => requiredKinds.indexOf(kind) !== index);
+  if (duplicateRequiredKinds.length > 0) {
+    issues.push(`Duplicate required rule kinds for ${mission.slug}: ${Array.from(new Set(duplicateRequiredKinds)).join(', ')}`);
+  }
   const missingRuleKinds = requiredKinds.filter((kind) => !missionRuleKinds.has(kind));
   const unexpectedRuleKinds = missionRuleKindsSorted.filter((kind) => !requiredKinds.includes(kind));
   if (missingRuleKinds.length > 0) {
