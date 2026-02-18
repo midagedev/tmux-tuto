@@ -1,0 +1,6 @@
+#!/bin/sh
+# tmux-tuto-cmdrelay — reads commands from ttyS2 and executes them via ash.
+# This keeps internal probe/geometry commands off the user-visible ttyS0.
+while IFS= read -r line; do
+  eval "$line" 2>/dev/null &
+done < /dev/ttyS2

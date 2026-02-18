@@ -7,6 +7,7 @@ COPY profile.d/tmux-tuto-banner.sh /etc/profile.d/tmux-tuto-banner.sh
 COPY init.d/tmux-tuto-serial-perms /etc/init.d/tmux-tuto-serial-perms
 COPY usr-local-bin/tmux-tuto-banner /usr/bin/tmux-tuto-banner
 COPY usr-local-bin/tmux-tuto-probe /usr/bin/tmux-tuto-probe
+COPY usr-local-bin/tmux-tuto-cmdrelay /usr/bin/tmux-tuto-cmdrelay
 
 RUN apk add --no-cache openrc alpine-base agetty alpine-conf linux-$KERNEL linux-firmware-none $ADDPKGS
 
@@ -21,6 +22,7 @@ RUN chmod +x /etc/profile.d/tmux-tuto-banner.sh
 RUN chmod +x /etc/init.d/tmux-tuto-serial-perms
 RUN chmod +x /usr/bin/tmux-tuto-banner
 RUN chmod +x /usr/bin/tmux-tuto-probe
+RUN chmod +x /usr/bin/tmux-tuto-cmdrelay
 
 RUN printf 'tmux-tuto\n' > /etc/hostname
 

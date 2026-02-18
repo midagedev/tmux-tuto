@@ -48,6 +48,7 @@ declare module 'v86' {
     add_listener(event: string, listener: (value?: unknown) => void): void;
     remove_listener(event: string, listener: (value?: unknown) => void): void;
     serial0_send(data: string): void;
+    serial_send_bytes(port: number, data: Uint8Array): void;
     run(): Promise<void> | void;
     stop(): Promise<void> | void;
     destroy(): Promise<void> | void;

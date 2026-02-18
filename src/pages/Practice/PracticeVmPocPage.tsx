@@ -1361,7 +1361,8 @@ export function PracticeVmPocPage() {
       return;
     }
 
-    emulatorRef.current.serial0_send(`${normalized}\n`);
+    const payload = new TextEncoder().encode(`${normalized}\n`);
+    emulatorRef.current.serial_send_bytes(2, payload);
   }, []);
 
   const requestSearchProbe = useCallback(() => {
@@ -1828,6 +1829,7 @@ export function PracticeVmPocPage() {
           cmdline:
             'rw root=host9p rootfstype=9p rootflags=trans=virtio,cache=loose console=ttyS0 init=/sbin/init quiet loglevel=3',
           uart1: true,
+          uart2: true,
           disable_keyboard: true,
           disable_mouse: true,
           autostart: true,
