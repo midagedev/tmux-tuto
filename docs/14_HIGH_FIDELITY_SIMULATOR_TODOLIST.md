@@ -65,7 +65,7 @@
   - 검증: integration test(command -> output)
   - DoD: 커리큘럼 시나리오용 명령 세트 동작
 
-- [ ] `HF-014` 가상 파일시스템 템플릿 구현
+- [x] `HF-014` 가상 파일시스템 템플릿 구현
   - 산출물: scenario별 초기 fs 템플릿 로더
   - 의존: `HF-013`
   - 검증: scenario init 테스트

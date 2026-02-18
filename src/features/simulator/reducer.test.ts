@@ -55,4 +55,14 @@ describe('simulatorReducer', () => {
     expect(downOnce.mode.commandBuffer).toBe('split-window -h');
     expect(downTwice.mode.commandBuffer).toBe('');
   });
+
+  it('initializes scenario template state by preset id', () => {
+    const initial = createInitialSimulatorState();
+    const next = simulatorReducer(initial, { type: 'INIT_SCENARIO', payload: 'log-buffer' });
+
+    expect(next.scenarioPresetId).toBe('log-buffer');
+    expect(next.shell.sessions[0]?.workingDirectory).toBe('/home/user/logs');
+    expect(next.shell.sessions[0]?.fileSystem.files['/home/user/logs/app.log']).toContain('ERROR');
+    expect(getActiveWindow(next).panes[0]?.buffer.some((line) => line.includes('ERROR'))).toBe(true);
+  });
 });

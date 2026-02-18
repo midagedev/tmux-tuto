@@ -1,4 +1,5 @@
 import { appendOutput, createTerminalBuffer, type TerminalBufferState } from './terminalBuffer';
+import { loadScenarioTemplate } from './scenarioFs';
 
 export type TmuxMode =
   | 'NORMAL'
@@ -72,6 +73,7 @@ export type TmuxConfigState = {
 };
 
 export type SimulatorState = {
+  scenarioPresetId: string;
   shell: {
     sessions: ShellSession[];
     activeSessionId: string;
@@ -91,46 +93,43 @@ function createId(prefix: string) {
   return `${prefix}-${random.slice(0, 8)}`;
 }
 
-export function createShellSession(): ShellSession {
+export function createShellSession(scenarioPresetId = 'single-pane'): ShellSession {
+  const template = loadScenarioTemplate(scenarioPresetId);
+
   return {
     id: createId('shell'),
     prompt: '$',
-    workingDirectory: '/home/user',
+    workingDirectory: template.workingDirectory,
     history: [],
-    fileSystem: {
-      directories: ['/', '/home', '/home/user', '/home/user/logs'],
-      files: {
-        '/home/user/README.md': 'tmux-tuto practice workspace',
-        '/home/user/logs/app.log': 'boot completed\nworker ready\nerror sample line',
-      },
-    },
+    fileSystem: template.fileSystem,
   };
 }
 
-export function createPane(shellSessionId: string, title = 'shell'): TmuxPane {
-  const seedLines = ['welcome to tmux simulator', 'log line: server ready', 'error: sample entry'];
+export function createPane(shellSessionId: string, title = 'shell', seedLines?: string[]): TmuxPane {
+  const defaultSeedLines = ['welcome to tmux simulator', 'log line: server ready', 'error: sample entry'];
+  const lines = seedLines && seedLines.length > 0 ? seedLines : defaultSeedLines;
   const seededTerminal = appendOutput(
     createTerminalBuffer({
       width: 80,
       height: 24,
       scrollbackLimit: 3000,
     }),
-    seedLines.join('\n'),
+    lines.join('\n'),
   );
 
   return {
     id: createId('pane'),
     title,
     shellSessionId,
-    buffer: seedLines,
+    buffer: lines,
     terminal: seededTerminal,
     width: 80,
     height: 24,
   };
 }
 
-export function createWindow(shellSessionId: string, name = '1'): TmuxWindow {
-  const firstPane = createPane(shellSessionId);
+export function createWindow(shellSessionId: string, name = '1', seedLines?: string[]): TmuxWindow {
+  const firstPane = createPane(shellSessionId, 'shell', seedLines);
 
   return {
     id: createId('window'),
@@ -141,8 +140,8 @@ export function createWindow(shellSessionId: string, name = '1'): TmuxWindow {
   };
 }
 
-export function createSession(shellSessionId: string, name = 'main'): TmuxSession {
-  const firstWindow = createWindow(shellSessionId, '1');
+export function createSession(shellSessionId: string, name = 'main', seedLines?: string[]): TmuxSession {
+  const firstWindow = createWindow(shellSessionId, '1', seedLines);
 
   return {
     id: createId('session'),
@@ -153,11 +152,13 @@ export function createSession(shellSessionId: string, name = 'main'): TmuxSessio
   };
 }
 
-export function createInitialSimulatorState(): SimulatorState {
-  const shellSession = createShellSession();
-  const tmuxSession = createSession(shellSession.id, 'main');
+export function createInitialSimulatorState(options?: { scenarioPresetId?: string }): SimulatorState {
+  const template = loadScenarioTemplate(options?.scenarioPresetId ?? 'single-pane');
+  const shellSession = createShellSession(template.id);
+  const tmuxSession = createSession(shellSession.id, 'main', template.seedLines);
 
   return {
+    scenarioPresetId: template.id,
     shell: {
       sessions: [shellSession],
       activeSessionId: shellSession.id,

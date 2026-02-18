@@ -15,6 +15,10 @@ function isSimulatorStateV2(value: unknown): value is SimulatorState {
     return false;
   }
 
+  if (typeof value.scenarioPresetId !== 'string') {
+    return false;
+  }
+
   const shell = value.shell;
   const tmux = value.tmux;
   const mode = value.mode;
@@ -75,6 +79,7 @@ type SimulatorStore = {
   dispatch: (action: SimulatorAction) => void;
   handleKeyInput: (key: string) => void;
   applyQuickPreset: (presetId: string) => void;
+  initScenario: (scenarioPresetId: string) => void;
   setPrefixKey: (key: 'C-b' | 'C-a') => void;
   setMode: (mode: SimulatorMode) => void;
   setCommandBuffer: (command: string) => void;
@@ -149,6 +154,13 @@ export const useSimulatorStore = create<SimulatorStore>((set) => ({
 
       return { state: nextState };
     }),
+  initScenario: (scenarioPresetId) =>
+    set((current) => ({
+      state: simulatorReducer(current.state, {
+        type: 'INIT_SCENARIO',
+        payload: scenarioPresetId,
+      }),
+    })),
   setPrefixKey: (key) =>
     set((current) => ({
       state: simulatorReducer(current.state, { type: 'SET_PREFIX_KEY', payload: key }),

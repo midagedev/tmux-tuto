@@ -38,6 +38,7 @@ export type SimulatorAction =
   | { type: 'ENTER_COPY_MODE' }
   | { type: 'EXIT_COPY_MODE' }
   | { type: 'RUN_COPY_SEARCH'; payload: string }
+  | { type: 'INIT_SCENARIO'; payload: string }
   | { type: 'LOAD_SNAPSHOT'; payload: SimulatorState }
   | { type: 'RESET' };
 
@@ -607,6 +608,10 @@ export function simulatorReducer(state: SimulatorState, action: SimulatorAction)
 
     case 'LOAD_SNAPSHOT': {
       return withHistory(action.payload, 'sim.snapshot.load', 'Snapshot restored');
+    }
+
+    case 'INIT_SCENARIO': {
+      return createInitialSimulatorState({ scenarioPresetId: action.payload });
     }
 
     case 'RESET': {
