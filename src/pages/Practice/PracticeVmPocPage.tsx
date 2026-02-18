@@ -340,6 +340,7 @@ export function PracticeVmPocPage() {
   const terminalRef = useRef<Terminal | null>(null);
   const fitAddonRef = useRef<FitAddon | null>(null);
   const emulatorRef = useRef<V86 | null>(null);
+  const celebrationCloseButtonRef = useRef<HTMLButtonElement | null>(null);
   const lineBufferRef = useRef('');
   const suppressCurrentLineRef = useRef(false);
   const autoProbeRef = useRef(autoProbe);
@@ -533,6 +534,8 @@ export function PracticeVmPocPage() {
     if (!celebration) {
       return;
     }
+
+    celebrationCloseButtonRef.current?.focus();
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') {
@@ -1396,7 +1399,12 @@ export function PracticeVmPocPage() {
                   X 공유
                 </a>
               ) : null}
-              <button type="button" className="secondary-btn" onClick={advanceCelebration}>
+              <button
+                ref={celebrationCloseButtonRef}
+                type="button"
+                className="secondary-btn"
+                onClick={advanceCelebration}
+              >
                 닫기 (Esc)
               </button>
             </div>
