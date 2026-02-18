@@ -275,6 +275,92 @@ a {
   color: #cbd5e1;
 }
 
+.terminal-stage {
+  position: relative;
+}
+
+.terminal-overlay {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  width: min(380px, calc(100% - 16px));
+  display: grid;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.terminal-mode-indicator {
+  justify-self: start;
+  border: 1px solid #334155;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.9);
+  color: #cbd5e1;
+  font-size: 0.68rem;
+  line-height: 1;
+  padding: 6px 10px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.terminal-mode-indicator.is-command-mode {
+  border-color: #fbbf24;
+  color: #fef08a;
+}
+
+.terminal-mode-indicator.is-copy-mode {
+  border-color: #38bdf8;
+  color: #bae6fd;
+}
+
+.terminal-command-overlay {
+  pointer-events: auto;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 6px 8px;
+  background: rgba(2, 6, 23, 0.92);
+}
+
+.terminal-command-overlay.is-active {
+  border-color: #fbbf24;
+  box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.25) inset;
+}
+
+.terminal-command-prefix {
+  font-family: 'SFMono-Regular', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  font-size: 0.85rem;
+  color: #facc15;
+}
+
+.terminal-command-input {
+  min-width: 120px;
+  flex: 1;
+  border: 1px solid #1e293b;
+  border-radius: 6px;
+  background: #020617;
+  color: #e2e8f0;
+  padding: 6px 8px;
+  font-size: 0.78rem;
+}
+
+.terminal-command-preview {
+  justify-self: start;
+  pointer-events: none;
+  color: #93c5fd;
+  background: rgba(15, 23, 42, 0.88);
+  border: 1px solid #1e3a8a;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.72rem;
+  font-family: 'SFMono-Regular', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  max-width: 100%;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
 .sim-pane-card {
   border: 1px solid #cbd5e1;
   border-radius: 10px;
@@ -344,6 +430,20 @@ a {
 .sim-pane-foot {
   font-size: 0.74rem;
   color: var(--text-secondary);
+}
+
+@media (max-width: 720px) {
+  .terminal-overlay {
+    position: static;
+    width: auto;
+    margin-top: 8px;
+    pointer-events: auto;
+  }
+
+  .terminal-mode-indicator,
+  .terminal-command-preview {
+    justify-self: start;
+  }
 }
 
 .sim-controls {

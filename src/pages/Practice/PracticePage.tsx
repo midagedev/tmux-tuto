@@ -9,10 +9,10 @@ import { PaneView } from './PaneView';
 export function PracticePage() {
   const [manualKey, setManualKey] = useState('');
   const [copySearchQuery, setCopySearchQuery] = useState('');
-  const [commandInput, setCommandInput] = useState('');
   const [searchParams, setSearchParams] = useSearchParams();
   const simulatorState = useSimulatorStore((store) => store.state);
   const handleKeyInput = useSimulatorStore((store) => store.handleKeyInput);
+  const setCommandBuffer = useSimulatorStore((store) => store.setCommandBuffer);
   const runCopySearch = useSimulatorStore((store) => store.runCopySearch);
   const focusPaneById = useSimulatorStore((store) => store.focusPaneById);
   const scrollPane = useSimulatorStore((store) => store.scrollPane);
@@ -34,6 +34,10 @@ export function PracticePage() {
       : -1;
   const presetId = searchParams.get('from');
   const mouseEnabled = simulatorState.tmux.config.mouse;
+  const commandBuffer = simulatorState.mode.commandBuffer;
+  const commandCursor = simulatorState.mode.commandCursor;
+  const commandPreview = `${commandBuffer.slice(0, commandCursor)}|${commandBuffer.slice(commandCursor)}`;
+  const modeClass = simulatorState.mode.value.toLowerCase().replace('_', '-');
 
   useEffect(() => {
     if (!presetId) {
@@ -50,15 +54,16 @@ export function PracticePage() {
     handleKeyInput(key);
   };
   const runCommand = () => {
-    const command = commandInput.trim();
+    const command = commandBuffer.trim();
     if (!command) {
       return;
     }
-    handleKeyInput(simulatorState.tmux.config.prefixKey);
-    handleKeyInput(':');
-    command.split('').forEach((char) => handleKeyInput(char));
+    if (simulatorState.mode.value !== 'COMMAND_MODE') {
+      handleKeyInput(simulatorState.tmux.config.prefixKey);
+      handleKeyInput(':');
+      setCommandBuffer(command);
+    }
     handleKeyInput('Enter');
-    setCommandInput('');
   };
 
   return (
@@ -117,22 +122,50 @@ export function PracticePage() {
             <span className="terminal-window-meta">session: {activeSession.name}</span>
           </div>
 
-          <div className="sim-pane-grid" aria-label="Pane viewport grid">
-            {activeWindow.panes.map((pane) => {
-              const isActive = pane.id === activeWindow.activePaneId;
-              return (
-                <PaneView
-                  key={pane.id}
-                  pane={pane}
-                  isActive={isActive}
-                  mouseEnabled={mouseEnabled}
-                  copyMatchLineSet={copyMatchLineSet}
-                  activeMatchLine={activeMatchLine}
-                  onFocusPane={focusPaneById}
-                  onScrollPane={scrollPane}
+          <div className="terminal-stage">
+            <div className="sim-pane-grid" aria-label="Pane viewport grid">
+              {activeWindow.panes.map((pane) => {
+                const isActive = pane.id === activeWindow.activePaneId;
+                return (
+                  <PaneView
+                    key={pane.id}
+                    pane={pane}
+                    isActive={isActive}
+                    mouseEnabled={mouseEnabled}
+                    copyMatchLineSet={copyMatchLineSet}
+                    activeMatchLine={activeMatchLine}
+                    onFocusPane={focusPaneById}
+                    onScrollPane={scrollPane}
+                  />
+                );
+              })}
+            </div>
+            <div className="terminal-overlay" aria-live="polite">
+              <div className={`terminal-mode-indicator is-${modeClass}`}>
+                mode: {simulatorState.mode.value}
+                {simulatorState.mode.repeatUntil ? ' (repeat)' : ''}
+              </div>
+              <form
+                className={`terminal-command-overlay${simulatorState.mode.value === 'COMMAND_MODE' ? ' is-active' : ''}`}
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  runCommand();
+                }}
+              >
+                <span className="terminal-command-prefix">:</span>
+                <input
+                  className="terminal-command-input"
+                  value={commandBuffer}
+                  onChange={(event) => setCommandBuffer(event.target.value)}
+                  placeholder="new-window, split-window -h, kill-pane"
+                  aria-label="Command mode input"
                 />
-              );
-            })}
+                <button type="submit" className="secondary-btn">
+                  Run Command
+                </button>
+              </form>
+              <div className="terminal-command-preview">{commandPreview || '|'}</div>
+            </div>
           </div>
 
           <div className="terminal-status-bar">
@@ -271,24 +304,6 @@ export function PracticePage() {
             </button>
           </form>
 
-          <form
-            className="inline-actions"
-            onSubmit={(event) => {
-              event.preventDefault();
-              runCommand();
-            }}
-          >
-            <input
-              className="sim-input"
-              value={commandInput}
-              onChange={(event) => setCommandInput(event.target.value)}
-              placeholder="명령 예: new-window, split-window -h, kill-pane"
-              aria-label="Command mode input"
-            />
-            <button type="submit" className="secondary-btn">
-              Run Command
-            </button>
-          </form>
         </div>
 
         <div

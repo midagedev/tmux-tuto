@@ -121,7 +121,7 @@
   - 검증: component test + e2e
   - DoD: 패인 상태가 직관적으로 식별됨
 
-- [ ] `HF-032` 모드/명령 프롬프트 오버레이
+- [x] `HF-032` 모드/명령 프롬프트 오버레이
   - 산출물: mode indicator + `:` 입력줄 UI
   - 의존: `HF-023`, `HF-024`
   - 검증: e2e(command-mode flow)

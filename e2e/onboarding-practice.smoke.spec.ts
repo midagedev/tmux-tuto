@@ -53,6 +53,27 @@ test('practice pane split click-focus and pane-scroll works @smoke', async ({ pa
   await expect(page.getByText('Action History')).toBeVisible();
 });
 
+test('practice command-mode overlay flow works @smoke', async ({ page }) => {
+  await page.goto('/practice');
+  await dismissAnalyticsBanner(page);
+
+  const modeIndicator = page.locator('.terminal-mode-indicator');
+  await expect(modeIndicator).toContainText('NORMAL');
+
+  await page.getByRole('button', { name: 'Prefix' }).click();
+  await page.getByLabel('Manual key input').fill(':');
+  await page.getByRole('button', { name: 'Send Key' }).click();
+
+  await expect(modeIndicator).toContainText('COMMAND_MODE');
+  await expect(page.locator('.terminal-command-preview')).toContainText('|');
+
+  await page.getByLabel('Command mode input').fill('new-window');
+  await page.getByRole('button', { name: 'Run Command' }).click();
+
+  await expect(modeIndicator).toContainText('NORMAL');
+  await expect(page.locator('.terminal-window-tab')).toHaveCount(2);
+});
+
 test('practice copy-mode search highlights and match navigation works @smoke', async ({ page }) => {
   await page.goto('/practice');
   await dismissAnalyticsBanner(page);
