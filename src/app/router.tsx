@@ -80,39 +80,41 @@ function renderLazyPage(Component: ComponentType) {
   );
 }
 
-export const router = createBrowserRouter(
-  [
+export function createAppRouter() {
+  return createBrowserRouter(
+    [
+      {
+        path: '/',
+        element: <AppShell />,
+        errorElement: <RouteErrorBoundary />,
+        children: [
+          { index: true, element: renderLazyPage(HomePage) },
+          { path: 'learn', element: renderLazyPage(LearnIndexPage) },
+          { path: 'learn/:trackSlug/:chapterSlug/:lessonSlug', element: renderLazyPage(LessonPage) },
+          { path: 'practice', element: renderLazyPage(PracticePage) },
+          { path: 'cheatsheet', element: renderLazyPage(CheatsheetPage) },
+          { path: 'playbooks', element: renderLazyPage(PlaybookIndexPage) },
+          { path: 'playbooks/:playbookSlug', element: renderLazyPage(PlaybookDetailPage) },
+          { path: 'playbooks/:playbookSlug/copied', element: renderLazyPage(PlaybookCopiedPage) },
+          { path: 'bookmarks', element: renderLazyPage(BookmarksPage) },
+          { path: 'progress', element: renderLazyPage(ProgressPage) },
+          { path: 'progress/missions/:missionSlug/passed', element: renderLazyPage(MissionPassedPage) },
+          { path: 'onboarding/start', element: renderLazyPage(OnboardingStartPage) },
+          { path: 'onboarding/goal', element: renderLazyPage(OnboardingGoalPage) },
+          { path: 'onboarding/preferences', element: renderLazyPage(OnboardingPreferencesPage) },
+          { path: 'onboarding/first-mission', element: renderLazyPage(OnboardingFirstMissionPage) },
+          {
+            path: 'onboarding/first-mission/passed',
+            element: renderLazyPage(OnboardingFirstMissionPassedPage),
+          },
+          { path: 'onboarding/done', element: renderLazyPage(OnboardingDonePage) },
+          { path: 'share/:milestoneSlug', element: renderLazyPage(ShareMilestonePage) },
+          { path: '*', element: renderLazyPage(NotFoundPage) },
+        ],
+      },
+    ],
     {
-      path: '/',
-      element: <AppShell />,
-      errorElement: <RouteErrorBoundary />,
-      children: [
-        { index: true, element: renderLazyPage(HomePage) },
-        { path: 'learn', element: renderLazyPage(LearnIndexPage) },
-        { path: 'learn/:trackSlug/:chapterSlug/:lessonSlug', element: renderLazyPage(LessonPage) },
-        { path: 'practice', element: renderLazyPage(PracticePage) },
-        { path: 'cheatsheet', element: renderLazyPage(CheatsheetPage) },
-        { path: 'playbooks', element: renderLazyPage(PlaybookIndexPage) },
-        { path: 'playbooks/:playbookSlug', element: renderLazyPage(PlaybookDetailPage) },
-        { path: 'playbooks/:playbookSlug/copied', element: renderLazyPage(PlaybookCopiedPage) },
-        { path: 'bookmarks', element: renderLazyPage(BookmarksPage) },
-        { path: 'progress', element: renderLazyPage(ProgressPage) },
-        { path: 'progress/missions/:missionSlug/passed', element: renderLazyPage(MissionPassedPage) },
-        { path: 'onboarding/start', element: renderLazyPage(OnboardingStartPage) },
-        { path: 'onboarding/goal', element: renderLazyPage(OnboardingGoalPage) },
-        { path: 'onboarding/preferences', element: renderLazyPage(OnboardingPreferencesPage) },
-        { path: 'onboarding/first-mission', element: renderLazyPage(OnboardingFirstMissionPage) },
-        {
-          path: 'onboarding/first-mission/passed',
-          element: renderLazyPage(OnboardingFirstMissionPassedPage),
-        },
-        { path: 'onboarding/done', element: renderLazyPage(OnboardingDonePage) },
-        { path: 'share/:milestoneSlug', element: renderLazyPage(ShareMilestonePage) },
-        { path: '*', element: renderLazyPage(NotFoundPage) },
-      ],
+      basename: import.meta.env.BASE_URL,
     },
-  ],
-  {
-    basename: import.meta.env.BASE_URL,
-  },
-);
+  );
+}

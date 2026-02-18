@@ -1,13 +1,29 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
-import { router } from './app/router';
+import { createAppRouter } from './app/router';
 import './index.css';
 
-const redirectedPath = new URLSearchParams(window.location.search).get('p');
-if (redirectedPath) {
-  window.history.replaceState(null, '', redirectedPath);
+function applyRedirectedPathFrom404() {
+  const redirectedPath = new URLSearchParams(window.location.search).get('p');
+  if (!redirectedPath) {
+    return;
+  }
+
+  try {
+    const targetUrl = new URL(redirectedPath, window.location.origin);
+    if (targetUrl.origin !== window.location.origin) {
+      return;
+    }
+    const nextPath = `${targetUrl.pathname}${targetUrl.search}${targetUrl.hash}`;
+    window.history.replaceState(null, '', nextPath);
+  } catch {
+    // Ignore malformed redirect payloads.
+  }
 }
+
+applyRedirectedPathFrom404();
+const router = createAppRouter();
 
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', () => {
