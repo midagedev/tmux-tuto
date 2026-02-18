@@ -619,6 +619,269 @@ a {
   font-size: 1rem;
 }
 
+.vm-poc-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.vm-poc-note {
+  border: 1px solid #bae6fd;
+  border-radius: 10px;
+  background: #f0f9ff;
+  padding: 12px;
+}
+
+.vm-poc-note p {
+  margin: 0 0 8px;
+  line-height: 1.5;
+}
+
+.vm-curriculum-panel {
+  border: 1px solid #dbeafe;
+  border-radius: 10px;
+  background: #f8fbff;
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.vm-curriculum-row {
+  display: grid;
+  gap: 6px;
+}
+
+.vm-curriculum-row label {
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+}
+
+.vm-mission-card {
+  border: 1px solid #dbe2ea;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 10px;
+}
+
+.vm-mission-card h2 {
+  margin: 0 0 6px;
+  font-size: 1rem;
+}
+
+.vm-mission-status {
+  margin-top: 10px;
+  border-top: 1px dashed #dbe2ea;
+  padding-top: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.vm-mission-status p {
+  margin: 0;
+}
+
+.vm-lesson-progress {
+  border: 1px dashed #dbeafe;
+  border-radius: 10px;
+  padding: 8px 10px;
+  background: #ffffff;
+}
+
+.vm-lesson-progress p {
+  margin: 0 0 4px;
+}
+
+.vm-lesson-progress p:last-child {
+  margin-bottom: 0;
+}
+
+.vm-runtime-badge {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 0.82rem;
+  width: fit-content;
+}
+
+.vm-runtime-badge.is-running {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.vm-runtime-badge.is-booting {
+  background: #fef9c3;
+  color: #854d0e;
+}
+
+.vm-runtime-badge.is-error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.vm-runtime-badge.is-idle {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.vm-celebration {
+  border-radius: 10px;
+  padding: 10px 12px;
+  border: 1px solid;
+}
+
+.vm-celebration p {
+  margin: 0 0 4px;
+}
+
+.vm-celebration p:last-child {
+  margin-bottom: 0;
+}
+
+.vm-celebration-mission {
+  background: #ecfeff;
+  border-color: #67e8f9;
+  color: #164e63;
+}
+
+.vm-celebration-lesson {
+  background: #ecfdf5;
+  border-color: #6ee7b7;
+  color: #065f46;
+}
+
+.vm-poc-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.vm-poc-image-picker {
+  display: grid;
+  gap: 8px;
+  border: 1px solid #dbeafe;
+  border-radius: 10px;
+  background: #f8fbff;
+  padding: 10px;
+}
+
+.vm-poc-image-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.vm-poc-image-option input[type='radio'] {
+  margin-top: 2px;
+}
+
+.vm-poc-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+
+.vm-poc-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.vm-poc-status {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+}
+
+.vm-poc-command-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.vm-poc-command-input {
+  min-width: 0;
+  flex: 1 1 300px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+}
+
+.vm-terminal-shell {
+  border: 1px solid #0f172a;
+  border-radius: 10px;
+  background: #020617;
+  min-height: 420px;
+  padding: 8px;
+}
+
+.vm-terminal-host {
+  min-height: 400px;
+}
+
+.vm-poc-debug {
+  border: 1px solid #dbeafe;
+  border-radius: 10px;
+  padding: 8px 10px;
+  background: #f8fbff;
+}
+
+.vm-poc-debug summary {
+  cursor: pointer;
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+}
+
+.vm-poc-debug-text {
+  margin: 8px 0 0;
+  max-height: 220px;
+  overflow: auto;
+  white-space: pre-wrap;
+  background: #0b1325;
+  color: #dbeafe;
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 0.72rem;
+}
+
+.vm-debug-grid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.vm-debug-grid article h3 {
+  margin: 8px 0 0;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 960px) {
+  .vm-poc-command-form {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .vm-poc-command-input {
+    width: 100%;
+    flex-basis: auto;
+  }
+
+  .vm-terminal-shell {
+    min-height: 340px;
+  }
+
+  .vm-terminal-host {
+    min-height: 320px;
+  }
+}
+
 .lesson-mission-grid {
   display: grid;
   gap: 10px;
