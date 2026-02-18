@@ -123,6 +123,14 @@ a {
   line-height: 1.5;
 }
 
+.context-action-list {
+  margin: 10px 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+  color: var(--text-secondary);
+}
+
 .page-card {
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
   border: 1px solid var(--border);
@@ -152,6 +160,40 @@ a {
 
 .page-extra {
   margin-top: 16px;
+}
+
+.home-intro-card {
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  background: #f0fdf4;
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.home-intro-card p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.home-value-grid {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.home-value-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fbfffe;
+  padding: 10px;
+}
+
+.home-value-card h2 {
+  margin: 0 0 6px;
+  font-size: 0.98rem;
 }
 
 .inline-actions {
@@ -540,6 +582,30 @@ a {
   gap: 12px;
 }
 
+.learning-journey-card {
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  background: linear-gradient(165deg, #eff6ff 0%, #f8fafc 100%);
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.learning-journey-card h2 {
+  margin: 0;
+  font-size: 1.12rem;
+}
+
+.learning-journey-card p {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.learning-journey-card strong {
+  color: var(--text-primary);
+}
+
 .curriculum-track-card {
   border: 1px solid var(--border);
   border-radius: 12px;
@@ -619,6 +685,20 @@ a {
   font-size: 1rem;
 }
 
+.lesson-brief {
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+
+.lesson-brief p {
+  margin: 0 0 8px;
+  line-height: 1.5;
+}
+
+.lesson-brief p:last-of-type {
+  margin-bottom: 0;
+}
+
 .vm-poc-panel {
   display: grid;
   gap: 12px;
@@ -634,6 +714,20 @@ a {
 .vm-poc-note p {
   margin: 0 0 8px;
   line-height: 1.5;
+}
+
+.vm-workbench {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  align-items: start;
+}
+
+.vm-study-panel,
+.vm-lab-panel {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
 }
 
 .vm-curriculum-panel {
@@ -653,6 +747,116 @@ a {
 .vm-curriculum-row label {
   font-size: 0.86rem;
   color: var(--text-secondary);
+}
+
+.vm-curriculum-panel .sim-input {
+  width: 100%;
+}
+
+.vm-lesson-card {
+  border: 1px solid #dbe2ea;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.vm-lesson-card-path {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.vm-lesson-card h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.vm-lesson-card h3 {
+  margin: 2px 0 0;
+  font-size: 0.9rem;
+}
+
+.vm-mission-list-card {
+  border: 1px solid #dbe2ea;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.vm-mission-list-card h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.vm-mission-list {
+  display: grid;
+  gap: 8px;
+}
+
+.vm-mission-row {
+  width: 100%;
+  border: 1px solid #dbe2ea;
+  border-radius: 10px;
+  background: #f8fafc;
+  padding: 8px 10px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.vm-mission-row.is-active {
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.14);
+  background: #ffffff;
+}
+
+.vm-mission-row-main {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.vm-mission-row-main strong {
+  font-size: 0.9rem;
+}
+
+.vm-mission-row-main small {
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+}
+
+.vm-mission-row-badge {
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.vm-mission-row-badge.is-complete {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.vm-mission-row-badge.is-live-complete {
+  background: #cffafe;
+  color: #155e75;
+}
+
+.vm-mission-row-badge.is-manual {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.vm-mission-row-badge.is-pending {
+  background: #e2e8f0;
+  color: #334155;
 }
 
 .vm-mission-card {
@@ -866,6 +1070,10 @@ a {
   .vm-poc-command-form {
     width: 100%;
     flex-direction: column;
+  }
+
+  .vm-workbench {
+    grid-template-columns: 1fr;
   }
 
   .vm-poc-command-input {
@@ -1116,6 +1324,10 @@ a {
   }
 
   .playbook-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-value-grid {
     grid-template-columns: 1fr;
   }
 

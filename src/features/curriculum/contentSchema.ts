@@ -25,6 +25,16 @@ const lessonSchema = z.object({
   title: z.string(),
   estimatedMinutes: z.number().int(),
   objectives: z.array(z.string()),
+  overview: z.string().optional(),
+  goal: z.string().optional(),
+  successCriteria: z.array(z.string()).optional(),
+});
+
+const learningJourneySchema = z.object({
+  title: z.string(),
+  intro: z.string(),
+  targetOutcome: z.string(),
+  principles: z.array(z.string()),
 });
 
 const missionRuleSchema = z.object({
@@ -72,6 +82,7 @@ const playbookSchema = z.object({
 export const appContentSchema = z.object({
   version: z.string(),
   generatedAt: z.string(),
+  learningJourney: learningJourneySchema.optional(),
   tracks: z.array(trackSchema),
   chapters: z.array(chapterSchema),
   lessons: z.array(lessonSchema),

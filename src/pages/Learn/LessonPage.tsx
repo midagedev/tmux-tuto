@@ -123,6 +123,31 @@ export function LessonPage() {
       title={`${track.title} · ${chapter.title}`}
       description={`${lesson.title} · 예상 ${lesson.estimatedMinutes}분`}
     >
+      {lesson.overview || lesson.goal || (lesson.successCriteria?.length ?? 0) > 0 ? (
+        <section className="lesson-section lesson-brief">
+          {lesson.overview ? (
+            <p>
+              <strong>레슨 소개:</strong> {lesson.overview}
+            </p>
+          ) : null}
+          {lesson.goal ? (
+            <p>
+              <strong>이 레슨의 목표:</strong> {lesson.goal}
+            </p>
+          ) : null}
+          {lesson.successCriteria && lesson.successCriteria.length > 0 ? (
+            <>
+              <h2>완료 기준</h2>
+              <ul className="link-list">
+                {lesson.successCriteria.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </>
+          ) : null}
+        </section>
+      ) : null}
+
       <section className="lesson-section">
         <h2>학습 목표</h2>
         <ul className="link-list">

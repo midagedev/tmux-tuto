@@ -2,7 +2,7 @@ import { PagePlaceholder } from '../../components/system/PagePlaceholder';
 import { useEffect, useState } from 'react';
 import { loadAppContent } from '../../features/curriculum/contentLoader';
 import { EmptyState } from '../../components/system/EmptyState';
-import type { AppChapter, AppLesson, AppMission, AppTrack } from '../../features/curriculum/contentSchema';
+import type { AppChapter, AppContent, AppLesson, AppMission, AppTrack } from '../../features/curriculum/contentSchema';
 import { Link } from 'react-router-dom';
 
 type ChapterWithLessons = AppChapter & {
@@ -17,6 +17,7 @@ type TrackWithCurriculum = AppTrack & {
 type LearnPageData = {
   tracks: TrackWithCurriculum[];
   missionCounts: Record<string, number>;
+  learningJourney: AppContent['learningJourney'] | null;
 };
 
 function toTrackWithCurriculum(
@@ -52,7 +53,11 @@ function buildMissionCountMap(missions: AppMission[]) {
 }
 
 export function LearnIndexPage() {
-  const [pageData, setPageData] = useState<LearnPageData>({ tracks: [], missionCounts: {} });
+  const [pageData, setPageData] = useState<LearnPageData>({
+    tracks: [],
+    missionCounts: {},
+    learningJourney: null,
+  });
 
   useEffect(() => {
     loadAppContent()
@@ -65,23 +70,56 @@ export function LearnIndexPage() {
         setPageData({
           tracks: activeTracks,
           missionCounts: buildMissionCountMap(content.missions),
+          learningJourney: content.learningJourney ?? null,
         });
       })
       .catch(() => {
-        setPageData({ tracks: [], missionCounts: {} });
+        setPageData({ tracks: [], missionCounts: {}, learningJourney: null });
       });
   }, []);
+
+  const firstTrack = pageData.tracks[0] ?? null;
+  const firstLesson = firstTrack?.firstLesson ?? null;
 
   return (
     <PagePlaceholder
       eyebrow="Learn"
-      title="Track A~C"
-      description="트랙별 챕터/레슨을 선택하고 바로 실습을 시작할 수 있습니다."
+      title="tmux 커리큘럼"
+      description="초간단 온램프부터 실무 루틴까지, 레슨과 실습을 한 흐름으로 학습합니다."
     >
       {pageData.tracks.length === 0 ? (
         <EmptyState title="로드된 트랙이 없습니다" description="콘텐츠 파일을 확인해 주세요." />
       ) : (
         <div className="curriculum-track-list">
+          {pageData.learningJourney ? (
+            <section className="learning-journey-card" aria-label="Learning Journey">
+              <p className="page-eyebrow">Start Here</p>
+              <h2>{pageData.learningJourney.title}</h2>
+              <p>{pageData.learningJourney.intro}</p>
+              <p>
+                <strong>최종 목표:</strong> {pageData.learningJourney.targetOutcome}
+              </p>
+              <ul className="link-list">
+                {pageData.learningJourney.principles.map((principle) => (
+                  <li key={principle}>{principle}</li>
+                ))}
+              </ul>
+              {firstLesson ? (
+                <div className="inline-actions">
+                  <Link
+                    className="primary-btn"
+                    to={`/learn/${firstLesson.trackSlug}/${firstLesson.chapterSlug}/${firstLesson.slug}`}
+                  >
+                    첫 3분 레슨 시작
+                  </Link>
+                  <Link className="secondary-btn" to={`/practice?lesson=${firstLesson.slug}`}>
+                    바로 실습 열기
+                  </Link>
+                </div>
+              ) : null}
+            </section>
+          ) : null}
+
           {pageData.tracks.map((track) => (
             <section key={track.id} className="curriculum-track-card" aria-label={`${track.title} curriculum`}>
               <header className="curriculum-track-head">

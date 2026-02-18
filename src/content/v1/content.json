@@ -1,12 +1,12 @@
 {
   "version": "1.0.0",
-  "generatedAt": "2026-02-16T00:00:00.000Z",
+  "generatedAt": "2026-02-18T00:00:00.000Z",
   "tracks": [
     {
       "id": "track-a-foundations",
       "slug": "track-a-foundations",
-      "title": "Track A Foundations",
-      "summary": "세션/윈도우/패인 기본 개념과 조작",
+      "title": "Track A Onramp & Foundations",
+      "summary": "첫 3분 온램프부터 세션/윈도우/패인의 핵심 개념과 기본 동작을 익힙니다.",
       "order": 1,
       "status": "active"
     },
@@ -14,7 +14,7 @@
       "id": "track-b-workflow",
       "slug": "track-b-workflow",
       "title": "Track B Daily Workflow",
-      "summary": "실무에서 자주 쓰는 분할/이동/리사이즈 패턴",
+      "summary": "분할, 포커스 이동, 윈도우 순환을 실무 작업 흐름으로 연결합니다.",
       "order": 2,
       "status": "active"
     },
@@ -22,12 +22,19 @@
       "id": "track-c-deepwork",
       "slug": "track-c-deepwork",
       "title": "Track C Deep Work",
-      "summary": "copy-mode, 검색, 레이아웃 운영 루틴",
+      "summary": "copy-mode 검색과 command mode를 활용해 긴 세션에서도 생산성을 유지합니다.",
       "order": 3,
       "status": "active"
     }
   ],
   "chapters": [
+    {
+      "id": "chapter-a-00",
+      "trackSlug": "track-a-foundations",
+      "slug": "tmux-onramp",
+      "title": "tmux Onramp",
+      "order": 0
+    },
     {
       "id": "chapter-a-01",
       "trackSlug": "track-a-foundations",
@@ -73,13 +80,43 @@
   ],
   "lessons": [
     {
+      "id": "lesson-a-00",
+      "trackSlug": "track-a-foundations",
+      "chapterSlug": "tmux-onramp",
+      "slug": "hello-tmux",
+      "title": "첫 3분: tmux 맛보기",
+      "estimatedMinutes": 3,
+      "objectives": [
+        "tmux 명령 1회 실행",
+        "세션이 작업을 유지한다는 개념 이해",
+        "다음 실습으로 넘어갈 준비"
+      ],
+      "overview": "tmux를 처음 쓰는 학습자를 위한 초간단 입문 레슨입니다. 복잡한 단축키 없이 명령 한 번으로 tmux 환경이 어떤 것인지 감을 잡습니다.",
+      "goal": "tmux가 \"터미널 작업을 이어서 쓰게 해주는 도구\"라는 핵심 가치를 체감하고, 본격 레슨을 시작할 준비를 마칩니다.",
+      "successCriteria": [
+        "`tmux -V` 명령을 직접 실행",
+        "실습 화면에서 첫 미션 완료 상태 확인"
+      ]
+    },
+    {
       "id": "lesson-a-01",
       "trackSlug": "track-a-foundations",
       "chapterSlug": "session-window-pane",
       "slug": "basics",
-      "title": "기본 조작",
+      "title": "기본 조작: Session/Window/Pane",
       "estimatedMinutes": 8,
-      "objectives": ["session 생성", "window 이동", "pane 인지"]
+      "objectives": [
+        "session 생성",
+        "window 생성/전환",
+        "pane 구조 이해"
+      ],
+      "overview": "tmux의 핵심 단위인 session, window, pane을 실제 조작으로 익히는 레슨입니다. 이후 모든 고급 기능의 기반이 됩니다.",
+      "goal": "하나의 tmux 세션 안에서 작업 공간을 만들고 오가며, 현재 내가 어디에서 작업 중인지 혼동 없이 인지할 수 있습니다.",
+      "successCriteria": [
+        "새 session 생성",
+        "window 2개 이상 운영",
+        "pane 분할 상태를 읽고 설명 가능"
+      ]
     },
     {
       "id": "lesson-a-02",
@@ -88,7 +125,18 @@
       "slug": "attach-detach",
       "title": "세션 유지 루틴",
       "estimatedMinutes": 9,
-      "objectives": ["detach", "attach", "세션 목록 확인"]
+      "objectives": [
+        "detach/attach",
+        "세션 목록 확인",
+        "세션 재접속 루틴"
+      ],
+      "overview": "tmux를 실무에서 쓰는 가장 큰 이유인 \"작업 복구\"를 다룹니다. 터미널을 닫거나 네트워크가 끊겨도 세션을 유지하는 루틴을 익힙니다.",
+      "goal": "작업을 중단하지 않고 안전하게 분리(detach)했다가 같은 상태로 복귀(attach)하는 기본 운영 습관을 만듭니다.",
+      "successCriteria": [
+        "session 목록 확인",
+        "detach 후 attach 재접속",
+        "2개 이상 session 구분 운영"
+      ]
     },
     {
       "id": "lesson-b-01",
@@ -97,7 +145,18 @@
       "slug": "split-resize",
       "title": "분할과 리사이즈",
       "estimatedMinutes": 10,
-      "objectives": ["vertical split", "horizontal split", "resize"]
+      "objectives": [
+        "vertical split",
+        "horizontal split",
+        "pane 크기 조절"
+      ],
+      "overview": "한 화면에서 로그/코드/테스트를 동시에 보는 멀티패인 작업의 기본을 학습합니다.",
+      "goal": "작업 성격에 맞게 pane을 나누고 크기를 조절해, 맥락 전환 없이 한 터미널에서 여러 작업을 처리합니다.",
+      "successCriteria": [
+        "pane 2개 이상 분할",
+        "분할 방향을 목적에 맞게 선택",
+        "가독성을 위한 리사이즈 적용"
+      ]
     },
     {
       "id": "lesson-b-02",
@@ -106,7 +165,18 @@
       "slug": "pane-focus-flow",
       "title": "패인 이동 루틴",
       "estimatedMinutes": 8,
-      "objectives": ["pane focus 이동", "window 순환", "작업 분배"]
+      "objectives": [
+        "pane focus 이동",
+        "window 순환",
+        "작업 분배"
+      ],
+      "overview": "여러 pane/window를 사용할 때 길을 잃지 않도록 이동 규칙과 분배 패턴을 만듭니다.",
+      "goal": "손이 기억하는 이동 루틴을 통해 컨텍스트 전환 시간을 줄이고, 복잡한 작업에서도 집중을 유지합니다.",
+      "successCriteria": [
+        "3개 이상 pane 구성",
+        "window next/prev 순환",
+        "작업별 pane 역할 분리"
+      ]
     },
     {
       "id": "lesson-c-01",
@@ -115,19 +185,61 @@
       "slug": "copy-search",
       "title": "Copy Mode 검색",
       "estimatedMinutes": 12,
-      "objectives": ["copy-mode 진입", "검색", "선택 복사"]
+      "objectives": [
+        "copy-mode 진입",
+        "검색 실행",
+        "성공/실패 케이스 확인"
+      ],
+      "overview": "긴 로그/출력에서 필요한 정보를 빠르게 찾는 검색 루틴을 학습합니다.",
+      "goal": "마우스 없이 copy mode로 텍스트를 탐색해, 디버깅과 장애 대응 속도를 높입니다.",
+      "successCriteria": [
+        "copy mode 진입",
+        "키워드 검색 성공",
+        "검색 실패 상황까지 판단 가능"
+      ]
     },
     {
       "id": "lesson-c-02",
       "trackSlug": "track-c-deepwork",
       "chapterSlug": "command-mode-workflow",
       "slug": "command-subset",
-      "title": "Command Mode Subset",
+      "title": "Command Mode 운영",
       "estimatedMinutes": 10,
-      "objectives": ["new-window", "split-window", "kill-pane"]
+      "objectives": [
+        "명령 모드 진입",
+        "new-window 실행",
+        "split-window/kill-pane 이해"
+      ],
+      "overview": "단축키만으로 어려운 작업을 command mode로 안정적으로 실행하는 방법을 다룹니다.",
+      "goal": "필요할 때 명령 기반으로 tmux 상태를 제어해 재현 가능한 작업 루틴을 구성합니다.",
+      "successCriteria": [
+        "command mode에서 window 생성",
+        "명령 입력/실행 흐름 숙지",
+        "자주 쓰는 명령 3개 이상 확보"
+      ]
     }
   ],
   "missions": [
+    {
+      "id": "mission-a-00",
+      "lessonSlug": "hello-tmux",
+      "slug": "hello-tmux-version-check",
+      "title": "tmux 명령 첫 실행",
+      "type": "state-check",
+      "difficulty": "beginner",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "tmux -V"
+        }
+      ],
+      "hints": [
+        "터미널에 `tmux -V`를 입력해 버전을 확인해 보세요.",
+        "띄어쓰기까지 그대로 `tmux -V`로 실행하면 바로 통과됩니다."
+      ]
+    },
     {
       "id": "mission-a-01",
       "lessonSlug": "basics",
@@ -137,10 +249,21 @@
       "difficulty": "beginner",
       "initialScenario": "single-pane",
       "passRules": [
-        { "kind": "sessionCount", "operator": ">=", "value": 1 },
-        { "kind": "actionHistoryText", "operator": "contains", "value": "sim.session.new" }
+        {
+          "kind": "sessionCount",
+          "operator": ">=",
+          "value": 1
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.session.new"
+        }
       ],
-      "hints": ["tmux new -As main 형태를 떠올려 보세요.", "세션 이름을 main으로 두면 재접속이 쉽습니다."]
+      "hints": [
+        "가장 쉬운 시작은 `tmux new -As main` 입니다.",
+        "세션 이름을 `main`으로 고정하면 재접속 루틴이 단순해집니다."
+      ]
     },
     {
       "id": "mission-a-02",
@@ -151,10 +274,21 @@
       "difficulty": "beginner",
       "initialScenario": "single-pane",
       "passRules": [
-        { "kind": "windowCount", "operator": ">=", "value": 2 },
-        { "kind": "actionHistoryText", "operator": "contains", "value": "sim.window.new" }
+        {
+          "kind": "windowCount",
+          "operator": ">=",
+          "value": 2
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.window.new"
+        }
       ],
-      "hints": ["prefix 후 c 키로 새 window를 생성하세요.", "next/prev window 이동도 같이 확인합니다."]
+      "hints": [
+        "새 window를 만들고 다시 원래 window로 돌아와 보세요.",
+        "window를 목적별로 나누면 작업 전환 비용이 줄어듭니다."
+      ]
     },
     {
       "id": "mission-a-03",
@@ -165,10 +299,21 @@
       "difficulty": "daily",
       "initialScenario": "single-pane",
       "passRules": [
-        { "kind": "sessionCount", "operator": ">=", "value": 2 },
-        { "kind": "actionHistoryText", "operator": "contains", "value": "sim.session.new" }
+        {
+          "kind": "sessionCount",
+          "operator": ">=",
+          "value": 2
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.session.new"
+        }
       ],
-      "hints": ["prefix 후 s 또는 command mode에서 new-session을 사용하세요.", "작업 목적별 세션 이름을 정하면 유지가 쉽습니다."]
+      "hints": [
+        "prefix 후 s 또는 command mode에서 new-session을 사용하세요.",
+        "작업 목적별 세션 이름을 정하면 유지가 쉽습니다."
+      ]
     },
     {
       "id": "mission-b-01",
@@ -179,10 +324,21 @@
       "difficulty": "daily",
       "initialScenario": "single-pane",
       "passRules": [
-        { "kind": "paneCount", "operator": ">=", "value": 2 },
-        { "kind": "actionHistoryText", "operator": "contains", "value": "sim.pane.split" }
+        {
+          "kind": "paneCount",
+          "operator": ">=",
+          "value": 2
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.pane.split"
+        }
       ],
-      "hints": ["prefix 후 분할 키를 확인하세요.", "분할 후 활성 pane 이동도 같이 확인해 보세요."]
+      "hints": [
+        "세로/가로 중 하나로 먼저 2분할을 만들어 보세요.",
+        "분할 직후 포커스 이동까지 함께 연습하면 실무에서 바로 씁니다."
+      ]
     },
     {
       "id": "mission-b-02",
@@ -193,10 +349,21 @@
       "difficulty": "daily",
       "initialScenario": "single-pane",
       "passRules": [
-        { "kind": "paneCount", "operator": ">=", "value": 3 },
-        { "kind": "actionHistoryText", "operator": "contains", "value": "sim.pane.split" }
+        {
+          "kind": "paneCount",
+          "operator": ">=",
+          "value": 3
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.pane.split"
+        }
       ],
-      "hints": ["세로/가로 분할을 섞어 grid 형태를 만들어 보세요.", "활성 pane 위치를 바꿔가며 분할하면 쉽습니다."]
+      "hints": [
+        "세로/가로 분할을 섞어 grid 형태를 만들어 보세요.",
+        "활성 pane 위치를 바꿔가며 분할하면 쉽습니다."
+      ]
     },
     {
       "id": "mission-b-03",
@@ -207,11 +374,26 @@
       "difficulty": "advanced",
       "initialScenario": "single-pane",
       "passRules": [
-        { "kind": "windowCount", "operator": ">=", "value": 2 },
-        { "kind": "paneCount", "operator": ">=", "value": 1 },
-        { "kind": "actionHistoryText", "operator": "contains", "value": "sim.window.next" }
+        {
+          "kind": "windowCount",
+          "operator": ">=",
+          "value": 2
+        },
+        {
+          "kind": "paneCount",
+          "operator": ">=",
+          "value": 1
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.window.next"
+        }
       ],
-      "hints": ["새 window를 만든 뒤 next/prev 이동을 연습하세요.", "window 이름을 지정하면 구분이 쉬워집니다."]
+      "hints": [
+        "새 window를 만든 뒤 next/prev 이동을 연습하세요.",
+        "window 이름을 지정하면 구분이 쉬워집니다."
+      ]
     },
     {
       "id": "mission-c-01",
@@ -222,11 +404,26 @@
       "difficulty": "advanced",
       "initialScenario": "log-buffer",
       "passRules": [
-        { "kind": "modeIs", "operator": "equals", "value": "COPY_MODE" },
-        { "kind": "searchExecuted", "operator": "equals", "value": true },
-        { "kind": "searchMatchFound", "operator": "equals", "value": true }
+        {
+          "kind": "modeIs",
+          "operator": "equals",
+          "value": "COPY_MODE"
+        },
+        {
+          "kind": "searchExecuted",
+          "operator": "equals",
+          "value": true
+        },
+        {
+          "kind": "searchMatchFound",
+          "operator": "equals",
+          "value": true
+        }
       ],
-      "hints": ["copy-mode 진입 단축키를 사용하세요.", "검색 후 다음 결과 이동도 확인합니다."]
+      "hints": [
+        "copy-mode 진입 단축키를 사용하세요.",
+        "검색 후 다음 결과 이동도 확인합니다."
+      ]
     },
     {
       "id": "mission-c-02",
@@ -237,11 +434,26 @@
       "difficulty": "advanced",
       "initialScenario": "log-buffer",
       "passRules": [
-        { "kind": "modeIs", "operator": "equals", "value": "COPY_MODE" },
-        { "kind": "searchExecuted", "operator": "equals", "value": true },
-        { "kind": "searchMatchFound", "operator": "equals", "value": false }
+        {
+          "kind": "modeIs",
+          "operator": "equals",
+          "value": "COPY_MODE"
+        },
+        {
+          "kind": "searchExecuted",
+          "operator": "equals",
+          "value": true
+        },
+        {
+          "kind": "searchMatchFound",
+          "operator": "equals",
+          "value": false
+        }
       ],
-      "hints": ["검색어를 바꿔가며 성공/실패를 모두 확인하세요.", "검색 결과가 없어도 상태가 기록되는지 봅니다."]
+      "hints": [
+        "검색어를 바꿔가며 성공/실패를 모두 확인하세요.",
+        "검색 결과가 없어도 상태가 기록되는지 봅니다."
+      ]
     },
     {
       "id": "mission-c-03",
@@ -252,10 +464,21 @@
       "difficulty": "scenario",
       "initialScenario": "single-pane",
       "passRules": [
-        { "kind": "windowCount", "operator": ">=", "value": 2 },
-        { "kind": "shellHistoryText", "operator": "contains", "value": "new-window" }
+        {
+          "kind": "windowCount",
+          "operator": ">=",
+          "value": 2
+        },
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "new-window"
+        }
       ],
-      "hints": [": 모드에서 new-window 명령을 사용하세요.", "명령 입력 후 Enter로 실행됩니다."]
+      "hints": [
+        ": 모드에서 new-window 명령을 사용하세요.",
+        "명령 입력 후 Enter로 실행됩니다."
+      ]
     }
   ],
   "playbooks": [
@@ -265,7 +488,9 @@
       "title": "권장 tmux.conf 베이스",
       "category": "config",
       "estimatedMinutes": 7,
-      "prerequisites": ["track-a-foundations"],
+      "prerequisites": [
+        "track-a-foundations"
+      ],
       "steps": [
         {
           "id": "p1",
@@ -285,7 +510,11 @@
           "description": "mouse/번호 시작값/이동 단축키를 확인합니다."
         }
       ],
-      "verification": ["mouse on 확인", "base-index 1 확인", "reload 단축키 확인"],
+      "verification": [
+        "mouse on 확인",
+        "base-index 1 확인",
+        "reload 단축키 확인"
+      ],
       "troubleshooting": [
         {
           "issue": "설정이 반영되지 않음",
@@ -303,7 +532,9 @@
       "title": "tmux 세션 유지 루틴",
       "category": "workflow",
       "estimatedMinutes": 6,
-      "prerequisites": ["track-a-foundations"],
+      "prerequisites": [
+        "track-a-foundations"
+      ],
       "steps": [
         {
           "id": "p1",
@@ -321,7 +552,10 @@
           "command": "tmux attach -t main"
         }
       ],
-      "verification": ["재접속 후 동일 세션 복구", "세션 목록 확인"],
+      "verification": [
+        "재접속 후 동일 세션 복구",
+        "세션 목록 확인"
+      ],
       "troubleshooting": [
         {
           "issue": "no sessions 오류",
@@ -339,7 +573,9 @@
       "title": "Tailscale SSH 원격 작업",
       "category": "remote",
       "estimatedMinutes": 9,
-      "prerequisites": ["track-a-foundations"],
+      "prerequisites": [
+        "track-a-foundations"
+      ],
       "steps": [
         {
           "id": "p1",
@@ -357,7 +593,11 @@
           "command": "tmux new -As work"
         }
       ],
-      "verification": ["원격 접속 성공", "tmux 세션 유지 확인", "재접속 후 이어서 작업"],
+      "verification": [
+        "원격 접속 성공",
+        "tmux 세션 유지 확인",
+        "재접속 후 이어서 작업"
+      ],
       "troubleshooting": [
         {
           "issue": "tailscale ssh 연결 실패",
@@ -369,5 +609,15 @@
         }
       ]
     }
-  ]
+  ],
+  "learningJourney": {
+    "title": "tmux 학습 여정",
+    "intro": "tmux는 터미널 작업을 세션으로 보존하고, 창과 패인을 통해 병렬 작업을 안정적으로 운영하게 해주는 도구입니다. 이 커리큘럼은 tmux가 처음인 개발자도 바로 실습으로 이해하도록 설계했습니다.",
+    "targetOutcome": "전체 트랙을 완료하면 로컬/원격 터미널 어디서든 tmux 세션을 만들고, 분할·이동·검색·명령 모드를 활용해 끊김 없는 개발 루틴을 운영할 수 있습니다.",
+    "principles": [
+      "첫 레슨은 3분 안에 완료 가능한 가장 쉬운 성공 경험으로 시작합니다.",
+      "모든 레슨은 실무 행동(명령/상태) 기준으로 학습 목표와 완료 기준을 명확히 제공합니다.",
+      "레슨 -> 미션 -> 실습 루프를 반복하며 단축키 암기보다 작업 루틴 내재화에 집중합니다."
+    ]
+  }
 }

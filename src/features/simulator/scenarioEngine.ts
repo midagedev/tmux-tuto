@@ -3,6 +3,7 @@ import { createInitialSimulatorState, type SimulatorState } from './model';
 import { simulatorReducer, type SimulatorAction } from './reducer';
 
 const MISSION_PRESET_OVERRIDES: Record<string, string> = {
+  'hello-tmux-version-check': 'single-pane',
   'session-create': 'single-pane',
   'session-window-create': 'single-pane',
   'session-multi-manage': 'single-pane',
