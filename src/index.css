@@ -46,16 +46,12 @@ a {
   grid-template-columns: 1fr;
   gap: 8px;
   padding: clamp(8px, 2vw, 16px);
+  align-content: start;
+  align-items: start;
   min-height: 100vh;
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-}
-
-.app-top-row {
-  display: grid;
-  align-items: center;
-  gap: 12px;
 }
 
 .skip-link {
@@ -87,7 +83,10 @@ a {
 }
 
 .app-header {
-  grid-template-columns: auto 1fr auto;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 74px;
 }
 
 .brand {
@@ -110,8 +109,11 @@ a {
 
 .main-nav {
   display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  align-items: center;
   gap: 6px;
-  margin-left: 0;
+  margin-left: 12px;
   overflow-x: auto;
   padding-bottom: 2px;
   scrollbar-width: thin;
@@ -137,26 +139,11 @@ a {
   padding: clamp(12px, 2vw, 18px);
 }
 
-.app-header-meta {
+.app-header-controls {
   display: flex;
   align-items: center;
   gap: 8px;
-  justify-self: end;
-}
-
-.app-route-chip,
-.app-analytics-chip {
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: #f8fafc;
-  padding: 4px 8px;
-  font-size: 0.74rem;
-  color: var(--text-secondary);
-}
-
-.app-route-chip {
-  color: var(--text-primary);
-  font-weight: 600;
+  margin-left: auto;
 }
 
 .app-analytics-toggle {
@@ -166,22 +153,20 @@ a {
 
 @media (max-width: 860px) {
   .app-header {
-    grid-template-columns: 1fr;
-    gap: 10px;
+    min-height: 0;
+    flex-wrap: wrap;
+    gap: 8px;
   }
 
   .main-nav {
     order: 3;
+    flex-basis: 100%;
+    margin-left: 0;
+    padding-top: 2px;
   }
 
-  .app-header-meta {
-    justify-self: start;
-  }
-
-  .app-route-chip,
-  .app-analytics-chip {
-    font-size: 0.7rem;
-    padding: 3px 7px;
+  .app-header-controls {
+    margin-left: auto;
   }
 
   .app-analytics-toggle {
@@ -191,8 +176,6 @@ a {
 }
 
 @media (max-width: 560px) {
-  .app-route-chip,
-  .app-analytics-chip,
   .app-analytics-toggle {
     display: none;
   }
@@ -296,7 +279,7 @@ a {
   font-size: 0.98rem;
 }
 
-.home-tone-card {
+.home-links-card {
   margin-top: 12px;
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -304,9 +287,14 @@ a {
   padding: 12px;
 }
 
-.home-tone-card h2 {
+.home-links-card h2 {
   margin: 0 0 8px;
   font-size: 0.98rem;
+}
+
+.home-links-card a {
+  color: #0f766e;
+  text-decoration: underline;
 }
 
 .inline-actions {
@@ -1551,10 +1539,6 @@ a {
   .main-panel,
   .right-panel {
     min-width: 0;
-  }
-
-  .app-top-row {
-    align-items: flex-start;
   }
 
   .main-nav {

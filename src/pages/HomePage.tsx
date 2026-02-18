@@ -45,12 +45,21 @@ export function HomePage() {
         </article>
       </section>
 
-      <section className="home-tone-card">
-        <h2>Tone &amp; Manner</h2>
+      <section className="home-links-card">
+        <h2>프로젝트 링크</h2>
         <ul className="link-list">
-          {BRAND.toneAndManner.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
+          <li>
+            소스코드: {' '}
+            <a href="https://github.com/midagedev/tmux-tuto" target="_blank" rel="noreferrer">
+              github.com/midagedev/tmux-tuto
+            </a>
+          </li>
+          <li>
+            X (Twitter): {' '}
+            <a href="https://x.com/midagedev" target="_blank" rel="noreferrer">
+              x.com/midagedev
+            </a>
+          </li>
         </ul>
       </section>
     </PagePlaceholder>

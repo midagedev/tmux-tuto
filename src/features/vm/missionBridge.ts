@@ -21,6 +21,24 @@ const ANSI_ESCAPE_PATTERN =
   // eslint-disable-next-line no-control-regex
   /\u001b(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])/g;
 
+const INTERNAL_PROBE_COMMAND_PATTERNS = [
+  'TMUXWEB_TMUX=',
+  'TMUXWEB_SESSION=',
+  'TMUXWEB_WINDOW=',
+  'TMUXWEB_PANE=',
+  'TMUXWEB_MODE=',
+  'TMUXWEB_PROBE',
+];
+
+function isInternalProbeCommand(command: string) {
+  const normalized = command.trim();
+  if (!normalized) {
+    return false;
+  }
+
+  return INTERNAL_PROBE_COMMAND_PATTERNS.some((pattern) => normalized.includes(pattern));
+}
+
 function evaluateOperator(actual: unknown, operator: string, expected: unknown) {
   switch (operator) {
     case 'equals':
@@ -121,7 +139,7 @@ export function extractCommandFromPromptLine(line: string) {
   }
 
   const command = match[1].trim();
-  if (!command || command.includes('TMUXWEB_PROBE')) {
+  if (!command || isInternalProbeCommand(command)) {
     return null;
   }
 
