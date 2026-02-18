@@ -1373,42 +1373,65 @@
       "slug": "recommended-config",
       "title": "권장 tmux.conf 베이스",
       "category": "config",
-      "estimatedMinutes": 7,
+      "estimatedMinutes": 12,
       "prerequisites": [
         "track-a-foundations"
       ],
       "steps": [
         {
           "id": "p1",
-          "title": "기본 설정 복사",
-          "description": "~/.tmux.conf에 권장 설정을 추가합니다.",
-          "command": "cat >> ~/.tmux.conf"
+          "title": "기존 설정 백업",
+          "description": "기존 ~/.tmux.conf가 있으면 타임스탬프 백업을 먼저 만들어 롤백 가능 상태로 시작합니다.",
+          "command": "cp ~/.tmux.conf ~/.tmux.conf.bak.$(date +%Y%m%d-%H%M%S) 2>/dev/null || true"
         },
         {
           "id": "p2",
-          "title": "설정 리로드",
-          "description": "실행 중 세션에서 설정을 다시 읽습니다.",
-          "command": "tmux source-file ~/.tmux.conf"
+          "title": "핵심 옵션 적용",
+          "description": "마우스, 인덱스(1 시작), 히스토리, copy-mode 키 체계를 기본 운영값으로 넣습니다.",
+          "command": "printf '%s\\n' 'set -g mouse on' 'set -g base-index 1' 'setw -g pane-base-index 1' 'set -g history-limit 100000' 'setw -g mode-keys vi' >> ~/.tmux.conf"
         },
         {
           "id": "p3",
-          "title": "동작 확인",
-          "description": "mouse/번호 시작값/이동 단축키를 확인합니다."
+          "title": "재로딩/패인 이동 바인딩 추가",
+          "description": "리로드 단축키와 h/j/k/l 패인 이동 단축키를 추가합니다.",
+          "command": "printf '%s\\n' 'bind r source-file ~/.tmux.conf \\; display-message \"tmux.conf reloaded\"' 'bind -r h select-pane -L' 'bind -r j select-pane -D' 'bind -r k select-pane -U' 'bind -r l select-pane -R' >> ~/.tmux.conf"
+        },
+        {
+          "id": "p4",
+          "title": "실행 중 세션에 반영",
+          "description": "재시작 없이 현재 세션에 설정을 적용합니다.",
+          "command": "tmux source-file ~/.tmux.conf"
+        },
+        {
+          "id": "p5",
+          "title": "옵션 값 검증",
+          "description": "핵심 옵션이 의도한 값인지 직접 확인합니다.",
+          "command": "tmux show -g mouse; tmux show -g base-index; tmux show -gw pane-base-index; tmux show -gw mode-keys"
+        },
+        {
+          "id": "p6",
+          "title": "운영 동작 검증",
+          "description": "`prefix + r` 리로드와 `prefix + h/j/k/l` 이동이 실제로 동작하는지 확인합니다."
         }
       ],
       "verification": [
-        "mouse on 확인",
-        "base-index 1 확인",
-        "reload 단축키 확인"
+        "`tmux show -g mouse` 결과가 `mouse on`",
+        "`tmux show -g base-index` 결과가 `base-index 1`",
+        "`tmux show -gw pane-base-index` 결과가 `pane-base-index 1`",
+        "`prefix + r` 입력 시 `tmux.conf reloaded` 메시지 표시"
       ],
       "troubleshooting": [
         {
           "issue": "설정이 반영되지 않음",
-          "resolution": "source-file 명령 실행 후 새 세션으로 재접속하세요."
+          "resolution": "`tmux source-file ~/.tmux.conf`를 다시 실행하고, 적용 세션이 맞는지 `tmux display-message -p '#S'`로 확인하세요."
         },
         {
-          "issue": "키 바인딩 충돌",
-          "resolution": "중복된 bind 설정을 정리하고 하나만 남기세요."
+          "issue": "설정을 반복 실행해 중복 라인이 많아짐",
+          "resolution": "`awk '!seen[$0]++' ~/.tmux.conf > ~/.tmux.conf.clean && mv ~/.tmux.conf.clean ~/.tmux.conf`로 중복을 정리한 뒤 다시 로드하세요."
+        },
+        {
+          "issue": "패인 이동 단축키가 동작하지 않음",
+          "resolution": "현재 prefix를 `tmux show -g prefix`로 확인하고, tmux 버전이 낮다면 `bind -r` 대신 `bind`로 교체해 적용하세요."
         }
       ]
     },
@@ -1458,40 +1481,66 @@
       "slug": "tailscale-ssh-workflow",
       "title": "Tailscale SSH 원격 작업",
       "category": "remote",
-      "estimatedMinutes": 9,
+      "estimatedMinutes": 14,
       "prerequisites": [
         "track-a-foundations"
       ],
       "steps": [
         {
           "id": "p1",
-          "title": "tailscale 상태 확인",
-          "command": "tailscale status"
+          "title": "원격 호스트에서 SSH 활성화",
+          "description": "대상 호스트에서 1회 실행해 Tailscale SSH를 열어둡니다.",
+          "command": "sudo tailscale set --ssh"
         },
         {
           "id": "p2",
-          "title": "원격 SSH 접속",
-          "command": "tailscale ssh user@host"
+          "title": "tailnet 상태 확인",
+          "description": "로컬에서 대상 호스트가 Online이며 tailnet에 참여 중인지 확인합니다.",
+          "command": "tailscale status"
         },
         {
           "id": "p3",
-          "title": "tmux 세션 진입",
-          "command": "tmux new -As work"
+          "title": "연결성 사전 점검",
+          "description": "실제 접속 전 지연/경로를 점검해 실패 원인을 빠르게 분리합니다.",
+          "command": "tailscale ping host"
+        },
+        {
+          "id": "p4",
+          "title": "원격 접속 + tmux 세션 부트스트랩",
+          "description": "세션이 없으면 생성하고, 있으면 기존 세션으로 복귀합니다.",
+          "command": "tailscale ssh user@host 'tmux new -As work'"
+        },
+        {
+          "id": "p5",
+          "title": "원격 윈도우 표준 구성",
+          "description": "editor/logs 윈도우를 만들어 재접속 시 동일한 작업 구조를 유지합니다.",
+          "command": "tailscale ssh user@host 'tmux new-window -t work -n editor; tmux new-window -t work -n logs; tmux list-windows -t work'"
+        },
+        {
+          "id": "p6",
+          "title": "재접속 복구 확인",
+          "description": "다시 접속해 동일 세션/윈도우가 보존되는지 확인합니다.",
+          "command": "tailscale ssh user@host 'tmux ls; tmux attach -t work'"
         }
       ],
       "verification": [
-        "원격 접속 성공",
-        "tmux 세션 유지 확인",
-        "재접속 후 이어서 작업"
+        "`tailscale status`에서 대상 호스트가 Online 상태",
+        "`tailscale ping host`가 응답하고 접속 가능한 경로가 표시됨",
+        "`tailscale ssh user@host 'tmux ls'`에서 `work` 세션 확인",
+        "재접속 후 `editor/logs` 윈도우가 그대로 복구됨"
       ],
       "troubleshooting": [
         {
-          "issue": "tailscale ssh 연결 실패",
-          "resolution": "tailnet ACL과 호스트 로그인 상태를 확인하세요."
+          "issue": "tailscale ssh 연결이 Permission denied로 실패",
+          "resolution": "ACL의 SSH 정책에 사용자/그룹이 허용됐는지 확인하고, 대상 호스트에서 `sudo tailscale set --ssh`를 다시 적용하세요."
         },
         {
-          "issue": "원격 tmux 세션이 보이지 않음",
-          "resolution": "원격에서 tmux ls 후 세션명을 확인해 attach 하세요."
+          "issue": "host를 찾을 수 없거나 Offline으로 표시됨",
+          "resolution": "대상 호스트에서 `tailscale up --ssh`를 실행해 tailnet에 재조인한 뒤, 로컬 `tailscale status`에서 정확한 MagicDNS 이름을 사용하세요."
+        },
+        {
+          "issue": "원격에서 tmux 명령이 없거나 세션이 없음",
+          "resolution": "원격 호스트에 tmux를 설치하고 `tailscale ssh user@host 'tmux new -As work'`로 기준 세션을 다시 생성하세요."
         }
       ]
     }

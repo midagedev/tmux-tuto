@@ -46,6 +46,25 @@ const MENU_ITEMS = [
   },
 ] as const;
 
+const TMUX_START_LINKS = [
+  {
+    label: 'tmux 공식 저장소 (개요/README)',
+    href: 'https://github.com/tmux/tmux',
+  },
+  {
+    label: 'tmux Getting Started (공식 위키)',
+    href: 'https://github.com/tmux/tmux/wiki/Getting-Started',
+  },
+  {
+    label: 'tmux 설치 가이드 (공식 위키)',
+    href: 'https://github.com/tmux/tmux/wiki/Installing',
+  },
+  {
+    label: 'macOS/Homebrew 설치 페이지',
+    href: 'https://formulae.brew.sh/formula/tmux',
+  },
+] as const;
+
 export function HomePage() {
   return (
     <PagePlaceholder
@@ -117,7 +136,22 @@ export function HomePage() {
       </section>
 
       <section className="home-links-card" aria-label="프로젝트 링크">
-        <h2>프로젝트 링크</h2>
+        <h2>tmux 시작 링크</h2>
+        <p className="muted">
+          tmux는 하나의 터미널에서 여러 작업을 유지/전환하고, 연결이 끊겨도 세션을 복구할 수 있게 해주는 terminal multiplexer입니다.
+          먼저 공식 개론을 읽고, 본인 OS에 맞는 설치 가이드를 확인한 뒤 실습을 시작하세요.
+        </p>
+        <ul className="link-list">
+          {TMUX_START_LINKS.map((item) => (
+            <li key={item.href}>
+              <a href={item.href} target="_blank" rel="noreferrer">
+                {item.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+
+        <h3>프로젝트 링크</h3>
         <ul className="link-list">
           <li>
             소스코드: {' '}

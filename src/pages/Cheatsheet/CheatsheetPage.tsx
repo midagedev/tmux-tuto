@@ -4,10 +4,15 @@ import { EmptyState } from '../../components/system/EmptyState';
 import { PagePlaceholder } from '../../components/system/PagePlaceholder';
 import { loadAppContent } from '../../features/curriculum/contentLoader';
 import type { AppPlaybook } from '../../features/curriculum/contentSchema';
-import { CHEATSHEET_ITEMS } from '../../features/cheatsheet/items';
+import { CHEATSHEET_ITEMS, type CheatsheetItem } from '../../features/cheatsheet/items';
 import { buildCheatsheetIndex, searchCheatsheet } from '../../features/cheatsheet/search';
 
 const QUICK_QUERY_PRESETS = ['session', 'split', 'copy-mode', 'tmux.conf', 'remote'] as const;
+const DEFAULT_PRACTICE_PATH = '/practice?lesson=hello-tmux';
+
+function resolvePracticePath(item: CheatsheetItem) {
+  return item.practicePath ?? DEFAULT_PRACTICE_PATH;
+}
 
 export function CheatsheetPage() {
   const [query, setQuery] = useState('');
@@ -34,7 +39,7 @@ export function CheatsheetPage() {
     <PagePlaceholder
       eyebrow="Reference Hub"
       title="치트시트 + 플레이북 통합 레퍼런스"
-      description="분산된 메뉴를 하나의 허브로 묶었습니다. 명령/단축키를 찾고 바로 실습 또는 플레이북으로 이동하세요."
+      description="짧은 명령은 실습 워크벤치에서 바로 검증하고, 운영 절차형 주제는 플레이북으로 깊게 학습하세요."
     >
       <section className="reference-hub-head">
         <p className="muted">
@@ -68,14 +73,15 @@ export function CheatsheetPage() {
                 <h3>{item.title}</h3>
                 <p className="muted">{item.description}</p>
                 <div className="inline-actions">
-                  <Link to={`/practice?from=${item.id}`} className="secondary-btn">
-                    실습 연결
-                  </Link>
                   {item.contentType === 'playbook' && item.playbookSlug ? (
                     <Link to={`/playbooks/${item.playbookSlug}`} className="secondary-btn">
-                      플레이북 열기
+                      플레이북 단계 보기
                     </Link>
-                  ) : null}
+                  ) : (
+                    <Link to={resolvePracticePath(item)} className="secondary-btn">
+                      실습 워크벤치 열기
+                    </Link>
+                  )}
                 </div>
                 {item.command ? <code className="playbook-command">{item.command}</code> : null}
                 {item.shortcut ? <code className="playbook-command">{item.shortcut}</code> : null}
