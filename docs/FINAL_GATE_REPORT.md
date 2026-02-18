@@ -1,52 +1,39 @@
-# 최종 게이트 검증 리포트 (2026-02-18)
+# 최종 게이트 검증 리포트 (Issue #14)
 
-## 1. 실행 명령
-- `pnpm lint`
-- `pnpm typecheck`
-- `pnpm test`
-- `pnpm test:e2e:smoke`
-- `pnpm verify:kpi-routes`
-- `pnpm verify:coverage-matrix`
-- `pnpm benchmark:simulator`
-- `pnpm build`
+- 작성일: 2026-02-18
+- 기준 이슈: #14 `[검증] 테스트 전면 갱신 + 최종 게이트 문서 업데이트`
+- 기준 문서: `/Users/hckim/repo/tmux-tuto/docs/28_VM_PRACTICE_TEST_TRANSITION_PLAN.md`
 
-## 2. 결과 요약
-- Lint: 통과
-- Typecheck: 통과
-- Unit/Integration Test: 통과 (23 files, 82 tests)
-- E2E Smoke: 통과 (15 tests)
-- KPI Route Map Verification: 통과
-- Coverage Matrix Verification: 통과 (`missions=9, rows=9, capabilities=14`)
-- Simulator Benchmark: 통과
-  - Input reaction p95: `0.004ms` (target `< 80ms`)
-  - Pane split reaction p95: `0.006ms` (target `< 100ms`)
-  - Pane focus reaction p95: `0.002ms` (target `< 100ms`)
-  - Pane scroll reaction p95: `0.002ms` (target `< 100ms`)
-- Production Build: 통과
+## 1. 실행 목적
 
-## 3. HF 게이트 판정
-- `G-HF-01` 시뮬레이터 핵심 조작(split/focus/scroll/copy-mode/command-mode): 통과
-- `G-HF-02` 커리큘럼/치트시트/북마크/복구 연동: 통과
-- `G-HF-03` snapshot 저장/복원 및 recovery fallback: 통과
-- `G-HF-04` 테스트 게이트(unit/integration/e2e): 통과
-- `G-HF-05` 성능 기준(p95) 측정 및 명시: 통과
-- `G-HF-06` CI 게이트 자동화(lint/type/test/e2e/build + verify): 통과(워크플로 정의 기준)
+- VM Practice 전환 이후 깨진 smoke 시나리오를 P0 사용자 동선 기준으로 재구성한다.
+- 최종 게이트 기준(`test`, `test:e2e:smoke`, `verify:coverage-matrix`) 통과 상태를 문서로 고정한다.
 
-## 4. 잔여 수동 확인 항목
-- Cloudflare Pages custom domain 검증 상태가 `pending -> active`로 최종 전환되는지 확인
-- Cloudflare Web Analytics 수집 반영 확인
+## 2. 실행 명령
 
-## 5. 원격 파이프라인 결과 (2026-02-18)
-- CI: `22124361959` (success)
-- Deploy GitHub Pages: `22124361948` (success)
-- Deploy Cloudflare Pages: `22124361944` (success)
+- `npm run test`
+- `npm run test:e2e:smoke`
+- `npm run verify:coverage-matrix`
 
-## 6. 배포 엔드포인트 상태 (2026-02-18)
-- GitHub Pages: `https://midagedev.github.io/tmux-tuto/` (`200`)
-- Cloudflare Pages subdomain: `https://tmux-tuto.pages.dev` (운영 경로 확인)
-- Cloudflare custom domain: `https://tmux.midagedev.com/` (`200`)
-- Practice smoke:
-  - `https://midagedev.github.io/tmux-tuto/practice` -> `tmux Simulator` 렌더링 확인
-  - `https://tmux.midagedev.com/practice` -> `tmux Simulator` 렌더링 확인
-- 참고:
-  - SPA deep-link는 정적 호스팅 fallback 특성으로 네트워크 탭에서 `404`가 보일 수 있으나 앱 렌더링이 정상이라면 허용한다.
+## 3. 결과 요약
+
+- Unit/Integration: 통과 (`29 files`, `101 tests`)
+- E2E Smoke: 통과 (`3 tests`)
+  - `learn entry opens practice with lesson context`
+  - `practice completion feedback supports queue, esc dismiss, and CTA flow`
+  - `progress milestone link opens share preview page`
+- Coverage Matrix: 통과 (`missions=16, rows=16, capabilities=21`)
+
+## 4. 게이트 판정
+
+- [x] `npm run test`
+- [x] `npm run test:e2e:smoke`
+- [x] `npm run verify:coverage-matrix`
+
+판정: **PASS**
+
+## 5. 변경 요약
+
+- 레거시 시뮬레이터 조작 셀렉터 의존 smoke(`Reset Simulator`, `Split Vertical`)를 제거했다.
+- VM Practice 기준 P0 경로(`/learn -> /practice`, 완료 피드백 UI, `/progress -> /share`)로 smoke를 재작성했다.
+- 완료 피드백 접근성 핵심 동작(`aria-label=\"완료 피드백\"`, `Esc` dismiss, 다음 CTA)을 E2E로 검증했다.
