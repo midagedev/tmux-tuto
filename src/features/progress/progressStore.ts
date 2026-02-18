@@ -3,8 +3,9 @@ import {
   calculateLevelFromXp,
   calculateMissionXp,
   calculateNextStreak,
-  computeCourseAchievements,
-  computeSkillAchievements,
+  computeCoreAchievements,
+  computeFunAchievements,
+  type AchievementEvaluationInput,
   type MissionDifficulty,
 } from './progressEngine';
 
@@ -53,8 +54,9 @@ type ProgressState = {
   streakDays: number;
   lastMissionPassDate: string | null;
   completedMissionSlugs: string[];
-  unlockedCourseAchievements: string[];
-  unlockedSkillAchievements: string[];
+  completedTrackSlugs: string[];
+  unlockedCoreAchievements: string[];
+  unlockedFunAchievements: string[];
   unlockedAchievements: string[];
   tmuxSkillStats: TmuxSkillStats;
   recordMissionPass: (payload: MissionPassPayload) => number;
@@ -84,14 +86,68 @@ const INITIAL_TMUX_SKILL_STATS: TmuxSkillStats = {
   lessonSlugs: [],
 };
 
+function unique(values: string[]) {
+  return Array.from(new Set(values));
+}
+
+function buildAchievementInput(
+  completedMissionSlugs: string[],
+  completedTrackSlugs: string[],
+  streakDays: number,
+  tmuxSkillStats: TmuxSkillStats,
+): AchievementEvaluationInput {
+  return {
+    completedMissionCount: completedMissionSlugs.length,
+    streakDays,
+    completedTrackSlugs,
+    splitCount: tmuxSkillStats.splitCount,
+    newWindowCount: tmuxSkillStats.newWindowCount,
+    newSessionCount: tmuxSkillStats.newSessionCount,
+    copyModeCount: tmuxSkillStats.copyModeCount,
+    paneResizeCount: tmuxSkillStats.paneResizeCount,
+    paneSelectCount: tmuxSkillStats.paneSelectCount,
+    layoutSelectCount: tmuxSkillStats.layoutSelectCount,
+    commandPromptCount: tmuxSkillStats.commandPromptCount,
+    chooseTreeCount: tmuxSkillStats.chooseTreeCount,
+    uniqueLayoutCount: tmuxSkillStats.layoutSignatures.length,
+    lessonCount: tmuxSkillStats.lessonSlugs.length,
+  };
+}
+
+function mergeAchievementState(
+  state: Pick<ProgressState, 'unlockedCoreAchievements' | 'unlockedFunAchievements' | 'unlockedAchievements'>,
+  input: AchievementEvaluationInput,
+) {
+  const computedCore = computeCoreAchievements(input);
+  const computedFun = computeFunAchievements(input);
+
+  const unlockedCoreAchievements = unique([...state.unlockedCoreAchievements, ...computedCore]);
+  const unlockedFunAchievements = unique([...state.unlockedFunAchievements, ...computedFun]);
+  const unlockedAchievements = unique([
+    ...state.unlockedAchievements,
+    ...unlockedCoreAchievements,
+    ...unlockedFunAchievements,
+  ]);
+
+  const newlyUnlocked = unlockedAchievements.filter((achievement) => !state.unlockedAchievements.includes(achievement));
+
+  return {
+    unlockedCoreAchievements,
+    unlockedFunAchievements,
+    unlockedAchievements,
+    newlyUnlocked,
+  };
+}
+
 export const useProgressStore = create<ProgressState>((set, get) => ({
   xp: 0,
   level: 1,
   streakDays: 0,
   lastMissionPassDate: null,
   completedMissionSlugs: [],
-  unlockedCourseAchievements: [],
-  unlockedSkillAchievements: [],
+  completedTrackSlugs: [],
+  unlockedCoreAchievements: [],
+  unlockedFunAchievements: [],
   unlockedAchievements: [],
   tmuxSkillStats: INITIAL_TMUX_SKILL_STATS,
   recordMissionPass: (payload) => {
@@ -110,19 +166,15 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
       ? state.completedMissionSlugs
       : [...state.completedMissionSlugs, payload.missionSlug];
     const nextStreak = calculateNextStreak(state.lastMissionPassDate, nowIso, state.streakDays);
+    const nextCompletedTrackSlugs = unique([...state.completedTrackSlugs, ...(payload.completedTrackSlugs ?? [])]);
 
-    const nextCourseAchievements = computeCourseAchievements({
-      completedMissionCount: nextCompletedMissionSlugs.length,
-      streakDays: nextStreak,
-      completedTrackSlugs: payload.completedTrackSlugs ?? [],
-    });
-
-    const unlockedCourseAchievements = Array.from(
-      new Set([...state.unlockedCourseAchievements, ...nextCourseAchievements]),
+    const achievementInput = buildAchievementInput(
+      nextCompletedMissionSlugs,
+      nextCompletedTrackSlugs,
+      nextStreak,
+      state.tmuxSkillStats,
     );
-    const unlockedAchievements = Array.from(
-      new Set([...state.unlockedAchievements, ...unlockedCourseAchievements]),
-    );
+    const nextAchievementState = mergeAchievementState(state, achievementInput);
 
     set({
       xp: nextXp,
@@ -130,8 +182,10 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
       streakDays: nextStreak,
       lastMissionPassDate: nowIso,
       completedMissionSlugs: nextCompletedMissionSlugs,
-      unlockedCourseAchievements,
-      unlockedAchievements,
+      completedTrackSlugs: nextCompletedTrackSlugs,
+      unlockedCoreAchievements: nextAchievementState.unlockedCoreAchievements,
+      unlockedFunAchievements: nextAchievementState.unlockedFunAchievements,
+      unlockedAchievements: nextAchievementState.unlockedAchievements,
     });
 
     return gainedXp;
@@ -212,49 +266,23 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
       nextStats.lessonSlugs.push(lessonSlug);
     }
 
-    const computedSkillAchievements = computeSkillAchievements({
-      splitCount: nextStats.splitCount,
-      maxPaneCount: nextStats.maxPaneCount,
-      newWindowCount: nextStats.newWindowCount,
-      newSessionCount: nextStats.newSessionCount,
-      copyModeCount: nextStats.copyModeCount,
-      paneResizeCount: nextStats.paneResizeCount,
-      paneSelectCount: nextStats.paneSelectCount,
-      paneSwapCount: nextStats.paneSwapCount,
-      windowRotateCount: nextStats.windowRotateCount,
-      layoutSelectCount: nextStats.layoutSelectCount,
-      zoomToggleCount: nextStats.zoomToggleCount,
-      syncToggleCount: nextStats.syncToggleCount,
-      commandPromptCount: nextStats.commandPromptCount,
-      chooseTreeCount: nextStats.chooseTreeCount,
-      uniqueLayoutCount: nextStats.layoutSignatures.length,
-      zoomObserved: nextStats.zoomObserved,
-      syncObserved: nextStats.syncObserved,
-      lessonCount: nextStats.lessonSlugs.length,
-    });
-
-    const newlyUnlocked = computedSkillAchievements.filter(
-      (achievement) => !state.unlockedSkillAchievements.includes(achievement),
+    const achievementInput = buildAchievementInput(
+      state.completedMissionSlugs,
+      state.completedTrackSlugs,
+      state.streakDays,
+      nextStats,
     );
 
-    const unlockedSkillAchievements = Array.from(
-      new Set([...state.unlockedSkillAchievements, ...computedSkillAchievements]),
-    );
-    const unlockedAchievements = Array.from(
-      new Set([
-        ...state.unlockedAchievements,
-        ...state.unlockedCourseAchievements,
-        ...unlockedSkillAchievements,
-      ]),
-    );
+    const nextAchievementState = mergeAchievementState(state, achievementInput);
 
     set({
       tmuxSkillStats: nextStats,
-      unlockedSkillAchievements,
-      unlockedAchievements,
+      unlockedCoreAchievements: nextAchievementState.unlockedCoreAchievements,
+      unlockedFunAchievements: nextAchievementState.unlockedFunAchievements,
+      unlockedAchievements: nextAchievementState.unlockedAchievements,
     });
 
-    return newlyUnlocked;
+    return nextAchievementState.newlyUnlocked;
   },
   addCompletedMission: (missionSlug) =>
     set((state) => ({

@@ -608,7 +608,7 @@ export function PracticeVmPocPage() {
 
   const announceSkillAchievement = useCallback((achievementId: string) => {
     const definition = getAchievementDefinition(achievementId);
-    if (!definition || definition.category !== 'skill') {
+    if (!definition) {
       return;
     }
 
@@ -619,7 +619,7 @@ export function PracticeVmPocPage() {
 
       return {
         kind: 'skill',
-        message: `스킬 업적 달성: ${definition.title}`,
+        message: `업적 달성: ${definition.title}`,
         detail: definition.description,
         achievementId: definition.id,
       };
