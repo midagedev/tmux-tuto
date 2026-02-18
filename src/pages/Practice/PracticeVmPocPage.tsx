@@ -8,6 +8,12 @@ import type { V86Options } from 'v86';
 import { PagePlaceholder } from '../../components/system/PagePlaceholder';
 import { loadAppContent } from '../../features/curriculum/contentLoader';
 import type { AppContent, AppMission } from '../../features/curriculum/contentSchema';
+import {
+  advanceCompletionFeedback,
+  enqueueCompletionFeedback,
+  type CompletionFeedbackItem,
+  type CompletionFeedbackQueueState,
+} from '../../features/progress/completionFeedbackQueue';
 import { getAchievementDefinition } from '../../features/progress';
 import { useProgressStore } from '../../features/progress/progressStore';
 import { buildTwitterIntentUrl } from '../../features/sharing';
@@ -37,12 +43,8 @@ type VmMetricState = {
   searchMatchFound: boolean | null;
 };
 
-type CelebrationState = {
-  kind: 'mission' | 'lesson' | 'achievement';
-  message: string;
-  detail: string;
-  achievementId?: string;
-};
+type CelebrationState = CompletionFeedbackItem;
+type CelebrationQueueState = CompletionFeedbackQueueState;
 
 type VmInitialState = {
   buffer: ArrayBuffer;
@@ -323,7 +325,10 @@ export function PracticeVmPocPage() {
   const [actionHistory, setActionHistory] = useState<string[]>([]);
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [metrics, setMetrics] = useState<VmMetricState>(createInitialMetrics());
-  const [celebration, setCelebration] = useState<CelebrationState | null>(null);
+  const [celebrationState, setCelebrationState] = useState<CelebrationQueueState>({
+    active: null,
+    queue: [],
+  });
   const [autoProbe, setAutoProbe] = useState(true);
   const [mobileWorkbenchView, setMobileWorkbenchView] = useState<'mission' | 'terminal'>('terminal');
 
@@ -341,6 +346,7 @@ export function PracticeVmPocPage() {
   const probeTimerRef = useRef<number | null>(null);
   const celebratedMissionSetRef = useRef(new Set<string>());
   const celebratedLessonSetRef = useRef(new Set<string>());
+  const seenCelebrationKeysRef = useRef(new Set<string>());
   const lastEmulatorOptionsRef = useRef<V86Options | null>(null);
   const vmInternalBridgeReadyRef = useRef(false);
   const vmWarmBannerPendingRef = useRef(false);
@@ -475,6 +481,22 @@ export function PracticeVmPocPage() {
     return content.lessons[index + 1] ?? null;
   }, [content, selectedLesson]);
 
+  const celebration = celebrationState.active;
+  const celebrationQueueCount = celebrationState.queue.length;
+
+  const enqueueCelebration = useCallback((nextCelebration: CelebrationState) => {
+    if (seenCelebrationKeysRef.current.has(nextCelebration.key)) {
+      return;
+    }
+    seenCelebrationKeysRef.current.add(nextCelebration.key);
+
+    setCelebrationState((previous) => enqueueCompletionFeedback(previous, nextCelebration));
+  }, []);
+
+  const advanceCelebration = useCallback(() => {
+    setCelebrationState((previous) => advanceCompletionFeedback(previous));
+  }, []);
+
   const celebrationAchievement = useMemo(() => {
     if (!celebration?.achievementId) {
       return null;
@@ -506,6 +528,26 @@ export function PracticeVmPocPage() {
   useEffect(() => {
     recordTmuxActivityRef.current = recordTmuxActivity;
   }, [recordTmuxActivity]);
+
+  useEffect(() => {
+    if (!celebration) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') {
+        return;
+      }
+
+      event.preventDefault();
+      advanceCelebration();
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [advanceCelebration, celebration]);
 
   useEffect(() => {
     let isMounted = true;
@@ -612,19 +654,14 @@ export function PracticeVmPocPage() {
       return;
     }
 
-    setCelebration((previous) => {
-      if (previous?.kind === 'lesson') {
-        return previous;
-      }
-
-      return {
-        kind: 'achievement',
-        message: `업적 달성: ${definition.title}`,
-        detail: definition.description,
-        achievementId: definition.id,
-      };
+    enqueueCelebration({
+      key: `achievement:${definition.id}`,
+      kind: 'achievement',
+      message: `업적 달성: ${definition.title}`,
+      detail: definition.description,
+      achievementId: definition.id,
     });
-  }, []);
+  }, [enqueueCelebration]);
 
   const updateMetricByProbe = useCallback(
     (metric: VmProbeMetric) => {
@@ -707,7 +744,7 @@ export function PracticeVmPocPage() {
           lessonSlug: selectedLessonSlugRef.current,
         });
         if (unlocked.length > 0) {
-          announceAchievement(unlocked[0]);
+          unlocked.forEach((achievementId) => announceAchievement(achievementId));
         }
       }
     },
@@ -732,7 +769,7 @@ export function PracticeVmPocPage() {
           lessonSlug: selectedLessonSlugRef.current,
         });
         if (unlocked.length > 0) {
-          announceAchievement(unlocked[0]);
+          unlocked.forEach((achievementId) => announceAchievement(achievementId));
         }
       }
 
@@ -863,7 +900,8 @@ export function PracticeVmPocPage() {
     setActionHistory([]);
     setCommandHistory([]);
     setDebugLines([]);
-    setCelebration(null);
+    setCelebrationState({ active: null, queue: [] });
+    seenCelebrationKeysRef.current.clear();
     lineBufferRef.current = '';
     suppressCurrentLineRef.current = false;
     vmInternalBridgeReadyRef.current = false;
@@ -1172,7 +1210,8 @@ export function PracticeVmPocPage() {
       completedTrackSlugs,
     });
 
-    setCelebration({
+    enqueueCelebration({
+      key: `mission:${selectedMission.slug}`,
       kind: 'mission',
       message: `미션 완료: ${selectedMission.title}`,
       detail: `자동 판정 통과, XP +${gainedXp}`,
@@ -1180,6 +1219,7 @@ export function PracticeVmPocPage() {
   }, [
     completedMissionSlugs,
     content,
+    enqueueCelebration,
     recordMissionPass,
     selectedMission,
     selectedMissionStatus,
@@ -1203,12 +1243,13 @@ export function PracticeVmPocPage() {
     }
 
     celebratedLessonSetRef.current.add(selectedLesson.slug);
-    setCelebration({
+    enqueueCelebration({
+      key: `lesson:${selectedLesson.slug}`,
       kind: 'lesson',
       message: `레슨 완료: ${selectedLesson.title}`,
       detail: `${lessonMissions.length}개 미션을 모두 완료했습니다.`,
     });
-  }, [completedMissionSlugs, lessonMissions, selectedLesson]);
+  }, [completedMissionSlugs, enqueueCelebration, lessonMissions, selectedLesson]);
 
   const handleManualMissionComplete = useCallback(() => {
     if (!content || !selectedMission) {
@@ -1232,12 +1273,13 @@ export function PracticeVmPocPage() {
       completedTrackSlugs,
     });
 
-    setCelebration({
+    enqueueCelebration({
+      key: `mission:${selectedMission.slug}`,
       kind: 'mission',
       message: `수동 완료 처리: ${selectedMission.title}`,
       detail: `수동 브리지 기록 완료, XP +${gainedXp}`,
     });
-  }, [content, completedMissionSlugs, recordMissionPass, selectedMission]);
+  }, [content, completedMissionSlugs, enqueueCelebration, recordMissionPass, selectedMission]);
 
   const lessonObjectivePreview = selectedLesson?.objectives.slice(0, 3) ?? [];
   const hiddenObjectiveCount = selectedLesson
@@ -1303,11 +1345,18 @@ export function PracticeVmPocPage() {
         </details>
 
         {celebration ? (
-          <section className={`vm-celebration vm-celebration-${celebration.kind}`} role="status" aria-live="polite">
+          <section
+            className={`vm-celebration vm-celebration-${celebration.kind}`}
+            role="dialog"
+            aria-modal="false"
+            aria-live="polite"
+            aria-label="완료 피드백"
+          >
             <p>
               <strong>{celebration.message}</strong>
             </p>
             <p>{celebration.detail}</p>
+            <p className="muted">대기 중인 알림 {celebrationQueueCount}개</p>
             <div className="inline-actions vm-celebration-actions">
               {celebration.kind === 'mission' && nextMission ? (
                 <button
@@ -1316,7 +1365,7 @@ export function PracticeVmPocPage() {
                   onClick={() => {
                     setSelectedMissionSlug(nextMission.slug);
                     setMobileWorkbenchView('mission');
-                    setCelebration(null);
+                    advanceCelebration();
                   }}
                 >
                   다음 미션
@@ -1333,7 +1382,7 @@ export function PracticeVmPocPage() {
                     );
                     setSelectedMissionSlug(nextMissionInLesson?.slug ?? '');
                     setMobileWorkbenchView('mission');
-                    setCelebration(null);
+                    advanceCelebration();
                   }}
                 >
                   다음 레슨
@@ -1347,8 +1396,8 @@ export function PracticeVmPocPage() {
                   X 공유
                 </a>
               ) : null}
-              <button type="button" className="secondary-btn" onClick={() => setCelebration(null)}>
-                닫기
+              <button type="button" className="secondary-btn" onClick={advanceCelebration}>
+                닫기 (Esc)
               </button>
             </div>
           </section>
