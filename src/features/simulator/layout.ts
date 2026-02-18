@@ -14,9 +14,7 @@ function withGeometry(pane: TmuxPane, x: number, y: number, width: number, heigh
 }
 
 function layoutSingle(panes: TmuxPane[]) {
-  return panes.map((pane, index) =>
-    withGeometry(pane, 0, 0, VIEW_WIDTH, VIEW_HEIGHT - index),
-  );
+  return panes.map((pane) => withGeometry(pane, 0, 0, VIEW_WIDTH, VIEW_HEIGHT));
 }
 
 function layoutVertical(panes: TmuxPane[]) {
