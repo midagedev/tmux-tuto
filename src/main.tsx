@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import { createAppRouter } from './app/router';
 import { I18nProvider } from './i18n';
-import { tx } from './i18n/tx';
+import { tx, txf } from './i18n/tx';
 import './index.css';
 function applyRedirectedPathFrom404() {
     const redirectedPath = new URLSearchParams(window.location.search).get('p');
@@ -24,6 +24,7 @@ function applyRedirectedPathFrom404() {
 }
 applyRedirectedPathFrom404();
 globalThis.__tx = tx;
+globalThis.__txf = txf;
 const router = createAppRouter();
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
     window.addEventListener('load', () => {
