@@ -56,6 +56,8 @@ declare global {
         status: VmStatus;
         text: string;
         metrics: VmMetricState;
+        actionHistory: string[];
+        commandHistory: string[];
         debugLineCount: number;
         lastDebugLine: string | null;
       };
@@ -788,6 +790,8 @@ export function PracticeVmPocPage() {
         status: vmStatus,
         text: vmStatusText,
         metrics,
+        actionHistory,
+        commandHistory,
         debugLineCount: debugLines.length,
         lastDebugLine: debugLines.length > 0 ? debugLines[debugLines.length - 1] : null,
       }),
@@ -816,7 +820,7 @@ export function PracticeVmPocPage() {
     return () => {
       delete window.__tmuxwebVmBridge;
     };
-  }, [debugLines, metrics, sendCommand, vmStatus, vmStatusText]);
+  }, [actionHistory, commandHistory, debugLines, metrics, sendCommand, vmStatus, vmStatusText]);
 
   useEffect(() => {
     if (contentState.status !== 'ready') {
