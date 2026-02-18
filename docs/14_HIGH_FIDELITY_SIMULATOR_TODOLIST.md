@@ -146,7 +146,7 @@
   - 검증: rule engine test 업데이트
   - DoD: Track A~C pass/fail 결정성 보장
 
-- [ ] `HF-042` 힌트 엔진과 실시간 상태 연결
+- [x] `HF-042` 힌트 엔진과 실시간 상태 연결
   - 산출물: 실패 상태 기반 단계별 힌트
   - 의존: `HF-041`
   - 검증: integration/e2e

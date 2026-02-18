@@ -4,7 +4,7 @@ import { PagePlaceholder } from '../../components/system/PagePlaceholder';
 import { EmptyState } from '../../components/system/EmptyState';
 import { loadAppContent } from '../../features/curriculum/contentLoader';
 import type { AppMission } from '../../features/curriculum/contentSchema';
-import { getHintForMission } from '../../features/grading/hintEngine';
+import { getHintForMission, getLiveHintForMission } from '../../features/grading/hintEngine';
 import { evaluateMission } from '../../features/grading/ruleEngine';
 import { useOnboardingStore } from '../../features/onboarding/onboardingStore';
 import { useProgressStore } from '../../features/progress/progressStore';
@@ -60,6 +60,14 @@ export function OnboardingFirstMissionPage() {
   }, [initMissionScenario, mission, prefixKey, resetSimulator, setSimulatorPrefix]);
 
   const activeWindow = useMemo(() => getActiveWindow(simulatorState), [simulatorState]);
+  const liveGrade = useMemo(
+    () => (mission ? evaluateMission(simulatorState, mission) : null),
+    [mission, simulatorState],
+  );
+  const liveHint = useMemo(
+    () => (mission && liveGrade ? getLiveHintForMission(mission, liveGrade) : null),
+    [liveGrade, mission],
+  );
 
   const sendPrefixKey = (key: string) => {
     handleKeyInput(prefixKey);
@@ -114,6 +122,11 @@ export function OnboardingFirstMissionPage() {
             <p className="muted">
               현재 상태: pane {activeWindow.panes.length}개 / mode {simulatorState.mode.value}
             </p>
+          </section>
+
+          <section className="onboarding-card" aria-live="polite">
+            <h2>실시간 힌트</h2>
+            <p className="page-description">{liveHint?.hintText ?? '현재 상태를 분석 중입니다.'}</p>
           </section>
 
           <div className="inline-actions">

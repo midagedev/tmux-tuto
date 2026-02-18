@@ -9,8 +9,11 @@ test('onboarding first mission flow completes @smoke', async ({ page }) => {
   await page.getByRole('button', { name: '업무용 기초 빨리 익히기' }).click();
   await page.getByRole('button', { name: '입력 선호 설정으로 이동' }).click();
   await page.getByRole('button', { name: '첫 미션 시작' }).click();
+  const liveHintCard = page.locator('.onboarding-card').filter({ hasText: '실시간 힌트' });
+  await expect(liveHintCard).toContainText('현재 가장 부족한 조건');
 
   await page.getByRole('button', { name: 'Prefix + % (세로 분할)' }).click();
+  await expect(liveHintCard).toContainText('통과 조건을 만족');
   await page.getByRole('button', { name: '제출하고 채점하기' }).click();
 
   await expect(page).toHaveURL(/\/onboarding\/first-mission\/passed/);
