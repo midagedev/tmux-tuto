@@ -106,7 +106,26 @@ const VM_BOOT_CONFIG = {
   vgaBiosPath: resolveAssetPath('vm/vgabios.bin'),
   fsBasePath: resolveAssetPath('vm/alpine-tmux-flat/'),
   fsJsonPath: resolveAssetPath('vm/alpine-tmux-fs.json'),
+  initialStatePath:
+    (import.meta.env.VITE_VM_INITIAL_STATE_PATH as string | undefined)?.trim() ||
+    resolveAssetPath('vm/alpine-tmux-ready.bin.zst'),
 };
+
+async function loadVmInitialState(initialStatePath: string) {
+  if (!initialStatePath) {
+    return null;
+  }
+
+  try {
+    const response = await fetch(initialStatePath, { cache: 'no-cache' });
+    if (!response.ok) {
+      return null;
+    }
+    return await response.arrayBuffer();
+  } catch {
+    return null;
+  }
+}
 
 function trimHistory(history: string[], max: number) {
   if (history.length <= max) {
@@ -682,6 +701,17 @@ export function PracticeVmPocPage() {
         }
 
         const V86Ctor = module.default;
+        setVmStatusText('VM 시작 이미지 확인 중...');
+
+        const initialState = await loadVmInitialState(VM_BOOT_CONFIG.initialStatePath);
+        if (!isMounted) {
+          return;
+        }
+
+        const useWarmStart = Boolean(initialState);
+        if (useWarmStart) {
+          setVmStatusText('빠른 시작 스냅샷 로딩 중...');
+        }
 
         const emulator = new V86Ctor({
           wasm_path: VM_BOOT_CONFIG.wasmPath,
@@ -701,13 +731,14 @@ export function PracticeVmPocPage() {
             'rw root=host9p rootfstype=9p rootflags=trans=virtio,cache=loose console=ttyS0 init=/sbin/init quiet loglevel=3',
           disable_keyboard: true,
           disable_mouse: true,
+          initial_state: initialState ?? undefined,
           autostart: true,
         });
 
         emulatorRef.current = emulator;
 
         loadedListener = () => {
-          setVmStatusText('커널 및 루트FS 로딩 완료');
+          setVmStatusText(useWarmStart ? '빠른 시작 스냅샷 복원 완료' : '커널 및 루트FS 로딩 완료');
         };
 
         stopListener = () => {
@@ -729,6 +760,7 @@ export function PracticeVmPocPage() {
         setVmStatus('booting');
         setVmStatusText('VM 부팅 중...');
 
+        const probeBootstrapDelayMs = useWarmStart ? 700 : 2600;
         window.setTimeout(() => {
           if (!emulatorRef.current) {
             return;
@@ -736,7 +768,7 @@ export function PracticeVmPocPage() {
           emulatorRef.current.serial0_send('\n');
           emulatorRef.current.serial0_send(`${PROBE_INSTALL_COMMAND}\n`);
           emulatorRef.current.serial0_send(`${PROBE_TRIGGER_COMMAND}\n`);
-        }, 2600);
+        }, probeBootstrapDelayMs);
       } catch {
         setVmStatus('error');
         setVmStatusText('v86 초기화 실패 (bios/wasm 경로 확인 필요)');
