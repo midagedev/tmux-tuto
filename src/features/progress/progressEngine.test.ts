@@ -4,6 +4,7 @@ import {
   calculateMissionXp,
   calculateNextStreak,
   computeAchievements,
+  computeSkillAchievements,
 } from './progressEngine';
 
 describe('progressEngine', () => {
@@ -42,5 +43,24 @@ describe('progressEngine', () => {
 
     expect(achievements).toContain('full_curriculum_completed');
     expect(achievements).toContain('streak_7_days');
+  });
+
+  it('unlocks tmux skill achievements from action counters', () => {
+    const achievements = computeSkillAchievements({
+      splitCount: 100,
+      maxPaneCount: 3,
+      newWindowCount: 1,
+      newSessionCount: 1,
+      copyModeCount: 1,
+      lessonCount: 3,
+    });
+
+    expect(achievements).toContain('skill_first_split');
+    expect(achievements).toContain('skill_split_100');
+    expect(achievements).toContain('skill_triple_panes');
+    expect(achievements).toContain('skill_first_window');
+    expect(achievements).toContain('skill_first_session');
+    expect(achievements).toContain('skill_first_copy_mode');
+    expect(achievements).toContain('skill_three_lessons');
   });
 });

@@ -6,10 +6,19 @@ type XpInput = {
   hintLevel: 0 | 1 | 2 | 3;
 };
 
-type AchievementInput = {
+export type CourseAchievementInput = {
   completedMissionCount: number;
   streakDays: number;
   completedTrackSlugs: string[];
+};
+
+export type SkillAchievementInput = {
+  splitCount: number;
+  maxPaneCount: number;
+  newWindowCount: number;
+  newSessionCount: number;
+  copyModeCount: number;
+  lessonCount: number;
 };
 
 const DIFFICULTY_BONUS: Record<MissionDifficulty, number> = {
@@ -109,7 +118,7 @@ export function calculateNextStreak(lastPassDate: string | null, nowIso: string,
   return 1;
 }
 
-export function computeAchievements(input: AchievementInput) {
+export function computeCourseAchievements(input: CourseAchievementInput) {
   const unlocked: string[] = [];
 
   if (input.completedMissionCount >= 1) {
@@ -138,6 +147,48 @@ export function computeAchievements(input: AchievementInput) {
     input.completedTrackSlugs.includes('track-c-deepwork')
   ) {
     unlocked.push('full_curriculum_completed');
+  }
+
+  return unlocked;
+}
+
+export function computeAchievements(input: CourseAchievementInput) {
+  return computeCourseAchievements(input);
+}
+
+export function computeSkillAchievements(input: SkillAchievementInput) {
+  const unlocked: string[] = [];
+
+  if (input.splitCount >= 1) {
+    unlocked.push('skill_first_split');
+  }
+
+  if (input.maxPaneCount >= 3) {
+    unlocked.push('skill_triple_panes');
+  }
+
+  if (input.splitCount >= 20) {
+    unlocked.push('skill_split_20');
+  }
+
+  if (input.splitCount >= 100) {
+    unlocked.push('skill_split_100');
+  }
+
+  if (input.newWindowCount >= 1) {
+    unlocked.push('skill_first_window');
+  }
+
+  if (input.newSessionCount >= 1) {
+    unlocked.push('skill_first_session');
+  }
+
+  if (input.copyModeCount >= 1) {
+    unlocked.push('skill_first_copy_mode');
+  }
+
+  if (input.lessonCount >= 3) {
+    unlocked.push('skill_three_lessons');
   }
 
   return unlocked;
