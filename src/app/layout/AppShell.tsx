@@ -13,58 +13,28 @@ const mainLinks = [
   { to: '/progress', label: '진행도' },
 ];
 
-type RouteContext = {
-  title: string;
-  objective: string;
-  nextAction: string;
-};
-
-function resolveRouteContext(pathname: string): RouteContext {
+function resolveRouteLabel(pathname: string): string {
   if (pathname === '/') {
-    return {
-      title: '시작',
-      objective: '바로 실습으로 들어가 초급 코어를 빠르게 완료합니다.',
-      nextAction: '실습 시작 버튼 클릭',
-    };
+    return '홈';
   }
 
   if (pathname.startsWith('/learn')) {
-    return {
-      title: '학습 경로',
-      objective: '초급 코어 완료 후 심화로 넘어갑니다.',
-      nextAction: '레슨 선택 후 실습 열기',
-    };
+    return '학습 경로';
   }
 
   if (pathname.startsWith('/practice')) {
-    return {
-      title: '실습',
-      objective: '현재 미션을 명령 실행으로 통과합니다.',
-      nextAction: '명령 실행 후 판정 확인',
-    };
+    return '실습';
   }
 
   if (pathname.startsWith('/playbooks')) {
-    return {
-      title: '플레이북',
-      objective: '학습 내용을 실제 운영 루틴으로 전환합니다.',
-      nextAction: '상황에 맞는 플레이북 실행',
-    };
+    return '플레이북';
   }
 
   if (pathname.startsWith('/progress')) {
-    return {
-      title: '진행도',
-      objective: '완료 현황을 점검하고 다음 레슨을 결정합니다.',
-      nextAction: '다음 미완료 레슨 선택',
-    };
+    return '진행도';
   }
 
-  return {
-    title: '안내',
-    objective: '현재 화면의 핵심 작업을 짧게 수행합니다.',
-    nextAction: '현재 화면의 주요 버튼 실행',
-  };
+  return '안내';
 }
 
 export function AppShell() {
@@ -72,7 +42,8 @@ export function AppShell() {
   useCloudflareAnalytics(consent);
   const hydrateSimulatorFromStorage = useSimulatorStore((store) => store.hydrateFromStorage);
   const location = useLocation();
-  const routeContext = useMemo(() => resolveRouteContext(location.pathname), [location.pathname]);
+  const routeLabel = useMemo(() => resolveRouteLabel(location.pathname), [location.pathname]);
+  const analyticsStatus = consent === 'granted' ? '켜짐' : consent === 'denied' ? '꺼짐' : '대기';
 
   useEffect(() => {
     void hydrateSimulatorFromStorage();
@@ -84,7 +55,7 @@ export function AppShell() {
         본문으로 건너뛰기
       </a>
       <div className="app-shell">
-        <header className="left-panel app-top-row" aria-label="Primary Navigation">
+        <header className="left-panel app-top-row app-header" aria-label="Primary Navigation">
           <NavLink to="/" className="brand">
             <span className="brand-name">{BRAND.name}</span>
             <small className="brand-subtitle">{BRAND.descriptor}</small>
@@ -100,26 +71,20 @@ export function AppShell() {
               </NavLink>
             ))}
           </nav>
+          <div className="app-header-meta" aria-label="Page Context">
+            <span className="app-route-chip">{routeLabel}</span>
+            <span className="app-analytics-chip">Analytics {analyticsStatus}</span>
+            {consent !== 'unknown' ? (
+              <button
+                type="button"
+                className="secondary-btn app-analytics-toggle"
+                onClick={consent === 'granted' ? setDenied : setGranted}
+              >
+                {consent === 'granted' ? '분석 끄기' : '분석 켜기'}
+              </button>
+            ) : null}
+          </div>
         </header>
-
-        <section className="right-panel app-context-row" aria-label="Context Panel">
-          <p>
-            <strong>{routeContext.title}</strong> · {routeContext.objective}
-          </p>
-          <p className="muted">다음 행동: {routeContext.nextAction}</p>
-          <p className="muted">
-            Analytics: {consent === 'granted' ? '동의됨' : consent === 'denied' ? '거부됨' : '대기중'}
-          </p>
-          {consent !== 'unknown' ? (
-            <button
-              type="button"
-              className="secondary-btn"
-              onClick={consent === 'granted' ? setDenied : setGranted}
-            >
-              {consent === 'granted' ? '분석 비활성화' : '분석 활성화'}
-            </button>
-          ) : null}
-        </section>
 
         <main id="main-content" className="main-panel">
           <Outlet />
@@ -130,4 +95,3 @@ export function AppShell() {
     </>
   );
 }
-

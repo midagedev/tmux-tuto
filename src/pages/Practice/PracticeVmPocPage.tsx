@@ -86,13 +86,20 @@ const QUICK_COMMANDS = [
 const BEGINNER_ENTRY_LESSON = 'hello-tmux';
 const ADVANCED_ENTRY_LESSON = 'copy-search';
 
+function resolveAssetPath(relativePath: string) {
+  const base = import.meta.env.BASE_URL ?? '/';
+  const normalizedBase = base.endsWith('/') ? base : `${base}/`;
+  const normalizedRelative = relativePath.replace(/^\/+/, '');
+  return `${normalizedBase}${normalizedRelative}`;
+}
+
 const VM_BOOT_CONFIG = {
-  wasmPath: '/vm/v86.wasm',
-  wasmFallbackPath: '/vm/v86-fallback.wasm',
-  biosPath: '/vm/seabios.bin',
-  vgaBiosPath: '/vm/vgabios.bin',
-  fsBasePath: '/vm/alpine-tmux-flat/',
-  fsJsonPath: '/vm/alpine-tmux-fs.json',
+  wasmPath: resolveAssetPath('vm/v86.wasm'),
+  wasmFallbackPath: resolveAssetPath('vm/v86-fallback.wasm'),
+  biosPath: resolveAssetPath('vm/seabios.bin'),
+  vgaBiosPath: resolveAssetPath('vm/vgabios.bin'),
+  fsBasePath: resolveAssetPath('vm/alpine-tmux-flat/'),
+  fsJsonPath: resolveAssetPath('vm/alpine-tmux-fs.json'),
 };
 
 function trimHistory(history: string[], max: number) {
@@ -203,6 +210,7 @@ export function PracticeVmPocPage() {
   const [metrics, setMetrics] = useState<VmMetricState>(createInitialMetrics());
   const [celebration, setCelebration] = useState<CelebrationState | null>(null);
   const [autoProbe, setAutoProbe] = useState(true);
+  const [mobileWorkbenchView, setMobileWorkbenchView] = useState<'mission' | 'terminal'>('terminal');
 
   const completedMissionSlugs = useProgressStore((store) => store.completedMissionSlugs);
   const recordMissionPass = useProgressStore((store) => store.recordMissionPass);
@@ -910,7 +918,24 @@ export function PracticeVmPocPage() {
           </section>
         ) : null}
 
-        <section className="vm-workbench">
+        <div className="vm-mobile-switch" role="tablist" aria-label="실습 화면 전환">
+          <button
+            type="button"
+            className={`secondary-btn ${mobileWorkbenchView === 'mission' ? 'is-active' : ''}`}
+            onClick={() => setMobileWorkbenchView('mission')}
+          >
+            미션
+          </button>
+          <button
+            type="button"
+            className={`secondary-btn ${mobileWorkbenchView === 'terminal' ? 'is-active' : ''}`}
+            onClick={() => setMobileWorkbenchView('terminal')}
+          >
+            터미널
+          </button>
+        </div>
+
+        <section className={`vm-workbench vm-workbench-view-${mobileWorkbenchView}`}>
           <aside className="vm-study-panel">
             <section className="vm-curriculum-panel vm-curriculum-row-layout">
               <div className="inline-actions">
@@ -1069,6 +1094,15 @@ export function PracticeVmPocPage() {
                 <p className="muted">
                   {selectedMission.title} · 난이도 {getDifficultyLabel(selectedMission.difficulty)}
                 </p>
+                <div className="inline-actions">
+                  <button
+                    type="button"
+                    className="secondary-btn"
+                    onClick={() => setMobileWorkbenchView('terminal')}
+                  >
+                    터미널로 바로 이동
+                  </button>
+                </div>
                 <ul className="link-list">
                   {selectedMission.hints.map((hint) => (
                     <li key={hint}>{hint}</li>
@@ -1144,13 +1178,16 @@ export function PracticeVmPocPage() {
                 </button>
               </form>
 
-              <div className="vm-poc-quick">
-                {QUICK_COMMANDS.map((item) => (
-                  <button key={item.label} type="button" className="secondary-btn" onClick={() => sendCommand(item.command)}>
-                    {item.label}
-                  </button>
-                ))}
-              </div>
+              <details className="vm-poc-quick-wrap">
+                <summary>자주 쓰는 명령 빠르게 실행</summary>
+                <div className="vm-poc-quick">
+                  {QUICK_COMMANDS.map((item) => (
+                    <button key={item.label} type="button" className="secondary-btn" onClick={() => sendCommand(item.command)}>
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              </details>
 
               <p className="vm-poc-status">
                 metrics · sessions {metrics.sessionCount ?? '-'} / windows {metrics.windowCount ?? '-'} / panes{' '}
