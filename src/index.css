@@ -1180,6 +1180,23 @@ a {
   text-underline-offset: 2px;
 }
 
+.vm-mobile-hint {
+  display: none;
+  margin: 0;
+  padding: 10px 14px;
+  font-size: 0.82rem;
+  color: #4b5563;
+  background: #f3f4f6;
+  border-radius: 8px;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .vm-mobile-hint {
+    display: block;
+  }
+}
+
 .vm-poc-panel {
   display: grid;
   gap: 8px;

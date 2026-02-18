@@ -2071,6 +2071,9 @@ export function PracticeVmPocPage() {
       title="tmux 실습"
       description=""
     >
+      <p className="vm-mobile-hint">
+        원활한 실습을 위해 데스크톱 브라우저 사용을 권장합니다.
+      </p>
       <div className="vm-poc-panel">
         {celebration ? (
           <section className={`vm-celebration-overlay ${isAchievementCelebration ? 'is-toast' : ''}`}>
