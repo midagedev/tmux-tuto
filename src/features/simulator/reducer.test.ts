@@ -8,6 +8,7 @@ describe('simulatorReducer', () => {
     const next = simulatorReducer(initial, { type: 'SPLIT_PANE', payload: 'vertical' });
 
     expect(getActiveWindow(next).panes.length).toBe(2);
+    expect(getActiveWindow(next).layout).toBe('vertical');
     expect(next.actionHistory[next.actionHistory.length - 1]).toBe('sim.pane.split.vertical');
   });
 
@@ -26,6 +27,29 @@ describe('simulatorReducer', () => {
 
     expect(getActiveWindow(killed).panes.length).toBe(1);
     expect(getActiveWindow(killedAgain).panes.length).toBe(1);
+  });
+
+  it('switches to grid layout when pane count grows beyond 2', () => {
+    const initial = createInitialSimulatorState();
+    const splitVertical = simulatorReducer(initial, { type: 'SPLIT_PANE', payload: 'vertical' });
+    const splitHorizontal = simulatorReducer(splitVertical, { type: 'SPLIT_PANE', payload: 'horizontal' });
+    const activeWindow = getActiveWindow(splitHorizontal);
+
+    expect(activeWindow.layout).toBe('grid');
+    expect(activeWindow.panes.length).toBe(3);
+    expect(activeWindow.panes.every((pane) => pane.width >= 10 && pane.height >= 5)).toBe(true);
+  });
+
+  it('moves focus by directional geometry', () => {
+    const initial = createInitialSimulatorState();
+    const withTwoPanes = simulatorReducer(initial, { type: 'SPLIT_PANE', payload: 'vertical' });
+    const activeWindow = getActiveWindow(withTwoPanes);
+    const activePaneBefore = activeWindow.activePaneId;
+
+    const focusedLeft = simulatorReducer(withTwoPanes, { type: 'FOCUS_PANE', payload: 'left' });
+    const activePaneAfter = getActiveWindow(focusedLeft).activePaneId;
+
+    expect(activePaneAfter).not.toBe(activePaneBefore);
   });
 
   it('stores executed commands in shell history', () => {

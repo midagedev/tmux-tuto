@@ -72,7 +72,7 @@
   - DoD: 레슨별 파일/로그 재현 가능
 
 ### Phase 2. tmux Engine High Fidelity
-- [ ] `HF-020` 패인/윈도우/세션 그래프 강화
+- [x] `HF-020` 패인/윈도우/세션 그래프 강화
   - 산출물: 레이아웃 알고리즘 개선(single/vertical/horizontal/grid)
   - 의존: `HF-001`
   - 검증: reducer unit test

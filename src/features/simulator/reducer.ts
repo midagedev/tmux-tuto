@@ -13,6 +13,7 @@ import {
 } from './model';
 import { executeShellCommand } from './shellCommands';
 import { appendOutput, clearTerminal } from './terminalBuffer';
+import { applyPaneLayout, resolveLayoutForPaneCount } from './layout';
 
 export type SplitDirection = 'vertical' | 'horizontal';
 export type FocusDirection = 'left' | 'right' | 'up' | 'down';
@@ -136,14 +137,73 @@ function moveFocus(panes: TmuxPane[], activePaneId: string, direction: FocusDire
     return activePaneId;
   }
 
-  const currentIndex = panes.findIndex((pane) => pane.id === activePaneId);
-  if (currentIndex < 0) {
+  const currentPaneIndex = panes.findIndex((pane) => pane.id === activePaneId);
+  if (currentPaneIndex < 0) {
     return panes[0].id;
   }
 
-  const offset = direction === 'left' || direction === 'up' ? -1 : 1;
-  const nextIndex = (currentIndex + offset + panes.length) % panes.length;
-  return panes[nextIndex].id;
+  const centers = panes.map((pane, index) => {
+    const x = Number.isFinite(pane.x) ? pane.x : index * 10;
+    const y = Number.isFinite(pane.y) ? pane.y : 0;
+    return {
+      pane,
+      centerX: x + pane.width / 2,
+      centerY: y + pane.height / 2,
+    };
+  });
+  const current = centers[currentPaneIndex];
+
+  const candidates = centers.filter((candidate) => {
+    if (candidate.pane.id === current.pane.id) {
+      return false;
+    }
+
+    if (direction === 'left') {
+      return candidate.centerX < current.centerX;
+    }
+
+    if (direction === 'right') {
+      return candidate.centerX > current.centerX;
+    }
+
+    if (direction === 'up') {
+      return candidate.centerY < current.centerY;
+    }
+
+    return candidate.centerY > current.centerY;
+  });
+
+  if (candidates.length === 0) {
+    return activePaneId;
+  }
+
+  candidates.sort((a, b) => {
+    const primaryA =
+      direction === 'left' || direction === 'right'
+        ? Math.abs(a.centerX - current.centerX)
+        : Math.abs(a.centerY - current.centerY);
+    const primaryB =
+      direction === 'left' || direction === 'right'
+        ? Math.abs(b.centerX - current.centerX)
+        : Math.abs(b.centerY - current.centerY);
+
+    if (primaryA !== primaryB) {
+      return primaryA - primaryB;
+    }
+
+    const secondaryA =
+      direction === 'left' || direction === 'right'
+        ? Math.abs(a.centerY - current.centerY)
+        : Math.abs(a.centerX - current.centerX);
+    const secondaryB =
+      direction === 'left' || direction === 'right'
+        ? Math.abs(b.centerY - current.centerY)
+        : Math.abs(b.centerX - current.centerX);
+
+    return secondaryA - secondaryB;
+  });
+
+  return candidates[0].pane.id;
 }
 
 export function simulatorReducer(state: SimulatorState, action: SimulatorAction): SimulatorState {
@@ -289,11 +349,13 @@ export function simulatorReducer(state: SimulatorState, action: SimulatorAction)
         const shellSessionId =
           window.panes.find((pane) => pane.id === window.activePaneId)?.shellSessionId ?? state.shell.activeSessionId;
         const nextPane = createPane(shellSessionId);
-        const layout = window.panes.length + 1 >= 3 ? 'grid' : action.payload;
+        const nextPanes = [...window.panes, nextPane];
+        const layout = resolveLayoutForPaneCount(nextPanes.length, action.payload);
+        const paneGraph = applyPaneLayout(nextPanes, layout);
 
         return {
           ...window,
-          panes: [...window.panes, nextPane],
+          panes: paneGraph,
           activePaneId: nextPane.id,
           layout,
         };
@@ -450,12 +512,14 @@ export function simulatorReducer(state: SimulatorState, action: SimulatorAction)
 
         const nextPanes = window.panes.filter((pane) => pane.id !== window.activePaneId);
         const nextActivePane = nextPanes[0];
+        const nextLayout = nextPanes.length === 1 ? 'single' : window.layout === 'grid' ? 'vertical' : window.layout;
+        const paneGraph = applyPaneLayout(nextPanes, nextLayout);
 
         return {
           ...window,
-          panes: nextPanes,
+          panes: paneGraph,
           activePaneId: nextActivePane.id,
-          layout: nextPanes.length === 1 ? 'single' : window.layout,
+          layout: nextLayout,
         };
       });
 

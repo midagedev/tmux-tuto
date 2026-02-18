@@ -33,6 +33,8 @@ export type TmuxPane = {
   shellSessionId: string;
   buffer: string[];
   terminal: TerminalBufferState;
+  x: number;
+  y: number;
   width: number;
   height: number;
 };
@@ -123,6 +125,8 @@ export function createPane(shellSessionId: string, title = 'shell', seedLines?: 
     shellSessionId,
     buffer: lines,
     terminal: seededTerminal,
+    x: 0,
+    y: 0,
     width: 80,
     height: 24,
   };
