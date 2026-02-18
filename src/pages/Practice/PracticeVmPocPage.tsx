@@ -1454,6 +1454,16 @@ export function PracticeVmPocPage() {
                     <strong>레슨 목표:</strong> {selectedLesson.goal}
                   </p>
                 ) : null}
+                {selectedLesson.successCriteria && selectedLesson.successCriteria.length > 0 ? (
+                  <p className="muted">
+                    <strong>완료 기준:</strong> {selectedLesson.successCriteria[0]}
+                  </p>
+                ) : null}
+                {selectedLesson.failureStates && selectedLesson.failureStates.length > 0 ? (
+                  <p className="muted">
+                    <strong>부족 상태:</strong> {selectedLesson.failureStates[0]}
+                  </p>
+                ) : null}
                 <ul className="link-list">
                   {lessonObjectivePreview.map((objective) => (
                     <li key={objective}>{objective}</li>

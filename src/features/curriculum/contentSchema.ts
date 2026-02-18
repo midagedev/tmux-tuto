@@ -28,6 +28,7 @@ const lessonSchema = z.object({
   overview: z.string().optional(),
   goal: z.string().optional(),
   successCriteria: z.array(z.string()).optional(),
+  failureStates: z.array(z.string()).optional(),
 });
 
 const learningJourneySchema = z.object({
