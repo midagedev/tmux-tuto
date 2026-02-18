@@ -116,8 +116,13 @@ export function evaluateMissionWithVmSnapshot(mission: AppMission, snapshot: VmB
 
   mission.passRules.forEach((rule) => {
     const actual = getMetricFromSnapshot(snapshot, rule.kind);
-    if (actual === undefined || actual === null) {
+    if (actual === undefined) {
       unsupportedKinds.add(rule.kind);
+      return;
+    }
+
+    if (actual === null) {
+      failedRules.push(`${rule.kind} ${rule.operator} ${JSON.stringify(rule.value)}`);
       return;
     }
 

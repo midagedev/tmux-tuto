@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  evaluateMissionWithVmSnapshot,
   extractCommandFromPromptLine,
   isInternalProbeLine,
   parseProbeMetricFromLine,
@@ -54,5 +55,75 @@ describe('parseTmuxActionsFromCommand', () => {
     expect(actions).toContain('sim.pane.resize');
     expect(actions).toContain('sim.pane.zoom.toggle');
     expect(actions).toContain('sim.panes.sync.toggle');
+  });
+});
+
+describe('evaluateMissionWithVmSnapshot', () => {
+  it('treats null metric values as incomplete, not manual', () => {
+    const result = evaluateMissionWithVmSnapshot(
+      {
+        id: 'm1',
+        lessonSlug: 'copy-search',
+        slug: 'copy-mode-search-keyword',
+        title: 'Copy mode search',
+        type: 'state-check',
+        difficulty: 'advanced',
+        initialScenario: 'log-buffer',
+        passRules: [{ kind: 'modeIs', operator: 'equals', value: 'COPY_MODE' }],
+        hints: [],
+      },
+      {
+        sessionCount: 1,
+        windowCount: 1,
+        paneCount: 1,
+        modeIs: null,
+        sessionName: 'main',
+        activeWindowIndex: 0,
+        windowLayout: null,
+        windowZoomed: false,
+        paneSynchronized: false,
+        searchExecuted: null,
+        searchMatchFound: null,
+        actionHistory: [],
+        commandHistory: [],
+      },
+    );
+
+    expect(result.status).toBe('incomplete');
+    expect(result.unsupportedKinds).toEqual([]);
+  });
+
+  it('keeps unknown rule kinds as manual', () => {
+    const result = evaluateMissionWithVmSnapshot(
+      {
+        id: 'm2',
+        lessonSlug: 'custom',
+        slug: 'unknown-rule',
+        title: 'Unknown rule kind',
+        type: 'state-check',
+        difficulty: 'beginner',
+        initialScenario: 'single-pane',
+        passRules: [{ kind: 'totallyUnknownKind', operator: 'equals', value: 1 }],
+        hints: [],
+      },
+      {
+        sessionCount: 1,
+        windowCount: 1,
+        paneCount: 1,
+        modeIs: 'NORMAL',
+        sessionName: 'main',
+        activeWindowIndex: 0,
+        windowLayout: null,
+        windowZoomed: false,
+        paneSynchronized: false,
+        searchExecuted: false,
+        searchMatchFound: false,
+        actionHistory: [],
+        commandHistory: [],
+      },
+    );
+
+    expect(result.status).toBe('manual');
+    expect(result.unsupportedKinds).toEqual(['totallyUnknownKind']);
   });
 });
