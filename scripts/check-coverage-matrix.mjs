@@ -8,9 +8,16 @@ const matrixDoc = JSON.parse(readFileSync(matrixPath, 'utf8'));
 const rows = Array.isArray(matrixDoc.rows) ? matrixDoc.rows : [];
 
 const missionBySlug = new Map(content.missions.map((mission) => [mission.slug, mission]));
+const lessonBySlug = new Map(content.lessons.map((lesson) => [lesson.slug, lesson]));
 const rowBySlug = new Map(rows.map((row) => [row.missionSlug, row]));
 
 const issues = [];
+
+const TRACK_ALIAS = {
+  'track-a-foundations': 'A',
+  'track-b-workflow': 'B',
+  'track-c-deepwork': 'C',
+};
 
 const duplicateSlugs = rows
   .map((row) => row.missionSlug)
@@ -37,10 +44,27 @@ for (const mission of content.missions) {
   }
 
   const missionRuleKinds = new Set(mission.passRules.map((rule) => rule.kind));
+  const missionRuleKindsSorted = Array.from(missionRuleKinds).sort();
   const requiredKinds = Array.isArray(row.requiredRuleKinds) ? row.requiredRuleKinds : [];
+  const duplicateRequiredKinds = requiredKinds.filter((kind, index) => requiredKinds.indexOf(kind) !== index);
+  if (duplicateRequiredKinds.length > 0) {
+    issues.push(`Duplicate required rule kinds for ${mission.slug}: ${Array.from(new Set(duplicateRequiredKinds)).join(', ')}`);
+  }
   const missingRuleKinds = requiredKinds.filter((kind) => !missionRuleKinds.has(kind));
+  const unexpectedRuleKinds = missionRuleKindsSorted.filter((kind) => !requiredKinds.includes(kind));
   if (missingRuleKinds.length > 0) {
     issues.push(`Missing pass rule kinds for ${mission.slug}: ${missingRuleKinds.join(', ')}`);
+  }
+  if (unexpectedRuleKinds.length > 0) {
+    issues.push(`Unexpected pass rule kinds for ${mission.slug}: ${unexpectedRuleKinds.join(', ')}`);
+  }
+
+  const lesson = lessonBySlug.get(mission.lessonSlug);
+  const expectedTrack = lesson ? TRACK_ALIAS[lesson.trackSlug] : null;
+  if (!expectedTrack) {
+    issues.push(`Cannot resolve lesson track for mission: ${mission.slug}`);
+  } else if (row.track !== expectedTrack) {
+    issues.push(`Track mismatch for ${mission.slug}: matrix=${row.track}, content=${expectedTrack}`);
   }
 }
 

@@ -14,16 +14,37 @@
       ]
     },
     {
+      "missionSlug": "hello-tmux-session-list",
+      "track": "A",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "session.list",
+        "tmux.command.run"
+      ],
+      "requiredRuleKinds": [
+        "shellHistoryText"
+      ]
+    },
+    {
       "missionSlug": "session-create",
       "track": "A",
       "scenarioPresetId": "single-pane",
       "capabilities": [
-        "session.create",
-        "session.attach.simulated"
+        "session.create"
       ],
       "requiredRuleKinds": [
-        "sessionCount",
-        "actionHistoryText"
+        "sessionCount"
+      ]
+    },
+    {
+      "missionSlug": "basics-window-open",
+      "track": "A",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "window.create"
+      ],
+      "requiredRuleKinds": [
+        "windowCount"
       ]
     },
     {
@@ -31,11 +52,11 @@
       "track": "A",
       "scenarioPresetId": "single-pane",
       "capabilities": [
-        "window.create"
+        "window.create",
+        "window.list"
       ],
       "requiredRuleKinds": [
-        "windowCount",
-        "actionHistoryText"
+        "windowCount"
       ]
     },
     {
@@ -47,19 +68,39 @@
         "session.multi_manage"
       ],
       "requiredRuleKinds": [
-        "sessionCount",
-        "actionHistoryText"
+        "sessionCount"
+      ]
+    },
+    {
+      "missionSlug": "session-attach-reconnect",
+      "track": "A",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "session.attach"
+      ],
+      "requiredRuleKinds": [
+        "shellHistoryText"
       ]
     },
     {
       "missionSlug": "split-two-panes",
-      "track": "A",
+      "track": "B",
       "scenarioPresetId": "single-pane",
       "capabilities": [
         "pane.split"
       ],
       "requiredRuleKinds": [
-        "paneCount",
+        "paneCount"
+      ]
+    },
+    {
+      "missionSlug": "split-resize-adjust",
+      "track": "B",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "pane.resize"
+      ],
+      "requiredRuleKinds": [
         "actionHistoryText"
       ]
     },
@@ -72,8 +113,7 @@
         "pane.grid"
       ],
       "requiredRuleKinds": [
-        "paneCount",
-        "actionHistoryText"
+        "paneCount"
       ]
     },
     {
@@ -87,13 +127,12 @@
       ],
       "requiredRuleKinds": [
         "windowCount",
-        "paneCount",
-        "actionHistoryText"
+        "activeWindowIndex"
       ]
     },
     {
       "missionSlug": "copy-mode-search-keyword",
-      "track": "B",
+      "track": "C",
       "scenarioPresetId": "log-buffer",
       "capabilities": [
         "copy-mode.enter",
@@ -108,7 +147,7 @@
     },
     {
       "missionSlug": "copy-mode-no-match",
-      "track": "B",
+      "track": "C",
       "scenarioPresetId": "log-buffer",
       "capabilities": [
         "copy-mode.enter",
@@ -122,6 +161,18 @@
       ]
     },
     {
+      "missionSlug": "command-mode-prompt-intro",
+      "track": "C",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "command-mode.enter",
+        "command-prompt.execute"
+      ],
+      "requiredRuleKinds": [
+        "actionHistoryText"
+      ]
+    },
+    {
       "missionSlug": "command-mode-new-window",
       "track": "C",
       "scenarioPresetId": "single-pane",
@@ -132,7 +183,19 @@
       ],
       "requiredRuleKinds": [
         "windowCount",
-        "shellHistoryText"
+        "activeWindowIndex"
+      ]
+    },
+    {
+      "missionSlug": "command-mode-tree-intro",
+      "track": "C",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "command-mode.enter",
+        "choose-tree.open"
+      ],
+      "requiredRuleKinds": [
+        "actionHistoryText"
       ]
     }
   ]

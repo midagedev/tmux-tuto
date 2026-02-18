@@ -8,7 +8,7 @@ describe('coverageMatrix', () => {
 
     expect(row).toBeTruthy();
     expect(row?.capabilities).toContain('command-mode.execute');
-    expect(row?.requiredRuleKinds).toContain('shellHistoryText');
+    expect(row?.requiredRuleKinds).toContain('activeWindowIndex');
   });
 
   it('covers every mission in curriculum content', async () => {
@@ -17,6 +17,19 @@ describe('coverageMatrix', () => {
 
     content.missions.forEach((mission) => {
       expect(matrixMissionSlugs.has(mission.slug)).toBe(true);
+    });
+  });
+
+  it('keeps required rule kinds exactly aligned with mission pass rules', async () => {
+    const content = await loadAppContent();
+
+    content.missions.forEach((mission) => {
+      const row = getCoverageRowByMissionSlug(mission.slug);
+      expect(row).toBeTruthy();
+
+      const requiredKinds = [...new Set(row?.requiredRuleKinds ?? [])].sort();
+      const missionKinds = [...new Set(mission.passRules.map((rule) => rule.kind))].sort();
+      expect(requiredKinds).toEqual(missionKinds);
     });
   });
 });
