@@ -178,9 +178,9 @@ async function generateInitialStateRaw(page, sink) {
       throw new Error('VM bridge is not available');
     }
 
-    // Keep the welcome banner and prompt visible in the captured warm state.
-    bridge.sendProbe();
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    // Run a no-op command so snapshot is captured with an interactive shell prompt.
+    bridge.sendCommand(':');
+    await new Promise((resolve) => setTimeout(resolve, 250));
 
     const state = await bridge.saveState();
     if (!state) {
