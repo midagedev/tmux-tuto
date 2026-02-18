@@ -186,7 +186,7 @@ export function ProgressPage() {
       completedTrackSlugs,
     });
 
-    window.alert(`Simulated pass: +${gainedXp} XP`);
+    window.alert(`샘플 완료 처리: +${gainedXp} XP`);
   };
 
   return (
