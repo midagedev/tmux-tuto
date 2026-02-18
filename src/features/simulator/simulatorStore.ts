@@ -3,6 +3,8 @@ import { createInitialSimulatorState, type SimulatorMode, type SimulatorState } 
 import { simulatorReducer, type FocusDirection, type SimulatorAction, type SplitDirection } from './reducer';
 import { resolveSimulatorInput } from './input';
 import { getLatestSnapshot, saveSnapshot as saveSnapshotRecord } from '../storage/repository';
+import type { AppMission } from '../curriculum/contentSchema';
+import { createMissionScenarioState } from './scenarioEngine';
 
 const MODE_VALUES: SimulatorMode[] = ['NORMAL', 'PREFIX_PENDING', 'COMMAND_MODE', 'COPY_MODE', 'SEARCH_MODE'];
 
@@ -95,6 +97,7 @@ type SimulatorStore = {
   handleKeyInput: (key: string) => void;
   applyQuickPreset: (presetId: string) => void;
   initScenario: (scenarioPresetId: string) => void;
+  initMissionScenario: (mission: AppMission) => void;
   setPrefixKey: (key: 'C-b' | 'C-a') => void;
   setMode: (mode: SimulatorMode) => void;
   setCommandBuffer: (command: string) => void;
@@ -177,6 +180,10 @@ export const useSimulatorStore = create<SimulatorStore>((set) => ({
         type: 'INIT_SCENARIO',
         payload: scenarioPresetId,
       }),
+    })),
+  initMissionScenario: (mission) =>
+    set(() => ({
+      state: createMissionScenarioState(mission),
     })),
   setPrefixKey: (key) =>
     set((current) => ({

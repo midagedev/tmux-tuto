@@ -26,7 +26,7 @@ export function OnboardingFirstMissionPage() {
   const simulatorState = useSimulatorStore((store) => store.state);
   const handleKeyInput = useSimulatorStore((store) => store.handleKeyInput);
   const resetSimulator = useSimulatorStore((store) => store.reset);
-  const initScenario = useSimulatorStore((store) => store.initScenario);
+  const initMissionScenario = useSimulatorStore((store) => store.initMissionScenario);
   const setSimulatorPrefix = useSimulatorStore((store) => store.setPrefixKey);
   const recordMissionPass = useProgressStore((store) => store.recordMissionPass);
 
@@ -51,13 +51,13 @@ export function OnboardingFirstMissionPage() {
   }, []);
 
   useEffect(() => {
-    if (mission?.initialScenario) {
-      initScenario(mission.initialScenario);
+    if (mission) {
+      initMissionScenario(mission);
     } else {
       resetSimulator();
     }
     setSimulatorPrefix(prefixKey);
-  }, [initScenario, mission?.initialScenario, prefixKey, resetSimulator, setSimulatorPrefix]);
+  }, [initMissionScenario, mission, prefixKey, resetSimulator, setSimulatorPrefix]);
 
   const activeWindow = useMemo(() => getActiveWindow(simulatorState), [simulatorState]);
 
@@ -130,9 +130,10 @@ export function OnboardingFirstMissionPage() {
               type="button"
               className="secondary-btn"
               onClick={() => {
-                resetSimulator();
-                if (mission?.initialScenario) {
-                  initScenario(mission.initialScenario);
+                if (mission) {
+                  initMissionScenario(mission);
+                } else {
+                  resetSimulator();
                 }
                 setSimulatorPrefix(prefixKey);
                 setFeedback(null);

@@ -134,7 +134,7 @@
   - DoD: 핵심 조작 키보드만으로 수행 가능
 
 ### Phase 4. Curriculum Integration
-- [ ] `HF-040` scenario preset 엔진
+- [x] `HF-040` scenario preset 엔진
   - 산출물: lesson/mission별 초기 상태 주입기
   - 의존: `HF-014`, `HF-020`
   - 검증: integration test(init scenario)
