@@ -1,4 +1,5 @@
-const CACHE_NAME = 'tmux-tuto-v2';
+const CACHE_VERSION = '__TMUX_TUTO_SW_CACHE_VERSION__';
+const CACHE_NAME = `tmux-tuto-${CACHE_VERSION}`;
 
 function getBasePath() {
   const scopePath = new URL(self.registration.scope).pathname;
@@ -26,7 +27,11 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
-      return Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)));
+      return Promise.all(
+        keys
+          .filter((key) => key.startsWith('tmux-tuto-') && key !== CACHE_NAME)
+          .map((key) => caches.delete(key)),
+      );
     }),
   );
   self.clients.claim();
@@ -34,6 +39,19 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') {
+    return;
+  }
+
+  const requestUrl = new URL(event.request.url);
+  if (requestUrl.origin !== self.location.origin) {
+    return;
+  }
+
+  // Always try network for document navigations to avoid stale HTML -> missing hashed assets.
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match(getIndexPath())),
+    );
     return;
   }
 
@@ -45,8 +63,10 @@ self.addEventListener('fetch', (event) => {
 
       return fetch(event.request)
         .then((response) => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
           return response;
         })
         .catch(() => caches.match(getIndexPath()));
