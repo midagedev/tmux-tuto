@@ -3,11 +3,14 @@ FROM docker.io/i386/alpine:3.21.0
 ENV KERNEL=virt
 ENV ADDPKGS="nodejs tmux"
 
+COPY profile.d/tmux-tuto-banner.sh /etc/profile.d/tmux-tuto-banner.sh
+
 RUN apk add --no-cache openrc alpine-base agetty alpine-conf linux-$KERNEL linux-firmware-none $ADDPKGS
 
 RUN sed -i 's/getty 38400 tty1/agetty --autologin root tty1 linux/' /etc/inittab
 RUN echo 'ttyS0::respawn:/sbin/agetty --autologin root -s ttyS0 115200 vt100' >> /etc/inittab
 RUN echo "root:" | chpasswd
+RUN chmod +x /etc/profile.d/tmux-tuto-banner.sh
 
 RUN setup-hostname localhost
 
