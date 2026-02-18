@@ -1749,7 +1749,7 @@ export function PracticeVmPocPage() {
         if (hasShellPrompt && !vmInternalBridgeReadyRef.current && emulatorRef.current) {
           vmInternalBridgeReadyRef.current = true;
           if (vmWarmBannerPendingRef.current) {
-            sendInternalCommand(BANNER_TRIGGER_COMMAND);
+            emulatorRef.current.serial0_send(`${BANNER_TRIGGER_COMMAND}\n`);
             vmWarmBannerPendingRef.current = false;
           }
           sendInternalCommand(TERMINAL_GEOMETRY_SYNC_COMMAND);
@@ -1901,7 +1901,7 @@ export function PracticeVmPocPage() {
               if (!emulatorRef.current) {
                 return;
               }
-              sendInternalCommand(BANNER_TRIGGER_COMMAND);
+              emulatorRef.current.serial0_send(`${BANNER_TRIGGER_COMMAND}\n`);
               sendInternalCommand(TERMINAL_GEOMETRY_SYNC_COMMAND);
               if (autoProbeRef.current) {
                 sendInternalCommand(PROBE_LOOP_START_COMMAND);
