@@ -75,7 +75,24 @@ const MAX_DEBUG_LINES = 220;
 const V86_STATE_MAGIC_LE = 0x86768676;
 const ZSTD_MAGIC_LE = 0xfd2fb528;
 
-const PROBE_TRIGGER_COMMAND = '/usr/bin/tmux-tuto-probe';
+const PROBE_EXTRA_METRICS_COMMAND =
+  'TMUXWEB_SESSION_NAME=""; TMUXWEB_ACTIVE_WINDOW=-1; TMUXWEB_LAYOUT=""; TMUXWEB_ZOOMED=0; TMUXWEB_SYNC=0; ' +
+  'if tmux -V >/dev/null 2>&1; then ' +
+  'TMUXWEB_SESSION_NAME=$(tmux display-message -p "#S" 2>/dev/null | tr -d "\\n\\r"); ' +
+  'TMUXWEB_ACTIVE_WINDOW=$(tmux display-message -p "#{window_index}" 2>/dev/null | tr -d " "); ' +
+  '[ -z "$TMUXWEB_ACTIVE_WINDOW" ] && TMUXWEB_ACTIVE_WINDOW=-1; ' +
+  'TMUXWEB_LAYOUT=$(tmux display-message -p "#{window_layout}" 2>/dev/null | tr -d "\\n\\r"); ' +
+  'TMUXWEB_ZOOMED=$(tmux display-message -p "#{window_zoomed_flag}" 2>/dev/null | tr -d " "); ' +
+  '[ -z "$TMUXWEB_ZOOMED" ] && TMUXWEB_ZOOMED=0; ' +
+  'TMUXWEB_SYNC_RAW=$(tmux show-window-options -v synchronize-panes 2>/dev/null | tr -d "\\n\\r"); ' +
+  'if [ "$TMUXWEB_SYNC_RAW" = "on" ]; then TMUXWEB_SYNC=1; else TMUXWEB_SYNC=0; fi; ' +
+  'fi; ' +
+  'echo "[[TMUXWEB_PROBE:sessionName:${TMUXWEB_SESSION_NAME}]]"; ' +
+  'echo "[[TMUXWEB_PROBE:activeWindow:${TMUXWEB_ACTIVE_WINDOW}]]"; ' +
+  'echo "[[TMUXWEB_PROBE:layout:${TMUXWEB_LAYOUT}]]"; ' +
+  'echo "[[TMUXWEB_PROBE:zoomed:${TMUXWEB_ZOOMED}]]"; ' +
+  'echo "[[TMUXWEB_PROBE:sync:${TMUXWEB_SYNC}]]"';
+const PROBE_TRIGGER_COMMAND = `/usr/bin/tmux-tuto-probe; ${PROBE_EXTRA_METRICS_COMMAND}`;
 const BANNER_TRIGGER_COMMAND = '/usr/bin/tmux-tuto-banner';
 
 const QUICK_COMMANDS = [
