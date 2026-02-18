@@ -15,6 +15,7 @@
 - `/Users/hckim/repo/tmux-tuto/docs/17_CURRICULUM_SIMULATOR_COVERAGE_MATRIX.md`
 - `/Users/hckim/repo/tmux-tuto/docs/18_HIGH_FIDELITY_SIMULATOR_PERFORMANCE_REPORT.md`
 - `/Users/hckim/repo/tmux-tuto/docs/19_HIGH_FIDELITY_SIMULATOR_USER_GUIDE.md`
+- `/Users/hckim/repo/tmux-tuto/docs/20_HIGH_FIDELITY_RELEASE_CHECKLIST.md`
 - `/Users/hckim/repo/tmux-tuto/docs/specs/01_APP_ARCHITECTURE_SPEC.md`
 - `/Users/hckim/repo/tmux-tuto/docs/specs/02_TMUX_SIMULATOR_SPEC.md`
 - `/Users/hckim/repo/tmux-tuto/docs/specs/03_CURRICULUM_MISSION_SPEC.md`
