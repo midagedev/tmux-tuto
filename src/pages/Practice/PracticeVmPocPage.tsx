@@ -1991,8 +1991,8 @@ export function PracticeVmPocPage() {
   return (
     <PagePlaceholder
       eyebrow="Practice"
-      title="Browser VM tmux Lab"
-      description="레거시 시뮬레이터를 대체한 실제 VM 기반 tmux 실습 환경입니다."
+      title="tmux 실습"
+      description=""
     >
       <div className="vm-poc-panel">
         <details className="vm-poc-note">
