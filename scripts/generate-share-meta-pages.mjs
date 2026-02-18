@@ -9,7 +9,7 @@ const shareMetaPath = path.join(rootDir, 'src', 'content', 'v1', 'share-meta.jso
 const shareAchievementMetaPath = path.join(rootDir, 'src', 'content', 'v1', 'share-achievement-meta.json');
 const publicShareDir = path.join(rootDir, 'public', 'share');
 
-const defaultSiteUrl = 'https://tmux-tuto.pages.dev';
+const defaultSiteUrl = 'https://tmux.midagedev.com';
 const siteUrl = (process.env.TMUX_TUTO_SITE_URL || defaultSiteUrl).replace(/\/$/, '');
 
 function escapeHtml(value) {
