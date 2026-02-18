@@ -111,4 +111,17 @@ describe('simulatorReducer', () => {
     expect(next.shell.sessions[0]?.fileSystem.files['/home/user/logs/app.log']).toContain('ERROR');
     expect(getActiveWindow(next).panes[0]?.buffer.some((line) => line.includes('ERROR'))).toBe(true);
   });
+
+  it('tracks copy-mode search matches and active match index', () => {
+    let state = createInitialSimulatorState();
+    state = simulatorReducer(state, { type: 'EXECUTE_COMMAND', payload: 'cat logs/app.log' });
+    state = simulatorReducer(state, { type: 'EXECUTE_COMMAND', payload: 'cat logs/app.log' });
+    const searched = simulatorReducer(state, { type: 'RUN_COPY_SEARCH', payload: 'error' });
+    const advanced = simulatorReducer(searched, { type: 'ADVANCE_COPY_MATCH', payload: 1 });
+
+    expect(searched.mode.copyMode.lastMatchFound).toBe(true);
+    expect(searched.mode.copyMode.matchLineIndices.length).toBeGreaterThan(1);
+    expect(searched.mode.copyMode.activeMatchIndex).toBe(0);
+    expect(advanced.mode.copyMode.activeMatchIndex).toBe(1);
+  });
 });

@@ -12,7 +12,7 @@ import {
   type SimulatorState,
 } from './model';
 import { executeShellCommand } from './shellCommands';
-import { appendOutput, clearTerminal, scrollViewport } from './terminalBuffer';
+import { appendOutput, clearTerminal, scrollViewport, setViewportTop } from './terminalBuffer';
 import { applyPaneLayout, resolveLayoutForPaneCount } from './layout';
 import { parseTmuxCommand } from './tmuxCommand';
 
@@ -44,6 +44,7 @@ export type SimulatorAction =
   | { type: 'ENTER_COPY_MODE' }
   | { type: 'EXIT_COPY_MODE' }
   | { type: 'RUN_COPY_SEARCH'; payload: string }
+  | { type: 'ADVANCE_COPY_MATCH'; payload: 1 | -1 }
   | { type: 'INIT_SCENARIO'; payload: string }
   | { type: 'LOAD_SNAPSHOT'; payload: SimulatorState }
   | { type: 'RESET' };
@@ -134,6 +135,13 @@ function clearActivePane(state: SimulatorState) {
     ...pane,
     terminal: clearTerminal(pane.terminal),
     buffer: [],
+  }));
+}
+
+function focusActivePaneToLine(state: SimulatorState, lineIndex: number) {
+  return withActivePane(state, (pane) => ({
+    ...pane,
+    terminal: setViewportTop(pane.terminal, lineIndex),
   }));
 }
 
@@ -678,29 +686,67 @@ export function simulatorReducer(state: SimulatorState, action: SimulatorAction)
     case 'RUN_COPY_SEARCH': {
       const activeWindow = getActiveWindow(state);
       const activePane = activeWindow.panes.find((pane) => pane.id === activeWindow.activePaneId);
-      const haystack =
-        activePane?.terminal.lines.map((line) => line.text).join('\n').toLowerCase() ??
-        activePane?.buffer.join('\n').toLowerCase() ??
-        '';
       const query = action.payload.trim().toLowerCase();
-      const found = query.length > 0 ? haystack.includes(query) : false;
+      const matchLineIndices =
+        query.length === 0
+          ? []
+          : (activePane?.terminal.lines ?? [])
+              .map((line, index) => ({ line, index }))
+              .filter(({ line }) => line.text.toLowerCase().includes(query))
+              .map(({ index }) => index);
+      const found = matchLineIndices.length > 0;
+
+      let nextState: SimulatorState = {
+        ...state,
+        mode: {
+          ...state.mode,
+          value: 'COPY_MODE',
+          copyMode: {
+            searchQuery: action.payload,
+            searchExecuted: true,
+            lastMatchFound: found,
+            matchLineIndices,
+            activeMatchIndex: found ? 0 : -1,
+          },
+        },
+      };
+
+      if (found) {
+        nextState = focusActivePaneToLine(nextState, matchLineIndices[0]);
+      }
 
       return withHistory(
+        nextState,
+        'sim.copymode.search',
+        found ? `Search match for "${action.payload}"` : `No match for "${action.payload}"`,
+      );
+    }
+
+    case 'ADVANCE_COPY_MATCH': {
+      const matches = state.mode.copyMode.matchLineIndices;
+      if (matches.length === 0) {
+        return state;
+      }
+
+      const currentIndex = state.mode.copyMode.activeMatchIndex < 0 ? 0 : state.mode.copyMode.activeMatchIndex;
+      const nextIndex = (currentIndex + action.payload + matches.length) % matches.length;
+      const targetLine = matches[nextIndex];
+
+      const nextState = focusActivePaneToLine(
         {
           ...state,
           mode: {
             ...state.mode,
-            value: 'COPY_MODE',
             copyMode: {
-              searchQuery: action.payload,
-              searchExecuted: true,
-              lastMatchFound: found,
+              ...state.mode.copyMode,
+              activeMatchIndex: nextIndex,
             },
           },
         },
-        'sim.copymode.search',
-        found ? `Search match for "${action.payload}"` : `No match for "${action.payload}"`,
+        targetLine,
       );
+
+      return withHistory(nextState, 'sim.copymode.match.navigate');
     }
 
     case 'LOAD_SNAPSHOT': {

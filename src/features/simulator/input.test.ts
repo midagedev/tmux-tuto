@@ -93,4 +93,18 @@ describe('resolveSimulatorInput', () => {
       { type: 'RECORD_ACTION', payload: 'sim.key.raw.%' },
     ]);
   });
+
+  it('navigates copy-mode matches with n/N keys', () => {
+    const initial = createInitialSimulatorState();
+    const state = {
+      ...initial,
+      mode: {
+        ...initial.mode,
+        value: 'COPY_MODE' as const,
+      },
+    };
+
+    expect(resolveSimulatorInput(state, 'n')).toEqual([{ type: 'ADVANCE_COPY_MATCH', payload: 1 }]);
+    expect(resolveSimulatorInput(state, 'N')).toEqual([{ type: 'ADVANCE_COPY_MATCH', payload: -1 }]);
+  });
 });

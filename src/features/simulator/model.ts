@@ -59,6 +59,8 @@ export type CopyModeState = {
   searchQuery: string;
   searchExecuted: boolean;
   lastMatchFound: boolean;
+  matchLineIndices: number[];
+  activeMatchIndex: number;
 };
 
 export type ModeState = {
@@ -188,6 +190,8 @@ export function createInitialSimulatorState(options?: { scenarioPresetId?: strin
         searchQuery: '',
         searchExecuted: false,
         lastMatchFound: false,
+        matchLineIndices: [],
+        activeMatchIndex: -1,
       },
     },
     messages: ['Simulator initialized'],

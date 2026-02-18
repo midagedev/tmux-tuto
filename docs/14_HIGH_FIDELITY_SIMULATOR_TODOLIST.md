@@ -96,7 +96,7 @@
   - 검증: unit test(command parse + dispatch)
   - DoD: 스펙 12의 command subset 전부 처리
 
-- [ ] `HF-024` copy-mode 스크롤/검색/매치 표시 강화
+- [x] `HF-024` copy-mode 스크롤/검색/매치 표시 강화
   - 산출물: search highlight, match index 상태
   - 의존: `HF-010`, `HF-020`
   - 검증: integration/e2e

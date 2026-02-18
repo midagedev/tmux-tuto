@@ -151,6 +151,14 @@ function resolveCopyMode(state: SimulatorState, key: string): SimulatorAction[] 
     return [action('EXIT_COPY_MODE')];
   }
 
+  if (key === 'n') {
+    return [action('ADVANCE_COPY_MATCH', 1)];
+  }
+
+  if (key === 'N') {
+    return [action('ADVANCE_COPY_MATCH', -1)];
+  }
+
   if (key === '/') {
     return [action('RUN_COPY_SEARCH', state.mode.copyMode.searchQuery || 'error')];
   }

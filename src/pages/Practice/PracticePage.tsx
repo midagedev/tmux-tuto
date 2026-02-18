@@ -27,6 +27,11 @@ export function PracticePage() {
   const activeShellSession = getActiveShellSession(simulatorState);
   const activeWindow = getActiveWindow(simulatorState);
   const activePane = getActivePane(simulatorState);
+  const copyMatchLineSet = new Set(simulatorState.mode.copyMode.matchLineIndices);
+  const activeMatchLine =
+    simulatorState.mode.copyMode.activeMatchIndex >= 0
+      ? simulatorState.mode.copyMode.matchLineIndices[simulatorState.mode.copyMode.activeMatchIndex]
+      : -1;
   const presetId = searchParams.get('from');
 
   useEffect(() => {
@@ -99,6 +104,7 @@ export function PracticePage() {
           {activeWindow.panes.map((pane) => {
             const isActive = pane.id === activeWindow.activePaneId;
             const viewportLines = getViewportLines(pane.terminal);
+            const viewportStart = pane.terminal.viewportTop;
             return (
               <div
                 key={pane.id}
@@ -125,7 +131,26 @@ export function PracticePage() {
                     {pane.width}x{pane.height}
                   </span>
                 </div>
-                <pre className="sim-pane-body">{viewportLines.map((line) => line.text).join('\n') || '(empty)'}</pre>
+                <div className="sim-pane-body">
+                  {viewportLines.length === 0 ? (
+                    <div className="sim-pane-line">(empty)</div>
+                  ) : (
+                    viewportLines.map((line, index) => {
+                      const lineIndex = viewportStart + index;
+                      const isMatch = isActive && copyMatchLineSet.has(lineIndex);
+                      const isActiveMatch = isMatch && lineIndex === activeMatchLine;
+
+                      return (
+                        <div
+                          key={line.id}
+                          className={`sim-pane-line${isMatch ? ' is-match' : ''}${isActiveMatch ? ' is-active-match' : ''}`}
+                        >
+                          {line.text || ' '}
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
                 <div className="sim-pane-foot" data-scroll-top={pane.terminal.viewportTop}>
                   scrollTop: {pane.terminal.viewportTop}
                 </div>
@@ -320,6 +345,10 @@ export function PracticePage() {
             <li>query: {simulatorState.mode.copyMode.searchQuery || '(none)'}</li>
             <li>executed: {simulatorState.mode.copyMode.searchExecuted ? 'yes' : 'no'}</li>
             <li>match: {simulatorState.mode.copyMode.lastMatchFound ? 'found' : 'not found'}</li>
+            <li>matches: {simulatorState.mode.copyMode.matchLineIndices.length}</li>
+            <li>
+              active: {simulatorState.mode.copyMode.activeMatchIndex >= 0 ? simulatorState.mode.copyMode.activeMatchIndex + 1 : '(none)'}
+            </li>
           </ul>
 
           <h2>Command Mode</h2>

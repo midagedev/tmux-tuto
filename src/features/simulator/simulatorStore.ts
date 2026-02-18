@@ -52,7 +52,10 @@ function isSimulatorStateV2(value: unknown): value is SimulatorState {
     !isRecord(mode.copyMode) ||
     typeof mode.copyMode.searchQuery !== 'string' ||
     typeof mode.copyMode.searchExecuted !== 'boolean' ||
-    typeof mode.copyMode.lastMatchFound !== 'boolean'
+    typeof mode.copyMode.lastMatchFound !== 'boolean' ||
+    !Array.isArray(mode.copyMode.matchLineIndices) ||
+    !mode.copyMode.matchLineIndices.every((item) => typeof item === 'number') ||
+    typeof mode.copyMode.activeMatchIndex !== 'number'
   ) {
     return false;
   }
