@@ -4,8 +4,13 @@ export type TmuxShortcutTelemetryState = {
   copySearchPending: boolean;
 };
 
+export type TmuxShortcutSyntheticCommand = {
+  command: string;
+  shortcutAction: string;
+};
+
 export type TmuxShortcutTelemetry = {
-  syntheticCommands: string[];
+  syntheticCommands: TmuxShortcutSyntheticCommand[];
   shouldProbeSearch: boolean;
 };
 
@@ -17,46 +22,54 @@ function isEscapeSequenceTerminator(char: string) {
   return char >= '@' && char <= '~';
 }
 
-function mapPrefixTokenToCommand(token: string): string | null {
+function mapPrefixTokenToCommand(token: string): TmuxShortcutSyntheticCommand | null {
   switch (token) {
     case '%':
-      return 'tmux split-window -h';
+      return { command: 'tmux split-window -h', shortcutAction: 'sim.shortcut.pane.split.vertical' };
     case '"':
-      return 'tmux split-window -v';
+      return { command: 'tmux split-window -v', shortcutAction: 'sim.shortcut.pane.split.horizontal' };
     case 'c':
-      return 'tmux new-window';
+      return { command: 'tmux new-window', shortcutAction: 'sim.shortcut.window.new' };
     case 'n':
-      return 'tmux next-window';
+      return { command: 'tmux next-window', shortcutAction: 'sim.shortcut.window.next' };
     case 'p':
-      return 'tmux previous-window';
+      return { command: 'tmux previous-window', shortcutAction: 'sim.shortcut.window.prev' };
     case 'd':
-      return 'tmux detach-client';
+      return { command: 'tmux detach-client', shortcutAction: 'sim.shortcut.session.detach' };
     case '[':
-      return 'tmux copy-mode';
+      return { command: 'tmux copy-mode', shortcutAction: 'sim.shortcut.copy-mode.enter' };
     case ':':
-      return 'tmux command-prompt -p "cmd"';
+      return { command: 'tmux command-prompt -p "cmd"', shortcutAction: 'sim.shortcut.command.prompt' };
     case 'w':
-      return 'tmux choose-tree -Z; tmux list-windows';
+      return { command: 'tmux choose-tree -Z; tmux list-windows', shortcutAction: 'sim.shortcut.choose.tree' };
     case 'h':
-      return 'tmux select-pane -L';
+      return { command: 'tmux select-pane -L', shortcutAction: 'sim.shortcut.pane.select.left' };
     case 'j':
-      return 'tmux select-pane -D';
+      return { command: 'tmux select-pane -D', shortcutAction: 'sim.shortcut.pane.select.down' };
     case 'k':
-      return 'tmux select-pane -U';
+      return { command: 'tmux select-pane -U', shortcutAction: 'sim.shortcut.pane.select.up' };
     case 'l':
-      return 'tmux select-pane -R';
+      return { command: 'tmux select-pane -R', shortcutAction: 'sim.shortcut.pane.select.right' };
+    case 'H':
+      return { command: 'tmux resize-pane -L 5', shortcutAction: 'sim.shortcut.pane.resize.left' };
+    case 'J':
+      return { command: 'tmux resize-pane -D 3', shortcutAction: 'sim.shortcut.pane.resize.down' };
+    case 'K':
+      return { command: 'tmux resize-pane -U 3', shortcutAction: 'sim.shortcut.pane.resize.up' };
+    case 'L':
+      return { command: 'tmux resize-pane -R 5', shortcutAction: 'sim.shortcut.pane.resize.right' };
     case '\u001b[A':
     case '\u001bOA':
-      return 'tmux select-pane -U';
+      return { command: 'tmux select-pane -U', shortcutAction: 'sim.shortcut.pane.select.up' };
     case '\u001b[B':
     case '\u001bOB':
-      return 'tmux select-pane -D';
+      return { command: 'tmux select-pane -D', shortcutAction: 'sim.shortcut.pane.select.down' };
     case '\u001b[C':
     case '\u001bOC':
-      return 'tmux select-pane -R';
+      return { command: 'tmux select-pane -R', shortcutAction: 'sim.shortcut.pane.select.right' };
     case '\u001b[D':
     case '\u001bOD':
-      return 'tmux select-pane -L';
+      return { command: 'tmux select-pane -L', shortcutAction: 'sim.shortcut.pane.select.left' };
     default:
       return null;
   }
@@ -75,7 +88,7 @@ export function parseTmuxShortcutTelemetry(
   state: TmuxShortcutTelemetryState,
   options: { inCopyMode: boolean },
 ): TmuxShortcutTelemetry {
-  const syntheticCommands: string[] = [];
+  const syntheticCommands: TmuxShortcutSyntheticCommand[] = [];
   let shouldProbeSearch = false;
 
   for (const char of input) {

@@ -9,7 +9,10 @@ describe('parseTmuxShortcutTelemetry', () => {
     const state = createTmuxShortcutTelemetryState();
     const result = parseTmuxShortcutTelemetry('\u0002%\u0002"', state, { inCopyMode: false });
 
-    expect(result.syntheticCommands).toEqual(['tmux split-window -h', 'tmux split-window -v']);
+    expect(result.syntheticCommands).toEqual([
+      { command: 'tmux split-window -h', shortcutAction: 'sim.shortcut.pane.split.vertical' },
+      { command: 'tmux split-window -v', shortcutAction: 'sim.shortcut.pane.split.horizontal' },
+    ]);
     expect(result.shouldProbeSearch).toBe(false);
   });
 
@@ -19,14 +22,18 @@ describe('parseTmuxShortcutTelemetry', () => {
     const second = parseTmuxShortcutTelemetry('[C', state, { inCopyMode: false });
 
     expect(first.syntheticCommands).toEqual([]);
-    expect(second.syntheticCommands).toEqual(['tmux select-pane -R']);
+    expect(second.syntheticCommands).toEqual([
+      { command: 'tmux select-pane -R', shortcutAction: 'sim.shortcut.pane.select.right' },
+    ]);
   });
 
   it('maps prefix + w to tree/list workflow command', () => {
     const state = createTmuxShortcutTelemetryState();
     const result = parseTmuxShortcutTelemetry('\u0002w', state, { inCopyMode: false });
 
-    expect(result.syntheticCommands).toEqual(['tmux choose-tree -Z; tmux list-windows']);
+    expect(result.syntheticCommands).toEqual([
+      { command: 'tmux choose-tree -Z; tmux list-windows', shortcutAction: 'sim.shortcut.choose.tree' },
+    ]);
   });
 
   it('requests search probe when copy-mode search query is submitted', () => {

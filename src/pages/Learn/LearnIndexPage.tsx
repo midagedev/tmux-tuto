@@ -12,8 +12,23 @@ type LearnPageData = {
   learningJourney: AppContent['learningJourney'] | null;
 };
 
-const BEGINNER_LESSON_ORDER = ['hello-tmux', 'basics', 'attach-detach', 'split-resize'] as const;
-const ADVANCED_LESSON_ORDER = ['pane-focus-flow', 'copy-search', 'command-subset'] as const;
+const BEGINNER_LESSON_ORDER = [
+  'hello-tmux',
+  'basics',
+  'basics-shortcuts',
+  'attach-detach',
+  'attach-detach-shortcuts',
+  'split-resize',
+  'split-resize-shortcuts',
+] as const;
+const ADVANCED_LESSON_ORDER = [
+  'pane-focus-flow',
+  'pane-focus-flow-shortcuts',
+  'copy-search',
+  'copy-search-shortcuts',
+  'command-subset',
+  'command-subset-shortcuts',
+] as const;
 
 function buildMissionCountMap(missions: AppMission[]) {
   return missions.reduce<Record<string, number>>((accumulator, mission) => {
@@ -165,4 +180,3 @@ export function LearnIndexPage() {
     </PagePlaceholder>
   );
 }
-

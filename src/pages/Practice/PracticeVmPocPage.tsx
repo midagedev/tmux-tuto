@@ -279,6 +279,7 @@ const ACTION_HISTORY_COMMAND_SUGGESTIONS: Record<string, string> = {
   'sim.command.prompt': 'tmux command-prompt -p "cmd"',
   'sim.choose.tree': 'tmux choose-tree -Z',
 };
+const SHORTCUT_TOOLTIP_TEXT = '입력 순서: Ctrl 키를 누른 채 b를 누른 뒤 손을 떼고, 다음 키를 입력하세요.';
 
 function uniqueStrings(values: string[]) {
   const normalized = values
@@ -291,6 +292,64 @@ function extractInlineCodeCandidates(text: string) {
   return Array.from(text.matchAll(/`([^`]+)`/g))
     .map((match) => match[1]?.trim() ?? '')
     .filter((value) => value.length > 0);
+}
+
+function getShortcutTooltipForToken(token: string) {
+  const normalized = token.toLowerCase().replace(/\s+/g, '');
+  if (normalized.includes('ctrl+b') || normalized.startsWith('prefix')) {
+    return SHORTCUT_TOOLTIP_TEXT;
+  }
+
+  return null;
+}
+
+function renderPlainHintSegmentWithTooltip(text: string, keyPrefix: string) {
+  return text.split(/(Ctrl\s*\+\s*b)/gi).map((segment, index) => {
+    if (!segment) {
+      return null;
+    }
+
+    if (/^Ctrl\s*\+\s*b$/i.test(segment)) {
+      return (
+        <span
+          key={`${keyPrefix}-shortcut-${index}`}
+          className="vm-shortcut-inline-tooltip"
+          title={SHORTCUT_TOOLTIP_TEXT}
+          aria-label={`단축키 안내: ${SHORTCUT_TOOLTIP_TEXT}`}
+        >
+          <code>Ctrl+b</code>
+        </span>
+      );
+    }
+
+    return <span key={`${keyPrefix}-text-${index}`}>{segment}</span>;
+  });
+}
+
+function renderHintTextWithTooltips(hint: string, keyPrefix: string) {
+  return hint.split(/(`[^`]+`)/g).flatMap((segment, index) => {
+    const codeMatch = segment.match(/^`([^`]+)`$/);
+    if (!codeMatch) {
+      return renderPlainHintSegmentWithTooltip(segment, `${keyPrefix}-plain-${index}`);
+    }
+
+    const token = codeMatch[1];
+    const shortcutTooltip = getShortcutTooltipForToken(token);
+    if (shortcutTooltip) {
+      return (
+        <span
+          key={`${keyPrefix}-code-${index}`}
+          className="vm-shortcut-inline-tooltip"
+          title={shortcutTooltip}
+          aria-label={`단축키 안내: ${shortcutTooltip}`}
+        >
+          <code>{token}</code>
+        </span>
+      );
+    }
+
+    return <code key={`${keyPrefix}-code-${index}`}>{token}</code>;
+  });
 }
 
 function isLikelyCommandText(value: string) {
@@ -1318,20 +1377,35 @@ export function PracticeVmPocPage() {
   }, [sendInternalCommand]);
 
   const registerCommand = useCallback(
-    (command: string) => {
+    (
+      command: string,
+      options?: {
+        source?: 'shell' | 'shortcut';
+        extraActions?: string[];
+      },
+    ) => {
       const normalizedCommand = command.trim();
       if (!normalizedCommand) {
         return;
       }
 
+      const source = options?.source ?? 'shell';
       setCommandHistory((previous) => appendHistory(previous, normalizedCommand, MAX_HISTORY));
 
       const actions = parseTmuxActionsFromCommand(normalizedCommand);
+      if (options?.extraActions && options.extraActions.length > 0) {
+        actions.push(...options.extraActions);
+      }
+      if (source === 'shortcut') {
+        actions.push('sim.shortcut.execute');
+      }
+
       if (actions.length > 0) {
-        setActionHistory((previous) => appendActions(previous, actions, MAX_HISTORY));
+        const uniqueActions = Array.from(new Set(actions));
+        setActionHistory((previous) => appendActions(previous, uniqueActions, MAX_HISTORY));
 
         const unlocked = recordTmuxActivityRef.current({
-          actions,
+          actions: uniqueActions,
           lessonSlug: selectedLessonSlugRef.current,
         });
         if (unlocked.length > 0) {
@@ -1446,7 +1520,7 @@ export function PracticeVmPocPage() {
           const command = inputLineBufferRef.current.trim();
           inputLineBufferRef.current = '';
           if (command) {
-            registerCommand(command);
+            registerCommand(command, { source: 'shell' });
           }
           continue;
         }
@@ -1481,7 +1555,7 @@ export function PracticeVmPocPage() {
       const trackCommand = options?.trackCommand ?? true;
 
       if (trackCommand) {
-        registerCommand(normalized);
+        registerCommand(normalized, { source: 'shell' });
       }
     },
     [registerCommand],
@@ -1609,8 +1683,11 @@ export function PracticeVmPocPage() {
       const shortcutTelemetry = parseTmuxShortcutTelemetry(data, shortcutTelemetryStateRef.current, {
         inCopyMode: metricsRef.current.modeIs === 'COPY_MODE',
       });
-      shortcutTelemetry.syntheticCommands.forEach((shortcutCommand) => {
-        registerCommand(shortcutCommand);
+      shortcutTelemetry.syntheticCommands.forEach((shortcutEvent) => {
+        registerCommand(shortcutEvent.command, {
+          source: 'shortcut',
+          extraActions: [shortcutEvent.shortcutAction],
+        });
       });
       if (shortcutTelemetry.shouldProbeSearch) {
         setMetrics((previous) => ({
@@ -2126,12 +2203,6 @@ export function PracticeVmPocPage() {
 
                 <section className="vm-mission-command-block">
                   <h3>이 미션에서 입력할 명령</h3>
-                  <p className="muted">단축키 입력 순서 (xterm.js 동일)</p>
-                  <ul className="link-list">
-                    <li>`Ctrl` 키를 누른 채 `b`를 한 번 누르고 손을 뗍니다.</li>
-                    <li>그다음 1초 안에 다음 키를 누릅니다. 예: `c`, `%`, `"`, `d`.</li>
-                    <li>`Ctrl+b`를 계속 누르는 것이 아니라 `Ctrl+b` 다음 키 순서입니다.</li>
-                  </ul>
                   {selectedMissionCommands.length > 0 ? (
                     <div className="vm-mission-command-list">
                       {selectedMissionCommands.map((command) => (
@@ -2177,16 +2248,16 @@ export function PracticeVmPocPage() {
                 </div>
 
                 <ul className="link-list">
-                  {missionHintPreview.map((hint) => (
-                    <li key={hint}>{hint}</li>
+                  {missionHintPreview.map((hint, index) => (
+                    <li key={hint}>{renderHintTextWithTooltips(hint, `hint-preview-${index}`)}</li>
                   ))}
                 </ul>
                 {hiddenMissionHintCount > 0 ? (
                   <details className="vm-mission-hints-more">
                     <summary>힌트 {hiddenMissionHintCount}개 더 보기</summary>
                     <ul className="link-list">
-                      {selectedMission.hints.slice(missionHintPreview.length).map((hint) => (
-                        <li key={hint}>{hint}</li>
+                      {selectedMission.hints.slice(missionHintPreview.length).map((hint, index) => (
+                        <li key={hint}>{renderHintTextWithTooltips(hint, `hint-more-${index}`)}</li>
                       ))}
                     </ul>
                   </details>

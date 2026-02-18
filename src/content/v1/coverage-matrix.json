@@ -243,6 +243,255 @@
       "requiredRuleKinds": [
         "actionHistoryText"
       ]
+    },
+    {
+      "missionSlug": "session-create-shortcuts",
+      "track": "A",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "session.create",
+        "shortcut.practice"
+      ],
+      "requiredRuleKinds": [
+        "sessionCount",
+        "actionHistoryText"
+      ]
+    },
+    {
+      "missionSlug": "basics-window-open-shortcuts",
+      "track": "A",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "window.create",
+        "shortcut.practice"
+      ],
+      "requiredRuleKinds": [
+        "windowCount",
+        "actionHistoryText"
+      ]
+    },
+    {
+      "missionSlug": "basics-workspace-routine-shortcuts",
+      "track": "A",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "session.create",
+        "window.create",
+        "window.list",
+        "workspace.checkpoint",
+        "shortcut.practice"
+      ],
+      "requiredRuleKinds": [
+        "sessionCount",
+        "windowCount",
+        "shellHistoryText",
+        "actionHistoryText"
+      ]
+    },
+    {
+      "missionSlug": "session-window-create-shortcuts",
+      "track": "A",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "window.create",
+        "window.list",
+        "workspace.checkpoint",
+        "shortcut.practice"
+      ],
+      "requiredRuleKinds": [
+        "windowCount",
+        "shellHistoryText",
+        "actionHistoryText"
+      ]
+    },
+    {
+      "missionSlug": "session-multi-manage-shortcuts",
+      "track": "A",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "session.create",
+        "session.multi_manage",
+        "shortcut.practice"
+      ],
+      "requiredRuleKinds": [
+        "sessionCount",
+        "actionHistoryText"
+      ]
+    },
+    {
+      "missionSlug": "session-attach-reconnect-shortcuts",
+      "track": "A",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "session.detach",
+        "session.attach",
+        "shortcut.practice"
+      ],
+      "requiredRuleKinds": [
+        "shellHistoryText",
+        "actionHistoryText"
+      ]
+    },
+    {
+      "missionSlug": "split-two-panes-shortcuts",
+      "track": "B",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "pane.split",
+        "shortcut.practice"
+      ],
+      "requiredRuleKinds": [
+        "paneCount",
+        "actionHistoryText"
+      ]
+    },
+    {
+      "missionSlug": "split-both-directions-shortcuts",
+      "track": "B",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "pane.split",
+        "pane.split.vertical",
+        "pane.split.horizontal",
+        "shortcut.practice"
+      ],
+      "requiredRuleKinds": [
+        "shellHistoryText",
+        "paneCount",
+        "actionHistoryText"
+      ]
+    },
+    {
+      "missionSlug": "split-resize-adjust-shortcuts",
+      "track": "B",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "pane.resize",
+        "shortcut.practice"
+      ],
+      "requiredRuleKinds": [
+        "actionHistoryText"
+      ]
+    },
+    {
+      "missionSlug": "pane-grid-layout-shortcuts",
+      "track": "B",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "pane.split",
+        "pane.grid",
+        "shortcut.practice"
+      ],
+      "requiredRuleKinds": [
+        "paneCount",
+        "actionHistoryText"
+      ]
+    },
+    {
+      "missionSlug": "pane-focus-select-practice-shortcuts",
+      "track": "B",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "pane.select",
+        "pane.focus.flow",
+        "shortcut.practice"
+      ],
+      "requiredRuleKinds": [
+        "paneCount",
+        "actionHistoryText"
+      ]
+    },
+    {
+      "missionSlug": "window-cycle-practice-shortcuts",
+      "track": "B",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "window.create",
+        "window.next",
+        "window.prev",
+        "shortcut.practice"
+      ],
+      "requiredRuleKinds": [
+        "windowCount",
+        "activeWindowIndex",
+        "actionHistoryText"
+      ]
+    },
+    {
+      "missionSlug": "copy-mode-search-keyword-shortcuts",
+      "track": "C",
+      "scenarioPresetId": "log-buffer",
+      "capabilities": [
+        "copy-mode.enter",
+        "copy-mode.search",
+        "copy-mode.match",
+        "shortcut.practice"
+      ],
+      "requiredRuleKinds": [
+        "modeIs",
+        "searchExecuted",
+        "searchMatchFound",
+        "actionHistoryText"
+      ]
+    },
+    {
+      "missionSlug": "copy-mode-no-match-shortcuts",
+      "track": "C",
+      "scenarioPresetId": "log-buffer",
+      "capabilities": [
+        "copy-mode.enter",
+        "copy-mode.search",
+        "copy-mode.no-match",
+        "shortcut.practice"
+      ],
+      "requiredRuleKinds": [
+        "modeIs",
+        "searchExecuted",
+        "searchMatchFound",
+        "actionHistoryText"
+      ]
+    },
+    {
+      "missionSlug": "command-mode-prompt-intro-shortcuts",
+      "track": "C",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "command-mode.enter",
+        "command-prompt.execute",
+        "shortcut.practice"
+      ],
+      "requiredRuleKinds": [
+        "actionHistoryText"
+      ]
+    },
+    {
+      "missionSlug": "command-mode-new-window-shortcuts",
+      "track": "C",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "command-mode.enter",
+        "command-mode.execute",
+        "window.create",
+        "shortcut.practice"
+      ],
+      "requiredRuleKinds": [
+        "windowCount",
+        "activeWindowIndex",
+        "actionHistoryText"
+      ]
+    },
+    {
+      "missionSlug": "command-mode-tree-intro-shortcuts",
+      "track": "C",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "command-mode.enter",
+        "choose-tree.open",
+        "shortcut.practice"
+      ],
+      "requiredRuleKinds": [
+        "actionHistoryText"
+      ]
     }
   ]
 }
