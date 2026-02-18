@@ -598,13 +598,17 @@ export function PracticeVmPocPage() {
   const lessonCompleted = lessonMissions.length > 0 && lessonCompletedMissionCount === lessonMissions.length;
 
   const selectLessonForAction = useCallback(
-    (lessonSlug: string) => {
+    (lessonSlug: string, options?: { resetFilter?: boolean }) => {
       if (!content) {
         return;
       }
 
       if (!content.lessons.some((lesson) => lesson.slug === lessonSlug)) {
         return;
+      }
+
+      if (options?.resetFilter) {
+        setLessonFilter('all');
       }
 
       const nextLessonMissions = content.missions.filter((mission) => mission.lessonSlug === lessonSlug);
@@ -1727,14 +1731,14 @@ export function PracticeVmPocPage() {
                 <button
                   type="button"
                   className="secondary-btn"
-                  onClick={() => selectLessonForAction(BEGINNER_ENTRY_LESSON)}
+                  onClick={() => selectLessonForAction(BEGINNER_ENTRY_LESSON, { resetFilter: true })}
                 >
                   초급 코어
                 </button>
                 <button
                   type="button"
                   className="secondary-btn"
-                  onClick={() => selectLessonForAction(ADVANCED_ENTRY_LESSON)}
+                  onClick={() => selectLessonForAction(ADVANCED_ENTRY_LESSON, { resetFilter: true })}
                 >
                   심화 과정
                 </button>
