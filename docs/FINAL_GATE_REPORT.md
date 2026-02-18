@@ -33,6 +33,20 @@
 - `G-HF-06` CI 게이트 자동화(lint/type/test/e2e/build + verify): 통과(워크플로 정의 기준)
 
 ## 4. 잔여 수동 확인 항목
-- GitHub Actions 원격 실행 성공 여부(실환경)
-- GitHub Pages/Cloudflare Pages 배포 URL smoke
+- Cloudflare Pages custom domain 검증 상태가 `pending -> active`로 최종 전환되는지 확인
 - Cloudflare Web Analytics 수집 반영 확인
+
+## 5. 원격 파이프라인 결과 (2026-02-18)
+- CI: `22124361959` (success)
+- Deploy GitHub Pages: `22124361948` (success)
+- Deploy Cloudflare Pages: `22124361944` (success)
+
+## 6. 배포 엔드포인트 상태 (2026-02-18)
+- GitHub Pages: `https://midagedev.github.io/tmux-tuto/` (`200`)
+- Cloudflare Pages subdomain: `https://tmux-tuto.pages.dev` (운영 경로 확인)
+- Cloudflare custom domain: `https://tmux.midagedev.com/` (`200`)
+- Practice smoke:
+  - `https://midagedev.github.io/tmux-tuto/practice` -> `tmux Simulator` 렌더링 확인
+  - `https://tmux.midagedev.com/practice` -> `tmux Simulator` 렌더링 확인
+- 참고:
+  - SPA deep-link는 정적 호스팅 fallback 특성으로 네트워크 탭에서 `404`가 보일 수 있으나 앱 렌더링이 정상이라면 허용한다.

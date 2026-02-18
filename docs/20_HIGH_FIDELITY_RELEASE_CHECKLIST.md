@@ -29,11 +29,18 @@
 - [x] Practice 주요 조작 흐름 (split/focus/resize/copy/config apply)
 - [x] Cheatsheet/Bookmarks/Recovery 재진입 흐름
 - [x] 문서 기대치/제약 명시 (`19_HIGH_FIDELITY_SIMULATOR_USER_GUIDE.md`)
-- [ ] 원격 GitHub Actions 실행 결과 확인
-- [ ] 실제 배포 환경(GitHub Pages/Cloudflare Pages) smoke 확인
+- [x] 원격 GitHub Actions 실행 결과 확인
+  - CI: `22124361959` success
+  - Deploy GitHub Pages: `22124361948` success
+  - Deploy Cloudflare Pages: `22124361944` success
+- [x] 실제 배포 환경 smoke 확인
+  - GitHub Pages: `https://midagedev.github.io/tmux-tuto/practice`
+  - Cloudflare custom domain: `https://tmux.midagedev.com/practice`
+  - Deep-link 요청 자체의 `404` 응답은 SPA fallback 동작으로 허용
 
 ## 4. 승인 판정
-- 현재 판정: **조건부 승인(로컬 게이트 완료)**
-- 남은 승인 조건:
-  1. 원격 CI 파이프라인 통과 확인
-  2. 배포 대상 URL smoke 확인
+- 현재 판정: **최종 승인 (배포 운영 가능)**
+- 승인 근거:
+  1. 로컬 게이트(lint/type/test/e2e/build/verify/benchmark) 통과
+  2. 원격 CI/배포 워크플로우 통과
+  3. 운영 도메인 실접속 smoke 확인

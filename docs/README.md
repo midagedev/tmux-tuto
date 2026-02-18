@@ -1,21 +1,36 @@
-# tmux-tuto 문서 인덱스
+# tmux-tuto docs index
 
-## 목적
-- 이 디렉토리는 실제 구현을 위한 실행 계획과 기능 명세를 분리해 관리한다.
-- `00_EXECUTION_TODOLIST.md`는 전체 작업 순서와 완료 기준을 정의한다.
-- `specs/`는 기능별 상세 스펙을 정의한다.
+## 기준 시점
+- Last updated: 2026-02-18
+- 현재 배포 기준: `main` @ `631ca3e`
 
-## 문서 목록
-- `/Users/hckim/repo/tmux-tuto/docs/01_PROJECT_CONVENTIONS.md`
-- `/Users/hckim/repo/tmux-tuto/docs/02_DOC_ALIGNMENT_REPORT.md`
-- `/Users/hckim/repo/tmux-tuto/docs/00_EXECUTION_TODOLIST.md`
+## 먼저 읽을 문서 (권장 순서)
+1. `/Users/hckim/repo/tmux-tuto/docs/21_HIGH_FIDELITY_IMPLEMENTATION_DEPLOYMENT_SUMMARY.md`
+2. `/Users/hckim/repo/tmux-tuto/docs/19_HIGH_FIDELITY_SIMULATOR_USER_GUIDE.md`
+3. `/Users/hckim/repo/tmux-tuto/docs/RELEASE_RUNBOOK.md`
+4. `/Users/hckim/repo/tmux-tuto/docs/FINAL_GATE_REPORT.md`
+
+## HF 구현/검증 문서
 - `/Users/hckim/repo/tmux-tuto/docs/14_HIGH_FIDELITY_SIMULATOR_TODOLIST.md`
 - `/Users/hckim/repo/tmux-tuto/docs/15_HIGH_FIDELITY_REQUIREMENTS_SYNC.md`
 - `/Users/hckim/repo/tmux-tuto/docs/16_SIMULATOR_SNAPSHOT_SCHEMA_V2.md`
 - `/Users/hckim/repo/tmux-tuto/docs/17_CURRICULUM_SIMULATOR_COVERAGE_MATRIX.md`
 - `/Users/hckim/repo/tmux-tuto/docs/18_HIGH_FIDELITY_SIMULATOR_PERFORMANCE_REPORT.md`
-- `/Users/hckim/repo/tmux-tuto/docs/19_HIGH_FIDELITY_SIMULATOR_USER_GUIDE.md`
 - `/Users/hckim/repo/tmux-tuto/docs/20_HIGH_FIDELITY_RELEASE_CHECKLIST.md`
+
+## 운영/릴리즈 문서
+- `/Users/hckim/repo/tmux-tuto/docs/RELEASE_RUNBOOK.md`
+- `/Users/hckim/repo/tmux-tuto/docs/FINAL_GATE_REPORT.md`
+
+## 공통/프로젝트 문서
+- `/Users/hckim/repo/tmux-tuto/docs/00_EXECUTION_TODOLIST.md`
+- `/Users/hckim/repo/tmux-tuto/docs/01_PROJECT_CONVENTIONS.md`
+- `/Users/hckim/repo/tmux-tuto/docs/02_DOC_ALIGNMENT_REPORT.md`
+- `/Users/hckim/repo/tmux-tuto/docs/KPI_ROUTE_MAP.md`
+- `/Users/hckim/repo/tmux-tuto/docs/OG_IMAGE_VERSIONING.md`
+- `/Users/hckim/repo/tmux-tuto/docs/QA_TUNING_REPORT.md`
+
+## 스펙 문서
 - `/Users/hckim/repo/tmux-tuto/docs/specs/01_APP_ARCHITECTURE_SPEC.md`
 - `/Users/hckim/repo/tmux-tuto/docs/specs/02_TMUX_SIMULATOR_SPEC.md`
 - `/Users/hckim/repo/tmux-tuto/docs/specs/03_CURRICULUM_MISSION_SPEC.md`
@@ -27,15 +42,12 @@
 - `/Users/hckim/repo/tmux-tuto/docs/specs/09_GAMIFICATION_PROGRESS_SPEC.md`
 - `/Users/hckim/repo/tmux-tuto/docs/specs/10_UX_UI_ONBOARDING_SPEC.md`
 - `/Users/hckim/repo/tmux-tuto/docs/specs/11_PRACTICAL_PLAYBOOKS_SPEC.md`
+- `/Users/hckim/repo/tmux-tuto/docs/specs/12_HIGH_FIDELITY_SHELL_TMUX_SIMULATOR_SPEC.md`
+- `/Users/hckim/repo/tmux-tuto/docs/specs/13_CURRICULUM_SIMULATOR_COVERAGE_SPEC.md`
 
 ## 문서 우선순위 (충돌 시)
-1. `/Users/hckim/repo/tmux-tuto/docs/01_PROJECT_CONVENTIONS.md`
-2. `/Users/hckim/repo/tmux-tuto/docs/specs/01_APP_ARCHITECTURE_SPEC.md`
-3. 기능별 스펙 (`/Users/hckim/repo/tmux-tuto/docs/specs/*.md`)
-4. 실행계획 (`/Users/hckim/repo/tmux-tuto/docs/00_EXECUTION_TODOLIST.md`)
-
-## 사용 규칙
-1. 기능 개발 전 관련 스펙 문서를 먼저 확정한다.
-2. 모든 작업 PR은 `00_EXECUTION_TODOLIST.md`의 Task ID를 제목/본문에 포함한다.
-3. 완료 판단은 각 스펙의 `DoD`와 `QA` 섹션 기준으로 한다.
-4. 라우트 파라미터/식별자 네이밍은 `01_PROJECT_CONVENTIONS.md`를 따른다.
+1. `/Users/hckim/repo/tmux-tuto/docs/specs/12_HIGH_FIDELITY_SHELL_TMUX_SIMULATOR_SPEC.md`
+2. `/Users/hckim/repo/tmux-tuto/docs/specs/13_CURRICULUM_SIMULATOR_COVERAGE_SPEC.md`
+3. `/Users/hckim/repo/tmux-tuto/docs/specs/*.md` (기능별 상세 스펙)
+4. `/Users/hckim/repo/tmux-tuto/docs/21_HIGH_FIDELITY_IMPLEMENTATION_DEPLOYMENT_SUMMARY.md`
+5. `/Users/hckim/repo/tmux-tuto/docs/14_HIGH_FIDELITY_SIMULATOR_TODOLIST.md` 및 검증/리포트 문서
