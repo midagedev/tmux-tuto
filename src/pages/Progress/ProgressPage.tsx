@@ -108,7 +108,8 @@ export function ProgressPage() {
   const inProgressSessions = useMemo(() => {
     return missionSessions
       .filter((session) => session.status === 'in_progress')
-      .sort((left, right) => right.startedAt.localeCompare(left.startedAt));
+      .sort((left, right) => right.startedAt.localeCompare(left.startedAt))
+      .slice(0, 8);
   }, [missionSessions]);
   const recentCompletedSessions = useMemo(() => {
     return missionSessions
