@@ -80,7 +80,7 @@ type PersistedProgressSlice = Pick<
   | 'tmuxSkillStats'
 >;
 
-const PROGRESS_PERSIST_KEY = 'tmux_tuto_progress_v1';
+export const PROGRESS_PERSIST_KEY = 'tmux_tuto_progress_v1';
 
 const INITIAL_TMUX_SKILL_STATS: TmuxSkillStats = {
   splitCount: 0,
