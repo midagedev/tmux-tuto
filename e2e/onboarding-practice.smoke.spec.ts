@@ -1,6 +1,16 @@
 import { expect, test } from '@playwright/test';
 import { dismissAnalyticsBanner } from './helpers';
 
+async function runSimulatorCommand(page: import('@playwright/test').Page, command: string) {
+  await page.getByRole('button', { name: 'Prefix' }).click();
+  await page.getByLabel('Manual key input').fill(':');
+  await page.getByRole('button', { name: 'Send Key' }).click();
+  await expect(page.locator('.terminal-mode-indicator')).toContainText('COMMAND_MODE');
+  await page.getByLabel('Command mode input').fill(command);
+  await page.getByRole('button', { name: 'Run Command' }).click();
+  await expect(page.locator('.terminal-mode-indicator')).toContainText('NORMAL');
+}
+
 test('onboarding first mission flow completes @smoke', async ({ page }) => {
   await page.goto('/onboarding/start');
   await dismissAnalyticsBanner(page);
@@ -37,11 +47,8 @@ test('practice pane split click-focus and pane-scroll works @smoke', async ({ pa
   await expect(targetPane).toHaveAttribute('data-active', 'true');
   await expect(targetPane.locator('.sim-pane-body')).toHaveClass(/is-active/);
 
-  const commandInput = page.getByLabel('Command mode input');
-  const runCommandButton = page.getByRole('button', { name: 'Run Command' });
   for (let index = 0; index < 3; index += 1) {
-    await commandInput.fill('cat logs/app.log');
-    await runCommandButton.click();
+    await runSimulatorCommand(page, 'cat logs/app.log');
   }
 
   const scrollInfo = targetPane.locator('.sim-pane-foot');
@@ -124,11 +131,8 @@ test('practice copy-mode search highlights and match navigation works @smoke', a
   await dismissAnalyticsBanner(page);
   await page.getByRole('button', { name: 'Reset Simulator' }).click();
 
-  const commandInput = page.getByLabel('Command mode input');
-  const runCommandButton = page.getByRole('button', { name: 'Run Command' });
   for (let index = 0; index < 2; index += 1) {
-    await commandInput.fill('cat logs/app.log');
-    await runCommandButton.click();
+    await runSimulatorCommand(page, 'cat logs/app.log');
   }
 
   await page.getByRole('button', { name: 'Enter Copy Mode' }).click();
@@ -149,18 +153,11 @@ test('practice tmux config apply flow works @smoke', async ({ page }) => {
   await dismissAnalyticsBanner(page);
   await page.getByRole('button', { name: 'Reset Simulator' }).click();
 
-  const commandInput = page.getByLabel('Command mode input');
-  const runCommandButton = page.getByRole('button', { name: 'Run Command' });
-  await commandInput.fill('echo "set -g prefix C-a" > .tmux.conf');
-  await runCommandButton.click();
-  await commandInput.fill('echo "set -g mouse off" >> .tmux.conf');
-  await runCommandButton.click();
-  await commandInput.fill('echo "setw -g mode-keys vi" >> .tmux.conf');
-  await runCommandButton.click();
-  await commandInput.fill('echo "bind x split-window -h" >> .tmux.conf');
-  await runCommandButton.click();
-  await commandInput.fill('tmux source-file .tmux.conf');
-  await runCommandButton.click();
+  await runSimulatorCommand(page, 'echo "set -g prefix C-a" > .tmux.conf');
+  await runSimulatorCommand(page, 'echo "set -g mouse off" >> .tmux.conf');
+  await runSimulatorCommand(page, 'echo "setw -g mode-keys vi" >> .tmux.conf');
+  await runSimulatorCommand(page, 'echo "bind x split-window -h" >> .tmux.conf');
+  await runSimulatorCommand(page, 'tmux source-file .tmux.conf');
 
   const prefixSummary = page.locator('.sim-summary p').filter({ hasText: 'Prefix:' });
   const configSummary = page.locator('.sim-summary p').filter({ hasText: 'Config:' });

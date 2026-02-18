@@ -333,9 +333,13 @@ a {
 }
 
 .terminal-command-overlay {
-  pointer-events: auto;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition: opacity 120ms ease, transform 120ms ease;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
   align-items: center;
   border: 1px solid #334155;
@@ -345,6 +349,10 @@ a {
 }
 
 .terminal-command-overlay.is-active {
+  pointer-events: auto;
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
   border-color: #fbbf24;
   box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.25) inset;
 }
@@ -356,9 +364,9 @@ a {
 }
 
 .terminal-command-input {
-  min-width: 0;
-  width: 100%;
-  flex: 1;
+  min-width: 140px;
+  width: auto;
+  flex: 1 1 auto;
   border: 1px solid #1e293b;
   border-radius: 6px;
   background: #020617;
@@ -475,6 +483,16 @@ a {
   .terminal-mode-indicator,
   .terminal-command-preview {
     justify-self: start;
+  }
+
+  .terminal-command-overlay {
+    flex-wrap: wrap;
+  }
+
+  .terminal-command-input {
+    min-width: 0;
+    width: 100%;
+    flex-basis: 100%;
   }
 }
 
