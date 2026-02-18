@@ -9,6 +9,7 @@
     "generate:share-meta": "node scripts/generate-share-meta-pages.mjs",
     "verify:kpi-routes": "node scripts/verify-kpi-route-map.mjs",
     "verify:coverage-matrix": "node scripts/check-coverage-matrix.mjs",
+    "benchmark:simulator": "vite-node scripts/benchmark-simulator.ts",
     "typecheck": "tsc -b",
     "test": "vitest run",
     "test:watch": "vitest",
