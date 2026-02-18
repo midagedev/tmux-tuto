@@ -1,4 +1,4 @@
-import { backupPayloadSchema, type BackupPayload } from './backupSchema';
+import { normalizeBackupPayload, type BackupPayload } from './backupSchema';
 import { clearAllData, setBackupMeta } from './repository';
 import { getDb } from './db';
 
@@ -6,11 +6,17 @@ type ImportMode = 'merge' | 'replace';
 
 export async function exportAllData(appVersion = '0.0.0'): Promise<BackupPayload> {
   const db = await getDb();
+  const snapshots = await db.getAll('simulator_snapshots');
+  const latestSnapshot = [...snapshots].sort((a, b) => b.savedAt.localeCompare(a.savedAt))[0];
 
   const payload: BackupPayload = {
-    backup_format_version: 1,
+    backup_format_version: 2,
     exported_at: new Date().toISOString(),
     app_version: appVersion,
+    simulator_defaults: {
+      latestSnapshotId: latestSnapshot?.id ?? null,
+      snapshotSchemaVersion: 2,
+    },
     stores: {
       profile: await db.getAll('profile'),
       progress: await db.getAll('progress'),
@@ -18,7 +24,7 @@ export async function exportAllData(appVersion = '0.0.0'): Promise<BackupPayload
       bookmarks: await db.getAll('bookmarks'),
       notes: await db.getAll('notes'),
       achievements: await db.getAll('achievements'),
-      simulator_snapshots: await db.getAll('simulator_snapshots'),
+      simulator_snapshots: snapshots,
       backup_meta: await db.getAll('backup_meta'),
     },
   };
@@ -27,7 +33,7 @@ export async function exportAllData(appVersion = '0.0.0'): Promise<BackupPayload
 }
 
 export async function importAllData(rawPayload: unknown, mode: ImportMode) {
-  const parsed = backupPayloadSchema.parse(rawPayload);
+  const parsed = normalizeBackupPayload(rawPayload);
   const db = await getDb();
 
   if (mode === 'replace') {

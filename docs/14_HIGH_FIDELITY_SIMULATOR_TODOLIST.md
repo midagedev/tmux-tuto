@@ -177,7 +177,7 @@
   - 검증: repository integration test
   - DoD: 새로고침 후 상태 복원
 
-- [ ] `HF-051` import/export 포맷 v2
+- [x] `HF-051` import/export 포맷 v2
   - 산출물: backup schema 확장 + 변환기
   - 의존: `HF-050`
   - 검증: backup round-trip test

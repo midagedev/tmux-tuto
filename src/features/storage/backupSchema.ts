@@ -69,20 +69,59 @@ const backupMetaSchema = z.object({
   updatedAt: z.string(),
 });
 
-export const backupPayloadSchema = z.object({
+const storesSchema = z.object({
+  profile: z.array(profileSchema),
+  progress: z.array(progressSchema),
+  mission_attempts: z.array(missionAttemptSchema),
+  bookmarks: z.array(bookmarkSchema),
+  notes: z.array(noteSchema),
+  achievements: z.array(achievementSchema),
+  simulator_snapshots: z.array(snapshotSchema),
+  backup_meta: z.array(backupMetaSchema),
+});
+
+const simulatorDefaultsSchema = z.object({
+  latestSnapshotId: z.string().nullable(),
+  snapshotSchemaVersion: z.literal(2),
+});
+
+export const backupPayloadV1Schema = z.object({
   backup_format_version: z.literal(1),
   exported_at: z.string(),
   app_version: z.string(),
-  stores: z.object({
-    profile: z.array(profileSchema),
-    progress: z.array(progressSchema),
-    mission_attempts: z.array(missionAttemptSchema),
-    bookmarks: z.array(bookmarkSchema),
-    notes: z.array(noteSchema),
-    achievements: z.array(achievementSchema),
-    simulator_snapshots: z.array(snapshotSchema),
-    backup_meta: z.array(backupMetaSchema),
-  }),
+  stores: storesSchema,
+});
+
+export const backupPayloadSchema = z.object({
+  backup_format_version: z.literal(2),
+  exported_at: z.string(),
+  app_version: z.string(),
+  simulator_defaults: simulatorDefaultsSchema,
+  stores: storesSchema,
 });
 
 export type BackupPayload = z.infer<typeof backupPayloadSchema>;
+export type BackupPayloadV1 = z.infer<typeof backupPayloadV1Schema>;
+
+export function normalizeBackupPayload(rawPayload: unknown): BackupPayload {
+  const parsedV2 = backupPayloadSchema.safeParse(rawPayload);
+  if (parsedV2.success) {
+    return parsedV2.data;
+  }
+
+  const parsedV1 = backupPayloadV1Schema.parse(rawPayload);
+  const sortedSnapshots = [...parsedV1.stores.simulator_snapshots].sort((a, b) =>
+    b.savedAt.localeCompare(a.savedAt),
+  );
+
+  return {
+    backup_format_version: 2,
+    exported_at: parsedV1.exported_at,
+    app_version: parsedV1.app_version,
+    simulator_defaults: {
+      latestSnapshotId: sortedSnapshots[0]?.id ?? null,
+      snapshotSchemaVersion: 2,
+    },
+    stores: parsedV1.stores,
+  };
+}
