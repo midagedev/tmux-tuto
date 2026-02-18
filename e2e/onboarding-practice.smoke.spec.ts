@@ -25,10 +25,13 @@ test('practice pane split click-focus and pane-scroll works @smoke', async ({ pa
   await page.getByRole('button', { name: 'Split Vertical' }).click();
   const paneCards = page.locator('.sim-pane-card');
   await expect(paneCards).toHaveCount(2);
+  await expect(page.locator('.sim-pane-geometry')).toHaveCount(2);
+  await expect(page.locator('.sim-pane-geometry').first()).toContainText(/x:\d+ y:\d+ w:\d+ h:\d+/);
 
   const targetPane = paneCards.nth(1);
   await targetPane.click();
   await expect(targetPane).toHaveAttribute('data-active', 'true');
+  await expect(targetPane.locator('.sim-pane-body')).toHaveClass(/is-active/);
 
   const commandInput = page.getByLabel('Command mode input');
   const runCommandButton = page.getByRole('button', { name: 'Run Command' });

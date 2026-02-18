@@ -115,7 +115,7 @@
   - 검증: 수동 QA(시각 일관성)
   - DoD: "터미널 같다"는 1차 체감 확보
 
-- [ ] `HF-031` 패인 렌더링 컴포넌트 분리
+- [x] `HF-031` 패인 렌더링 컴포넌트 분리
   - 산출물: pane view component, active border, geometry overlay
   - 의존: `HF-021`
   - 검증: component test + e2e

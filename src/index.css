@@ -300,8 +300,9 @@ a {
 }
 
 .sim-pane-body {
+  position: relative;
   margin: 0;
-  padding: 8px;
+  padding: 22px 8px 8px;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   background: #0f172a;
@@ -312,6 +313,20 @@ a {
   max-height: 140px;
   overflow: hidden;
   font-family: 'SFMono-Regular', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+}
+
+.sim-pane-body.is-active {
+  border-color: #2dd4bf;
+  box-shadow: 0 0 0 1px rgba(45, 212, 191, 0.35) inset;
+}
+
+.sim-pane-geometry {
+  position: absolute;
+  top: 5px;
+  right: 8px;
+  font-size: 0.62rem;
+  color: #7dd3fc;
+  opacity: 0.9;
 }
 
 .sim-pane-line {
