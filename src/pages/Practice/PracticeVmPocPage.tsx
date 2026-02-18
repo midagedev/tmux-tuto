@@ -77,7 +77,8 @@ const MAX_DEBUG_LINES = 220;
 const V86_STATE_MAGIC_LE = 0x86768676;
 const ZSTD_MAGIC_LE = 0xfd2fb528;
 const INTERNAL_ECHO_TIMEOUT_MS = 2500;
-const PROBE_TRIGGER_COMMAND = '/usr/bin/tmux-tuto-probe >/dev/ttyS1 2>/dev/null || /usr/bin/tmux-tuto-probe';
+const PROBE_TRIGGER_COMMAND =
+  'if [ -w /dev/ttyS1 ]; then /usr/bin/tmux-tuto-probe > /dev/ttyS1; else /usr/bin/tmux-tuto-probe; fi';
 const BANNER_TRIGGER_COMMAND = '/usr/bin/tmux-tuto-banner';
 
 type PendingInternalEcho = {
