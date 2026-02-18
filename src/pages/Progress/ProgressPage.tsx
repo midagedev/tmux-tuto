@@ -186,7 +186,7 @@ export function ProgressPage() {
       completedTrackSlugs,
     });
 
-    window.alert(`Simulated pass: +${gainedXp} XP`);
+    window.alert(`샘플 완료 처리: +${gainedXp} XP`);
   };
 
   return (
@@ -204,21 +204,21 @@ export function ProgressPage() {
               <strong>XP:</strong> {xp}
             </p>
             <p>
-              <strong>Level:</strong> {level}
+              <strong>레벨:</strong> {level}
             </p>
             <p>
-              <strong>Streak:</strong> {streakDays} days
+              <strong>연속 학습:</strong> {streakDays}일
             </p>
             <p>
-              <strong>Completed Missions:</strong> {completedMissionSlugs.length}
+              <strong>완료 미션:</strong> {completedMissionSlugs.length}
             </p>
             <p>
-              <strong>Skill Splits:</strong> {tmuxSkillStats.splitCount}
+              <strong>pane 분할 누적:</strong> {tmuxSkillStats.splitCount}
             </p>
           </div>
 
           <section className="playbook-section">
-            <h2>Session History</h2>
+            <h2>세션 히스토리</h2>
             <div className="progress-session-grid">
               <article>
                 <h3>진행 중 세션</h3>
@@ -277,7 +277,7 @@ export function ProgressPage() {
           </section>
 
           <section className="playbook-section">
-            <h2>Track Progress</h2>
+            <h2>트랙 진행률</h2>
             <ul className="link-list">
               {trackProgress.map((track) => (
                 <li key={track.trackSlug}>
@@ -376,7 +376,7 @@ export function ProgressPage() {
           </section>
 
           <section className="playbook-section">
-            <h2>Recommended Missions</h2>
+            <h2>다음 추천 미션</h2>
             {recommendedMissions.length === 0 ? (
               <p className="muted">모든 미션을 완료했습니다.</p>
             ) : (
@@ -400,7 +400,7 @@ export function ProgressPage() {
           </section>
 
           <section className="playbook-section">
-            <h2>Share Milestones</h2>
+            <h2>마일스톤 공유</h2>
             {milestoneLinks.length === 0 ? (
               <p className="muted">공유 가능한 마일스톤이 아직 없습니다.</p>
             ) : (

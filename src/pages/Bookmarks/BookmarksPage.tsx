@@ -1,7 +1,7 @@
-import { PagePlaceholder } from '../../components/system/PagePlaceholder';
-import { EmptyState } from '../../components/system/EmptyState';
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { EmptyState } from '../../components/system/EmptyState';
+import { PagePlaceholder } from '../../components/system/PagePlaceholder';
 import { useBookmarkStore } from '../../features/bookmarks/bookmarkStore';
 import type { BookmarkRecord } from '../../features/storage/types';
 
@@ -58,14 +58,63 @@ export function BookmarksPage() {
     );
   }, [bookmarks, tagFilter, sortOrder]);
 
+  const bookmarkTypeCount = useMemo(() => {
+    return bookmarks.reduce<Record<string, number>>((accumulator, bookmark) => {
+      accumulator[bookmark.type] = (accumulator[bookmark.type] ?? 0) + 1;
+      return accumulator;
+    }, {});
+  }, [bookmarks]);
+
+  const topTags = useMemo(() => {
+    const tagCountMap = bookmarks.reduce<Record<string, number>>((accumulator, bookmark) => {
+      bookmark.tags.forEach((tag) => {
+        accumulator[tag] = (accumulator[tag] ?? 0) + 1;
+      });
+      return accumulator;
+    }, {});
+
+    return Object.entries(tagCountMap)
+      .sort((left, right) => right[1] - left[1])
+      .slice(0, 5);
+  }, [bookmarks]);
+
   return (
     <PagePlaceholder
       eyebrow="Bookmarks"
-      title="북마크/노트"
-      description="저장한 항목을 태그/정렬로 관리하고 재실습합니다."
+      title="북마크 운영 허브"
+      description="북마크를 단순 저장소가 아니라 재실습 큐로 관리할 수 있도록 정리했습니다."
     >
+      <section className="bookmark-dashboard">
+        <article className="bookmark-metric-card">
+          <h2>저장 항목</h2>
+          <p>
+            <strong>{bookmarks.length}</strong>개
+          </p>
+        </article>
+        <article className="bookmark-metric-card">
+          <h2>현재 필터 결과</h2>
+          <p>
+            <strong>{filteredBookmarks.length}</strong>개
+          </p>
+        </article>
+        <article className="bookmark-metric-card">
+          <h2>타입 분포</h2>
+          <p className="muted">
+            {Object.entries(bookmarkTypeCount)
+              .map(([bookmarkType, count]) => `${bookmarkType}: ${count}`)
+              .join(' / ') || '데이터 없음'}
+          </p>
+        </article>
+        <article className="bookmark-metric-card">
+          <h2>상위 태그</h2>
+          <p className="muted">
+            {topTags.map(([tag, count]) => `${tag}(${count})`).join(', ') || '태그 없음'}
+          </p>
+        </article>
+      </section>
+
       <form
-        className="bookmark-form"
+        className="bookmark-form bookmark-form-card"
         onSubmit={(event) => {
           event.preventDefault();
           if (!title.trim() || !targetId.trim()) {
@@ -119,7 +168,7 @@ export function BookmarksPage() {
         </button>
       </form>
 
-      <div className="inline-actions">
+      <div className="inline-actions bookmark-filter-row">
         <input
           className="sim-input"
           value={tagFilter}
@@ -142,21 +191,34 @@ export function BookmarksPage() {
       ) : filteredBookmarks.length === 0 ? (
         <EmptyState
           title="아직 저장된 항목이 없습니다"
-          description="학습 중 북마크한 레슨/플레이북이 여기에 표시됩니다."
+          description="실습 중 중요한 레슨/패턴을 저장하면 여기에 누적됩니다."
         />
       ) : (
-        <ul className="link-list">
+        <div className="bookmark-list-grid">
           {filteredBookmarks.map((bookmark) => (
-            <li key={bookmark.id}>
-              <strong>{bookmark.title}</strong> <span className="muted">[{bookmark.type}]</span>
-              <div className="muted">
+            <article key={bookmark.id} className="bookmark-list-card">
+              <h2>
+                {bookmark.title} <span className="muted">[{bookmark.type}]</span>
+              </h2>
+              <p className="muted">
                 target: {bookmark.targetId} / tags: {bookmark.tags.join(', ') || '(none)'}
+              </p>
+              <div className="inline-actions">
+                {buildBookmarkPracticeLink(bookmark) ? (
+                  <Link to={buildBookmarkPracticeLink(bookmark) ?? '/practice'} className="secondary-btn">
+                    실습 열기
+                  </Link>
+                ) : null}
+                <button
+                  type="button"
+                  className="secondary-btn"
+                  onClick={() => {
+                    void deleteBookmark(bookmark.id);
+                  }}
+                >
+                  삭제
+                </button>
               </div>
-              {buildBookmarkPracticeLink(bookmark) ? (
-                <Link to={buildBookmarkPracticeLink(bookmark) ?? '/practice'} className="secondary-btn">
-                  실습 열기
-                </Link>
-              ) : null}
               <textarea
                 className="bookmark-note"
                 value={notesByBookmarkId[bookmark.id] ?? ''}
@@ -166,18 +228,9 @@ export function BookmarksPage() {
                 placeholder="개인 노트"
                 aria-label={`Note for ${bookmark.title}`}
               />
-              <button
-                type="button"
-                className="secondary-btn"
-                onClick={() => {
-                  void deleteBookmark(bookmark.id);
-                }}
-              >
-                삭제
-              </button>
-            </li>
+            </article>
           ))}
-        </ul>
+        </div>
       )}
     </PagePlaceholder>
   );
