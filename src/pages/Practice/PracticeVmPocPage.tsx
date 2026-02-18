@@ -77,8 +77,7 @@ const MAX_DEBUG_LINES = 220;
 const V86_STATE_MAGIC_LE = 0x86768676;
 const ZSTD_MAGIC_LE = 0xfd2fb528;
 const INTERNAL_ECHO_TIMEOUT_MS = 2500;
-const PROBE_TRIGGER_COMMAND =
-  'if [ -w /dev/ttyS1 ]; then /usr/bin/tmux-tuto-probe > /dev/ttyS1; else /usr/bin/tmux-tuto-probe; fi';
+const PROBE_TRIGGER_COMMAND = '/usr/bin/tmux-tuto-probe > /dev/ttyS1';
 const BANNER_TRIGGER_COMMAND = '/usr/bin/tmux-tuto-banner';
 
 type PendingInternalEcho = {
@@ -147,12 +146,12 @@ const QUICK_COMMANDS = [
   {
     label: 'Copy Search 성공',
     command:
-      'tmux has-session -t lesson 2>/dev/null || tmux new-session -d -s lesson; tmux copy-mode -t lesson:0.0; tmux send-keys -t lesson:0.0 -X search-backward "bin"; if [ -w /dev/ttyS1 ]; then printf "[[TMUXWEB_PROBE:search:1]]\\n[[TMUXWEB_PROBE:searchMatched:1]]\\n" > /dev/ttyS1; else echo "[[TMUXWEB_PROBE:search:1]]"; echo "[[TMUXWEB_PROBE:searchMatched:1]]"; fi',
+      'tmux has-session -t lesson 2>/dev/null || tmux new-session -d -s lesson; tmux copy-mode -t lesson:0.0; tmux send-keys -t lesson:0.0 -X search-backward "bin"; printf "[[TMUXWEB_PROBE:search:1]]\\n[[TMUXWEB_PROBE:searchMatched:1]]\\n" > /dev/ttyS1',
   },
   {
     label: 'Copy Search 실패',
     command:
-      'tmux has-session -t lesson 2>/dev/null || tmux new-session -d -s lesson; tmux copy-mode -t lesson:0.0; tmux send-keys -t lesson:0.0 -X search-backward "__TMUXWEB_NOT_FOUND__"; if [ -w /dev/ttyS1 ]; then printf "[[TMUXWEB_PROBE:search:1]]\\n[[TMUXWEB_PROBE:searchMatched:0]]\\n" > /dev/ttyS1; else echo "[[TMUXWEB_PROBE:search:1]]"; echo "[[TMUXWEB_PROBE:searchMatched:0]]"; fi',
+      'tmux has-session -t lesson 2>/dev/null || tmux new-session -d -s lesson; tmux copy-mode -t lesson:0.0; tmux send-keys -t lesson:0.0 -X search-backward "__TMUXWEB_NOT_FOUND__"; printf "[[TMUXWEB_PROBE:search:1]]\\n[[TMUXWEB_PROBE:searchMatched:0]]\\n" > /dev/ttyS1',
   },
   {
     label: '레이아웃 변경',
