@@ -28,6 +28,31 @@ describe('resolveSimulatorInput', () => {
     ]);
   });
 
+  it('uses custom bind command when prefix key table is overridden', () => {
+    const initial = createInitialSimulatorState();
+    const state = {
+      ...initial,
+      tmux: {
+        ...initial.tmux,
+        config: {
+          ...initial.tmux.config,
+          binds: { x: 'split-window -h' },
+        },
+      },
+      mode: {
+        ...initial.mode,
+        value: 'PREFIX_PENDING' as const,
+      },
+    };
+    const actions = resolveSimulatorInput(state, 'x');
+
+    expect(actions).toEqual([
+      { type: 'EXECUTE_COMMAND', payload: 'split-window -h' },
+      { type: 'SET_MODE', payload: 'NORMAL' },
+      { type: 'SET_REPEAT_WINDOW', payload: null },
+    ]);
+  });
+
   it('builds command buffer in command mode', () => {
     const initial = createInitialSimulatorState();
     const state = {

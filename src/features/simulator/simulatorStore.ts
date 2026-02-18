@@ -31,7 +31,17 @@ function isSimulatorStateV2(value: unknown): value is SimulatorState {
     return false;
   }
 
-  if (!isRecord(tmux.config) || (tmux.config.prefixKey !== 'C-b' && tmux.config.prefixKey !== 'C-a')) {
+  if (
+    !isRecord(tmux.config) ||
+    (tmux.config.prefixKey !== 'C-b' && tmux.config.prefixKey !== 'C-a') ||
+    typeof tmux.config.mouse !== 'boolean' ||
+    (tmux.config.modeKeys !== 'vi' && tmux.config.modeKeys !== 'emacs') ||
+    !isRecord(tmux.config.binds) ||
+    !Object.values(tmux.config.binds).every((value) => typeof value === 'string') ||
+    (tmux.config.lastAppliedSource !== null && typeof tmux.config.lastAppliedSource !== 'string') ||
+    !Array.isArray(tmux.config.errors) ||
+    !tmux.config.errors.every((value) => typeof value === 'string')
+  ) {
     return false;
   }
 

@@ -15,6 +15,7 @@ import { executeShellCommand } from './shellCommands';
 import { appendOutput, clearTerminal, scrollViewport, setViewportTop } from './terminalBuffer';
 import { applyPaneLayout, resolveLayoutForPaneCount } from './layout';
 import { parseTmuxCommand } from './tmuxCommand';
+import { applyTmuxConfig, parseTmuxConfig } from './tmuxConfig';
 
 export type SplitDirection = 'vertical' | 'horizontal';
 export type FocusDirection = 'left' | 'right' | 'up' | 'down';
@@ -45,6 +46,7 @@ export type SimulatorAction =
   | { type: 'EXIT_COPY_MODE' }
   | { type: 'RUN_COPY_SEARCH'; payload: string }
   | { type: 'ADVANCE_COPY_MATCH'; payload: 1 | -1 }
+  | { type: 'APPLY_TMUX_CONFIG'; payload: { content: string; sourcePath: string } }
   | { type: 'INIT_SCENARIO'; payload: string }
   | { type: 'LOAD_SNAPSHOT'; payload: SimulatorState }
   | { type: 'RESET' };
@@ -143,6 +145,33 @@ function focusActivePaneToLine(state: SimulatorState, lineIndex: number) {
     ...pane,
     terminal: setViewportTop(pane.terminal, lineIndex),
   }));
+}
+
+function normalizePath(path: string) {
+  const segments: string[] = [];
+  path.split('/').forEach((segment) => {
+    if (!segment || segment === '.') {
+      return;
+    }
+
+    if (segment === '..') {
+      segments.pop();
+      return;
+    }
+
+    segments.push(segment);
+  });
+
+  const normalized = `/${segments.join('/')}`.replace(/\/+$/, '');
+  return normalized === '' ? '/' : normalized;
+}
+
+function resolvePath(cwd: string, input: string) {
+  if (input.startsWith('/')) {
+    return normalizePath(input);
+  }
+
+  return normalizePath(`${cwd}/${input}`);
 }
 
 function moveFocus(panes: TmuxPane[], activePaneId: string, direction: FocusDirection) {
@@ -628,6 +657,29 @@ export function simulatorReducer(state: SimulatorState, action: SimulatorAction)
       }
 
       const nextState = withCommandHistory(state, command);
+      const tmuxCommand = command.startsWith('tmux ') ? command.slice(5).trim() : command;
+      if (tmuxCommand.startsWith('source-file')) {
+        const [, filePathRaw] = tmuxCommand.split(/\s+/, 2);
+        if (!filePathRaw) {
+          return withHistory(nextState, 'sim.config.sourcefile.missing', 'source-file path is required');
+        }
+
+        const activeShellSession = getActiveShellSession(nextState);
+        const filePath = resolvePath(activeShellSession.workingDirectory, filePathRaw);
+        const fileContent = activeShellSession.fileSystem.files[filePath];
+        if (typeof fileContent !== 'string') {
+          return withHistory(nextState, 'sim.config.sourcefile.missing', `No such file: ${filePathRaw}`);
+        }
+
+        return simulatorReducer(nextState, {
+          type: 'APPLY_TMUX_CONFIG',
+          payload: {
+            content: fileContent,
+            sourcePath: filePath,
+          },
+        });
+      }
+
       const activeShellSession = getActiveShellSession(nextState);
       const shellResult = executeShellCommand(activeShellSession, command);
       if (shellResult.handled) {
@@ -647,13 +699,36 @@ export function simulatorReducer(state: SimulatorState, action: SimulatorAction)
         return withHistory(shellState, 'sim.command.shell');
       }
 
-      const tmuxCommand = command.startsWith('tmux ') ? command.slice(5).trim() : command;
       const tmuxAction = parseTmuxCommand(tmuxCommand);
       if (tmuxAction) {
         return simulatorReducer(nextState, tmuxAction);
       }
 
       return withHistory(nextState, 'sim.command.unhandled', `Unsupported command: ${command}`);
+    }
+
+    case 'APPLY_TMUX_CONFIG': {
+      const parsed = parseTmuxConfig(action.payload.content);
+      const applied = applyTmuxConfig(state.tmux.config, parsed.directives);
+      const errors = parsed.errors.map((entry) => `L${entry.line}: ${entry.message}`);
+
+      return withHistory(
+        {
+          ...state,
+          tmux: {
+            ...state.tmux,
+            config: {
+              ...applied,
+              lastAppliedSource: action.payload.sourcePath,
+              errors,
+            },
+          },
+        },
+        'sim.config.apply',
+        errors.length === 0
+          ? `tmux config applied (${action.payload.sourcePath})`
+          : `tmux config applied with ${errors.length} error(s)`,
+      );
     }
 
     case 'ENTER_COPY_MODE': {

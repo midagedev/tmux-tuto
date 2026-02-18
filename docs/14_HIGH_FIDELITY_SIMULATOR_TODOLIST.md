@@ -102,7 +102,7 @@
   - 검증: integration/e2e
   - DoD: copy-mode 실습 미션 수행 가능
 
-- [ ] `HF-025` `.tmux.conf` parser v1 적용
+- [x] `HF-025` `.tmux.conf` parser v1 적용
   - 산출물: 설정 파서 + 적용 상태 + 에러 표시
   - 의존: `HF-022`, `HF-023`
   - 검증: unit test(valid/invalid config)

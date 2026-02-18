@@ -76,6 +76,11 @@ export type ModeState = {
 
 export type TmuxConfigState = {
   prefixKey: 'C-b' | 'C-a';
+  mouse: boolean;
+  modeKeys: 'vi' | 'emacs';
+  binds: Record<string, string>;
+  lastAppliedSource: string | null;
+  errors: string[];
 };
 
 export type SimulatorState = {
@@ -176,6 +181,11 @@ export function createInitialSimulatorState(options?: { scenarioPresetId?: strin
       activeSessionId: tmuxSession.id,
       config: {
         prefixKey: 'C-b',
+        mouse: true,
+        modeKeys: 'emacs',
+        binds: {},
+        lastAppliedSource: null,
+        errors: [],
       },
     },
     mode: {

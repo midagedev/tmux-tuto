@@ -33,6 +33,7 @@ export function PracticePage() {
       ? simulatorState.mode.copyMode.matchLineIndices[simulatorState.mode.copyMode.activeMatchIndex]
       : -1;
   const presetId = searchParams.get('from');
+  const mouseEnabled = simulatorState.tmux.config.mouse;
 
   useEffect(() => {
     if (!presetId) {
@@ -98,6 +99,9 @@ export function PracticePage() {
           <p>
             <strong>Repeat Table:</strong> {simulatorState.mode.repeatUntil ? 'active' : 'idle'}
           </p>
+          <p>
+            <strong>Config:</strong> mouse {mouseEnabled ? 'on' : 'off'} / mode-keys {simulatorState.tmux.config.modeKeys}
+          </p>
         </div>
 
         <div className="sim-pane-grid" aria-label="Pane viewport grid">
@@ -110,7 +114,12 @@ export function PracticePage() {
                 key={pane.id}
                 className={`sim-pane-card${isActive ? ' is-active' : ''}`}
                 data-active={isActive ? 'true' : 'false'}
-                onClick={() => focusPaneById(pane.id)}
+                onClick={() => {
+                  if (!mouseEnabled) {
+                    return;
+                  }
+                  focusPaneById(pane.id);
+                }}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter' || event.key === ' ') {
                     event.preventDefault();
@@ -118,6 +127,9 @@ export function PracticePage() {
                   }
                 }}
                 onWheel={(event) => {
+                  if (!mouseEnabled) {
+                    return;
+                  }
                   event.preventDefault();
                   const delta = event.deltaY < 0 ? 2 : -2;
                   scrollPane(pane.id, delta);
@@ -356,6 +368,14 @@ export function PracticePage() {
             <li>buffer: {simulatorState.mode.commandBuffer || '(empty)'}</li>
             <li>cursor: {simulatorState.mode.commandCursor}</li>
             <li>supported: new-window, new-session, split-window -h/-v, copy-mode, kill-pane</li>
+            <li>config load: tmux source-file .tmux.conf</li>
+          </ul>
+
+          <h2>Tmux Config</h2>
+          <ul className="link-list">
+            <li>source: {simulatorState.tmux.config.lastAppliedSource ?? '(none)'}</li>
+            <li>binds: {Object.keys(simulatorState.tmux.config.binds).length}</li>
+            <li>errors: {simulatorState.tmux.config.errors.length}</li>
           </ul>
 
           <h2>Action History</h2>

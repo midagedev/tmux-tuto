@@ -124,4 +124,28 @@ describe('simulatorReducer', () => {
     expect(searched.mode.copyMode.activeMatchIndex).toBe(0);
     expect(advanced.mode.copyMode.activeMatchIndex).toBe(1);
   });
+
+  it('applies tmux config from .tmux.conf and updates config state', () => {
+    let state = createInitialSimulatorState();
+    state = simulatorReducer(state, { type: 'EXECUTE_COMMAND', payload: 'echo "set -g prefix C-a" > .tmux.conf' });
+    state = simulatorReducer(state, { type: 'EXECUTE_COMMAND', payload: 'echo "set -g mouse off" >> .tmux.conf' });
+    state = simulatorReducer(state, { type: 'EXECUTE_COMMAND', payload: 'echo "setw -g mode-keys vi" >> .tmux.conf' });
+    state = simulatorReducer(state, { type: 'EXECUTE_COMMAND', payload: 'echo "bind x split-window -h" >> .tmux.conf' });
+    state = simulatorReducer(state, { type: 'EXECUTE_COMMAND', payload: 'tmux source-file .tmux.conf' });
+
+    expect(state.tmux.config.prefixKey).toBe('C-a');
+    expect(state.tmux.config.mouse).toBe(false);
+    expect(state.tmux.config.modeKeys).toBe('vi');
+    expect(state.tmux.config.binds.x).toBe('split-window -h');
+    expect(state.tmux.config.errors).toEqual([]);
+  });
+
+  it('stores line-level parse errors when tmux config is invalid', () => {
+    let state = createInitialSimulatorState();
+    state = simulatorReducer(state, { type: 'EXECUTE_COMMAND', payload: 'echo "set -g prefix C-x" > .tmux.conf' });
+    state = simulatorReducer(state, { type: 'EXECUTE_COMMAND', payload: 'tmux source-file .tmux.conf' });
+
+    expect(state.tmux.config.errors.length).toBeGreaterThan(0);
+    expect(state.tmux.config.errors[0]).toContain('L1');
+  });
 });

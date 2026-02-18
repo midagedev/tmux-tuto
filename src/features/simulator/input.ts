@@ -57,8 +57,12 @@ function isRepeatablePrefixKey(key: string) {
   return ['h', 'j', 'k', 'l', 'H', 'J', 'K', 'L'].includes(key);
 }
 
-function resolvePrefixKey(key: string): SimulatorAction[] {
+function resolvePrefixKey(state: SimulatorState, key: string): SimulatorAction[] {
   const prefixTail: SimulatorAction[] = [action('SET_MODE', 'NORMAL')];
+  const customBind = state.tmux.config.binds[key];
+  if (customBind) {
+    return [action('EXECUTE_COMMAND', customBind), ...prefixTail];
+  }
 
   switch (key) {
     case '%':
@@ -201,7 +205,7 @@ export function resolveSimulatorInputAt(state: SimulatorState, key: string, nowM
       return [action('SET_MODE', 'NORMAL'), action('SET_REPEAT_WINDOW', null), ...resolveSimulatorInputAt(timedOutState, key, nowMs)];
     }
 
-    const prefixActions = resolvePrefixKey(key);
+    const prefixActions = resolvePrefixKey(state, key);
     if (isRepeatablePrefixKey(key)) {
       return [...prefixActions, action('SET_REPEAT_WINDOW', nowMs + REPEAT_TIMEOUT_MS)];
     }
@@ -210,7 +214,7 @@ export function resolveSimulatorInputAt(state: SimulatorState, key: string, nowM
   }
 
   if (state.mode.repeatUntil !== null && nowMs <= state.mode.repeatUntil && isRepeatablePrefixKey(key)) {
-    const repeatActions = resolvePrefixKey(key).filter(
+    const repeatActions = resolvePrefixKey(state, key).filter(
       (item) => !(item.type === 'SET_MODE' && item.payload === 'NORMAL'),
     );
     return [...repeatActions, action('SET_REPEAT_WINDOW', nowMs + REPEAT_TIMEOUT_MS)];
