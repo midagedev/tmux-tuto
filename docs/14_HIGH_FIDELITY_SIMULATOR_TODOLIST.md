@@ -190,7 +190,7 @@
   - DoD: 복구 실패 시 안전 폴백
 
 ### Phase 6. Test/Quality
-- [ ] `HF-060` unit 테스트 확장
+- [x] `HF-060` unit 테스트 확장
   - 산출물: shell parser/keymap/command parser/reducer tests
   - 의존: Phase 1~2
   - 검증: `npm run test`

@@ -21,10 +21,18 @@ describe('tmuxCommand parser', () => {
   });
 
   it('returns null on unsupported/invalid command syntax', () => {
+    expect(parseTmuxCommand('   ')).toBeNull();
+    expect(parseTmuxCommand('new-window foo')).toBeNull();
     expect(parseTmuxCommand('split-window')).toBeNull();
     expect(parseTmuxCommand('split-window -x')).toBeNull();
+    expect(parseTmuxCommand('split-window -h -v')).toBeNull();
     expect(parseTmuxCommand('select-pane')).toBeNull();
     expect(parseTmuxCommand('select-pane -X')).toBeNull();
     expect(parseTmuxCommand('unknown-cmd')).toBeNull();
+  });
+
+  it('parses quoted flags with extra whitespace', () => {
+    expect(parseTmuxCommand('  split-window   "-h"  ')).toEqual({ type: 'SPLIT_PANE', payload: 'vertical' });
+    expect(parseTmuxCommand(" select-pane '-D' ")).toEqual({ type: 'FOCUS_PANE', payload: 'down' });
   });
 });
