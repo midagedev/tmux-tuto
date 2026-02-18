@@ -74,6 +74,30 @@ test('practice command-mode overlay flow works @smoke', async ({ page }) => {
   await expect(page.locator('.terminal-window-tab')).toHaveCount(2);
 });
 
+test('practice keyboard-only routing works @smoke', async ({ page }) => {
+  await page.goto('/practice');
+  await dismissAnalyticsBanner(page);
+
+  const terminalShell = page.locator('.terminal-shell');
+  await terminalShell.focus();
+
+  await page.keyboard.press('Control+b');
+  await page.keyboard.press('c');
+  await expect(page.locator('.terminal-window-tab')).toHaveCount(2);
+  await expect(page.locator('.terminal-window-tab.is-active')).toHaveText('2');
+
+  await page.keyboard.press('Control+b');
+  await page.keyboard.press('p');
+  await expect(page.locator('.terminal-window-tab.is-active')).toHaveText('1');
+
+  await page.keyboard.press('Control+b');
+  await page.keyboard.press('n');
+  await expect(page.locator('.terminal-window-tab.is-active')).toHaveText('2');
+
+  await expect(page.locator('.terminal-mode-indicator')).toContainText('NORMAL');
+  await expect(page.getByLabel('Simulator live region')).toContainText('Mode NORMAL');
+});
+
 test('practice copy-mode search highlights and match navigation works @smoke', async ({ page }) => {
   await page.goto('/practice');
   await dismissAnalyticsBanner(page);

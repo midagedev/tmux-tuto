@@ -19,6 +19,18 @@ body {
   background: linear-gradient(180deg, #eef1f5 0%, #f8f9fb 100%);
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -238,6 +250,11 @@ a {
   gap: 10px;
 }
 
+.terminal-shell:focus-visible {
+  outline: 2px solid #22d3ee;
+  outline-offset: 2px;
+}
+
 .terminal-window-bar {
   display: flex;
   flex-wrap: wrap;
@@ -345,6 +362,11 @@ a {
   font-size: 0.78rem;
 }
 
+.terminal-command-input:focus-visible {
+  outline: 2px solid #facc15;
+  outline-offset: 1px;
+}
+
 .terminal-command-preview {
   justify-self: start;
   pointer-events: none;
@@ -370,6 +392,11 @@ a {
   gap: 6px;
   cursor: pointer;
   user-select: none;
+}
+
+.sim-pane-card:focus-visible {
+  outline: 2px solid #0891b2;
+  outline-offset: 2px;
 }
 
 .sim-pane-card.is-active {

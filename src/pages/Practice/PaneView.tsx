@@ -29,6 +29,18 @@ export function PaneView({
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      onScrollPane(pane.id, 2);
+      return;
+    }
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      onScrollPane(pane.id, -2);
+      return;
+    }
+
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       handleFocus();
@@ -49,6 +61,7 @@ export function PaneView({
     <div
       className={`sim-pane-card${isActive ? ' is-active' : ''}`}
       data-active={isActive ? 'true' : 'false'}
+      aria-label={`Pane ${pane.id}${isActive ? ' active' : ''}, x ${pane.x} y ${pane.y} width ${pane.width} height ${pane.height}`}
       onClick={() => {
         if (!mouseEnabled) {
           return;

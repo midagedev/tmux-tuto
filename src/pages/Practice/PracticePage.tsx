@@ -1,10 +1,18 @@
 import { PagePlaceholder } from '../../components/system/PagePlaceholder';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { getActivePane, getActiveSession, getActiveShellSession, getActiveWindow } from '../../features/simulator/model';
 import { useSimulatorStore } from '../../features/simulator/simulatorStore';
 import { normalizeKeyboardEvent } from '../../features/simulator/input';
 import { useSearchParams } from 'react-router-dom';
 import { PaneView } from './PaneView';
+
+function isEditableTarget(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) {
+    return false;
+  }
+
+  return target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+}
 
 export function PracticePage() {
   const [manualKey, setManualKey] = useState('');
@@ -22,6 +30,9 @@ export function PracticePage() {
   );
   const resetSimulator = useSimulatorStore((store) => store.reset);
   const applyQuickPreset = useSimulatorStore((store) => store.applyQuickPreset);
+  const terminalShellRef = useRef<HTMLElement | null>(null);
+  const commandInputRef = useRef<HTMLInputElement | null>(null);
+  const previousModeRef = useRef(simulatorState.mode.value);
 
   const activeSession = getActiveSession(simulatorState);
   const activeShellSession = getActiveShellSession(simulatorState);
@@ -38,6 +49,7 @@ export function PracticePage() {
   const commandCursor = simulatorState.mode.commandCursor;
   const commandPreview = `${commandBuffer.slice(0, commandCursor)}|${commandBuffer.slice(commandCursor)}`;
   const modeClass = simulatorState.mode.value.toLowerCase().replace('_', '-');
+  const liveAnnouncement = `Mode ${simulatorState.mode.value}. Active pane ${activePane.id}. Panes ${activeWindow.panes.length}.`;
 
   useEffect(() => {
     if (!presetId) {
@@ -49,6 +61,21 @@ export function PracticePage() {
     nextParams.delete('from');
     setSearchParams(nextParams, { replace: true });
   }, [applyQuickPreset, presetId, searchParams, setSearchParams]);
+
+  useEffect(() => {
+    const previousMode = previousModeRef.current;
+    if (simulatorState.mode.value === 'COMMAND_MODE' && previousMode !== 'COMMAND_MODE') {
+      commandInputRef.current?.focus();
+      commandInputRef.current?.select();
+    }
+
+    if (previousMode === 'COMMAND_MODE' && simulatorState.mode.value !== 'COMMAND_MODE') {
+      terminalShellRef.current?.focus();
+    }
+
+    previousModeRef.current = simulatorState.mode.value;
+  }, [simulatorState.mode.value]);
+
   const sendPrefixed = (key: string) => {
     handleKeyInput(simulatorState.tmux.config.prefixKey);
     handleKeyInput(key);
@@ -108,8 +135,29 @@ export function PracticePage() {
             <strong>Config:</strong> mouse {mouseEnabled ? 'on' : 'off'} / mode-keys {simulatorState.tmux.config.modeKeys}
           </p>
         </div>
+        <div className="sr-only" aria-live="polite" aria-atomic="true" aria-label="Simulator live region">
+          {liveAnnouncement}
+        </div>
 
-        <section className="terminal-shell" aria-label="Terminal skin">
+        <section
+          className="terminal-shell"
+          aria-label="Terminal skin"
+          ref={terminalShellRef}
+          role="application"
+          tabIndex={0}
+          onKeyDown={(event) => {
+            if (isEditableTarget(event.target)) {
+              return;
+            }
+
+            const key = normalizeKeyboardEvent(event.nativeEvent);
+            handleKeyInput(key);
+            event.preventDefault();
+            setTimeout(() => {
+              terminalShellRef.current?.focus();
+            }, 0);
+          }}
+        >
           <div className="terminal-window-bar">
             {activeSession.windows.map((window) => (
               <span
@@ -154,6 +202,7 @@ export function PracticePage() {
               >
                 <span className="terminal-command-prefix">:</span>
                 <input
+                  ref={commandInputRef}
                   className="terminal-command-input"
                   value={commandBuffer}
                   onChange={(event) => setCommandBuffer(event.target.value)}
@@ -184,6 +233,13 @@ export function PracticePage() {
               onClick={() => handleKeyInput(simulatorState.tmux.config.prefixKey)}
             >
               Prefix
+            </button>
+            <button
+              type="button"
+              className="secondary-btn"
+              onClick={() => terminalShellRef.current?.focus()}
+            >
+              Focus Terminal
             </button>
             <button type="button" className="secondary-btn" onClick={() => sendPrefixed('%')}>
               Split Vertical
@@ -306,18 +362,7 @@ export function PracticePage() {
 
         </div>
 
-        <div
-          className="sim-capture"
-          role="application"
-          tabIndex={0}
-          onKeyDown={(event) => {
-            const key = normalizeKeyboardEvent(event.nativeEvent);
-            handleKeyInput(key);
-            event.preventDefault();
-          }}
-        >
-          키보드 캡처 영역 (클릭 후 단축키 입력)
-        </div>
+        <div className="sim-capture">터미널 영역에 포커스를 두고 키보드 단축키를 입력하세요.</div>
 
         <div className="sim-log">
           <h2>Sessions</h2>
