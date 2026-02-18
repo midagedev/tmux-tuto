@@ -7,7 +7,7 @@ import type { AppContent, AppMission } from '../../features/curriculum/contentSc
 import { listAchievementDefinitions } from '../../features/progress';
 import { useProgressStore } from '../../features/progress/progressStore';
 import type { MilestoneSlug } from '../../features/sharing';
-import { buildSharePath, buildTwitterIntentUrl, getMilestoneMeta } from '../../features/sharing';
+import { buildSharePath, buildTwitterIntentUrl, computeMilestoneProgress, getMilestoneMeta } from '../../features/sharing';
 
 export function ProgressPage() {
   const [content, setContent] = useState<AppContent | null>(null);
@@ -73,10 +73,22 @@ export function ProgressPage() {
     return content.missions.filter((mission) => !completedMissionSlugs.includes(mission.slug)).slice(0, 3);
   }, [content, completedMissionSlugs]);
 
-  const completedTrackSlugs = useMemo(
-    () => trackProgress.filter((row) => row.ratio >= 100).map((row) => row.trackSlug),
-    [trackProgress],
-  );
+  const milestoneProgress = useMemo(() => {
+    if (!content) {
+      return {
+        unlockedMilestones: [] as MilestoneSlug[],
+        completedTrackSlugs: [] as string[],
+      };
+    }
+
+    return computeMilestoneProgress({
+      content,
+      completedMissionSlugs,
+      streakDays,
+    });
+  }, [content, completedMissionSlugs, streakDays]);
+
+  const completedTrackSlugs = milestoneProgress.completedTrackSlugs;
 
   const coreAchievementRows = useMemo(() => {
     const unlockedSet = new Set(unlockedCoreAchievements);
@@ -101,34 +113,9 @@ export function ProgressPage() {
   }, []);
 
   const milestoneLinks = useMemo(() => {
-    const milestoneSet = new Set<MilestoneSlug>();
-
-    if (completedMissionSlugs.length >= 1) {
-      milestoneSet.add('first-chapter-complete');
-    }
-    if (completedTrackSlugs.includes('track-a-foundations')) {
-      milestoneSet.add('track-a-complete');
-    }
-    if (completedTrackSlugs.includes('track-b-workflow')) {
-      milestoneSet.add('track-b-complete');
-    }
-    if (completedTrackSlugs.includes('track-c-deepwork')) {
-      milestoneSet.add('track-c-complete');
-    }
-    if (streakDays >= 7) {
-      milestoneSet.add('streak-7');
-    }
-    if (
-      completedTrackSlugs.includes('track-a-foundations') &&
-      completedTrackSlugs.includes('track-b-workflow') &&
-      completedTrackSlugs.includes('track-c-deepwork')
-    ) {
-      milestoneSet.add('final-complete');
-    }
-
     const date = new Date().toISOString().slice(0, 10);
 
-    return Array.from(milestoneSet).map((milestoneSlug) => {
+    return milestoneProgress.unlockedMilestones.map((milestoneSlug) => {
       const meta = getMilestoneMeta(milestoneSlug);
       return {
         milestoneSlug,
@@ -141,7 +128,7 @@ export function ProgressPage() {
         }),
       };
     });
-  }, [completedMissionSlugs.length, completedTrackSlugs, level, streakDays, xp]);
+  }, [level, milestoneProgress.unlockedMilestones, xp]);
 
   const simulateMissionPass = (mission: AppMission) => {
     const gainedXp = recordMissionPass({
