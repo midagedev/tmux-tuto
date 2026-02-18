@@ -942,6 +942,7 @@ export function PracticeVmPocPage() {
         });
       }
       setMobileWorkbenchView('mission');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     },
     [completedMissionSlugs, content, startMissionSession],
   );
@@ -974,6 +975,7 @@ export function PracticeVmPocPage() {
       });
     }
     setMobileWorkbenchView('mission');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [completedMissionSlugs, content, nextLesson, startMissionSession]);
 
   const celebration = celebrationState.active;
@@ -2187,34 +2189,32 @@ export function PracticeVmPocPage() {
         {selectedLesson ? (
           <section className="vm-lesson-banner">
             <div className="vm-lesson-banner-header">
-              <p className="vm-lesson-banner-path">
+              <span className="vm-lesson-banner-path">
                 {selectedLessonTrack?.title ?? selectedLesson.trackSlug} ·{' '}
                 {selectedLessonChapter?.title ?? selectedLesson.chapterSlug}
-              </p>
+              </span>
               <h2 className="vm-lesson-banner-title">{selectedLesson.title}</h2>
-              <p className="vm-lesson-banner-meta">
-                예상 {selectedLesson.estimatedMinutes}분 · 목표 {selectedLesson.objectives.length}개 · 미션{' '}
-                {lessonMissions.length}개
-              </p>
+              <span className="vm-lesson-banner-meta">
+                {selectedLesson.estimatedMinutes}분 · 목표 {selectedLesson.objectives.length} · 미션{' '}
+                {lessonMissions.length}
+              </span>
             </div>
             <div className="vm-lesson-banner-body">
               <div className="vm-lesson-banner-col">
                 {selectedLesson.overview ? (
                   <p>
-                    <strong>레슨 소개:</strong>{' '}
                     {renderTextWithShortcutTooltip(selectedLesson.overview, 'banner-overview')}
                   </p>
                 ) : null}
                 {selectedLesson.goal ? (
-                  <p>
-                    <strong>레슨 목표:</strong>{' '}
+                  <p className="vm-lesson-banner-goal">
+                    <strong>목표:</strong>{' '}
                     {renderTextWithShortcutTooltip(selectedLesson.goal, 'banner-goal')}
                   </p>
                 ) : null}
               </div>
               <div className="vm-lesson-banner-col">
-                <p className="vm-lesson-banner-subhead">학습 목표</p>
-                <ul className="link-list vm-lesson-banner-list">
+                <ul className="vm-lesson-banner-objectives">
                   {selectedLesson.objectives.map((objective, index) => (
                     <li key={`banner-obj-${index}`}>
                       {renderTextWithShortcutTooltip(objective, `banner-obj-${index}`)}
@@ -2222,45 +2222,41 @@ export function PracticeVmPocPage() {
                   ))}
                 </ul>
               </div>
-              <div className="vm-lesson-banner-col">
-                {selectedLesson.successCriteria && selectedLesson.successCriteria.length > 0 ? (
-                  <>
-                    <p className="vm-lesson-banner-subhead">완료 기준</p>
-                    <ul className="link-list vm-lesson-banner-list">
-                      {selectedLesson.successCriteria.map((item, index) => (
-                        <li key={`banner-sc-${index}`}>
-                          {renderTextWithShortcutTooltip(item, `banner-sc-${index}`)}
-                        </li>
-                      ))}
-                    </ul>
-                  </>
-                ) : null}
-                {selectedLesson.failureStates && selectedLesson.failureStates.length > 0 ? (
-                  <>
-                    <p className="vm-lesson-banner-subhead">부족 상태</p>
-                    <ul className="link-list vm-lesson-banner-list">
-                      {selectedLesson.failureStates.map((item, index) => (
-                        <li key={`banner-fs-${index}`}>
-                          {renderTextWithShortcutTooltip(item, `banner-fs-${index}`)}
-                        </li>
-                      ))}
-                    </ul>
-                  </>
-                ) : null}
-                {bannerLessonTerms.length > 0 ? (
-                  <>
-                    <p className="vm-lesson-banner-subhead">관련 용어</p>
-                    <ul className="link-list vm-lesson-banner-list">
-                      {bannerLessonTerms.map((term) => (
-                        <li key={term.id}>
-                          <strong>{term.title}:</strong> {term.description}
-                        </li>
-                      ))}
-                    </ul>
-                  </>
-                ) : null}
-              </div>
             </div>
+            <div className="vm-lesson-banner-footer">
+              {selectedLesson.successCriteria && selectedLesson.successCriteria.length > 0 ? (
+                <span className="vm-lesson-banner-tag">
+                  <strong>완료:</strong>{' '}
+                  {selectedLesson.successCriteria.map((item, index) => (
+                    <span key={`banner-sc-${index}`}>
+                      {index > 0 ? ' · ' : ''}
+                      {renderTextWithShortcutTooltip(item, `banner-sc-${index}`)}
+                    </span>
+                  ))}
+                </span>
+              ) : null}
+              {selectedLesson.failureStates && selectedLesson.failureStates.length > 0 ? (
+                <span className="vm-lesson-banner-tag is-warn">
+                  <strong>부족:</strong>{' '}
+                  {selectedLesson.failureStates.map((item, index) => (
+                    <span key={`banner-fs-${index}`}>
+                      {index > 0 ? ' · ' : ''}
+                      {renderTextWithShortcutTooltip(item, `banner-fs-${index}`)}
+                    </span>
+                  ))}
+                </span>
+              ) : null}
+            </div>
+            {bannerLessonTerms.length > 0 ? (
+              <div className="vm-lesson-banner-terms-row">
+                <span className="vm-lesson-banner-terms-label">용어사전</span>
+                {bannerLessonTerms.map((term) => (
+                  <span key={term.id} className="vm-lesson-banner-term">
+                    <strong>{term.title}</strong> {term.description}
+                  </span>
+                ))}
+              </div>
+            ) : null}
           </section>
         ) : null}
 
@@ -2313,16 +2309,6 @@ export function PracticeVmPocPage() {
                   </ul>
                 </section>
 
-                <div className="inline-actions">
-                  <button
-                    type="button"
-                    className="secondary-btn"
-                    onClick={() => setMobileWorkbenchView('terminal')}
-                  >
-                    터미널로 바로 이동
-                  </button>
-                </div>
-
                 <ul className="link-list">
                   {missionHintPreview.map((hint, index) => (
                     <li key={hint}>{renderHintTextWithTooltips(hint, `hint-preview-${index}`)}</li>
@@ -2353,87 +2339,41 @@ export function PracticeVmPocPage() {
               </article>
             ) : null}
 
-            <section className="vm-next-action-card">
-              <p className="vm-next-action-eyebrow">Next Action</p>
-              <h2>지금 할 일</h2>
-              {!selectedMission ? (
-                <p className="muted">미션을 선택하면 바로 실행할 다음 행동을 안내합니다.</p>
-              ) : null}
-              {selectedMission && selectedMissionStatus?.status === 'complete' && !selectedMissionCompleted ? (
-                <p className="muted">완료 판정 반영 중입니다. 잠시 후 자동으로 완료 처리됩니다.</p>
-              ) : null}
-              {selectedMission && selectedMissionCompleted && nextIncompleteMission ? (
-                <>
-                  <p>
-                    <strong>{selectedMission.title}</strong> 완료됨. 다음 미션으로 이동해 이어서 진행하세요.
-                  </p>
-                  <button
-                    type="button"
-                    className="primary-btn vm-next-action-btn"
-                    onClick={() => selectMissionForAction(nextIncompleteMission.slug)}
-                  >
-                    다음 미션으로 이동
-                  </button>
-                  <p className="muted">다음: {nextIncompleteMission.title}</p>
-                </>
-              ) : null}
-              {selectedMission && selectedMissionCompleted && !nextIncompleteMission && lessonCompleted && nextLesson ? (
-                <>
-                  <p>
-                    <strong>현재 레슨 완료.</strong> 다음 레슨으로 넘어가 학습 흐름을 이어가세요.
-                  </p>
-                  <button type="button" className="primary-btn vm-next-action-btn" onClick={selectNextLessonForAction}>
-                    다음 레슨 시작
-                  </button>
-                  <p className="muted">다음: {nextLesson.title}</p>
-                </>
-              ) : null}
-              {selectedMission && selectedMissionCompleted && !nextIncompleteMission && lessonCompleted && !nextLesson ? (
-                <>
-                  <p>
-                    <strong>전체 레슨을 완료했습니다.</strong> 진행 현황에서 업적과 누적 XP를 확인하세요.
-                  </p>
-                  <Link className="primary-btn vm-next-action-btn" to="/progress">
-                    진행 현황 보기
-                  </Link>
-                </>
-              ) : null}
-              {selectedMission && !selectedMissionCompleted && selectedMissionStatus?.status === 'manual' ? (
-                <>
-                  <p>
-                    <strong>{selectedMission.title}</strong>는 자동 판정이 어려워 수동 완료가 필요합니다.
-                  </p>
-                  <button type="button" className="primary-btn vm-next-action-btn" onClick={handleManualMissionComplete}>
-                    수동 완료 처리
-                  </button>
-                </>
-              ) : null}
-              {selectedMission &&
-              !selectedMissionCompleted &&
-              selectedMissionStatus?.status !== 'manual' &&
-              selectedMissionStatus?.status !== 'complete' ? (
-                <>
-                  <p>
-                    <strong>{selectedMission.title}</strong> 미션 수행 중입니다. 터미널에서 힌트를 실행하고 완료 판정을 받으세요.
-                  </p>
-                  <button
-                    type="button"
-                    className="primary-btn vm-next-action-btn"
-                    onClick={() => setMobileWorkbenchView('terminal')}
-                  >
-                    터미널로 이동
-                  </button>
-                </>
-              ) : null}
+            <section className="vm-mission-list-card">
+              <div className="vm-mission-list-header">
+                <h2>미션 {lessonCompletedMissionCount}/{lessonMissions.length}</h2>
+                <span className="vm-mission-list-action">
+                  {selectedMission && selectedMissionCompleted && nextIncompleteMission ? (
+                    <button
+                      type="button"
+                      className="primary-btn vm-next-action-btn"
+                      onClick={() => selectMissionForAction(nextIncompleteMission.slug)}
+                    >
+                      다음 미션
+                    </button>
+                  ) : null}
+                  {selectedMission && selectedMissionCompleted && !nextIncompleteMission && lessonCompleted && nextLesson ? (
+                    <button type="button" className="primary-btn vm-next-action-btn" onClick={selectNextLessonForAction}>
+                      다음 레슨
+                    </button>
+                  ) : null}
+                  {selectedMission && selectedMissionCompleted && !nextIncompleteMission && lessonCompleted && !nextLesson ? (
+                    <Link className="primary-btn vm-next-action-btn" to="/progress">
+                      완료 현황
+                    </Link>
+                  ) : null}
+                  {selectedMission && !selectedMissionCompleted && selectedMissionStatus?.status === 'manual' ? (
+                    <button type="button" className="secondary-btn vm-next-action-btn" onClick={handleManualMissionComplete}>
+                      수동 완료
+                    </button>
+                  ) : null}
+                </span>
+              </div>
               {selectedMissionStatus ? (
-                <p className="vm-next-action-meta">
-                  현재 판정: {selectedMissionStatus.status} · {selectedMissionStatus.reason}
+                <p className="vm-mission-list-status">
+                  판정: {selectedMissionStatus.status} · {selectedMissionStatus.reason}
                 </p>
               ) : null}
-            </section>
-
-            <section className="vm-mission-list-card">
-              <h2>미션 목록</h2>
               <div className="vm-mission-list">
                 {lessonMissions.map((mission, index) => {
                   const missionStatus = missionStatusMap.get(mission.slug);
@@ -2474,29 +2414,7 @@ export function PracticeVmPocPage() {
               </div>
             </section>
 
-            {selectedMissionSession ? (
-              <details className="vm-sidebar-fold">
-                <summary>세션 상태</summary>
-                <section className="vm-session-card">
-                  <p>
-                    <strong>
-                      {selectedMissionSession.status === 'completed' ? '완료됨' : '진행 중'}
-                    </strong>
-                  </p>
-                  <p className="muted">시작: {formatSessionDateTime(selectedMissionSession.startedAt)}</p>
-                  {selectedMissionSession.completedAt ? (
-                    <p className="muted">완료: {formatSessionDateTime(selectedMissionSession.completedAt)}</p>
-                  ) : null}
-                  {selectedMissionSession.gainedXp !== null ? (
-                    <p className="muted">획득 XP: +{selectedMissionSession.gainedXp}</p>
-                  ) : null}
-                </section>
-              </details>
-            ) : null}
-
-            <details className="vm-sidebar-fold">
-              <summary>레슨 목록 · 커리큘럼</summary>
-              <section className="vm-curriculum-panel vm-curriculum-row-layout">
+            <section className="vm-curriculum-panel vm-curriculum-row-layout">
               <div className="inline-actions">
                 <button
                   type="button"
@@ -2565,7 +2483,6 @@ export function PracticeVmPocPage() {
                 <span>{vmStatusText}</span>
               </div>
             </section>
-            </details>
           </aside>
 
           <section className="vm-lab-panel">
