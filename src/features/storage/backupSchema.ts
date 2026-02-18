@@ -29,7 +29,7 @@ const missionAttemptSchema = z.object({
 
 const bookmarkSchema = z.object({
   id: z.string(),
-  type: z.enum(['lesson', 'mission', 'cheatsheet_item', 'action_pattern', 'playbook']),
+  type: z.enum(['lesson', 'mission', 'cheatsheet_item', 'action_pattern', 'playbook', 'snapshot']),
   targetId: z.string(),
   title: z.string(),
   tags: z.array(z.string()),

@@ -31,7 +31,7 @@ export type MissionAttemptRecord = {
 
 export type BookmarkRecord = {
   id: string;
-  type: 'lesson' | 'mission' | 'cheatsheet_item' | 'action_pattern' | 'playbook';
+  type: 'lesson' | 'mission' | 'cheatsheet_item' | 'action_pattern' | 'playbook' | 'snapshot';
   targetId: string;
   title: string;
   tags: string[];

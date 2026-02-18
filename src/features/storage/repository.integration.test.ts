@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { resetDbForTests } from './db';
 import {
+  getSnapshot,
   getLatestSnapshot,
   getProgress,
   listProgress,
@@ -54,5 +55,7 @@ describe('storage repository integration', () => {
 
     const latest = await getLatestSnapshot();
     expect(latest?.id).toBe('snapshot-2');
+    const byId = await getSnapshot('snapshot-1');
+    expect(byId?.id).toBe('snapshot-1');
   });
 });

@@ -1,12 +1,26 @@
 import { PagePlaceholder } from '../../components/system/PagePlaceholder';
 import { EmptyState } from '../../components/system/EmptyState';
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useBookmarkStore } from '../../features/bookmarks/bookmarkStore';
+import type { BookmarkRecord } from '../../features/storage/types';
+
+function buildBookmarkPracticeLink(bookmark: BookmarkRecord) {
+  if (bookmark.type === 'snapshot') {
+    return `/practice?snapshot=${encodeURIComponent(bookmark.targetId)}`;
+  }
+
+  if (bookmark.type === 'cheatsheet_item' || bookmark.type === 'action_pattern') {
+    return `/practice?from=${encodeURIComponent(bookmark.targetId)}`;
+  }
+
+  return null;
+}
 
 export function BookmarksPage() {
   const [title, setTitle] = useState('');
   const [targetId, setTargetId] = useState('');
-  const [type, setType] = useState<'lesson' | 'mission' | 'cheatsheet_item' | 'action_pattern' | 'playbook'>(
+  const [type, setType] = useState<'lesson' | 'mission' | 'cheatsheet_item' | 'action_pattern' | 'playbook' | 'snapshot'>(
     'lesson',
   );
   const [tagsInput, setTagsInput] = useState('');
@@ -87,6 +101,7 @@ export function BookmarksPage() {
           <option value="cheatsheet_item">cheatsheet_item</option>
           <option value="action_pattern">action_pattern</option>
           <option value="playbook">playbook</option>
+          <option value="snapshot">snapshot</option>
         </select>
         <input
           className="sim-input"
@@ -133,6 +148,11 @@ export function BookmarksPage() {
               <div className="muted">
                 target: {bookmark.targetId} / tags: {bookmark.tags.join(', ') || '(none)'}
               </div>
+              {buildBookmarkPracticeLink(bookmark) ? (
+                <Link to={buildBookmarkPracticeLink(bookmark) ?? '/practice'} className="secondary-btn">
+                  실습 열기
+                </Link>
+              ) : null}
               <textarea
                 className="bookmark-note"
                 value={notesByBookmarkId[bookmark.id] ?? ''}

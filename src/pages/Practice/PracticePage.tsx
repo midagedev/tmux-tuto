@@ -25,6 +25,7 @@ export function PracticePage() {
   const focusPaneById = useSimulatorStore((store) => store.focusPaneById);
   const scrollPane = useSimulatorStore((store) => store.scrollPane);
   const saveSnapshotToStorage = useSimulatorStore((store) => store.saveSnapshotToStorage);
+  const restoreSnapshotByIdFromStorage = useSimulatorStore((store) => store.restoreSnapshotByIdFromStorage);
   const restoreLatestSnapshotFromStorage = useSimulatorStore(
     (store) => store.restoreLatestSnapshotFromStorage,
   );
@@ -44,6 +45,7 @@ export function PracticePage() {
       ? simulatorState.mode.copyMode.matchLineIndices[simulatorState.mode.copyMode.activeMatchIndex]
       : -1;
   const presetId = searchParams.get('from');
+  const snapshotId = searchParams.get('snapshot');
   const mouseEnabled = simulatorState.tmux.config.mouse;
   const commandBuffer = simulatorState.mode.commandBuffer;
   const commandCursor = simulatorState.mode.commandCursor;
@@ -52,6 +54,15 @@ export function PracticePage() {
   const liveAnnouncement = `Mode ${simulatorState.mode.value}. Active pane ${activePane.id}. Panes ${activeWindow.panes.length}.`;
 
   useEffect(() => {
+    if (snapshotId) {
+      void restoreSnapshotByIdFromStorage(snapshotId).then(() => {
+        const nextParams = new URLSearchParams(searchParams);
+        nextParams.delete('snapshot');
+        setSearchParams(nextParams, { replace: true });
+      });
+      return;
+    }
+
     if (!presetId) {
       return;
     }
@@ -60,7 +71,7 @@ export function PracticePage() {
     const nextParams = new URLSearchParams(searchParams);
     nextParams.delete('from');
     setSearchParams(nextParams, { replace: true });
-  }, [applyQuickPreset, presetId, searchParams, setSearchParams]);
+  }, [applyQuickPreset, presetId, restoreSnapshotByIdFromStorage, searchParams, setSearchParams, snapshotId]);
 
   useEffect(() => {
     const previousMode = previousModeRef.current;

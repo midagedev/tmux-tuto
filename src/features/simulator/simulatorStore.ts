@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { createInitialSimulatorState, type SimulatorMode, type SimulatorState } from './model';
 import { simulatorReducer, type FocusDirection, type SimulatorAction, type SplitDirection } from './reducer';
 import { resolveSimulatorInput } from './input';
-import { getLatestSnapshot, saveSnapshot as saveSnapshotRecord } from '../storage/repository';
+import { getLatestSnapshot, getSnapshot, saveSnapshot as saveSnapshotRecord } from '../storage/repository';
 import type { AppMission } from '../curriculum/contentSchema';
 import { createMissionScenarioState } from './scenarioEngine';
 import { resolveQuickPreset } from './quickPresets';
@@ -116,6 +116,7 @@ type SimulatorStore = {
   runCopySearch: (query: string) => void;
   loadSnapshot: (snapshot: SimulatorState) => void;
   saveSnapshotToStorage: () => Promise<void>;
+  restoreSnapshotByIdFromStorage: (snapshotId: string) => Promise<void>;
   restoreLatestSnapshotFromStorage: () => Promise<void>;
   reset: () => void;
 };
@@ -240,6 +241,46 @@ export const useSimulatorStore = create<SimulatorStore>((set) => ({
       state: simulatorReducer(current.state, {
         type: 'ADD_MESSAGE',
         payload: `Snapshot saved (${id})`,
+      }),
+    }));
+  },
+  restoreSnapshotByIdFromStorage: async (snapshotId) => {
+    const snapshot = await getSnapshot(snapshotId);
+    if (!snapshot) {
+      set((current) => ({
+        state: simulatorReducer(current.state, {
+          type: 'ADD_MESSAGE',
+          payload: `Snapshot not found (${snapshotId})`,
+        }),
+      }));
+      return;
+    }
+
+    if (snapshot.schemaVersion !== 2) {
+      set((current) => ({
+        state: simulatorReducer(current.state, {
+          type: 'ADD_MESSAGE',
+          payload: `Unsupported snapshot schema version (${snapshot.schemaVersion})`,
+        }),
+      }));
+      return;
+    }
+
+    const simulatorSnapshot = snapshot.sessionGraph.simulatorState;
+    if (!isSimulatorStateV2(simulatorSnapshot)) {
+      set((current) => ({
+        state: simulatorReducer(current.state, {
+          type: 'ADD_MESSAGE',
+          payload: `Snapshot ${snapshot.id} is not simulator schema v2`,
+        }),
+      }));
+      return;
+    }
+
+    set((current) => ({
+      state: simulatorReducer(current.state, {
+        type: 'LOAD_SNAPSHOT',
+        payload: simulatorSnapshot,
       }),
     }));
   },

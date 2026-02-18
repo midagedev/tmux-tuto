@@ -164,7 +164,7 @@
   - 검증: e2e(검색 -> 실습)
   - DoD: 핵심 항목이 즉시 실습 전환됨
 
-- [ ] `HF-045` bookmark snapshot deep-link
+- [x] `HF-045` bookmark snapshot deep-link
   - 산출물: 북마크에서 특정 스냅샷 재진입 지원
   - 의존: `HF-002`, `HF-050`
   - 검증: integration/e2e

@@ -41,6 +41,50 @@ test('bookmark persists after page reload @smoke', async ({ page }) => {
   await expect(page.getByText('e2e bookmark')).toBeVisible();
 });
 
+test('bookmark snapshot deep-link restores simulator state @smoke', async ({ page }) => {
+  await page.goto('/practice');
+  await dismissAnalyticsBanner(page);
+
+  await page.getByRole('button', { name: 'Split Vertical' }).click();
+  await page.getByRole('button', { name: 'Save Snapshot' }).click();
+
+  const snapshotId = await page.evaluate(async () => {
+    const openRequest = indexedDB.open('tmux_tuto');
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      openRequest.onsuccess = () => resolve(openRequest.result);
+      openRequest.onerror = () => reject(openRequest.error);
+    });
+
+    const tx = db.transaction('simulator_snapshots', 'readonly');
+    const store = tx.objectStore('simulator_snapshots');
+    const allRequest = store.getAll();
+    const snapshots = await new Promise<Array<{ id: string; savedAt: string }>>((resolve, reject) => {
+      allRequest.onsuccess = () => resolve(allRequest.result as Array<{ id: string; savedAt: string }>);
+      allRequest.onerror = () => reject(allRequest.error);
+    });
+    db.close();
+
+    snapshots.sort((a, b) => b.savedAt.localeCompare(a.savedAt));
+    return snapshots[0]?.id ?? null;
+  });
+
+  expect(snapshotId).toBeTruthy();
+
+  await page.goto('/bookmarks');
+  await page.getByLabel('Bookmark title').fill('e2e snapshot bookmark');
+  await page.getByLabel('Bookmark target id').fill(snapshotId ?? '');
+  await page.selectOption('select.sim-input', 'snapshot');
+  await page.getByLabel('Bookmark tags').fill('snapshot,e2e');
+  await page.getByRole('button', { name: '북마크 저장' }).click();
+
+  const snapshotRow = page.locator('li').filter({ hasText: 'e2e snapshot bookmark' }).first();
+  await snapshotRow.getByRole('link', { name: '실습 열기' }).click();
+
+  await expect(page).toHaveURL('/practice');
+  const panesSummary = page.locator('.sim-summary p').filter({ hasText: 'Panes:' });
+  await expect(panesSummary).toContainText('2');
+});
+
 test('milestone share page can be opened from progress @smoke', async ({ page }) => {
   await page.goto('/progress');
   await dismissAnalyticsBanner(page);
