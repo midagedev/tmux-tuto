@@ -1350,6 +1350,99 @@ a {
   color: #334155;
 }
 
+.vm-lesson-banner {
+  border: 1px solid #dbe2ea;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f8fbff 0%, #f0f9ff 100%);
+  padding: 14px 16px;
+  display: grid;
+  gap: 8px;
+}
+
+.vm-lesson-banner-header {
+  display: grid;
+  gap: 2px;
+}
+
+.vm-lesson-banner-path {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.vm-lesson-banner-title {
+  margin: 0;
+  font-size: 1.08rem;
+}
+
+.vm-lesson-banner-meta {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.vm-lesson-banner-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
+}
+
+.vm-lesson-banner-body p {
+  margin: 0 0 6px;
+  line-height: 1.5;
+  font-size: 0.88rem;
+}
+
+.vm-lesson-banner-col {
+  min-width: 0;
+}
+
+.vm-lesson-banner-subhead {
+  margin: 0 0 4px;
+  font-weight: 700;
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+}
+
+.vm-lesson-banner-list {
+  font-size: 0.85rem;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.vm-lesson-banner-list li {
+  margin-bottom: 3px;
+  line-height: 1.4;
+}
+
+.vm-sidebar-fold {
+  border: 1px solid #dbe2ea;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 8px 12px;
+}
+
+.vm-sidebar-fold summary {
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+
+.vm-sidebar-fold[open] summary {
+  margin-bottom: 8px;
+}
+
+.vm-sidebar-fold .vm-session-card {
+  border: none;
+  padding: 0;
+}
+
+.vm-sidebar-fold .vm-curriculum-panel {
+  border: none;
+  padding: 0;
+}
+
 .vm-lesson-card {
   border: 1px solid #dbe2ea;
   border-radius: 10px;
@@ -2160,6 +2253,11 @@ a {
 }
 
 @media (max-width: 960px) {
+  .vm-lesson-banner-body {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
   .vm-mobile-switch {
     display: flex;
   }

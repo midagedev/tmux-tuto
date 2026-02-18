@@ -7,6 +7,8 @@ import type { V86Options } from 'v86';
 import { PagePlaceholder } from '../../components/system/PagePlaceholder';
 import { loadAppContent } from '../../features/curriculum/contentLoader';
 import type { AppContent, AppMission } from '../../features/curriculum/contentSchema';
+import { resolveLessonTerms } from '../../features/curriculum/lessonTerms';
+import { renderTextWithShortcutTooltip } from '../../features/curriculum/shortcutTooltip';
 import {
   advanceCompletionFeedback,
   enqueueCompletionFeedback,
@@ -2010,22 +2012,17 @@ export function PracticeVmPocPage() {
     completeSelectedMission('manual');
   }, [completeSelectedMission, completedMissionSlugs, selectedMission]);
 
-  const lessonObjectivePreview = selectedLesson?.objectives.slice(0, 3) ?? [];
-  const hiddenObjectiveCount = selectedLesson
-    ? Math.max(selectedLesson.objectives.length - lessonObjectivePreview.length, 0)
-    : 0;
-  const lessonSuccessCriteriaPreview = selectedLesson?.successCriteria?.slice(0, 1) ?? [];
-  const hiddenSuccessCriteriaCount = selectedLesson
-    ? Math.max((selectedLesson.successCriteria?.length ?? 0) - lessonSuccessCriteriaPreview.length, 0)
-    : 0;
-  const lessonFailureStatePreview = selectedLesson?.failureStates?.slice(0, 1) ?? [];
-  const hiddenFailureStateCount = selectedLesson
-    ? Math.max((selectedLesson.failureStates?.length ?? 0) - lessonFailureStatePreview.length, 0)
-    : 0;
   const missionHintPreview = selectedMission?.hints.slice(0, 2) ?? [];
   const hiddenMissionHintCount = selectedMission
     ? Math.max(selectedMission.hints.length - missionHintPreview.length, 0)
     : 0;
+  const bannerLessonTerms = useMemo(() => {
+    if (!selectedLesson) {
+      return [];
+    }
+    return resolveLessonTerms(selectedLesson, lessonMissions, content?.termGlossary ?? null);
+  }, [selectedLesson, lessonMissions, content]);
+
   const selectedMissionCommands = useMemo(() => buildMissionCommandSuggestions(selectedMission), [selectedMission]);
   const selectedMissionPreconditions = useMemo(
     () => buildMissionPreconditionItems(selectedMission, vmSnapshot),
@@ -2186,6 +2183,86 @@ export function PracticeVmPocPage() {
             터미널
           </button>
         </div>
+
+        {selectedLesson ? (
+          <section className="vm-lesson-banner">
+            <div className="vm-lesson-banner-header">
+              <p className="vm-lesson-banner-path">
+                {selectedLessonTrack?.title ?? selectedLesson.trackSlug} ·{' '}
+                {selectedLessonChapter?.title ?? selectedLesson.chapterSlug}
+              </p>
+              <h2 className="vm-lesson-banner-title">{selectedLesson.title}</h2>
+              <p className="vm-lesson-banner-meta">
+                예상 {selectedLesson.estimatedMinutes}분 · 목표 {selectedLesson.objectives.length}개 · 미션{' '}
+                {lessonMissions.length}개
+              </p>
+            </div>
+            <div className="vm-lesson-banner-body">
+              <div className="vm-lesson-banner-col">
+                {selectedLesson.overview ? (
+                  <p>
+                    <strong>레슨 소개:</strong>{' '}
+                    {renderTextWithShortcutTooltip(selectedLesson.overview, 'banner-overview')}
+                  </p>
+                ) : null}
+                {selectedLesson.goal ? (
+                  <p>
+                    <strong>레슨 목표:</strong>{' '}
+                    {renderTextWithShortcutTooltip(selectedLesson.goal, 'banner-goal')}
+                  </p>
+                ) : null}
+              </div>
+              <div className="vm-lesson-banner-col">
+                <p className="vm-lesson-banner-subhead">학습 목표</p>
+                <ul className="link-list vm-lesson-banner-list">
+                  {selectedLesson.objectives.map((objective, index) => (
+                    <li key={`banner-obj-${index}`}>
+                      {renderTextWithShortcutTooltip(objective, `banner-obj-${index}`)}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="vm-lesson-banner-col">
+                {selectedLesson.successCriteria && selectedLesson.successCriteria.length > 0 ? (
+                  <>
+                    <p className="vm-lesson-banner-subhead">완료 기준</p>
+                    <ul className="link-list vm-lesson-banner-list">
+                      {selectedLesson.successCriteria.map((item, index) => (
+                        <li key={`banner-sc-${index}`}>
+                          {renderTextWithShortcutTooltip(item, `banner-sc-${index}`)}
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                ) : null}
+                {selectedLesson.failureStates && selectedLesson.failureStates.length > 0 ? (
+                  <>
+                    <p className="vm-lesson-banner-subhead">부족 상태</p>
+                    <ul className="link-list vm-lesson-banner-list">
+                      {selectedLesson.failureStates.map((item, index) => (
+                        <li key={`banner-fs-${index}`}>
+                          {renderTextWithShortcutTooltip(item, `banner-fs-${index}`)}
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                ) : null}
+                {bannerLessonTerms.length > 0 ? (
+                  <>
+                    <p className="vm-lesson-banner-subhead">관련 용어</p>
+                    <ul className="link-list vm-lesson-banner-list">
+                      {bannerLessonTerms.map((term) => (
+                        <li key={term.id}>
+                          <strong>{term.title}:</strong> {term.description}
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                ) : null}
+              </div>
+            </div>
+          </section>
+        ) : null}
 
         <section className={`vm-workbench vm-workbench-view-${mobileWorkbenchView}`}>
           <aside className="vm-study-panel">
@@ -2398,68 +2475,28 @@ export function PracticeVmPocPage() {
             </section>
 
             {selectedMissionSession ? (
-              <section className="vm-session-card">
-                <p className="vm-session-card-eyebrow">현재 세션 상태</p>
-                <p>
-                  <strong>
-                    {selectedMissionSession.status === 'completed' ? '완료됨' : '진행 중'}
-                  </strong>
-                </p>
-                <p className="muted">시작: {formatSessionDateTime(selectedMissionSession.startedAt)}</p>
-                {selectedMissionSession.completedAt ? (
-                  <p className="muted">완료: {formatSessionDateTime(selectedMissionSession.completedAt)}</p>
-                ) : null}
-                {selectedMissionSession.gainedXp !== null ? (
-                  <p className="muted">획득 XP: +{selectedMissionSession.gainedXp}</p>
-                ) : null}
-              </section>
-            ) : null}
-
-            {selectedLesson ? (
-              <section className="vm-lesson-card">
-                <p className="vm-lesson-card-path">
-                  {selectedLessonTrack?.title ?? selectedLesson.trackSlug} ·{' '}
-                  {selectedLessonChapter?.title ?? selectedLesson.chapterSlug}
-                </p>
-                <h2>{selectedLesson.title}</h2>
-                <p className="muted">
-                  예상 {selectedLesson.estimatedMinutes}분 · 목표 {selectedLesson.objectives.length}개
-                </p>
-                {selectedLesson.goal ? (
+              <details className="vm-sidebar-fold">
+                <summary>세션 상태</summary>
+                <section className="vm-session-card">
                   <p>
-                    <strong>레슨 목표:</strong> {selectedLesson.goal}
+                    <strong>
+                      {selectedMissionSession.status === 'completed' ? '완료됨' : '진행 중'}
+                    </strong>
                   </p>
-                ) : null}
-                {lessonSuccessCriteriaPreview.length > 0 ? (
-                  <p className="muted">
-                    <strong>완료 기준:</strong> {lessonSuccessCriteriaPreview[0]}
-                    {hiddenSuccessCriteriaCount > 0 ? ` (+${hiddenSuccessCriteriaCount}개)` : ''}
-                  </p>
-                ) : null}
-                {lessonFailureStatePreview.length > 0 ? (
-                  <p className="muted">
-                    <strong>부족 상태:</strong> {lessonFailureStatePreview[0]}
-                    {hiddenFailureStateCount > 0 ? ` (+${hiddenFailureStateCount}개)` : ''}
-                  </p>
-                ) : null}
-                <ul className="link-list">
-                  {lessonObjectivePreview.map((objective) => (
-                    <li key={objective}>{objective}</li>
-                  ))}
-                  {hiddenObjectiveCount > 0 ? <li className="muted">+ {hiddenObjectiveCount}개 목표 더 있음</li> : null}
-                </ul>
-                <div className="inline-actions">
-                  <Link
-                    className="secondary-btn"
-                    to={`/learn/${selectedLesson.trackSlug}/${selectedLesson.chapterSlug}/${selectedLesson.slug}`}
-                  >
-                    레슨 상세 보기
-                  </Link>
-                </div>
-              </section>
+                  <p className="muted">시작: {formatSessionDateTime(selectedMissionSession.startedAt)}</p>
+                  {selectedMissionSession.completedAt ? (
+                    <p className="muted">완료: {formatSessionDateTime(selectedMissionSession.completedAt)}</p>
+                  ) : null}
+                  {selectedMissionSession.gainedXp !== null ? (
+                    <p className="muted">획득 XP: +{selectedMissionSession.gainedXp}</p>
+                  ) : null}
+                </section>
+              </details>
             ) : null}
 
-            <section className="vm-curriculum-panel vm-curriculum-row-layout">
+            <details className="vm-sidebar-fold">
+              <summary>레슨 목록 · 커리큘럼</summary>
+              <section className="vm-curriculum-panel vm-curriculum-row-layout">
               <div className="inline-actions">
                 <button
                   type="button"
@@ -2528,6 +2565,7 @@ export function PracticeVmPocPage() {
                 <span>{vmStatusText}</span>
               </div>
             </section>
+            </details>
           </aside>
 
           <section className="vm-lab-panel">
