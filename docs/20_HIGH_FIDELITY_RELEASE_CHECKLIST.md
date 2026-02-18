@@ -25,6 +25,12 @@
 - [x] `pnpm benchmark:simulator`
 - [x] `pnpm build`
 
+### 2.1 Issue #14 게이트 재검증 (2026-02-18)
+- [x] `npm run test`
+- [x] `npm run test:e2e:smoke`
+- [x] `npm run verify:coverage-matrix`
+- [x] 결과 문서 갱신: `/Users/hckim/repo/tmux-tuto/docs/FINAL_GATE_REPORT.md`
+
 ## 3. 수동 점검 체크
 - [x] Practice 주요 조작 흐름 (split/focus/resize/copy/config apply)
 - [x] Cheatsheet/Bookmarks/Recovery 재진입 흐름
