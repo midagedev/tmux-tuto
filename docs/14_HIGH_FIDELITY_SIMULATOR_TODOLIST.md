@@ -140,7 +140,7 @@
   - 검증: integration test(init scenario)
   - DoD: 미션마다 재현 가능한 시작 상태 제공
 
-- [ ] `HF-041` 미션 채점 어댑터 v2
+- [x] `HF-041` 미션 채점 어댑터 v2
   - 산출물: mission evaluator가 shell+tmux 상태 읽도록 확장
   - 의존: `HF-040`, `HF-024`
   - 검증: rule engine test 업데이트

@@ -1,5 +1,5 @@
 import type { AppMission } from '../curriculum/contentSchema';
-import { getActiveWindow, type SimulatorState } from '../simulator/model';
+import { getActiveShellSession, getActiveWindow, type SimulatorState } from '../simulator/model';
 
 type RuleResult = {
   passed: boolean;
@@ -35,6 +35,24 @@ function evaluateOperator(actual: unknown, operator: string, expected: unknown):
         expected,
         actual,
       };
+    case 'contains':
+      if (typeof actual === 'string' && typeof expected === 'string') {
+        return {
+          passed: actual.includes(expected),
+          expected,
+          actual,
+        };
+      }
+
+      if (Array.isArray(actual)) {
+        return {
+          passed: actual.some((value) => value === expected),
+          expected,
+          actual,
+        };
+      }
+
+      return { passed: false, expected, actual };
     default:
       return { passed: false, expected, actual };
   }
@@ -42,6 +60,7 @@ function evaluateOperator(actual: unknown, operator: string, expected: unknown):
 
 function getMetricFromState(state: SimulatorState, kind: string): unknown {
   const activeWindow = getActiveWindow(state);
+  const activeShellSession = getActiveShellSession(state);
 
   switch (kind) {
     case 'paneCount':
@@ -56,8 +75,14 @@ function getMetricFromState(state: SimulatorState, kind: string): unknown {
       return state.mode.value;
     case 'searchExecuted':
       return state.mode.copyMode.searchExecuted;
+    case 'searchMatchFound':
+      return state.mode.copyMode.lastMatchFound;
     case 'activePaneId':
       return activeWindow.activePaneId;
+    case 'actionHistoryText':
+      return state.actionHistory.join(' ');
+    case 'shellHistoryText':
+      return activeShellSession.history.join(' ');
     default:
       return undefined;
   }

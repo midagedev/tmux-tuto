@@ -137,7 +137,8 @@
       "difficulty": "beginner",
       "initialScenario": "single-pane",
       "passRules": [
-        { "kind": "sessionCount", "operator": ">=", "value": 1 }
+        { "kind": "sessionCount", "operator": ">=", "value": 1 },
+        { "kind": "actionHistoryText", "operator": "contains", "value": "sim.session.new" }
       ],
       "hints": ["tmux new -As main 형태를 떠올려 보세요.", "세션 이름을 main으로 두면 재접속이 쉽습니다."]
     },
@@ -150,7 +151,8 @@
       "difficulty": "beginner",
       "initialScenario": "single-pane",
       "passRules": [
-        { "kind": "windowCount", "operator": ">=", "value": 2 }
+        { "kind": "windowCount", "operator": ">=", "value": 2 },
+        { "kind": "actionHistoryText", "operator": "contains", "value": "sim.window.new" }
       ],
       "hints": ["prefix 후 c 키로 새 window를 생성하세요.", "next/prev window 이동도 같이 확인합니다."]
     },
@@ -163,7 +165,8 @@
       "difficulty": "daily",
       "initialScenario": "single-pane",
       "passRules": [
-        { "kind": "sessionCount", "operator": ">=", "value": 2 }
+        { "kind": "sessionCount", "operator": ">=", "value": 2 },
+        { "kind": "actionHistoryText", "operator": "contains", "value": "sim.session.new" }
       ],
       "hints": ["prefix 후 s 또는 command mode에서 new-session을 사용하세요.", "작업 목적별 세션 이름을 정하면 유지가 쉽습니다."]
     },
@@ -176,7 +179,8 @@
       "difficulty": "daily",
       "initialScenario": "single-pane",
       "passRules": [
-        { "kind": "paneCount", "operator": ">=", "value": 2 }
+        { "kind": "paneCount", "operator": ">=", "value": 2 },
+        { "kind": "actionHistoryText", "operator": "contains", "value": "sim.pane.split" }
       ],
       "hints": ["prefix 후 분할 키를 확인하세요.", "분할 후 활성 pane 이동도 같이 확인해 보세요."]
     },
@@ -189,7 +193,8 @@
       "difficulty": "daily",
       "initialScenario": "single-pane",
       "passRules": [
-        { "kind": "paneCount", "operator": ">=", "value": 3 }
+        { "kind": "paneCount", "operator": ">=", "value": 3 },
+        { "kind": "actionHistoryText", "operator": "contains", "value": "sim.pane.split" }
       ],
       "hints": ["세로/가로 분할을 섞어 grid 형태를 만들어 보세요.", "활성 pane 위치를 바꿔가며 분할하면 쉽습니다."]
     },
@@ -203,7 +208,8 @@
       "initialScenario": "single-pane",
       "passRules": [
         { "kind": "windowCount", "operator": ">=", "value": 2 },
-        { "kind": "paneCount", "operator": ">=", "value": 1 }
+        { "kind": "paneCount", "operator": ">=", "value": 1 },
+        { "kind": "actionHistoryText", "operator": "contains", "value": "sim.window.next" }
       ],
       "hints": ["새 window를 만든 뒤 next/prev 이동을 연습하세요.", "window 이름을 지정하면 구분이 쉬워집니다."]
     },
@@ -217,7 +223,8 @@
       "initialScenario": "log-buffer",
       "passRules": [
         { "kind": "modeIs", "operator": "equals", "value": "COPY_MODE" },
-        { "kind": "searchExecuted", "operator": "equals", "value": true }
+        { "kind": "searchExecuted", "operator": "equals", "value": true },
+        { "kind": "searchMatchFound", "operator": "equals", "value": true }
       ],
       "hints": ["copy-mode 진입 단축키를 사용하세요.", "검색 후 다음 결과 이동도 확인합니다."]
     },
@@ -231,7 +238,8 @@
       "initialScenario": "log-buffer",
       "passRules": [
         { "kind": "modeIs", "operator": "equals", "value": "COPY_MODE" },
-        { "kind": "searchExecuted", "operator": "equals", "value": true }
+        { "kind": "searchExecuted", "operator": "equals", "value": true },
+        { "kind": "searchMatchFound", "operator": "equals", "value": false }
       ],
       "hints": ["검색어를 바꿔가며 성공/실패를 모두 확인하세요.", "검색 결과가 없어도 상태가 기록되는지 봅니다."]
     },
@@ -244,7 +252,8 @@
       "difficulty": "scenario",
       "initialScenario": "single-pane",
       "passRules": [
-        { "kind": "windowCount", "operator": ">=", "value": 2 }
+        { "kind": "windowCount", "operator": ">=", "value": 2 },
+        { "kind": "shellHistoryText", "operator": "contains", "value": "new-window" }
       ],
       "hints": [": 모드에서 new-window 명령을 사용하세요.", "명령 입력 후 Enter로 실행됩니다."]
     }
