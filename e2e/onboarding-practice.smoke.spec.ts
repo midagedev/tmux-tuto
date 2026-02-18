@@ -176,3 +176,71 @@ test('practice tmux config apply flow works @smoke', async ({ page }) => {
   const panesSummary = page.locator('.sim-summary p').filter({ hasText: 'Panes:' });
   await expect(panesSummary).toContainText('2');
 });
+
+test('learn curriculum can start lesson and open practice scenario @smoke', async ({ page }) => {
+  await page.goto('/learn');
+  await dismissAnalyticsBanner(page);
+
+  await page.getByRole('link', { name: '트랙 시작' }).first().click();
+  await expect(page).toHaveURL('/learn/track-a-foundations/session-window-pane/basics');
+  await expect(page.getByRole('heading', { name: '학습 목표' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /미션 목록/ })).toBeVisible();
+
+  await page.getByRole('link', { name: '시뮬레이터에서 레슨 시작' }).click();
+  await expect(page).toHaveURL(/\/practice/);
+  await expect(page.locator('.sim-log')).toContainText('sim.scenario.mission.session-create');
+});
+
+test('practice mobile layout stays within viewport @smoke', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/practice');
+  await dismissAnalyticsBanner(page);
+  await page.getByRole('button', { name: 'Reset Simulator' }).click();
+
+  for (let index = 0; index < 5; index += 1) {
+    await page.getByRole('button', { name: 'Split Vertical' }).click();
+  }
+
+  const layoutMetrics = await page.evaluate(() => {
+    const trackedSelectors = [
+      '.app-shell',
+      '.left-panel',
+      '.main-panel',
+      '.right-panel',
+      '.terminal-shell',
+      '.sim-controls',
+      '.sim-pane-grid',
+    ];
+
+    const width = window.innerWidth;
+    const offenders = trackedSelectors
+      .map((selector) => {
+        const node = document.querySelector(selector);
+        if (!node) {
+          return null;
+        }
+
+        const rect = node.getBoundingClientRect();
+        const overflow = rect.right - width;
+        if (overflow <= 1) {
+          return null;
+        }
+
+        return {
+          selector,
+          overflow,
+        };
+      })
+      .filter((entry): entry is { selector: string; overflow: number } => entry !== null);
+
+    return {
+      innerWidth: width,
+      scrollWidth: document.documentElement.scrollWidth,
+      hasHorizontalOverflow: document.documentElement.scrollWidth > width + 1,
+      offenders,
+    };
+  });
+
+  expect(layoutMetrics.hasHorizontalOverflow).toBeFalsy();
+  expect(layoutMetrics.offenders).toEqual([]);
+});

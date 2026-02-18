@@ -43,10 +43,12 @@ a {
 
 .app-shell {
   display: grid;
-  grid-template-columns: 220px 1fr 280px;
+  grid-template-columns: minmax(0, 220px) minmax(0, 1fr) minmax(0, 280px);
   min-height: 100vh;
   gap: 12px;
   padding: 12px;
+  width: 100%;
+  max-width: 100vw;
 }
 
 .skip-link {
@@ -70,6 +72,7 @@ a {
   background: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: 12px;
+  min-width: 0;
 }
 
 .left-panel {
@@ -332,6 +335,7 @@ a {
 .terminal-command-overlay {
   pointer-events: auto;
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   align-items: center;
   border: 1px solid #334155;
@@ -352,7 +356,8 @@ a {
 }
 
 .terminal-command-input {
-  min-width: 120px;
+  min-width: 0;
+  width: 100%;
   flex: 1;
   border: 1px solid #1e293b;
   border-radius: 6px;
@@ -479,10 +484,113 @@ a {
 }
 
 .sim-input {
-  min-width: 240px;
+  min-width: 0;
+  width: min(280px, 100%);
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 10px 12px;
+}
+
+.curriculum-track-list {
+  display: grid;
+  gap: 12px;
+}
+
+.curriculum-track-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #f8fafc;
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.curriculum-track-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.curriculum-track-head h2 {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+}
+
+.curriculum-chapter-list {
+  display: grid;
+  gap: 10px;
+}
+
+.curriculum-chapter-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 10px;
+}
+
+.curriculum-chapter-card h3 {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+}
+
+.curriculum-lesson-list {
+  display: grid;
+  gap: 8px;
+}
+
+.curriculum-lesson-row {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.curriculum-lesson-link {
+  display: grid;
+  gap: 2px;
+  color: var(--text-primary);
+}
+
+.curriculum-lesson-link span {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.lesson-section {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #f8fafc;
+  padding: 12px;
+  margin-top: 10px;
+}
+
+.lesson-section h2 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.lesson-mission-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.lesson-mission-card {
+  border: 1px solid #dbe2ea;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 10px;
+}
+
+.lesson-mission-card h3 {
+  margin: 0 0 6px;
+  font-size: 0.95rem;
 }
 
 .sim-capture {
@@ -681,7 +789,7 @@ a {
 
 @media (max-width: 1080px) {
   .app-shell {
-    grid-template-columns: 200px 1fr;
+    grid-template-columns: minmax(0, 200px) minmax(0, 1fr);
   }
 
   .right-panel {
@@ -697,7 +805,7 @@ a {
   .left-panel,
   .main-panel,
   .right-panel {
-    width: 100%;
+    min-width: 0;
   }
 
   .playbook-grid {
@@ -709,6 +817,15 @@ a {
   }
 
   .onboarding-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .curriculum-track-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .lesson-mission-grid {
     grid-template-columns: 1fr;
   }
 }
