@@ -2,7 +2,7 @@
   {
     "slug": "first-chapter-complete",
     "title": "첫 챕터 완료",
-    "description": "첫 챕터 실습을 통과하고 기본 조작 흐름을 익혔습니다.",
+    "description": "Onramp 첫 챕터의 모든 미션을 완료했습니다.",
     "badge": "first_chapter_complete",
     "ogImage": "/og/first-chapter-complete.v1.png"
   },
@@ -16,14 +16,14 @@
   {
     "slug": "track-b-complete",
     "title": "Track B 완료",
-    "description": "워크플로우 전환과 copy-mode 핵심 루틴을 익혔습니다.",
+    "description": "분할, 이동, 리사이즈 기반 워크플로우 실습을 완료했습니다.",
     "badge": "track_b_complete",
     "ogImage": "/og/track-b-complete.v1.png"
   },
   {
     "slug": "track-c-complete",
     "title": "Track C 완료",
-    "description": "command-mode와 deep work 루틴 시나리오를 완료했습니다.",
+    "description": "copy-mode와 command-mode 기반 deep work 루틴을 완료했습니다.",
     "badge": "track_c_complete",
     "ogImage": "/og/track-c-complete.v1.png"
   },
