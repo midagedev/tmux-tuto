@@ -158,7 +158,7 @@
   - 검증: 누락 항목 체크 스크립트
   - DoD: 매핑 누락 0건
 
-- [ ] `HF-044` cheatsheet -> simulator action 매핑 100%
+- [x] `HF-044` cheatsheet -> simulator action 매핑 100%
   - 산출물: cheatsheet index/quick preset 확장
   - 의존: `HF-043`
   - 검증: e2e(검색 -> 실습)

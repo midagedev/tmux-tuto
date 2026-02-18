@@ -29,15 +29,14 @@ export function CheatsheetPage() {
               <strong>{item.title}</strong> <span className="muted">({item.contentType})</span>
               <div className="muted">{item.description}</div>
               <div className="inline-actions">
+                <Link to={`/practice?from=${item.id}`} className="secondary-btn">
+                  바로 실습
+                </Link>
                 {item.contentType === 'playbook' && item.playbookSlug ? (
                   <Link to={`/playbooks/${item.playbookSlug}`} className="secondary-btn">
                     가이드 열기
                   </Link>
-                ) : (
-                  <Link to={`/practice?from=${item.id}`} className="secondary-btn">
-                    바로 실습
-                  </Link>
-                )}
+                ) : null}
                 {item.command ? <code className="playbook-command">{item.command}</code> : null}
                 {item.shortcut ? <code className="playbook-command">{item.shortcut}</code> : null}
               </div>

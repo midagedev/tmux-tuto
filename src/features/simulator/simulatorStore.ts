@@ -5,6 +5,7 @@ import { resolveSimulatorInput } from './input';
 import { getLatestSnapshot, saveSnapshot as saveSnapshotRecord } from '../storage/repository';
 import type { AppMission } from '../curriculum/contentSchema';
 import { createMissionScenarioState } from './scenarioEngine';
+import { resolveQuickPreset } from './quickPresets';
 
 const MODE_VALUES: SimulatorMode[] = ['NORMAL', 'PREFIX_PENDING', 'COMMAND_MODE', 'COPY_MODE', 'SEARCH_MODE'];
 
@@ -133,44 +134,16 @@ export const useSimulatorStore = create<SimulatorStore>((set) => ({
   applyQuickPreset: (presetId) =>
     set((current) => {
       let nextState = simulatorReducer(current.state, { type: 'RESET' });
-
-      switch (presetId) {
-        case 'cs-split-vertical':
-          nextState = applyActions(nextState, [{ type: 'SPLIT_PANE', payload: 'vertical' }]);
-          break;
-        case 'cs-split-horizontal':
-          nextState = applyActions(nextState, [{ type: 'SPLIT_PANE', payload: 'horizontal' }]);
-          break;
-        case 'cs-window-new':
-          nextState = applyActions(nextState, [{ type: 'NEW_WINDOW' }]);
-          break;
-        case 'cs-window-next':
-          nextState = applyActions(nextState, [
-            { type: 'NEW_WINDOW' },
-            { type: 'NEXT_WINDOW' },
-          ]);
-          break;
-        case 'cs-copy-mode':
-          nextState = applyActions(nextState, [{ type: 'ENTER_COPY_MODE' }]);
-          break;
-        case 'cs-command-mode':
-          nextState = applyActions(nextState, [{ type: 'SET_MODE', payload: 'COMMAND_MODE' }]);
-          break;
-        case 'cs-session-main':
-          nextState = applyActions(nextState, [
-            { type: 'ADD_MESSAGE', payload: 'Practice preset: tmux new -As main' },
-          ]);
-          break;
-        default:
-          nextState = applyActions(nextState, [
-            { type: 'ADD_MESSAGE', payload: `No preset found for ${presetId}` },
-          ]);
-          break;
+      const preset = resolveQuickPreset(presetId);
+      if (!preset) {
+        nextState = applyActions(nextState, [{ type: 'ADD_MESSAGE', payload: `No preset found for ${presetId}` }]);
+      } else {
+        nextState = applyActions(nextState, preset.actions);
+        nextState = applyActions(nextState, [
+          { type: 'ADD_MESSAGE', payload: `Quick preset applied (${presetId})` },
+          { type: 'RECORD_ACTION', payload: `sim.preset.${preset.id}` },
+        ]);
       }
-
-      nextState = applyActions(nextState, [
-        { type: 'ADD_MESSAGE', payload: `Quick preset applied (${presetId})` },
-      ]);
 
       return { state: nextState };
     }),

@@ -13,6 +13,19 @@ test('cheatsheet search can jump to quick practice @smoke', async ({ page }) => 
   await expect(panesSummary).toContainText('2');
 });
 
+test('cheatsheet playbook item can jump to quick practice preset @smoke', async ({ page }) => {
+  await page.goto('/cheatsheet');
+  await dismissAnalyticsBanner(page);
+
+  await page.getByLabel('Cheatsheet search').fill('tmux.conf');
+  const recommendedConfigItem = page.locator('li').filter({ hasText: '권장 tmux.conf' }).first();
+  await recommendedConfigItem.getByRole('link', { name: '바로 실습' }).click();
+
+  await expect(page).toHaveURL('/practice');
+  const configSummary = page.locator('.sim-summary p').filter({ hasText: 'Config:' });
+  await expect(configSummary).toContainText('mode-keys vi');
+});
+
 test('bookmark persists after page reload @smoke', async ({ page }) => {
   await page.goto('/bookmarks');
   await dismissAnalyticsBanner(page);
