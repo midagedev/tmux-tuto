@@ -1081,14 +1081,39 @@ a {
   color: #334155;
 }
 
+.vm-celebration-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(12px, 2.2vw, 24px);
+  background: rgba(2, 6, 23, 0.56);
+  backdrop-filter: blur(3px);
+  animation: vm-celebration-overlay-in 220ms ease-out;
+}
+
 .vm-celebration {
-  border-radius: 10px;
-  padding: 10px 12px;
+  position: relative;
+  width: min(560px, 100%);
+  border-radius: 16px;
+  padding: clamp(16px, 2vw, 22px);
   border: 1px solid;
+  box-shadow:
+    0 28px 60px rgba(2, 6, 23, 0.28),
+    0 2px 8px rgba(2, 6, 23, 0.18);
+  animation: vm-celebration-dialog-in 320ms cubic-bezier(0.2, 0.92, 0.18, 1.08);
+  overflow: hidden;
+}
+
+.vm-celebration strong {
+  font-size: 1.08rem;
 }
 
 .vm-celebration p {
-  margin: 0 0 4px;
+  margin: 0 0 6px;
+  line-height: 1.45;
 }
 
 .vm-celebration p:last-child {
@@ -1096,7 +1121,47 @@ a {
 }
 
 .vm-celebration-actions {
-  margin-top: 8px;
+  margin-top: 12px;
+}
+
+.vm-celebration-burst {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.vm-celebration-burst span {
+  position: absolute;
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  opacity: 0.42;
+  filter: blur(0.4px);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0) 70%);
+  animation: vm-celebration-burst 820ms ease-out forwards;
+}
+
+.vm-celebration-burst span:nth-child(1) {
+  top: -94px;
+  left: -66px;
+}
+
+.vm-celebration-burst span:nth-child(2) {
+  top: -118px;
+  right: -44px;
+  width: 220px;
+  height: 220px;
+  animation-delay: 60ms;
+}
+
+.vm-celebration-burst span:nth-child(3) {
+  bottom: -150px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 260px;
+  height: 260px;
+  animation-delay: 120ms;
 }
 
 .vm-celebration-mission {
@@ -1115,6 +1180,48 @@ a {
   background: #fff7ed;
   border-color: #fdba74;
   color: #9a3412;
+}
+
+@keyframes vm-celebration-overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes vm-celebration-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes vm-celebration-burst {
+  0% {
+    transform: scale(0.62);
+    opacity: 0.5;
+  }
+  75% {
+    opacity: 0.34;
+  }
+  100% {
+    transform: scale(1.3);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vm-celebration-overlay,
+  .vm-celebration,
+  .vm-celebration-burst span {
+    animation: none !important;
+  }
 }
 
 .vm-poc-controls {

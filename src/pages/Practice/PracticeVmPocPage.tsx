@@ -535,7 +535,7 @@ export function PracticeVmPocPage() {
       return;
     }
 
-    celebrationCloseButtonRef.current?.focus();
+    celebrationCloseButtonRef.current?.focus({ preventScroll: true });
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') {
@@ -551,6 +551,19 @@ export function PracticeVmPocPage() {
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [advanceCelebration, celebration]);
+
+  useEffect(() => {
+    if (!celebration) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [celebration]);
 
   useEffect(() => {
     let isMounted = true;
@@ -1348,66 +1361,73 @@ export function PracticeVmPocPage() {
         </details>
 
         {celebration ? (
-          <section
-            className={`vm-celebration vm-celebration-${celebration.kind}`}
-            role="dialog"
-            aria-modal="false"
-            aria-live="polite"
-            aria-label="완료 피드백"
-          >
-            <p>
-              <strong>{celebration.message}</strong>
-            </p>
-            <p>{celebration.detail}</p>
-            <p className="muted">대기 중인 알림 {celebrationQueueCount}개</p>
-            <div className="inline-actions vm-celebration-actions">
-              {celebration.kind === 'mission' && nextMission ? (
+          <section className="vm-celebration-overlay">
+            <section
+              className={`vm-celebration vm-celebration-${celebration.kind}`}
+              role="dialog"
+              aria-modal="true"
+              aria-live="polite"
+              aria-label="완료 피드백"
+            >
+              <div className="vm-celebration-burst" aria-hidden="true">
+                <span />
+                <span />
+                <span />
+              </div>
+              <p>
+                <strong>{celebration.message}</strong>
+              </p>
+              <p>{celebration.detail}</p>
+              <p className="muted">대기 중인 알림 {celebrationQueueCount}개</p>
+              <div className="inline-actions vm-celebration-actions">
+                {celebration.kind === 'mission' && nextMission ? (
+                  <button
+                    type="button"
+                    className="primary-btn"
+                    onClick={() => {
+                      setSelectedMissionSlug(nextMission.slug);
+                      setMobileWorkbenchView('mission');
+                      advanceCelebration();
+                    }}
+                  >
+                    다음 미션
+                  </button>
+                ) : null}
+                {celebration.kind === 'lesson' && nextLesson ? (
+                  <button
+                    type="button"
+                    className="primary-btn"
+                    onClick={() => {
+                      setSelectedLessonSlug(nextLesson.slug);
+                      const nextMissionInLesson = content.missions.find(
+                        (mission) => mission.lessonSlug === nextLesson.slug,
+                      );
+                      setSelectedMissionSlug(nextMissionInLesson?.slug ?? '');
+                      setMobileWorkbenchView('mission');
+                      advanceCelebration();
+                    }}
+                  >
+                    다음 레슨
+                  </button>
+                ) : null}
+                <Link className="secondary-btn" to="/progress">
+                  업적 보기
+                </Link>
+                {celebrationShareHref ? (
+                  <a className="text-link" href={celebrationShareHref} target="_blank" rel="noreferrer">
+                    X 공유
+                  </a>
+                ) : null}
                 <button
+                  ref={celebrationCloseButtonRef}
                   type="button"
-                  className="primary-btn"
-                  onClick={() => {
-                    setSelectedMissionSlug(nextMission.slug);
-                    setMobileWorkbenchView('mission');
-                    advanceCelebration();
-                  }}
+                  className="secondary-btn"
+                  onClick={advanceCelebration}
                 >
-                  다음 미션
+                  닫기 (Esc)
                 </button>
-              ) : null}
-              {celebration.kind === 'lesson' && nextLesson ? (
-                <button
-                  type="button"
-                  className="primary-btn"
-                  onClick={() => {
-                    setSelectedLessonSlug(nextLesson.slug);
-                    const nextMissionInLesson = content.missions.find(
-                      (mission) => mission.lessonSlug === nextLesson.slug,
-                    );
-                    setSelectedMissionSlug(nextMissionInLesson?.slug ?? '');
-                    setMobileWorkbenchView('mission');
-                    advanceCelebration();
-                  }}
-                >
-                  다음 레슨
-                </button>
-              ) : null}
-              <Link className="secondary-btn" to="/progress">
-                업적 보기
-              </Link>
-              {celebrationShareHref ? (
-                <a className="text-link" href={celebrationShareHref} target="_blank" rel="noreferrer">
-                  X 공유
-                </a>
-              ) : null}
-              <button
-                ref={celebrationCloseButtonRef}
-                type="button"
-                className="secondary-btn"
-                onClick={advanceCelebration}
-              >
-                닫기 (Esc)
-              </button>
-            </div>
+              </div>
+            </section>
           </section>
         ) : null}
 
