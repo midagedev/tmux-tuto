@@ -883,24 +883,101 @@ a {
   border-color: #dbe2ea;
 }
 
-.vm-curriculum-grid {
-  display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.vm-curriculum-row {
-  display: grid;
+.vm-lesson-filter {
+  display: flex;
+  flex-wrap: wrap;
   gap: 6px;
 }
 
-.vm-curriculum-row label {
-  font-size: 0.86rem;
-  color: var(--text-secondary);
+.vm-lesson-filter-btn {
+  font-size: 0.8rem;
+  padding: 5px 10px;
 }
 
-.vm-curriculum-panel .sim-input {
+.vm-lesson-filter-btn.is-active {
+  border-color: #0ea5e9;
+  background: #eff6ff;
+  color: #0c4a6e;
+  font-weight: 700;
+}
+
+.vm-lesson-catalog {
+  display: grid;
+  gap: 8px;
+  max-height: 240px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.vm-lesson-row {
+  border: 1px solid #dbe2ea;
+  border-radius: 10px;
+  background: #f8fafc;
   width: 100%;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.vm-lesson-row.is-active {
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.14);
+  background: #ffffff;
+}
+
+.vm-lesson-row-main {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.vm-lesson-row-main strong {
+  font-size: 0.9rem;
+}
+
+.vm-lesson-row-main small {
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vm-lesson-row-meta {
+  display: grid;
+  gap: 4px;
+  justify-items: end;
+  white-space: nowrap;
+}
+
+.vm-lesson-row-meta small {
+  color: var(--text-secondary);
+  font-size: 0.74rem;
+}
+
+.vm-lesson-row-status {
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 0.72rem;
+}
+
+.vm-lesson-row-status.is-complete {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.vm-lesson-row-status.is-in-progress {
+  background: #cffafe;
+  color: #155e75;
+}
+
+.vm-lesson-row-status.is-not-started {
+  background: #e2e8f0;
+  color: #334155;
 }
 
 .vm-lesson-card {
@@ -1464,10 +1541,6 @@ a {
 @media (max-width: 960px) {
   .vm-mobile-switch {
     display: flex;
-  }
-
-  .vm-curriculum-grid {
-    grid-template-columns: 1fr;
   }
 
   .vm-poc-command-form {

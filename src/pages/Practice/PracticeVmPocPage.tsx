@@ -26,6 +26,13 @@ import {
   stripAnsi,
   type VmProbeMetric,
 } from '../../features/vm/missionBridge';
+import {
+  buildLessonProgressRows,
+  filterLessonProgressRows,
+  resolveDefaultMissionSlugForLesson,
+  type LessonCompletionStatus,
+  type LessonFilter,
+} from './lessonProgress';
 
 type VmStatus = 'idle' | 'booting' | 'running' | 'stopped' | 'error';
 
@@ -172,6 +179,12 @@ const QUICK_COMMANDS = [
 
 const BEGINNER_ENTRY_LESSON = 'hello-tmux';
 const ADVANCED_ENTRY_LESSON = 'copy-search';
+const LESSON_FILTER_OPTIONS: Array<{ value: LessonFilter; label: string }> = [
+  { value: 'all', label: '전체' },
+  { value: 'continue', label: '이어하기' },
+  { value: 'incomplete', label: '미완료' },
+  { value: 'completed', label: '완료' },
+];
 
 function resolveAssetPath(relativePath: string) {
   const base = import.meta.env.BASE_URL ?? '/';
@@ -331,6 +344,30 @@ function formatLayout(layout: string | null) {
   return `${layout.slice(0, 28)}...`;
 }
 
+function getLessonStatusLabel(status: LessonCompletionStatus) {
+  switch (status) {
+    case 'completed':
+      return '완료';
+    case 'in-progress':
+      return '진행중';
+    case 'not-started':
+    default:
+      return '미시작';
+  }
+}
+
+function getLessonStatusClass(status: LessonCompletionStatus) {
+  switch (status) {
+    case 'completed':
+      return 'is-complete';
+    case 'in-progress':
+      return 'is-in-progress';
+    case 'not-started':
+    default:
+      return 'is-not-started';
+  }
+}
+
 export function PracticeVmPocPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [contentState, setContentState] = useState<{
@@ -356,6 +393,7 @@ export function PracticeVmPocPage() {
     queue: [],
   });
   const [autoProbe, setAutoProbe] = useState(true);
+  const [lessonFilter, setLessonFilter] = useState<LessonFilter>('all');
   const [mobileWorkbenchView, setMobileWorkbenchView] = useState<'mission' | 'terminal'>('terminal');
 
   const completedMissionSlugs = useProgressStore((store) => store.completedMissionSlugs);
@@ -389,6 +427,31 @@ export function PracticeVmPocPage() {
   const disableWarmStart = warmParam === '0' || warmParam.toLowerCase() === 'off';
 
   const content = contentState.content;
+  const trackTitleMap = useMemo(() => {
+    if (!content) {
+      return new Map<string, string>();
+    }
+
+    return new Map(content.tracks.map((track) => [track.slug, track.title]));
+  }, [content]);
+  const chapterTitleMap = useMemo(() => {
+    if (!content) {
+      return new Map<string, string>();
+    }
+
+    return new Map(content.chapters.map((chapter) => [chapter.slug, chapter.title]));
+  }, [content]);
+  const lessonProgressRows = useMemo(() => {
+    if (!content) {
+      return [];
+    }
+
+    return buildLessonProgressRows(content, completedMissionSlugs);
+  }, [completedMissionSlugs, content]);
+  const filteredLessonRows = useMemo(
+    () => filterLessonProgressRows(lessonProgressRows, lessonFilter),
+    [lessonFilter, lessonProgressRows],
+  );
 
   const lessonMissions = useMemo(() => {
     if (!content || !selectedLessonSlug) {
@@ -534,6 +597,28 @@ export function PracticeVmPocPage() {
 
   const lessonCompleted = lessonMissions.length > 0 && lessonCompletedMissionCount === lessonMissions.length;
 
+  const selectLessonForAction = useCallback(
+    (lessonSlug: string, options?: { resetFilter?: boolean }) => {
+      if (!content) {
+        return;
+      }
+
+      if (!content.lessons.some((lesson) => lesson.slug === lessonSlug)) {
+        return;
+      }
+
+      if (options?.resetFilter) {
+        setLessonFilter('all');
+      }
+
+      const nextLessonMissions = content.missions.filter((mission) => mission.lessonSlug === lessonSlug);
+      setSelectedLessonSlug(lessonSlug);
+      setSelectedMissionSlug(resolveDefaultMissionSlugForLesson(nextLessonMissions, completedMissionSlugs));
+      setMobileWorkbenchView('mission');
+    },
+    [completedMissionSlugs, content],
+  );
+
   const selectMissionForAction = useCallback((missionSlug: string) => {
     setSelectedMissionSlug(missionSlug);
     setMobileWorkbenchView('mission');
@@ -545,10 +630,10 @@ export function PracticeVmPocPage() {
     }
 
     setSelectedLessonSlug(nextLesson.slug);
-    const nextMissionInLesson = content.missions.find((mission) => mission.lessonSlug === nextLesson.slug);
-    setSelectedMissionSlug(nextMissionInLesson?.slug ?? '');
+    const nextLessonMissions = content.missions.filter((mission) => mission.lessonSlug === nextLesson.slug);
+    setSelectedMissionSlug(resolveDefaultMissionSlugForLesson(nextLessonMissions, completedMissionSlugs));
     setMobileWorkbenchView('mission');
-  }, [content, nextLesson]);
+  }, [completedMissionSlugs, content, nextLesson]);
 
   const celebration = celebrationState.active;
   const celebrationQueueCount = celebrationState.queue.length;
@@ -674,6 +759,21 @@ export function PracticeVmPocPage() {
   }, [content, lessonParam, selectedLessonSlug]);
 
   useEffect(() => {
+    if (!content || filteredLessonRows.length === 0) {
+      return;
+    }
+
+    if (filteredLessonRows.some((row) => row.lesson.slug === selectedLessonSlug)) {
+      return;
+    }
+
+    const nextLessonSlug = filteredLessonRows[0].lesson.slug;
+    const nextLessonMissions = content.missions.filter((mission) => mission.lessonSlug === nextLessonSlug);
+    setSelectedLessonSlug(nextLessonSlug);
+    setSelectedMissionSlug(resolveDefaultMissionSlugForLesson(nextLessonMissions, completedMissionSlugs));
+  }, [completedMissionSlugs, content, filteredLessonRows, selectedLessonSlug]);
+
+  useEffect(() => {
     if (!content || !selectedLessonSlug) {
       return;
     }
@@ -692,8 +792,8 @@ export function PracticeVmPocPage() {
     }
 
     const fromParam = missions.some((mission) => mission.slug === missionParam) ? missionParam : '';
-    setSelectedMissionSlug(fromParam || missions[0].slug);
-  }, [content, missionParam, selectedLessonSlug, selectedMissionSlug]);
+    setSelectedMissionSlug(fromParam || resolveDefaultMissionSlugForLesson(missions, completedMissionSlugs));
+  }, [completedMissionSlugs, content, missionParam, selectedLessonSlug, selectedMissionSlug]);
 
   useEffect(() => {
     if (!selectedLessonSlug) {
@@ -1631,63 +1731,66 @@ export function PracticeVmPocPage() {
                 <button
                   type="button"
                   className="secondary-btn"
-                  onClick={() => {
-                    setSelectedLessonSlug(BEGINNER_ENTRY_LESSON);
-                    const nextMission = content.missions.find((mission) => mission.lessonSlug === BEGINNER_ENTRY_LESSON);
-                    setSelectedMissionSlug(nextMission?.slug ?? '');
-                  }}
+                  onClick={() => selectLessonForAction(BEGINNER_ENTRY_LESSON, { resetFilter: true })}
                 >
                   초급 코어
                 </button>
                 <button
                   type="button"
                   className="secondary-btn"
-                  onClick={() => {
-                    setSelectedLessonSlug(ADVANCED_ENTRY_LESSON);
-                    const nextMission = content.missions.find((mission) => mission.lessonSlug === ADVANCED_ENTRY_LESSON);
-                    setSelectedMissionSlug(nextMission?.slug ?? '');
-                  }}
+                  onClick={() => selectLessonForAction(ADVANCED_ENTRY_LESSON, { resetFilter: true })}
                 >
                   심화 과정
                 </button>
               </div>
-              <div className="vm-curriculum-grid">
-                <div className="vm-curriculum-row">
-                  <label htmlFor="lesson-select">Lesson</label>
-                  <select
-                    id="lesson-select"
-                    className="sim-input"
-                    value={selectedLessonSlug}
-                    onChange={(event) => {
-                      const nextLessonSlug = event.target.value;
-                      setSelectedLessonSlug(nextLessonSlug);
-                      const nextMission = content.missions.find((mission) => mission.lessonSlug === nextLessonSlug);
-                      setSelectedMissionSlug(nextMission?.slug ?? '');
-                    }}
+              <div className="vm-lesson-filter" role="tablist" aria-label="레슨 필터">
+                {LESSON_FILTER_OPTIONS.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    className={`secondary-btn vm-lesson-filter-btn ${lessonFilter === option.value ? 'is-active' : ''}`}
+                    onClick={() => setLessonFilter(option.value)}
                   >
-                    {content.lessons.map((lesson) => (
-                      <option key={lesson.id} value={lesson.slug}>
-                        {lesson.title}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="vm-curriculum-row">
-                  <label htmlFor="mission-select">Mission</label>
-                  <select
-                    id="mission-select"
-                    className="sim-input"
-                    value={selectedMissionSlug}
-                    onChange={(event) => setSelectedMissionSlug(event.target.value)}
-                  >
-                    {lessonMissions.map((mission) => (
-                      <option key={mission.id} value={mission.slug}>
-                        {mission.title}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                    {option.label}
+                  </button>
+                ))}
               </div>
+              <section className="vm-lesson-catalog" aria-label="레슨 목록">
+                {filteredLessonRows.length === 0 ? (
+                  <p className="muted">선택한 필터에 해당하는 레슨이 없습니다.</p>
+                ) : (
+                  filteredLessonRows.map((row) => {
+                    const isActive = row.lesson.slug === selectedLessonSlug;
+                    const trackTitle = trackTitleMap.get(row.lesson.trackSlug) ?? row.lesson.trackSlug;
+                    const chapterTitle = chapterTitleMap.get(row.lesson.chapterSlug) ?? row.lesson.chapterSlug;
+
+                    return (
+                      <button
+                        key={row.lesson.id}
+                        type="button"
+                        className={`vm-lesson-row ${isActive ? 'is-active' : ''}`}
+                        onClick={() => selectLessonForAction(row.lesson.slug)}
+                        aria-pressed={isActive}
+                      >
+                        <span className="vm-lesson-row-main">
+                          <strong>{row.lesson.title}</strong>
+                          <small>
+                            {trackTitle} · {chapterTitle}
+                          </small>
+                        </span>
+                        <span className="vm-lesson-row-meta">
+                          <small>
+                            {row.completedMissionCount}/{row.totalMissionCount}
+                          </small>
+                          <span className={`vm-lesson-row-status ${getLessonStatusClass(row.status)}`}>
+                            {getLessonStatusLabel(row.status)}
+                          </span>
+                        </span>
+                      </button>
+                    );
+                  })
+                )}
+              </section>
               <div className="vm-lesson-progress">
                 <p>
                   <strong>Lesson 진행:</strong> {lessonCompletedMissionCount}/{lessonMissions.length}
@@ -1850,7 +1953,7 @@ export function PracticeVmPocPage() {
                       key={mission.id}
                       type="button"
                       className={`vm-mission-row ${isSelected ? 'is-active' : ''}`}
-                      onClick={() => setSelectedMissionSlug(mission.slug)}
+                      onClick={() => selectMissionForAction(mission.slug)}
                     >
                       <span className="vm-mission-row-main">
                         <strong>
