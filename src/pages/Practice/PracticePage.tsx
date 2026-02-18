@@ -17,8 +17,11 @@ function isEditableTarget(target: EventTarget | null) {
 export function PracticePage() {
   const [manualKey, setManualKey] = useState('');
   const [copySearchQuery, setCopySearchQuery] = useState('');
+  const [recoverySource, setRecoverySource] = useState<'latest' | 'lesson-default'>('latest');
+  const [recoveryLessonSlug, setRecoveryLessonSlug] = useState('');
   const [searchParams, setSearchParams] = useSearchParams();
   const simulatorState = useSimulatorStore((store) => store.state);
+  const hydratedFromStorage = useSimulatorStore((store) => store.hydratedFromStorage);
   const handleKeyInput = useSimulatorStore((store) => store.handleKeyInput);
   const setCommandBuffer = useSimulatorStore((store) => store.setCommandBuffer);
   const runCopySearch = useSimulatorStore((store) => store.runCopySearch);
@@ -26,6 +29,7 @@ export function PracticePage() {
   const scrollPane = useSimulatorStore((store) => store.scrollPane);
   const saveSnapshotToStorage = useSimulatorStore((store) => store.saveSnapshotToStorage);
   const restoreSnapshotByIdFromStorage = useSimulatorStore((store) => store.restoreSnapshotByIdFromStorage);
+  const restoreLessonDefaultScenario = useSimulatorStore((store) => store.restoreLessonDefaultScenario);
   const restoreLatestSnapshotFromStorage = useSimulatorStore(
     (store) => store.restoreLatestSnapshotFromStorage,
   );
@@ -46,6 +50,7 @@ export function PracticePage() {
       : -1;
   const presetId = searchParams.get('from');
   const snapshotId = searchParams.get('snapshot');
+  const lessonSlug = searchParams.get('lesson');
   const mouseEnabled = simulatorState.tmux.config.mouse;
   const commandBuffer = simulatorState.mode.commandBuffer;
   const commandCursor = simulatorState.mode.commandCursor;
@@ -54,10 +59,24 @@ export function PracticePage() {
   const liveAnnouncement = `Mode ${simulatorState.mode.value}. Active pane ${activePane.id}. Panes ${activeWindow.panes.length}.`;
 
   useEffect(() => {
+    if (!hydratedFromStorage) {
+      return;
+    }
+
     if (snapshotId) {
       void restoreSnapshotByIdFromStorage(snapshotId).then(() => {
         const nextParams = new URLSearchParams(searchParams);
         nextParams.delete('snapshot');
+        setSearchParams(nextParams, { replace: true });
+      });
+      return;
+    }
+
+    if (lessonSlug) {
+      setRecoveryLessonSlug(lessonSlug);
+      void restoreLessonDefaultScenario(lessonSlug).then(() => {
+        const nextParams = new URLSearchParams(searchParams);
+        nextParams.delete('lesson');
         setSearchParams(nextParams, { replace: true });
       });
       return;
@@ -71,7 +90,17 @@ export function PracticePage() {
     const nextParams = new URLSearchParams(searchParams);
     nextParams.delete('from');
     setSearchParams(nextParams, { replace: true });
-  }, [applyQuickPreset, presetId, restoreSnapshotByIdFromStorage, searchParams, setSearchParams, snapshotId]);
+  }, [
+    applyQuickPreset,
+    hydratedFromStorage,
+    lessonSlug,
+    presetId,
+    restoreLessonDefaultScenario,
+    restoreSnapshotByIdFromStorage,
+    searchParams,
+    setSearchParams,
+    snapshotId,
+  ]);
 
   useEffect(() => {
     const previousMode = previousModeRef.current;
@@ -324,6 +353,45 @@ export function PracticePage() {
             <button type="button" className="secondary-btn" onClick={() => resetSimulator()}>
               Reset Simulator
             </button>
+          </div>
+
+          <div className="inline-actions">
+            <select
+              className="sim-input"
+              value={recoverySource}
+              onChange={(event) => setRecoverySource(event.target.value as typeof recoverySource)}
+              aria-label="Recovery source"
+            >
+              <option value="latest">latest snapshot</option>
+              <option value="lesson-default">lesson default</option>
+            </select>
+            <button
+              type="button"
+              className="secondary-btn"
+              onClick={() => {
+                const normalizedLessonSlug = recoveryLessonSlug.trim();
+                if (recoverySource === 'latest') {
+                  void restoreLatestSnapshotFromStorage().then((restored) => {
+                    if (!restored && normalizedLessonSlug) {
+                      void restoreLessonDefaultScenario(normalizedLessonSlug);
+                    }
+                  });
+                  return;
+                }
+
+                void restoreLessonDefaultScenario(normalizedLessonSlug || null);
+              }}
+            >
+              Run Recovery
+            </button>
+            <input
+              className="sim-input"
+              value={recoveryLessonSlug}
+              onChange={(event) => setRecoveryLessonSlug(event.target.value)}
+              placeholder="lesson slug (예: copy-search)"
+              aria-label="Recovery lesson slug"
+            />
+            <span className="muted">fallback: latest -&gt; lesson default</span>
           </div>
 
           <form

@@ -85,6 +85,68 @@ test('bookmark snapshot deep-link restores simulator state @smoke', async ({ pag
   await expect(panesSummary).toContainText('2');
 });
 
+test('bookmark lesson deep-link restores lesson default scenario @smoke', async ({ page }) => {
+  await page.goto('/bookmarks');
+  await dismissAnalyticsBanner(page);
+
+  await page.getByLabel('Bookmark title').fill('e2e lesson bookmark');
+  await page.getByLabel('Bookmark target id').fill('copy-search');
+  await page.locator('form.bookmark-form select').selectOption('lesson');
+  await page.getByLabel('Bookmark tags').fill('lesson,e2e');
+  await page.getByRole('button', { name: '북마크 저장' }).click();
+
+  const lessonRow = page.locator('li').filter({ hasText: 'e2e lesson bookmark' }).first();
+  await lessonRow.getByRole('link', { name: '실습 열기' }).click();
+
+  await expect(page).toHaveURL('/practice');
+  await expect(page.locator('.sim-log')).toContainText('sim.scenario.mission.copy-mode-search-keyword');
+});
+
+test('recovery flow falls back from latest snapshot to lesson default @smoke', async ({ page }) => {
+  await page.goto('/practice');
+  await dismissAnalyticsBanner(page);
+  await page.getByRole('button', { name: 'Reset Simulator' }).click();
+  await page.waitForTimeout(500);
+
+  await page.evaluate(async () => {
+    const openRequest = indexedDB.open('tmux_tuto');
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      openRequest.onsuccess = () => resolve(openRequest.result);
+      openRequest.onerror = () => reject(openRequest.error);
+    });
+    const tx = db.transaction('simulator_snapshots', 'readwrite');
+    tx.objectStore('simulator_snapshots').clear();
+    await new Promise<void>((resolve, reject) => {
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () => reject(tx.error);
+    });
+    db.close();
+  });
+
+  await page.getByLabel('Recovery source').selectOption('latest');
+  await page.getByLabel('Recovery lesson slug').fill('copy-search');
+  await page.getByRole('button', { name: 'Run Recovery' }).click();
+
+  await expect(page.locator('.sim-log')).toContainText('sim.scenario.mission.copy-mode-search-keyword');
+});
+
+test('recovery flow falls back to reset when lesson default restore fails @smoke', async ({ page }) => {
+  await page.goto('/practice');
+  await dismissAnalyticsBanner(page);
+  await page.getByRole('button', { name: 'Reset Simulator' }).click();
+
+  await page.getByRole('button', { name: 'Split Vertical' }).click();
+  const panesSummary = page.locator('.sim-summary p').filter({ hasText: 'Panes:' });
+  await expect(panesSummary).toContainText('2');
+
+  await page.getByLabel('Recovery source').selectOption('lesson-default');
+  await page.getByLabel('Recovery lesson slug').fill('lesson-not-found');
+  await page.getByRole('button', { name: 'Run Recovery' }).click();
+
+  await expect(panesSummary).toContainText('1');
+});
+
 test('milestone share page can be opened from progress @smoke', async ({ page }) => {
   await page.goto('/progress');
   await dismissAnalyticsBanner(page);

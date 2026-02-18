@@ -6,6 +6,10 @@ import { useBookmarkStore } from '../../features/bookmarks/bookmarkStore';
 import type { BookmarkRecord } from '../../features/storage/types';
 
 function buildBookmarkPracticeLink(bookmark: BookmarkRecord) {
+  if (bookmark.type === 'lesson') {
+    return `/practice?lesson=${encodeURIComponent(bookmark.targetId)}`;
+  }
+
   if (bookmark.type === 'snapshot') {
     return `/practice?snapshot=${encodeURIComponent(bookmark.targetId)}`;
   }

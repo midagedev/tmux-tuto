@@ -183,7 +183,7 @@
   - 검증: backup round-trip test
   - DoD: 데이터 유실 없이 복구
 
-- [ ] `HF-052` 복구 UX 개선
+- [x] `HF-052` 복구 UX 개선
   - 산출물: 최신 snapshot/lesson default 선택 복원 플로우
   - 의존: `HF-050`
   - 검증: 수동 QA + e2e

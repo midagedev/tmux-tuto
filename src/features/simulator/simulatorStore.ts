@@ -4,6 +4,7 @@ import { simulatorReducer, type FocusDirection, type SimulatorAction, type Split
 import { resolveSimulatorInput } from './input';
 import { getLatestSnapshot, getSnapshot, saveSnapshot as saveSnapshotRecord } from '../storage/repository';
 import type { AppMission } from '../curriculum/contentSchema';
+import { loadAppContent } from '../curriculum/contentLoader';
 import type { SimulatorSnapshotRecord } from '../storage/types';
 import { createMissionScenarioState } from './scenarioEngine';
 import { resolveQuickPreset } from './quickPresets';
@@ -152,8 +153,9 @@ type SimulatorStore = {
   loadSnapshot: (snapshot: SimulatorState) => void;
   hydrateFromStorage: () => Promise<void>;
   saveSnapshotToStorage: () => Promise<void>;
-  restoreSnapshotByIdFromStorage: (snapshotId: string) => Promise<void>;
-  restoreLatestSnapshotFromStorage: () => Promise<void>;
+  restoreSnapshotByIdFromStorage: (snapshotId: string) => Promise<boolean>;
+  restoreLessonDefaultScenario: (lessonSlug: string | null) => Promise<boolean>;
+  restoreLatestSnapshotFromStorage: () => Promise<boolean>;
   reset: () => void;
 };
 
@@ -300,7 +302,7 @@ export const useSimulatorStore = create<SimulatorStore>((set) => ({
             : `Snapshot not found (${snapshotId})`,
         }),
       }));
-      return;
+      return false;
     }
 
     set((current) => ({
@@ -309,6 +311,52 @@ export const useSimulatorStore = create<SimulatorStore>((set) => ({
         payload: simulatorSnapshot,
       }),
     }));
+    return true;
+  },
+  restoreLessonDefaultScenario: async (lessonSlug) => {
+    const normalizedLessonSlug = lessonSlug?.trim() ?? '';
+    if (!normalizedLessonSlug) {
+      set((current) => ({
+        state: simulatorReducer(simulatorReducer(current.state, { type: 'RESET' }), {
+          type: 'ADD_MESSAGE',
+          payload: 'Lesson restore failed (missing lesson slug), fallback to reset',
+        }),
+      }));
+      return false;
+    }
+
+    try {
+      const content = await loadAppContent();
+      const firstMission = content.missions.find((mission) => mission.lessonSlug === normalizedLessonSlug);
+      if (!firstMission) {
+        throw new Error('lesson not found');
+      }
+      const lessonState = createMissionScenarioState(firstMission);
+      set((current) => {
+        const restored = simulatorReducer(current.state, {
+          type: 'LOAD_SNAPSHOT',
+          payload: lessonState,
+        });
+        return {
+          state: simulatorReducer(restored, {
+            type: 'ADD_MESSAGE',
+            payload: `Lesson default restored (${normalizedLessonSlug})`,
+          }),
+        };
+      });
+      return true;
+    } catch {
+      set((current) => {
+        const fallback = simulatorReducer(current.state, { type: 'RESET' });
+        return {
+          state: simulatorReducer(fallback, {
+            type: 'ADD_MESSAGE',
+            payload: `Lesson restore failed (${normalizedLessonSlug}), fallback to reset`,
+          }),
+        };
+      });
+      return false;
+    }
   },
   restoreLatestSnapshotFromStorage: async () => {
     const latest = await getLatestSnapshot();
@@ -320,7 +368,7 @@ export const useSimulatorStore = create<SimulatorStore>((set) => ({
           payload: 'No v2 restorable snapshot found',
         }),
       }));
-      return;
+      return false;
     }
     set((current) => ({
       state: simulatorReducer(current.state, {
@@ -328,6 +376,7 @@ export const useSimulatorStore = create<SimulatorStore>((set) => ({
         payload: simulatorSnapshot,
       }),
     }));
+    return true;
   },
   reset: () =>
     set((current) => ({
