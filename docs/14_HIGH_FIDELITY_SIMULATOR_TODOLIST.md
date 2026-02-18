@@ -109,7 +109,7 @@
   - DoD: prefix/mouse/mode-keys/bind subset 반영
 
 ### Phase 3. 실제감 UI/UX
-- [ ] `HF-030` 터미널 화면 스킨(상태바/윈도우바/프롬프트)
+- [x] `HF-030` 터미널 화면 스킨(상태바/윈도우바/프롬프트)
   - 산출물: Practice UI 재구성
   - 의존: `HF-010`, `HF-020`
   - 검증: 수동 QA(시각 일관성)

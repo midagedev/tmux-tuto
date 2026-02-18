@@ -229,6 +229,52 @@ a {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
+.terminal-shell {
+  border: 1px solid #1f2937;
+  border-radius: 12px;
+  background: #020617;
+  padding: 10px;
+  display: grid;
+  gap: 10px;
+}
+
+.terminal-window-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.terminal-window-tab {
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  color: #cbd5e1;
+  background: #0f172a;
+}
+
+.terminal-window-tab.is-active {
+  border-color: #14b8a6;
+  color: #99f6e4;
+}
+
+.terminal-window-meta {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.terminal-status-bar {
+  border-top: 1px solid #1e293b;
+  padding-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 0.74rem;
+  color: #cbd5e1;
+}
+
 .sim-pane-card {
   border: 1px solid #cbd5e1;
   border-radius: 10px;

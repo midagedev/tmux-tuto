@@ -104,72 +104,93 @@ export function PracticePage() {
           </p>
         </div>
 
-        <div className="sim-pane-grid" aria-label="Pane viewport grid">
-          {activeWindow.panes.map((pane) => {
-            const isActive = pane.id === activeWindow.activePaneId;
-            const viewportLines = getViewportLines(pane.terminal);
-            const viewportStart = pane.terminal.viewportTop;
-            return (
-              <div
-                key={pane.id}
-                className={`sim-pane-card${isActive ? ' is-active' : ''}`}
-                data-active={isActive ? 'true' : 'false'}
-                onClick={() => {
-                  if (!mouseEnabled) {
-                    return;
-                  }
-                  focusPaneById(pane.id);
-                }}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault();
-                    focusPaneById(pane.id);
-                  }
-                }}
-                onWheel={(event) => {
-                  if (!mouseEnabled) {
-                    return;
-                  }
-                  event.preventDefault();
-                  const delta = event.deltaY < 0 ? 2 : -2;
-                  scrollPane(pane.id, delta);
-                }}
-                role="button"
-                tabIndex={0}
+        <section className="terminal-shell" aria-label="Terminal skin">
+          <div className="terminal-window-bar">
+            {activeSession.windows.map((window) => (
+              <span
+                key={window.id}
+                className={`terminal-window-tab${window.id === activeSession.activeWindowId ? ' is-active' : ''}`}
               >
-                <div className="sim-pane-head">
-                  <strong>{isActive ? '●' : '○'} {pane.id}</strong>
-                  <span>
-                    {pane.width}x{pane.height}
-                  </span>
-                </div>
-                <div className="sim-pane-body">
-                  {viewportLines.length === 0 ? (
-                    <div className="sim-pane-line">(empty)</div>
-                  ) : (
-                    viewportLines.map((line, index) => {
-                      const lineIndex = viewportStart + index;
-                      const isMatch = isActive && copyMatchLineSet.has(lineIndex);
-                      const isActiveMatch = isMatch && lineIndex === activeMatchLine;
+                {window.name}
+              </span>
+            ))}
+            <span className="terminal-window-meta">session: {activeSession.name}</span>
+          </div>
 
-                      return (
-                        <div
-                          key={line.id}
-                          className={`sim-pane-line${isMatch ? ' is-match' : ''}${isActiveMatch ? ' is-active-match' : ''}`}
-                        >
-                          {line.text || ' '}
-                        </div>
-                      );
-                    })
-                  )}
+          <div className="sim-pane-grid" aria-label="Pane viewport grid">
+            {activeWindow.panes.map((pane) => {
+              const isActive = pane.id === activeWindow.activePaneId;
+              const viewportLines = getViewportLines(pane.terminal);
+              const viewportStart = pane.terminal.viewportTop;
+              return (
+                <div
+                  key={pane.id}
+                  className={`sim-pane-card${isActive ? ' is-active' : ''}`}
+                  data-active={isActive ? 'true' : 'false'}
+                  onClick={() => {
+                    if (!mouseEnabled) {
+                      return;
+                    }
+                    focusPaneById(pane.id);
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      focusPaneById(pane.id);
+                    }
+                  }}
+                  onWheel={(event) => {
+                    if (!mouseEnabled) {
+                      return;
+                    }
+                    event.preventDefault();
+                    const delta = event.deltaY < 0 ? 2 : -2;
+                    scrollPane(pane.id, delta);
+                  }}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <div className="sim-pane-head">
+                    <strong>{isActive ? '●' : '○'} {pane.id}</strong>
+                    <span>
+                      {pane.width}x{pane.height}
+                    </span>
+                  </div>
+                  <div className="sim-pane-body">
+                    {viewportLines.length === 0 ? (
+                      <div className="sim-pane-line">(empty)</div>
+                    ) : (
+                      viewportLines.map((line, index) => {
+                        const lineIndex = viewportStart + index;
+                        const isMatch = isActive && copyMatchLineSet.has(lineIndex);
+                        const isActiveMatch = isMatch && lineIndex === activeMatchLine;
+
+                        return (
+                          <div
+                            key={line.id}
+                            className={`sim-pane-line${isMatch ? ' is-match' : ''}${isActiveMatch ? ' is-active-match' : ''}`}
+                          >
+                            {line.text || ' '}
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                  <div className="sim-pane-foot" data-scroll-top={pane.terminal.viewportTop}>
+                    scrollTop: {pane.terminal.viewportTop}
+                  </div>
                 </div>
-                <div className="sim-pane-foot" data-scroll-top={pane.terminal.viewportTop}>
-                  scrollTop: {pane.terminal.viewportTop}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+
+          <div className="terminal-status-bar">
+            <span>{activeShellSession.workingDirectory} {activeShellSession.prompt}</span>
+            <span>mode: {simulatorState.mode.value}</span>
+            <span>active-pane: {activePane.id}</span>
+            <span>mouse: {mouseEnabled ? 'on' : 'off'}</span>
+          </div>
+        </section>
 
         <div className="sim-controls">
           <div className="inline-actions">
