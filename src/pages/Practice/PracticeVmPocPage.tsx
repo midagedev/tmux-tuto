@@ -83,6 +83,9 @@ const QUICK_COMMANDS = [
   },
 ] as const;
 
+const BEGINNER_ENTRY_LESSON = 'hello-tmux';
+const ADVANCED_ENTRY_LESSON = 'copy-search';
+
 const VM_BOOT_CONFIG = {
   wasmPath: '/vm/v86.wasm',
   wasmFallbackPath: '/vm/v86-fallback.wasm',
@@ -146,37 +149,6 @@ function getMetricBadgeClass(status: VmStatus) {
     return 'is-error';
   }
   return 'is-idle';
-}
-
-function getMissionProgressMeta(
-  missionStatus: ReturnType<typeof evaluateMissionWithVmSnapshot> | undefined,
-  completed: boolean,
-) {
-  if (completed) {
-    return {
-      label: '완료',
-      className: 'is-complete',
-    };
-  }
-
-  if (!missionStatus || missionStatus.status === 'incomplete') {
-    return {
-      label: '진행 전',
-      className: 'is-pending',
-    };
-  }
-
-  if (missionStatus.status === 'complete') {
-    return {
-      label: '자동 통과',
-      className: 'is-live-complete',
-    };
-  }
-
-  return {
-    label: '수동 확인',
-    className: 'is-manual',
-  };
 }
 
 function computeCompletedTrackSlugs(content: AppContent, completedMissionSlugs: string[]) {
@@ -330,8 +302,6 @@ export function PracticeVmPocPage() {
   const manualMissionCandidates = useMemo(() => {
     return lessonMissions.filter((mission) => missionStatusMap.get(mission.slug)?.status === 'manual');
   }, [lessonMissions, missionStatusMap]);
-
-  const completedMissionSet = useMemo(() => new Set(completedMissionSlugs), [completedMissionSlugs]);
 
   const selectedMissionOrder = useMemo(() => {
     if (!selectedMission) {
@@ -958,258 +928,206 @@ export function PracticeVmPocPage() {
           </div>
         </section>
 
-        <div className="vm-workbench">
-          <aside className="vm-study-panel" aria-label="Lesson Guide">
-            <section className="vm-curriculum-panel">
-              <div className="vm-curriculum-row">
-                <label htmlFor="lesson-select">Lesson</label>
-                <select
-                  id="lesson-select"
-                  className="sim-input"
-                  value={selectedLessonSlug}
-                  onChange={(event) => {
-                    const nextLessonSlug = event.target.value;
-                    setSelectedLessonSlug(nextLessonSlug);
-                    const nextMission = content.missions.find((mission) => mission.lessonSlug === nextLessonSlug);
-                    setSelectedMissionSlug(nextMission?.slug ?? '');
-                  }}
-                >
-                  {content.lessons.map((lesson) => (
-                    <option key={lesson.id} value={lesson.slug}>
-                      {lesson.title}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="vm-curriculum-row">
-                <label htmlFor="mission-select">Mission</label>
-                <select
-                  id="mission-select"
-                  className="sim-input"
-                  value={selectedMissionSlug}
-                  onChange={(event) => setSelectedMissionSlug(event.target.value)}
-                >
-                  {lessonMissions.map((mission) => (
-                    <option key={mission.id} value={mission.slug}>
-                      {mission.title}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="vm-lesson-progress">
-                <p>
-                  <strong>Lesson 진행:</strong> {lessonCompletedMissionCount}/{lessonMissions.length}
-                </p>
-                <p className="muted">manual 판정 미션: {manualMissionCandidates.length}</p>
-              </div>
-            </section>
-
-            {selectedLesson ? (
-              <section className="vm-lesson-card">
-                <p className="vm-lesson-card-path">
-                  {selectedLessonTrack?.title ?? selectedLesson.trackSlug} ·{' '}
-                  {selectedLessonChapter?.title ?? selectedLesson.chapterSlug}
-                </p>
-                <h2>{selectedLesson.title}</h2>
-                <p className="muted">
-                  예상 {selectedLesson.estimatedMinutes}분 · 목표 {selectedLesson.objectives.length}개
-                </p>
-                {selectedLesson.overview ? <p>{selectedLesson.overview}</p> : null}
-                {selectedLesson.goal ? (
-                  <p>
-                    <strong>레슨 목표:</strong> {selectedLesson.goal}
-                  </p>
-                ) : null}
-                <h3>학습 목표</h3>
-                <ul className="link-list">
-                  {selectedLesson.objectives.map((objective) => (
-                    <li key={objective}>{objective}</li>
-                  ))}
-                </ul>
-                {selectedLesson.successCriteria && selectedLesson.successCriteria.length > 0 ? (
-                  <>
-                    <h3>완료 기준</h3>
-                    <ul className="link-list">
-                      {selectedLesson.successCriteria.map((criterion) => (
-                        <li key={criterion}>{criterion}</li>
-                      ))}
-                    </ul>
-                  </>
-                ) : null}
-                <div className="inline-actions">
-                  <Link
-                    className="secondary-btn"
-                    to={`/learn/${selectedLesson.trackSlug}/${selectedLesson.chapterSlug}/${selectedLesson.slug}`}
-                  >
-                    레슨 페이지 열기
-                  </Link>
-                </div>
-              </section>
-            ) : (
-              <section className="vm-lesson-card">
-                <h2>선택된 레슨이 없습니다.</h2>
-              </section>
-            )}
-
-            <section className="vm-mission-list-card">
-              <h2>미션 체크리스트</h2>
-              {lessonMissions.length === 0 ? (
-                <p className="muted">이 레슨에는 미션이 없습니다.</p>
-              ) : (
-                <div className="vm-mission-list">
-                  {lessonMissions.map((mission, index) => {
-                    const missionStatus = missionStatusMap.get(mission.slug);
-                    const missionProgress = getMissionProgressMeta(
-                      missionStatus,
-                      completedMissionSet.has(mission.slug),
-                    );
-                    const isSelected = mission.slug === selectedMissionSlug;
-                    return (
-                      <button
-                        key={mission.id}
-                        type="button"
-                        className={`vm-mission-row ${isSelected ? 'is-active' : ''}`}
-                        onClick={() => setSelectedMissionSlug(mission.slug)}
-                        aria-pressed={isSelected}
-                      >
-                        <span className="vm-mission-row-main">
-                          <strong>
-                            {index + 1}. {mission.title}
-                          </strong>
-                          <small>
-                            {getDifficultyLabel(mission.difficulty)} · 초기 시나리오 {mission.initialScenario}
-                          </small>
-                        </span>
-                        <span className={`vm-mission-row-badge ${missionProgress.className}`}>
-                          {missionProgress.label}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </section>
-
-            {selectedMission ? (
-              <article className="vm-mission-card">
-                <h2>
-                  현재 미션
-                  {selectedMissionOrder ? ` ${selectedMissionOrder}/${lessonMissions.length}` : ''}
-                </h2>
-                <p className="muted">
-                  {selectedMission.title} · 난이도 {getDifficultyLabel(selectedMission.difficulty)}
-                </p>
-                <ul className="link-list">
-                  {selectedMission.hints.map((hint) => (
-                    <li key={hint}>{hint}</li>
-                  ))}
-                </ul>
-
-                {selectedMissionStatus ? (
-                  <div className="vm-mission-status">
-                    <p>
-                      <strong>판정:</strong> {selectedMissionStatus.status} · {selectedMissionStatus.reason}
-                    </p>
-                    {selectedMissionStatus.status === 'manual' ? (
-                      <button type="button" className="secondary-btn" onClick={handleManualMissionComplete}>
-                        수동 완료 처리
-                      </button>
-                    ) : null}
-                  </div>
-                ) : null}
-              </article>
-            ) : (
-              <article className="vm-mission-card">
-                <h2>선택된 미션이 없습니다.</h2>
-              </article>
-            )}
-          </aside>
-
-          <section className="vm-lab-panel" aria-label="VM Simulator">
-            <div className={`vm-runtime-badge ${getMetricBadgeClass(vmStatus)}`}>
-              <span>VM 상태: {vmStatus}</span>
-              <span>{vmStatusText}</span>
-            </div>
-
-            {celebration ? (
-              <section
-                className={`vm-celebration vm-celebration-${celebration.kind}`}
-                role="status"
-                aria-live="polite"
-              >
-                <p>
-                  <strong>{celebration.message}</strong>
-                </p>
-                <p>{celebration.detail}</p>
-              </section>
-            ) : null}
-
-            <section className="vm-poc-controls">
-              <form
-                className="vm-poc-command-form"
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  sendCommand(commandInput);
+        <section className="vm-curriculum-panel vm-curriculum-row-layout">
+          <div className="inline-actions">
+            <button
+              type="button"
+              className="secondary-btn"
+              onClick={() => {
+                setSelectedLessonSlug(BEGINNER_ENTRY_LESSON);
+                const nextMission = content.missions.find((mission) => mission.lessonSlug === BEGINNER_ENTRY_LESSON);
+                setSelectedMissionSlug(nextMission?.slug ?? '');
+              }}
+            >
+              초급 코어로 이동
+            </button>
+            <button
+              type="button"
+              className="secondary-btn"
+              onClick={() => {
+                setSelectedLessonSlug(ADVANCED_ENTRY_LESSON);
+                const nextMission = content.missions.find((mission) => mission.lessonSlug === ADVANCED_ENTRY_LESSON);
+                setSelectedMissionSlug(nextMission?.slug ?? '');
+              }}
+            >
+              심화 과정으로 이동
+            </button>
+          </div>
+          <div className="vm-curriculum-grid">
+            <div className="vm-curriculum-row">
+              <label htmlFor="lesson-select">Lesson</label>
+              <select
+                id="lesson-select"
+                className="sim-input"
+                value={selectedLessonSlug}
+                onChange={(event) => {
+                  const nextLessonSlug = event.target.value;
+                  setSelectedLessonSlug(nextLessonSlug);
+                  const nextMission = content.missions.find((mission) => mission.lessonSlug === nextLessonSlug);
+                  setSelectedMissionSlug(nextMission?.slug ?? '');
                 }}
               >
-                <input
-                  className="vm-poc-command-input"
-                  value={commandInput}
-                  onChange={(event) => setCommandInput(event.target.value)}
-                  placeholder="tmux new-session -d -s lesson"
-                  aria-label="VM shell command"
-                />
-                <button type="submit" className="primary-btn" disabled={vmStatus === 'error'}>
-                  명령 실행
-                </button>
-              </form>
-
-              <div className="vm-poc-quick">
-                {QUICK_COMMANDS.map((item) => (
-                  <button
-                    key={item.label}
-                    type="button"
-                    className="secondary-btn"
-                    onClick={() => sendCommand(item.command)}
-                  >
-                    {item.label}
-                  </button>
+                {content.lessons.map((lesson) => (
+                  <option key={lesson.id} value={lesson.slug}>
+                    {lesson.title}
+                  </option>
                 ))}
-              </div>
+              </select>
+            </div>
+            <div className="vm-curriculum-row">
+              <label htmlFor="mission-select">Mission</label>
+              <select
+                id="mission-select"
+                className="sim-input"
+                value={selectedMissionSlug}
+                onChange={(event) => setSelectedMissionSlug(event.target.value)}
+              >
+                {lessonMissions.map((mission) => (
+                  <option key={mission.id} value={mission.slug}>
+                    {mission.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="vm-lesson-progress">
+            <p>
+              <strong>Lesson 진행:</strong> {lessonCompletedMissionCount}/{lessonMissions.length}
+            </p>
+            <p className="muted">manual 판정 미션: {manualMissionCandidates.length}</p>
+          </div>
+          <div className={`vm-runtime-badge ${getMetricBadgeClass(vmStatus)}`}>
+            <span>VM 상태: {vmStatus}</span>
+            <span>{vmStatusText}</span>
+          </div>
+        </section>
 
-              <p className="vm-poc-status">
-                metrics · sessions {metrics.sessionCount ?? '-'} / windows {metrics.windowCount ?? '-'} / panes{' '}
-                {metrics.paneCount ?? '-'} / mode {metrics.modeIs ?? '-'} / search{' '}
-                {metrics.searchExecuted === null ? '-' : metrics.searchExecuted ? 'yes' : 'no'} / match{' '}
-                {metrics.searchMatchFound === null ? '-' : metrics.searchMatchFound ? 'yes' : 'no'}
-              </p>
-            </section>
-
-            <section className="vm-terminal-shell" aria-label="VM terminal">
-              <div className="vm-terminal-host" ref={terminalHostRef} />
-            </section>
-
-            <details className="vm-poc-debug">
-              <summary>브리지 디버그</summary>
-              <div className="vm-debug-grid">
-                <article>
-                  <h3>Recent Action History</h3>
-                  <pre className="vm-poc-debug-text">{actionHistory.slice(-20).join('\n') || '(empty)'}</pre>
-                </article>
-                <article>
-                  <h3>Recent Command History</h3>
-                  <pre className="vm-poc-debug-text">{commandHistory.slice(-20).join('\n') || '(empty)'}</pre>
-                </article>
-                <article>
-                  <h3>Recent VM Output Lines</h3>
-                  <pre className="vm-poc-debug-text">{debugLines.slice(-50).join('\n') || '(empty)'}</pre>
-                </article>
-              </div>
-            </details>
+        {celebration ? (
+          <section className={`vm-celebration vm-celebration-${celebration.kind}`} role="status" aria-live="polite">
+            <p>
+              <strong>{celebration.message}</strong>
+            </p>
+            <p>{celebration.detail}</p>
           </section>
-        </div>
+        ) : null}
+
+        {selectedLesson ? (
+          <section className="vm-lesson-card">
+            <p className="vm-lesson-card-path">
+              {selectedLessonTrack?.title ?? selectedLesson.trackSlug} ·{' '}
+              {selectedLessonChapter?.title ?? selectedLesson.chapterSlug}
+            </p>
+            <h2>{selectedLesson.title}</h2>
+            <p className="muted">
+              예상 {selectedLesson.estimatedMinutes}분 · 목표 {selectedLesson.objectives.length}개
+            </p>
+            {selectedLesson.goal ? (
+              <p>
+                <strong>레슨 목표:</strong> {selectedLesson.goal}
+              </p>
+            ) : null}
+            <ul className="link-list">
+              {selectedLesson.objectives.map((objective) => (
+                <li key={objective}>{objective}</li>
+              ))}
+            </ul>
+            <div className="inline-actions">
+              <Link
+                className="secondary-btn"
+                to={`/learn/${selectedLesson.trackSlug}/${selectedLesson.chapterSlug}/${selectedLesson.slug}`}
+              >
+                레슨 상세 보기
+              </Link>
+            </div>
+          </section>
+        ) : null}
+
+        {selectedMission ? (
+          <article className="vm-mission-card">
+            <h2>
+              현재 미션
+              {selectedMissionOrder ? ` ${selectedMissionOrder}/${lessonMissions.length}` : ''}
+            </h2>
+            <p className="muted">
+              {selectedMission.title} · 난이도 {getDifficultyLabel(selectedMission.difficulty)}
+            </p>
+            <ul className="link-list">
+              {selectedMission.hints.map((hint) => (
+                <li key={hint}>{hint}</li>
+              ))}
+            </ul>
+            {selectedMissionStatus ? (
+              <div className="vm-mission-status">
+                <p>
+                  <strong>판정:</strong> {selectedMissionStatus.status} · {selectedMissionStatus.reason}
+                </p>
+                {selectedMissionStatus.status === 'manual' ? (
+                  <button type="button" className="secondary-btn" onClick={handleManualMissionComplete}>
+                    수동 완료 처리
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
+          </article>
+        ) : null}
+
+        <section className="vm-poc-controls">
+          <form
+            className="vm-poc-command-form"
+            onSubmit={(event) => {
+              event.preventDefault();
+              sendCommand(commandInput);
+            }}
+          >
+            <input
+              className="vm-poc-command-input"
+              value={commandInput}
+              onChange={(event) => setCommandInput(event.target.value)}
+              placeholder="tmux new-session -d -s lesson"
+              aria-label="VM shell command"
+            />
+            <button type="submit" className="primary-btn" disabled={vmStatus === 'error'}>
+              명령 실행
+            </button>
+          </form>
+
+          <div className="vm-poc-quick">
+            {QUICK_COMMANDS.map((item) => (
+              <button key={item.label} type="button" className="secondary-btn" onClick={() => sendCommand(item.command)}>
+                {item.label}
+              </button>
+            ))}
+          </div>
+
+          <p className="vm-poc-status">
+            metrics · sessions {metrics.sessionCount ?? '-'} / windows {metrics.windowCount ?? '-'} / panes{' '}
+            {metrics.paneCount ?? '-'} / mode {metrics.modeIs ?? '-'} / search{' '}
+            {metrics.searchExecuted === null ? '-' : metrics.searchExecuted ? 'yes' : 'no'} / match{' '}
+            {metrics.searchMatchFound === null ? '-' : metrics.searchMatchFound ? 'yes' : 'no'}
+          </p>
+        </section>
+
+        <section className="vm-terminal-shell" aria-label="VM terminal">
+          <div className="vm-terminal-host" ref={terminalHostRef} />
+        </section>
+
+        <details className="vm-poc-debug">
+          <summary>브리지 디버그</summary>
+          <div className="vm-debug-grid">
+            <article>
+              <h3>Recent Action History</h3>
+              <pre className="vm-poc-debug-text">{actionHistory.slice(-20).join('\n') || '(empty)'}</pre>
+            </article>
+            <article>
+              <h3>Recent Command History</h3>
+              <pre className="vm-poc-debug-text">{commandHistory.slice(-20).join('\n') || '(empty)'}</pre>
+            </article>
+            <article>
+              <h3>Recent VM Output Lines</h3>
+              <pre className="vm-poc-debug-text">{debugLines.slice(-50).join('\n') || '(empty)'}</pre>
+            </article>
+          </div>
+        </details>
       </div>
     </PagePlaceholder>
   );

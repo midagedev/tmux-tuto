@@ -1,46 +1,57 @@
 import { Link } from 'react-router-dom';
 import { PagePlaceholder } from '../components/system/PagePlaceholder';
+import { BRAND } from '../app/brand';
 
 export function HomePage() {
   return (
     <PagePlaceholder
-      eyebrow="tmux Interactive Trainer"
-      title="터미널 실전형 tmux 학습"
-      description="초보자도 바로 시작하고, 끝까지 학습하면 실무에서 tmux를 자연스럽게 쓰도록 설계한 실습형 커리큘럼입니다."
+      eyebrow={BRAND.name}
+      title="바로 실습으로 시작하는 tmux 학습"
+      description={BRAND.tagline}
     >
-      <section className="home-intro-card">
+      <section className="home-intro-card home-brand-hero">
+        <p className="home-brand-kicker">{BRAND.descriptor}</p>
         <p>
-          <strong>이 사이트의 목표:</strong> 한번 쭉 경험해보면, 이후 로컬/원격 터미널 어디서든 tmux 세션을 안정적으로 운영하는
-          개발자가 되는 것.
+          <strong>학습 약속:</strong> {BRAND.valuePromise}
         </p>
-        <p className="muted">학습 방식은 단순합니다. 짧은 레슨을 보고, 바로 같은 화면에서 실습하고, 미션 통과로 확인합니다.</p>
+        <ul className="link-list">
+          {BRAND.valuePillars.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
       </section>
 
       <div className="inline-actions">
-        <Link to="/onboarding/start" className="primary-btn">
-          3분 온보딩 시작
+        <Link to="/practice?lesson=hello-tmux" className="primary-btn">
+          바로 실습 시작
         </Link>
         <Link to="/learn" className="secondary-btn">
-          커리큘럼 보기
-        </Link>
-        <Link to="/practice" className="secondary-btn">
-          바로 실습 화면 열기
+          초급/심화 경로 보기
         </Link>
       </div>
 
-      <section className="home-value-grid">
+      <section className="home-value-grid home-brand-grid">
         <article className="home-value-card">
-          <h2>1. 가장 쉬운 첫 성공</h2>
-          <p className="muted">첫 레슨은 명령 1개 실행으로 통과하도록 설계해 진입 장벽을 낮췄습니다.</p>
+          <h2>초급 목표</h2>
+          <p className="muted">session 생성, window/pane 분할, detach/attach, 기본 검색까지 혼자 수행</p>
         </article>
         <article className="home-value-card">
-          <h2>2. 레슨과 실습의 결합</h2>
-          <p className="muted">레슨 설명과 tmux 시뮬레이터를 한 화면에서 보고 바로 연습합니다.</p>
+          <h2>심화 목표</h2>
+          <p className="muted">copy-mode/command-mode, 설정 적용, 원격 세션 루틴까지 실무형으로 확장</p>
         </article>
         <article className="home-value-card">
-          <h2>3. 실무 루틴 중심</h2>
-          <p className="muted">단축키 암기보다 세션 유지, 분할, 검색, 명령 모드 루틴을 먼저 내재화합니다.</p>
+          <h2>핵심 가치</h2>
+          <p className="muted">설명은 짧게, 실습은 바로. 단계는 단순하게 유지해 빠르게 숙련도를 올립니다.</p>
         </article>
+      </section>
+
+      <section className="home-tone-card">
+        <h2>Tone &amp; Manner</h2>
+        <ul className="link-list">
+          {BRAND.toneAndManner.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
       </section>
     </PagePlaceholder>
   );
