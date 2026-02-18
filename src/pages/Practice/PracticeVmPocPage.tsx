@@ -2072,17 +2072,6 @@ export function PracticeVmPocPage() {
       description=""
     >
       <div className="vm-poc-panel">
-        <details className="vm-poc-note">
-          <summary>실습 환경 안내</summary>
-          <p>
-            <strong>실행 방식:</strong> 브라우저 안에서 v86 + Alpine Linux + tmux를 직접 실행합니다. 입력은
-            xterm.js를 통해 시리얼 콘솔로 전달됩니다.
-          </p>
-          <p>
-            <strong>브리지:</strong> VM 출력에서 tmux 상태/행동을 probe로 수집해 미션 완료를 자동 판정합니다.
-          </p>
-        </details>
-
         {celebration ? (
           <section className={`vm-celebration-overlay ${isAchievementCelebration ? 'is-toast' : ''}`}>
             <section
