@@ -11,12 +11,8 @@ export function PlaybookCopiedPage() {
       </ul>
 
       <div className="inline-actions">
-        <Link to={`/playbooks/${playbookSlug ?? ''}`} className="primary-btn">
-          플레이북으로 돌아가기
-        </Link>
-        <Link to="/playbooks" className="secondary-btn">
-          플레이북 목록
-        </Link>
+        <Link to={`/playbooks/${playbookSlug ?? ''}`} className="primary-btn">{__tx("\uD50C\uB808\uC774\uBD81\uC73C\uB85C \uB3CC\uC544\uAC00\uAE30")}</Link>
+        <Link to="/playbooks" className="secondary-btn">{__tx("\uD50C\uB808\uC774\uBD81 \uBAA9\uB85D")}</Link>
       </div>
     </PagePlaceholder>);
 }

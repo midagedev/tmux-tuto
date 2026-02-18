@@ -91,8 +91,7 @@ export function OnboardingFirstMissionPage() {
               <li>{__tx("\uD604\uC7AC \uC708\uB3C4\uC6B0\uC5D0\uC11C pane \uC218\uB97C 2\uAC1C \uC774\uC0C1\uC73C\uB85C \uB9CC\uB4E0\uB2E4.")}</li>
               <li>{__tx("\uC644\uB8CC \uD6C4 \uC81C\uCD9C \uBC84\uD2BC\uC73C\uB85C \uCC44\uC810\uD55C\uB2E4.")}</li>
             </ul>
-            <p className="muted">
-              현재 상태: pane {activeWindow.panes.length}개 / mode {simulatorState.mode.value}
+            <p className="muted">{__tx("\uD604\uC7AC \uC0C1\uD0DC: pane")}{activeWindow.panes.length}{__tx("\uAC1C / mode")}{simulatorState.mode.value}
             </p>
           </section>
 
@@ -102,15 +101,9 @@ export function OnboardingFirstMissionPage() {
           </section>
 
           <div className="inline-actions">
-            <button type="button" className="secondary-btn" onClick={() => sendPrefixKey('%')}>
-              Prefix + % (세로 분할)
-            </button>
-            <button type="button" className="secondary-btn" onClick={() => sendPrefixKey('"')}>
-              Prefix + " (가로 분할)
-            </button>
-            <button type="button" className="secondary-btn" onClick={() => sendPrefixKey('h')}>
-              Prefix + h (패인 이동)
-            </button>
+            <button type="button" className="secondary-btn" onClick={() => sendPrefixKey('%')}>{__tx("Prefix + % (\uC138\uB85C \uBD84\uD560)")}</button>
+            <button type="button" className="secondary-btn" onClick={() => sendPrefixKey('"')}>{__tx("Prefix + \" (\uAC00\uB85C \uBD84\uD560)")}</button>
+            <button type="button" className="secondary-btn" onClick={() => sendPrefixKey('h')}>{__tx("Prefix + h (\uD328\uC778 \uC774\uB3D9)")}</button>
             <button type="button" className="secondary-btn" onClick={() => {
                 if (mission) {
                     initMissionScenario(mission);
@@ -123,9 +116,7 @@ export function OnboardingFirstMissionPage() {
                 setHintText(null);
                 setAttemptCount(0);
                 setMaxHintLevelUsed(0);
-            }}>
-              미션 상태 초기화
-            </button>
+            }}>{__tx("\uBBF8\uC158 \uC0C1\uD0DC \uCD08\uAE30\uD654")}</button>
           </div>
 
           <section className="onboarding-card">
@@ -146,12 +137,8 @@ export function OnboardingFirstMissionPage() {
             </section>) : null}
 
           <div className="inline-actions">
-            <button type="button" className="primary-btn" onClick={handleCheck}>
-              제출하고 채점하기
-            </button>
-            <Link to="/onboarding/preferences" className="secondary-btn">
-              이전 단계
-            </Link>
+            <button type="button" className="primary-btn" onClick={handleCheck}>{__tx("\uC81C\uCD9C\uD558\uACE0 \uCC44\uC810\uD558\uAE30")}</button>
+            <Link to="/onboarding/preferences" className="secondary-btn">{__tx("\uC774\uC804 \uB2E8\uACC4")}</Link>
           </div>
         </div>)}
     </PagePlaceholder>);

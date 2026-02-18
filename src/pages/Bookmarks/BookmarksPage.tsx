@@ -64,14 +64,12 @@ export function BookmarksPage() {
         <article className="bookmark-metric-card">
           <h2>{__tx("\uC800\uC7A5 \uD56D\uBAA9")}</h2>
           <p>
-            <strong>{bookmarks.length}</strong>개
-          </p>
+            <strong>{bookmarks.length}</strong>{__tx("\uAC1C")}</p>
         </article>
         <article className="bookmark-metric-card">
           <h2>{__tx("\uD604\uC7AC \uD544\uD130 \uACB0\uACFC")}</h2>
           <p>
-            <strong>{filteredBookmarks.length}</strong>개
-          </p>
+            <strong>{filteredBookmarks.length}</strong>{__tx("\uAC1C")}</p>
         </article>
         <article className="bookmark-metric-card">
           <h2>{__tx("\uD0C0\uC785 \uBD84\uD3EC")}</h2>
@@ -118,9 +116,7 @@ export function BookmarksPage() {
           <option value="snapshot">snapshot</option>
         </select>
         <input className="sim-input" value={tagsInput} onChange={(event) => setTagsInput(event.target.value)} placeholder={__tx("\uD0DC\uADF8 , \uAD6C\uBD84 (\uC608: session,remote)")} aria-label="Bookmark tags"/>
-        <button type="submit" className="primary-btn">
-          북마크 저장
-        </button>
+        <button type="submit" className="primary-btn">{__tx("\uBD81\uB9C8\uD06C \uC800\uC7A5")}</button>
       </form>
 
       <div className="inline-actions bookmark-filter-row">
@@ -140,14 +136,10 @@ export function BookmarksPage() {
                 target: {bookmark.targetId} / tags: {bookmark.tags.join(', ') || '(none)'}
               </p>
               <div className="inline-actions">
-                {buildBookmarkPracticeLink(bookmark) ? (<Link to={buildBookmarkPracticeLink(bookmark) ?? '/practice'} className="secondary-btn">
-                    실습 열기
-                  </Link>) : null}
+                {buildBookmarkPracticeLink(bookmark) ? (<Link to={buildBookmarkPracticeLink(bookmark) ?? '/practice'} className="secondary-btn">{__tx("\uC2E4\uC2B5 \uC5F4\uAE30")}</Link>) : null}
                 <button type="button" className="secondary-btn" onClick={() => {
                     void deleteBookmark(bookmark.id);
-                }}>
-                  삭제
-                </button>
+                }}>{__tx("\uC0AD\uC81C")}</button>
               </div>
               <textarea className="bookmark-note" value={notesByBookmarkId[bookmark.id] ?? ''} onChange={(event) => {
                     void saveBookmarkNote(bookmark.id, event.target.value);

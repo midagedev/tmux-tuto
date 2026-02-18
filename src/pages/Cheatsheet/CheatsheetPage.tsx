@@ -30,9 +30,7 @@ export function CheatsheetPage() {
     }, [normalizedQuery, results]);
     return (<PagePlaceholder eyebrow="Reference Hub" title={__tx("\uCE58\uD2B8\uC2DC\uD2B8 + \uD50C\uB808\uC774\uBD81 \uD1B5\uD569 \uB808\uD37C\uB7F0\uC2A4")} description={__tx("\uC9E7\uC740 \uBA85\uB839\uC740 \uC2E4\uC2B5 \uC6CC\uD06C\uBCA4\uCE58\uC5D0\uC11C \uBC14\uB85C \uAC80\uC99D\uD558\uACE0, \uC6B4\uC601 \uC808\uCC28\uD615 \uC8FC\uC81C\uB294 \uD50C\uB808\uC774\uBD81\uC73C\uB85C \uAE4A\uAC8C \uD559\uC2B5\uD558\uC138\uC694.")}>
       <section className="reference-hub-head">
-        <p className="muted">
-          단축키 표기 안내: `Ctrl+b`는 tmux 기본 prefix 키입니다. 문서의 `prefix`는 보통 `Ctrl+b`를 의미합니다.
-        </p>
+        <p className="muted">{__tx("\uB2E8\uCD95\uD0A4 \uD45C\uAE30 \uC548\uB0B4: `Ctrl+b`\uB294 tmux \uAE30\uBCF8 prefix \uD0A4\uC785\uB2C8\uB2E4. \uBB38\uC11C\uC758 `prefix`\uB294 \uBCF4\uD1B5 `Ctrl+b`\uB97C \uC758\uBBF8\uD569\uB2C8\uB2E4.")}</p>
         <input className="sim-input reference-search-input" value={query} onChange={(event) => setQuery(event.target.value)} placeholder={__tx("\uC608: split, tmux.conf, session, copy-mode")} aria-label="Reference search"/>
         <div className="reference-chip-row">
           {QUICK_QUERY_PRESETS.map((preset) => (<button key={preset} type="button" className="secondary-btn reference-chip" onClick={() => setQuery(preset)}>
@@ -42,18 +40,14 @@ export function CheatsheetPage() {
       </section>
 
       <section className="reference-section">
-        <h2>{normalizedQuery.length > 0 ? `검색 결과 (${results.length})` : __tx("\uC790\uC8FC \uC4F0\uB294 \uB808\uD37C\uB7F0\uC2A4")}</h2>
+        <h2>{normalizedQuery.length > 0 ? __tx("\uAC80\uC0C9 \uACB0\uACFC (") + results.length + ")" : __tx("\uC790\uC8FC \uC4F0\uB294 \uB808\uD37C\uB7F0\uC2A4")}</h2>
         {featuredReferences.length === 0 ? (<EmptyState title={__tx("\uAC80\uC0C9 \uACB0\uACFC\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4")} description={__tx("\uB2E4\uB978 \uD0A4\uC6CC\uB4DC\uB85C \uB2E4\uC2DC \uAC80\uC0C9\uD574 \uBCF4\uC138\uC694.")}/>) : (<div className="reference-grid">
             {featuredReferences.map((item) => (<article key={item.id} className="reference-card">
                 <p className="reference-type">{item.contentType}</p>
                 <h3>{item.title}</h3>
                 <p className="muted">{item.description}</p>
                 <div className="inline-actions">
-                  {item.contentType === 'playbook' && item.playbookSlug ? (<Link to={`/playbooks/${item.playbookSlug}`} className="secondary-btn">
-                      플레이북 단계 보기
-                    </Link>) : (<Link to={resolvePracticePath(item)} className="secondary-btn">
-                      실습 워크벤치 열기
-                    </Link>)}
+                  {item.contentType === 'playbook' && item.playbookSlug ? (<Link to={`/playbooks/${item.playbookSlug}`} className="secondary-btn">{__tx("\uD50C\uB808\uC774\uBD81 \uB2E8\uACC4 \uBCF4\uAE30")}</Link>) : (<Link to={resolvePracticePath(item)} className="secondary-btn">{__tx("\uC2E4\uC2B5 \uC6CC\uD06C\uBCA4\uCE58 \uC5F4\uAE30")}</Link>)}
                 </div>
                 {item.command ? <code className="playbook-command">{item.command}</code> : null}
                 {item.shortcut ? <code className="playbook-command">{item.shortcut}</code> : null}
@@ -68,18 +62,13 @@ export function CheatsheetPage() {
                 <p className="reference-type">{playbook.category}</p>
                 <h3>{playbook.title}</h3>
                 <p className="muted">
-                  {playbook.estimatedMinutes}분 · 단계 {playbook.steps.length}개
-                </p>
-                <p className="muted">선행: {playbook.prerequisites.join(', ') || __tx("\uC5C6\uC74C")}</p>
-                <Link to={`/playbooks/${playbook.slug}`} className="text-link">
-                  상세 가이드 보기
-                </Link>
+                  {playbook.estimatedMinutes}{__tx("\uBD84 \u00B7 \uB2E8\uACC4")}{playbook.steps.length}{__tx("\uAC1C")}</p>
+                <p className="muted">{__tx("\uC120\uD589:")}{playbook.prerequisites.join(', ') || __tx("\uC5C6\uC74C")}</p>
+                <Link to={`/playbooks/${playbook.slug}`} className="text-link">{__tx("\uC0C1\uC138 \uAC00\uC774\uB4DC \uBCF4\uAE30")}</Link>
               </article>))}
           </div>)}
         <div className="inline-actions">
-          <Link to="/playbooks" className="secondary-btn">
-            레퍼런스 라이브러리 전체 보기
-          </Link>
+          <Link to="/playbooks" className="secondary-btn">{__tx("\uB808\uD37C\uB7F0\uC2A4 \uB77C\uC774\uBE0C\uB7EC\uB9AC \uC804\uCCB4 \uBCF4\uAE30")}</Link>
         </div>
       </section>
     </PagePlaceholder>);

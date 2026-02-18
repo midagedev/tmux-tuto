@@ -44,21 +44,19 @@ export function OnboardingDonePage() {
         <section className="onboarding-card">
           <h2>{__tx("\uC124\uC815 \uC694\uC57D")}</h2>
           <ul className="link-list">
-            <li>목표: {goal ? getGoalLabel(goal) : __tx("\uC5C5\uBB34\uC6A9 \uAE30\uCD08 \uBE68\uB9AC \uC775\uD788\uAE30")}</li>
+            <li>{__tx("\uBAA9\uD45C:")}{goal ? getGoalLabel(goal) : __tx("\uC5C5\uBB34\uC6A9 \uAE30\uCD08 \uBE68\uB9AC \uC775\uD788\uAE30")}</li>
             <li>Prefix: {prefixKey}</li>
-            <li>키보드: {keyboardLayout === 'mac' ? 'Mac' : 'Windows/Linux'}</li>
+            <li>{__tx("\uD0A4\uBCF4\uB4DC:")}{keyboardLayout === 'mac' ? 'Mac' : 'Windows/Linux'}</li>
           </ul>
         </section>
 
         <section className="onboarding-card">
           <h2>{__tx("\uAC1C\uC778\uD654 \uCD94\uCC9C")}</h2>
           <ul className="link-list">
-            <li>
-              추천 트랙: <strong>{recommendedTrackTitle}</strong>
+            <li>{__tx("\uCD94\uCC9C \uD2B8\uB799:")}<strong>{recommendedTrackTitle}</strong>
               <p className="muted">{recommendation.trackReason}</p>
             </li>
-            <li>
-              추천 플레이북: <strong>{recommendedPlaybookTitle}</strong>
+            <li>{__tx("\uCD94\uCC9C \uD50C\uB808\uC774\uBD81:")}<strong>{recommendedPlaybookTitle}</strong>
               <p className="muted">{recommendation.playbookReason}</p>
             </li>
           </ul>
@@ -66,12 +64,8 @@ export function OnboardingDonePage() {
       </div>
 
       <div className="inline-actions">
-        <Link to="/learn" className="primary-btn">
-          오늘 1개 미션 시작
-        </Link>
-        <Link to={`/playbooks/${recommendation.playbookSlug}`} className="secondary-btn">
-          추천 플레이북 열기
-        </Link>
+        <Link to="/learn" className="primary-btn">{__tx("\uC624\uB298 1\uAC1C \uBBF8\uC158 \uC2DC\uC791")}</Link>
+        <Link to={`/playbooks/${recommendation.playbookSlug}`} className="secondary-btn">{__tx("\uCD94\uCC9C \uD50C\uB808\uC774\uBD81 \uC5F4\uAE30")}</Link>
       </div>
     </PagePlaceholder>);
 }

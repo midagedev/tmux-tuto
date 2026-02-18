@@ -241,7 +241,7 @@ function renderPlainHintSegmentWithTooltip(text: string, keyPrefix: string) {
             return null;
         }
         if (/^Ctrl\s*\+\s*b$/i.test(segment)) {
-            return (<span key={`${keyPrefix}-shortcut-${index}`} className="vm-shortcut-inline-tooltip" title={SHORTCUT_TOOLTIP_TEXT} aria-label={`단축키 안내: ${SHORTCUT_TOOLTIP_TEXT}`}>
+            return (<span key={`${keyPrefix}-shortcut-${index}`} className="vm-shortcut-inline-tooltip" title={SHORTCUT_TOOLTIP_TEXT} aria-label={__tx("\uB2E8\uCD95\uD0A4 \uC548\uB0B4: ") + SHORTCUT_TOOLTIP_TEXT}>
           <code>Ctrl+b</code>
         </span>);
         }
@@ -257,7 +257,7 @@ function renderHintTextWithTooltips(hint: string, keyPrefix: string) {
         const token = codeMatch[1];
         const shortcutTooltip = getShortcutTooltipForToken(token);
         if (shortcutTooltip) {
-            return (<span key={`${keyPrefix}-code-${index}`} className="vm-shortcut-inline-tooltip" title={shortcutTooltip} aria-label={`단축키 안내: ${shortcutTooltip}`}>
+            return (<span key={`${keyPrefix}-code-${index}`} className="vm-shortcut-inline-tooltip" title={shortcutTooltip} aria-label={__tx("\uB2E8\uCD95\uD0A4 \uC548\uB0B4: ") + shortcutTooltip}>
           <code>{token}</code>
         </span>);
         }
@@ -365,59 +365,59 @@ function evaluateRuleOperator(actual: unknown, operator: string, expected: unkno
 function getRulePreconditionLabel(rule: AppMission['passRules'][number]) {
     switch (rule.kind) {
         case 'sessionCount':
-            return `세션 수가 ${rule.operator} ${String(rule.value)} 이어야 함`;
+            return __tx("\uC138\uC158 \uC218\uAC00 ") + rule.operator + " " + String(rule.value) + __tx(" \uC774\uC5B4\uC57C \uD568");
         case 'windowCount':
-            return `윈도우 수가 ${rule.operator} ${String(rule.value)} 이어야 함`;
+            return __tx("\uC708\uB3C4\uC6B0 \uC218\uAC00 ") + rule.operator + " " + String(rule.value) + __tx(" \uC774\uC5B4\uC57C \uD568");
         case 'paneCount':
-            return `패인 수가 ${rule.operator} ${String(rule.value)} 이어야 함`;
+            return __tx("\uD328\uC778 \uC218\uAC00 ") + rule.operator + " " + String(rule.value) + __tx(" \uC774\uC5B4\uC57C \uD568");
         case 'activeWindowIndex':
-            return `활성 윈도우 인덱스가 ${rule.operator} ${String(rule.value)} 이어야 함`;
+            return __tx("\uD65C\uC131 \uC708\uB3C4\uC6B0 \uC778\uB371\uC2A4\uAC00 ") + rule.operator + " " + String(rule.value) + __tx(" \uC774\uC5B4\uC57C \uD568");
         case 'modeIs':
             return rule.value === 'COPY_MODE'
-                ? __tx("Copy Mode\uC5D0 \uC9C4\uC785\uD574\uC57C \uD568") : `mode 값이 ${rule.operator} ${String(rule.value)} 이어야 함`;
+                ? __tx("Copy Mode\uC5D0 \uC9C4\uC785\uD574\uC57C \uD568") : __tx("mode \uAC12\uC774 ") + rule.operator + " " + String(rule.value) + __tx(" \uC774\uC5B4\uC57C \uD568");
         case 'searchExecuted':
             return __tx("Copy Mode\uC5D0\uC11C \uAC80\uC0C9\uC744 \uC2E4\uD589\uD574\uC57C \uD568");
         case 'searchMatchFound':
             return rule.value === true ? __tx("\uAC80\uC0C9 \uACB0\uACFC\uAC00 \uC788\uC5B4\uC57C \uD568") : __tx("\uAC80\uC0C9 \uACB0\uACFC\uAC00 \uC5C6\uC5B4\uC57C \uD568");
         case 'shellHistoryText':
-            return `쉘 히스토리에 ${JSON.stringify(rule.value)} 실행 기록이 있어야 함`;
+            return __tx("\uC258 \uD788\uC2A4\uD1A0\uB9AC\uC5D0 ") + JSON.stringify(rule.value) + __tx(" \uC2E4\uD589 \uAE30\uB85D\uC774 \uC788\uC5B4\uC57C \uD568");
         case 'actionHistoryText':
-            return `tmux 액션 로그에 ${JSON.stringify(rule.value)} 기록이 있어야 함`;
+            return __tx("tmux \uC561\uC158 \uB85C\uADF8\uC5D0 ") + JSON.stringify(rule.value) + __tx(" \uAE30\uB85D\uC774 \uC788\uC5B4\uC57C \uD568");
         default:
-            return `${rule.kind} ${rule.operator} ${JSON.stringify(rule.value)} 조건`;
+            return rule.kind + " " + rule.operator + " " + JSON.stringify(rule.value) + __tx(" \uC870\uAC74");
     }
 }
 function getRuleCurrentStateText(rule: AppMission['passRules'][number], snapshot: VmBridgeSnapshot) {
     switch (rule.kind) {
         case 'sessionCount':
-            return `현재 session: ${snapshot.sessionCount ?? '-'}`;
+            return __tx("\uD604\uC7AC session: ") + (snapshot.sessionCount ?? '-');
         case 'windowCount':
-            return `현재 window: ${snapshot.windowCount ?? '-'}`;
+            return __tx("\uD604\uC7AC window: ") + (snapshot.windowCount ?? '-');
         case 'paneCount':
-            return `현재 pane: ${snapshot.paneCount ?? '-'}`;
+            return __tx("\uD604\uC7AC pane: ") + (snapshot.paneCount ?? '-');
         case 'activeWindowIndex':
-            return `현재 activeWindow: ${snapshot.activeWindowIndex ?? '-'}`;
+            return __tx("\uD604\uC7AC activeWindow: ") + (snapshot.activeWindowIndex ?? '-');
         case 'modeIs':
-            return `현재 mode: ${snapshot.modeIs ?? '-'}`;
+            return __tx("\uD604\uC7AC mode: ") + (snapshot.modeIs ?? '-');
         case 'searchExecuted':
-            return `현재 searchExecuted: ${snapshot.searchExecuted === null ? '-' : snapshot.searchExecuted ? 'yes' : 'no'}`;
+            return __tx("\uD604\uC7AC searchExecuted: ") + (snapshot.searchExecuted === null ? '-' : snapshot.searchExecuted ? 'yes' : 'no');
         case 'searchMatchFound':
-            return `현재 searchMatchFound: ${snapshot.searchMatchFound === null ? '-' : snapshot.searchMatchFound ? 'yes' : 'no'}`;
+            return __tx("\uD604\uC7AC searchMatchFound: ") + (snapshot.searchMatchFound === null ? '-' : snapshot.searchMatchFound ? 'yes' : 'no');
         case 'shellHistoryText': {
             const expected = typeof rule.value === 'string' ? rule.value : null;
             if (!expected) {
-                return `최근 명령 ${snapshot.commandHistory.length}개`;
+                return __tx("\uCD5C\uADFC \uBA85\uB839 ") + snapshot.commandHistory.length + __tx("\uAC1C");
             }
             const found = snapshot.commandHistory.some((command) => command.includes(expected));
-            return found ? `최근 명령에서 "${expected}" 확인됨` : `최근 명령에서 "${expected}" 미확인`;
+            return found ? __tx("\uCD5C\uADFC \uBA85\uB839\uC5D0\uC11C \"") + expected + __tx("\" \uD655\uC778\uB428") : __tx("\uCD5C\uADFC \uBA85\uB839\uC5D0\uC11C \"") + expected + __tx("\" \uBBF8\uD655\uC778");
         }
         case 'actionHistoryText': {
             const expected = typeof rule.value === 'string' ? rule.value : null;
             if (!expected) {
-                return `최근 액션 ${snapshot.actionHistory.length}개`;
+                return __tx("\uCD5C\uADFC \uC561\uC158 ") + snapshot.actionHistory.length + __tx("\uAC1C");
             }
             const found = snapshot.actionHistory.some((action) => action.includes(expected));
-            return found ? `최근 액션에서 "${expected}" 확인됨` : `최근 액션에서 "${expected}" 미확인`;
+            return found ? __tx("\uCD5C\uADFC \uC561\uC158\uC5D0\uC11C \"") + expected + __tx("\" \uD655\uC778\uB428") : __tx("\uCD5C\uADFC \uC561\uC158\uC5D0\uC11C \"") + expected + __tx("\" \uBBF8\uD655\uC778");
         }
         default:
             return __tx("\uD604\uC7AC \uC0C1\uD0DC \uCE21\uC815\uAC12 \uC5C6\uC74C");
@@ -430,7 +430,7 @@ function getInitialScenarioLabel(initialScenario: string) {
         case 'log-buffer':
             return __tx("\uCD08\uAE30 \uC2DC\uB098\uB9AC\uC624: \uB85C\uADF8 \uBC84\uD37C\uAC00 \uC900\uBE44\uB41C pane\uC5D0\uC11C \uC2DC\uC791");
         default:
-            return `초기 시나리오: ${initialScenario}`;
+            return __tx("\uCD08\uAE30 \uC2DC\uB098\uB9AC\uC624: ") + initialScenario;
     }
 }
 function buildMissionPreconditionItems(mission: AppMission | null, snapshot: VmBridgeSnapshot): MissionPreconditionItem[] {
@@ -824,7 +824,7 @@ export function PracticeVmPocPage() {
             enqueueCelebration({
                 key: `achievement:${definition.id}`,
                 kind: 'achievement',
-                message: `업적 달성: ${definition.title}`,
+                message: __tx("\uC5C5\uC801 \uB2EC\uC131: ") + definition.title,
                 detail: definition.description,
                 achievementId: definition.id,
             });
@@ -842,8 +842,8 @@ export function PracticeVmPocPage() {
         enqueueCelebration({
             key: `achievement-batch:${batchIds.join(',')}`,
             kind: 'achievement',
-            message: `업적 ${unseenDefinitions.length}개 달성`,
-            detail: hiddenCount > 0 ? `${preview} 외 ${hiddenCount}개` : preview,
+            message: __tx("\uC5C5\uC801 ") + unseenDefinitions.length + __tx("\uAC1C \uB2EC\uC131"),
+            detail: hiddenCount > 0 ? preview + __tx(" \uC678 ") + hiddenCount + __tx("\uAC1C") : preview,
         });
     }, [enqueueCelebration]);
     const celebrationAchievement = useMemo(() => {
@@ -1193,16 +1193,16 @@ export function PracticeVmPocPage() {
             enqueueCelebration({
                 key: `lesson:${selectedLesson.slug}`,
                 kind: 'lesson',
-                message: `레슨 완료: ${selectedLesson.title}`,
-                detail: `${lessonMissions.length}개 미션을 모두 완료했습니다. XP +${gainedXp}`,
+                message: __tx("\uB808\uC2A8 \uC644\uB8CC: ") + selectedLesson.title,
+                detail: lessonMissions.length + __tx("\uAC1C \uBBF8\uC158\uC744 \uBAA8\uB450 \uC644\uB8CC\uD588\uC2B5\uB2C8\uB2E4. XP +") + gainedXp,
             });
         }
         else {
             enqueueCelebration({
                 key: `mission:${missionSlug}`,
                 kind: 'mission',
-                message: mode === 'manual' ? `수동 완료 처리: ${selectedMission.title}` : `미션 완료: ${selectedMission.title}`,
-                detail: mode === 'manual' ? `수동 브리지 기록 완료, XP +${gainedXp}` : `자동 판정 통과, XP +${gainedXp}`,
+                message: mode === 'manual' ? __tx("\uC218\uB3D9 \uC644\uB8CC \uCC98\uB9AC: ") + selectedMission.title : __tx("\uBBF8\uC158 \uC644\uB8CC: ") + selectedMission.title,
+                detail: mode === 'manual' ? __tx("\uC218\uB3D9 \uBE0C\uB9AC\uC9C0 \uAE30\uB85D \uC644\uB8CC, XP +") + gainedXp : __tx("\uC790\uB3D9 \uD310\uC815 \uD1B5\uACFC, XP +") + gainedXp,
             });
         }
         const newlyUnlocked = useProgressStore
@@ -1683,9 +1683,7 @@ export function PracticeVmPocPage() {
         <div className="inline-actions">
           <button type="button" className="secondary-btn" onClick={() => {
                 window.location.reload();
-            }}>
-            새로고침
-          </button>
+            }}>{__tx("\uC0C8\uB85C\uACE0\uCE68")}</button>
         </div>
       </PagePlaceholder>);
     }
@@ -1694,12 +1692,9 @@ export function PracticeVmPocPage() {
         <details className="vm-poc-note">
           <summary>{__tx("\uC2E4\uC2B5 \uD658\uACBD \uC548\uB0B4")}</summary>
           <p>
-            <strong>{__tx("\uC2E4\uD589 \uBC29\uC2DD:")}</strong> 브라우저 안에서 v86 + Alpine Linux + tmux를 직접 실행합니다. 입력은
-            xterm.js를 통해 시리얼 콘솔로 전달됩니다.
-          </p>
+            <strong>{__tx("\uC2E4\uD589 \uBC29\uC2DD:")}</strong>{__tx("\uBE0C\uB77C\uC6B0\uC800 \uC548\uC5D0\uC11C v86 + Alpine Linux + tmux\uB97C \uC9C1\uC811 \uC2E4\uD589\uD569\uB2C8\uB2E4. \uC785\uB825\uC740\n            xterm.js\uB97C \uD1B5\uD574 \uC2DC\uB9AC\uC5BC \uCF58\uC194\uB85C \uC804\uB2EC\uB429\uB2C8\uB2E4.")}</p>
           <p>
-            <strong>{__tx("\uBE0C\uB9AC\uC9C0:")}</strong> VM 출력에서 tmux 상태/행동을 probe로 수집해 미션 완료를 자동 판정합니다.
-          </p>
+            <strong>{__tx("\uBE0C\uB9AC\uC9C0:")}</strong>{__tx("VM \uCD9C\uB825\uC5D0\uC11C tmux \uC0C1\uD0DC/\uD589\uB3D9\uC744 probe\uB85C \uC218\uC9D1\uD574 \uBBF8\uC158 \uC644\uB8CC\uB97C \uC790\uB3D9 \uD310\uC815\uD569\uB2C8\uB2E4.")}</p>
         </details>
 
         {celebration ? (<section className={`vm-celebration-overlay ${isAchievementCelebration ? 'is-toast' : ''}`}>
@@ -1713,7 +1708,7 @@ export function PracticeVmPocPage() {
                 <span className={`vm-celebration-kind-chip is-${celebration.kind}`}>
                   {getCelebrationKindLabel(celebration.kind)}
                 </span>
-                {celebrationQueueCount > 0 ? (<span className="vm-celebration-queue-chip">다음 {celebrationQueueCount}</span>) : null}
+                {celebrationQueueCount > 0 ? (<span className="vm-celebration-queue-chip">{__tx("\uB2E4\uC74C")}{celebrationQueueCount}</span>) : null}
               </div>
               <p>
                 <strong>{celebration.message}</strong>
@@ -1724,60 +1719,42 @@ export function PracticeVmPocPage() {
                   <button type="button" className="primary-btn vm-celebration-primary-btn" onClick={() => {
                     selectMissionForAction(nextIncompleteMission.slug);
                     advanceCelebration();
-                }}>
-                    다음 미션 시작
-                  </button>
-                  <p className="muted">다음: {nextIncompleteMission.title}</p>
+                }}>{__tx("\uB2E4\uC74C \uBBF8\uC158 \uC2DC\uC791")}</button>
+                  <p className="muted">{__tx("\uB2E4\uC74C:")}{nextIncompleteMission.title}</p>
                 </section>) : null}
               {celebration.kind === 'lesson' && nextLesson ? (<section className="vm-celebration-next-action">
                   <p className="vm-celebration-next-label">{__tx("\uCD94\uCC9C \uB2E4\uC74C \uB2E8\uACC4")}</p>
                   <button type="button" className="primary-btn vm-celebration-primary-btn" onClick={() => {
                     selectNextLessonForAction();
                     advanceCelebration();
-                }}>
-                    다음 레슨 시작
-                  </button>
-                  <p className="muted">다음: {nextLesson.title}</p>
+                }}>{__tx("\uB2E4\uC74C \uB808\uC2A8 \uC2DC\uC791")}</button>
+                  <p className="muted">{__tx("\uB2E4\uC74C:")}{nextLesson.title}</p>
                 </section>) : null}
               {celebration.kind === 'lesson' && !nextLesson ? (<section className="vm-celebration-next-action">
                   <p className="vm-celebration-next-label">{__tx("\uCD94\uCC9C \uB2E4\uC74C \uB2E8\uACC4")}</p>
-                  <Link className="primary-btn vm-celebration-primary-btn" to="/progress">
-                    학습 완료 현황 보기
-                  </Link>
+                  <Link className="primary-btn vm-celebration-primary-btn" to="/progress">{__tx("\uD559\uC2B5 \uC644\uB8CC \uD604\uD669 \uBCF4\uAE30")}</Link>
                 </section>) : null}
               <div className="inline-actions vm-celebration-actions">
-                <Link className="secondary-btn" to="/progress">
-                  업적 보기
-                </Link>
-                {celebrationShareHref ? (<a className="text-link" href={celebrationShareHref} target="_blank" rel="noreferrer">
-                    X 챌린지 공유
-                  </a>) : null}
-                <button ref={celebrationCloseButtonRef} type="button" className="secondary-btn" onClick={advanceCelebration}>
-                  닫기 (Esc)
-                </button>
+                <Link className="secondary-btn" to="/progress">{__tx("\uC5C5\uC801 \uBCF4\uAE30")}</Link>
+                {celebrationShareHref ? (<a className="text-link" href={celebrationShareHref} target="_blank" rel="noreferrer">{__tx("X \uCC4C\uB9B0\uC9C0 \uACF5\uC720")}</a>) : null}
+                <button ref={celebrationCloseButtonRef} type="button" className="secondary-btn" onClick={advanceCelebration}>{__tx("\uB2EB\uAE30 (Esc)")}</button>
               </div>
             </section>
           </section>) : null}
 
         <div className="vm-mobile-switch" role="tablist" aria-label={__tx("\uC2E4\uC2B5 \uD654\uBA74 \uC804\uD658")}>
-          <button type="button" className={`secondary-btn ${mobileWorkbenchView === 'mission' ? 'is-active' : ''}`} onClick={() => setMobileWorkbenchView('mission')}>
-            미션
-          </button>
-          <button type="button" className={`secondary-btn ${mobileWorkbenchView === 'terminal' ? 'is-active' : ''}`} onClick={() => setMobileWorkbenchView('terminal')}>
-            터미널
-          </button>
+          <button type="button" className={`secondary-btn ${mobileWorkbenchView === 'mission' ? 'is-active' : ''}`} onClick={() => setMobileWorkbenchView('mission')}>{__tx("\uBBF8\uC158")}</button>
+          <button type="button" className={`secondary-btn ${mobileWorkbenchView === 'terminal' ? 'is-active' : ''}`} onClick={() => setMobileWorkbenchView('terminal')}>{__tx("\uD130\uBBF8\uB110")}</button>
         </div>
 
         <section className={`vm-workbench vm-workbench-view-${mobileWorkbenchView}`}>
           <aside className="vm-study-panel">
             {selectedMission ? (<article className="vm-mission-card vm-mission-priority-card">
                 <p className="vm-mission-priority-eyebrow">Priority 1</p>
-                <h2>
-                  현재 미션
-                  {selectedMissionOrder ? ` ${selectedMissionOrder}/${lessonMissions.length}` : ''}
+                <h2>{__tx("\uD604\uC7AC \uBBF8\uC158")}{selectedMissionOrder ? ` ${selectedMissionOrder}/${lessonMissions.length}` : ''}
                 </h2>
                 <p className="muted">
-                  {selectedMission.title} · 난이도 {getDifficultyLabel(selectedMission.difficulty)}
+                  {selectedMission.title}{__tx("\u00B7 \uB09C\uC774\uB3C4")}{getDifficultyLabel(selectedMission.difficulty)}
                 </p>
 
                 <section className="vm-mission-command-block">
@@ -1804,16 +1781,14 @@ export function PracticeVmPocPage() {
                 </section>
 
                 <div className="inline-actions">
-                  <button type="button" className="secondary-btn" onClick={() => setMobileWorkbenchView('terminal')}>
-                    터미널로 바로 이동
-                  </button>
+                  <button type="button" className="secondary-btn" onClick={() => setMobileWorkbenchView('terminal')}>{__tx("\uD130\uBBF8\uB110\uB85C \uBC14\uB85C \uC774\uB3D9")}</button>
                 </div>
 
                 <ul className="link-list">
                   {missionHintPreview.map((hint, index) => (<li key={hint}>{renderHintTextWithTooltips(hint, `hint-preview-${index}`)}</li>))}
                 </ul>
                 {hiddenMissionHintCount > 0 ? (<details className="vm-mission-hints-more">
-                    <summary>힌트 {hiddenMissionHintCount}{__tx("\uAC1C \uB354 \uBCF4\uAE30")}</summary>
+                    <summary>{__tx("\uD78C\uD2B8")}{hiddenMissionHintCount}{__tx("\uAC1C \uB354 \uBCF4\uAE30")}</summary>
                     <ul className="link-list">
                       {selectedMission.hints.slice(missionHintPreview.length).map((hint, index) => (<li key={hint}>{renderHintTextWithTooltips(hint, `hint-more-${index}`)}</li>))}
                     </ul>
@@ -1822,9 +1797,7 @@ export function PracticeVmPocPage() {
                     <p>
                       <strong>{__tx("\uD310\uC815:")}</strong> {selectedMissionStatus.status} · {selectedMissionStatus.reason}
                     </p>
-                    {selectedMissionStatus.status === 'manual' ? (<button type="button" className="secondary-btn" onClick={handleManualMissionComplete}>
-                        수동 완료 처리
-                      </button>) : null}
+                    {selectedMissionStatus.status === 'manual' ? (<button type="button" className="secondary-btn" onClick={handleManualMissionComplete}>{__tx("\uC218\uB3D9 \uC644\uB8CC \uCC98\uB9AC")}</button>) : null}
                   </div>) : null}
               </article>) : null}
 
@@ -1835,51 +1808,35 @@ export function PracticeVmPocPage() {
               {selectedMission && selectedMissionStatus?.status === 'complete' && !selectedMissionCompleted ? (<p className="muted">{__tx("\uC644\uB8CC \uD310\uC815 \uBC18\uC601 \uC911\uC785\uB2C8\uB2E4. \uC7A0\uC2DC \uD6C4 \uC790\uB3D9\uC73C\uB85C \uC644\uB8CC \uCC98\uB9AC\uB429\uB2C8\uB2E4.")}</p>) : null}
               {selectedMission && selectedMissionCompleted && nextIncompleteMission ? (<>
                   <p>
-                    <strong>{selectedMission.title}</strong> 완료됨. 다음 미션으로 이동해 이어서 진행하세요.
-                  </p>
-                  <button type="button" className="primary-btn vm-next-action-btn" onClick={() => selectMissionForAction(nextIncompleteMission.slug)}>
-                    다음 미션으로 이동
-                  </button>
-                  <p className="muted">다음: {nextIncompleteMission.title}</p>
+                    <strong>{selectedMission.title}</strong>{__tx("\uC644\uB8CC\uB428. \uB2E4\uC74C \uBBF8\uC158\uC73C\uB85C \uC774\uB3D9\uD574 \uC774\uC5B4\uC11C \uC9C4\uD589\uD558\uC138\uC694.")}</p>
+                  <button type="button" className="primary-btn vm-next-action-btn" onClick={() => selectMissionForAction(nextIncompleteMission.slug)}>{__tx("\uB2E4\uC74C \uBBF8\uC158\uC73C\uB85C \uC774\uB3D9")}</button>
+                  <p className="muted">{__tx("\uB2E4\uC74C:")}{nextIncompleteMission.title}</p>
                 </>) : null}
               {selectedMission && selectedMissionCompleted && !nextIncompleteMission && lessonCompleted && nextLesson ? (<>
                   <p>
-                    <strong>{__tx("\uD604\uC7AC \uB808\uC2A8 \uC644\uB8CC.")}</strong> 다음 레슨으로 넘어가 학습 흐름을 이어가세요.
-                  </p>
-                  <button type="button" className="primary-btn vm-next-action-btn" onClick={selectNextLessonForAction}>
-                    다음 레슨 시작
-                  </button>
-                  <p className="muted">다음: {nextLesson.title}</p>
+                    <strong>{__tx("\uD604\uC7AC \uB808\uC2A8 \uC644\uB8CC.")}</strong>{__tx("\uB2E4\uC74C \uB808\uC2A8\uC73C\uB85C \uB118\uC5B4\uAC00 \uD559\uC2B5 \uD750\uB984\uC744 \uC774\uC5B4\uAC00\uC138\uC694.")}</p>
+                  <button type="button" className="primary-btn vm-next-action-btn" onClick={selectNextLessonForAction}>{__tx("\uB2E4\uC74C \uB808\uC2A8 \uC2DC\uC791")}</button>
+                  <p className="muted">{__tx("\uB2E4\uC74C:")}{nextLesson.title}</p>
                 </>) : null}
               {selectedMission && selectedMissionCompleted && !nextIncompleteMission && lessonCompleted && !nextLesson ? (<>
                   <p>
-                    <strong>{__tx("\uC804\uCCB4 \uB808\uC2A8\uC744 \uC644\uB8CC\uD588\uC2B5\uB2C8\uB2E4.")}</strong> 진행 현황에서 업적과 누적 XP를 확인하세요.
-                  </p>
-                  <Link className="primary-btn vm-next-action-btn" to="/progress">
-                    진행 현황 보기
-                  </Link>
+                    <strong>{__tx("\uC804\uCCB4 \uB808\uC2A8\uC744 \uC644\uB8CC\uD588\uC2B5\uB2C8\uB2E4.")}</strong>{__tx("\uC9C4\uD589 \uD604\uD669\uC5D0\uC11C \uC5C5\uC801\uACFC \uB204\uC801 XP\uB97C \uD655\uC778\uD558\uC138\uC694.")}</p>
+                  <Link className="primary-btn vm-next-action-btn" to="/progress">{__tx("\uC9C4\uD589 \uD604\uD669 \uBCF4\uAE30")}</Link>
                 </>) : null}
               {selectedMission && !selectedMissionCompleted && selectedMissionStatus?.status === 'manual' ? (<>
                   <p>
-                    <strong>{selectedMission.title}</strong>는 자동 판정이 어려워 수동 완료가 필요합니다.
-                  </p>
-                  <button type="button" className="primary-btn vm-next-action-btn" onClick={handleManualMissionComplete}>
-                    수동 완료 처리
-                  </button>
+                    <strong>{selectedMission.title}</strong>{__tx("\uB294 \uC790\uB3D9 \uD310\uC815\uC774 \uC5B4\uB824\uC6CC \uC218\uB3D9 \uC644\uB8CC\uAC00 \uD544\uC694\uD569\uB2C8\uB2E4.")}</p>
+                  <button type="button" className="primary-btn vm-next-action-btn" onClick={handleManualMissionComplete}>{__tx("\uC218\uB3D9 \uC644\uB8CC \uCC98\uB9AC")}</button>
                 </>) : null}
               {selectedMission &&
             !selectedMissionCompleted &&
             selectedMissionStatus?.status !== 'manual' &&
             selectedMissionStatus?.status !== 'complete' ? (<>
                   <p>
-                    <strong>{selectedMission.title}</strong> 미션 수행 중입니다. 터미널에서 힌트를 실행하고 완료 판정을 받으세요.
-                  </p>
-                  <button type="button" className="primary-btn vm-next-action-btn" onClick={() => setMobileWorkbenchView('terminal')}>
-                    터미널로 이동
-                  </button>
+                    <strong>{selectedMission.title}</strong>{__tx("\uBBF8\uC158 \uC218\uD589 \uC911\uC785\uB2C8\uB2E4. \uD130\uBBF8\uB110\uC5D0\uC11C \uD78C\uD2B8\uB97C \uC2E4\uD589\uD558\uACE0 \uC644\uB8CC \uD310\uC815\uC744 \uBC1B\uC73C\uC138\uC694.")}</p>
+                  <button type="button" className="primary-btn vm-next-action-btn" onClick={() => setMobileWorkbenchView('terminal')}>{__tx("\uD130\uBBF8\uB110\uB85C \uC774\uB3D9")}</button>
                 </>) : null}
-              {selectedMissionStatus ? (<p className="vm-next-action-meta">
-                  현재 판정: {selectedMissionStatus.status} · {selectedMissionStatus.reason}
+              {selectedMissionStatus ? (<p className="vm-next-action-meta">{__tx("\uD604\uC7AC \uD310\uC815:")}{selectedMissionStatus.status} · {selectedMissionStatus.reason}
                 </p>) : null}
             </section>
 
@@ -1909,7 +1866,7 @@ export function PracticeVmPocPage() {
                         <strong>
                           {index + 1}. {mission.title}
                         </strong>
-                        <small>난이도 {getDifficultyLabel(mission.difficulty)}</small>
+                        <small>{__tx("\uB09C\uC774\uB3C4")}{getDifficultyLabel(mission.difficulty)}</small>
                       </span>
                       <span className={`vm-mission-row-badge ${badgeClass}`}>{badgeLabel}</span>
                     </button>);
@@ -1924,8 +1881,8 @@ export function PracticeVmPocPage() {
                     {selectedMissionSession.status === 'completed' ? __tx("\uC644\uB8CC\uB428") : __tx("\uC9C4\uD589 \uC911")}
                   </strong>
                 </p>
-                <p className="muted">시작: {formatSessionDateTime(selectedMissionSession.startedAt)}</p>
-                {selectedMissionSession.completedAt ? (<p className="muted">완료: {formatSessionDateTime(selectedMissionSession.completedAt)}</p>) : null}
+                <p className="muted">{__tx("\uC2DC\uC791:")}{formatSessionDateTime(selectedMissionSession.startedAt)}</p>
+                {selectedMissionSession.completedAt ? (<p className="muted">{__tx("\uC644\uB8CC:")}{formatSessionDateTime(selectedMissionSession.completedAt)}</p>) : null}
                 {selectedMissionSession.gainedXp !== null ? (<p className="muted">{__tx("\uD68D\uB4DD XP: +")}{selectedMissionSession.gainedXp}</p>) : null}
               </section>) : null}
 
@@ -1935,36 +1892,30 @@ export function PracticeVmPocPage() {
                   {selectedLessonChapter?.title ?? selectedLesson.chapterSlug}
                 </p>
                 <h2>{selectedLesson.title}</h2>
-                <p className="muted">
-                  예상 {selectedLesson.estimatedMinutes}분 · 목표 {selectedLesson.objectives.length}개
-                </p>
+                <p className="muted">{__tx("\uC608\uC0C1")}{selectedLesson.estimatedMinutes}{__tx("\uBD84 \u00B7 \uBAA9\uD45C")}{selectedLesson.objectives.length}{__tx("\uAC1C")}</p>
                 {selectedLesson.goal ? (<p>
                     <strong>{__tx("\uB808\uC2A8 \uBAA9\uD45C:")}</strong> {selectedLesson.goal}
                   </p>) : null}
                 {lessonSuccessCriteriaPreview.length > 0 ? (<p className="muted">
                     <strong>{__tx("\uC644\uB8CC \uAE30\uC900:")}</strong> {lessonSuccessCriteriaPreview[0]}
-                    {hiddenSuccessCriteriaCount > 0 ? ` (+${hiddenSuccessCriteriaCount}개)` : ''}
+                    {hiddenSuccessCriteriaCount > 0 ? " (+" + hiddenSuccessCriteriaCount + __tx("\uAC1C)") : ''}
                   </p>) : null}
                 {lessonFailureStatePreview.length > 0 ? (<p className="muted">
                     <strong>{__tx("\uBD80\uC871 \uC0C1\uD0DC:")}</strong> {lessonFailureStatePreview[0]}
-                    {hiddenFailureStateCount > 0 ? ` (+${hiddenFailureStateCount}개)` : ''}
+                    {hiddenFailureStateCount > 0 ? " (+" + hiddenFailureStateCount + __tx("\uAC1C)") : ''}
                   </p>) : null}
                 <ul className="link-list">
                   {lessonObjectivePreview.map((objective) => (<li key={objective}>{objective}</li>))}
                   {hiddenObjectiveCount > 0 ? <li className="muted">+ {hiddenObjectiveCount}{__tx("\uAC1C \uBAA9\uD45C \uB354 \uC788\uC74C")}</li> : null}
                 </ul>
                 <div className="inline-actions">
-                  <Link className="secondary-btn" to={`/learn/${selectedLesson.trackSlug}/${selectedLesson.chapterSlug}/${selectedLesson.slug}`}>
-                    레슨 상세 보기
-                  </Link>
+                  <Link className="secondary-btn" to={`/learn/${selectedLesson.trackSlug}/${selectedLesson.chapterSlug}/${selectedLesson.slug}`}>{__tx("\uB808\uC2A8 \uC0C1\uC138 \uBCF4\uAE30")}</Link>
                 </div>
               </section>) : null}
 
             <section className="vm-curriculum-panel vm-curriculum-row-layout">
               <div className="inline-actions">
-                <button type="button" className="secondary-btn" onClick={() => selectLessonForAction(LEARNING_PATH_ENTRY_LESSON, { resetFilter: true })}>
-                  통합 학습 경로 처음으로
-                </button>
+                <button type="button" className="secondary-btn" onClick={() => selectLessonForAction(LEARNING_PATH_ENTRY_LESSON, { resetFilter: true })}>{__tx("\uD1B5\uD569 \uD559\uC2B5 \uACBD\uB85C \uCC98\uC74C\uC73C\uB85C")}</button>
               </div>
               <div className="vm-lesson-filter" role="tablist" aria-label={__tx("\uB808\uC2A8 \uD544\uD130")}>
                 {LESSON_FILTER_OPTIONS.map((option) => (<button key={option.value} type="button" className={`secondary-btn vm-lesson-filter-btn ${lessonFilter === option.value ? 'is-active' : ''}`} onClick={() => setLessonFilter(option.value)}>
@@ -1998,10 +1949,10 @@ export function PracticeVmPocPage() {
                 <p>
                   <strong>{__tx("Lesson \uC9C4\uD589:")}</strong> {lessonCompletedMissionCount}/{lessonMissions.length}
                 </p>
-                <p className="muted">manual 판정 미션: {manualMissionCandidates.length}</p>
+                <p className="muted">{__tx("manual \uD310\uC815 \uBBF8\uC158:")}{manualMissionCandidates.length}</p>
               </div>
               <div className={`vm-runtime-badge ${getMetricBadgeClass(vmStatus)}`}>
-                <span>VM 상태: {vmStatus}</span>
+                <span>{__tx("VM \uC0C1\uD0DC:")}{vmStatus}</span>
                 <span>{vmStatusText}</span>
               </div>
             </section>
@@ -2010,23 +1961,17 @@ export function PracticeVmPocPage() {
           <section className="vm-lab-panel">
             <section className="vm-poc-controls">
               <div className="inline-actions">
-                <Link className="secondary-btn" to="/learn">
-                  커리큘럼으로 이동
-                </Link>
+                <Link className="secondary-btn" to="/learn">{__tx("\uCEE4\uB9AC\uD058\uB7FC\uC73C\uB85C \uC774\uB3D9")}</Link>
                 <button type="button" className="secondary-btn" onClick={() => {
             setVmEpoch((value) => value + 1);
-        }}>
-                  VM 재시작
-                </button>
+        }}>{__tx("VM \uC7AC\uC2DC\uC791")}</button>
                 <label className="vm-poc-check" htmlFor="auto-probe-toggle">
                   <input id="auto-probe-toggle" type="checkbox" checked={autoProbe} onChange={(event) => setAutoProbe(event.target.checked)}/>
                   Auto probe
                 </label>
                 <button type="button" className="secondary-btn" onClick={() => {
             sendInternalCommand(PROBE_TRIGGER_COMMAND);
-        }}>
-                  Probe 지금 실행
-                </button>
+        }}>{__tx("Probe \uC9C0\uAE08 \uC2E4\uD589")}</button>
               </div>
 
               <form className="vm-poc-command-form" onSubmit={(event) => {
@@ -2034,9 +1979,7 @@ export function PracticeVmPocPage() {
             sendCommand(commandInput);
         }}>
                 <input className="vm-poc-command-input" value={commandInput} onChange={(event) => setCommandInput(event.target.value)} placeholder="tmux new-session -d -s lesson" aria-label="VM shell command"/>
-                <button type="submit" className="primary-btn" disabled={vmStatus === 'error'}>
-                  명령 실행
-                </button>
+                <button type="submit" className="primary-btn" disabled={vmStatus === 'error'}>{__tx("\uBA85\uB839 \uC2E4\uD589")}</button>
               </form>
 
               <details className="vm-poc-quick-wrap">

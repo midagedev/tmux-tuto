@@ -24,9 +24,7 @@ export function OnboardingStartPage() {
             <li>{__tx("\uACC4\uC815 \uAE30\uBC18 \uD074\uB77C\uC6B0\uB4DC \uB3D9\uAE30\uD654")}</li>
             <li>{__tx("\uBC31\uC5D4\uB4DC \uB85C\uADF8 \uC218\uC9D1")}</li>
           </ul>
-          <p className="muted">
-            실제 tmux와의 차이는 실습 화면의 <strong>SIMULATED</strong> 안내에서 항상 확인할 수 있습니다.
-          </p>
+          <p className="muted">{__tx("\uC2E4\uC81C tmux\uC640\uC758 \uCC28\uC774\uB294 \uC2E4\uC2B5 \uD654\uBA74\uC758")}<strong>SIMULATED</strong>{__tx("\uC548\uB0B4\uC5D0\uC11C \uD56D\uC0C1 \uD655\uC778\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.")}</p>
         </section>
       </div>
 
@@ -34,16 +32,11 @@ export function OnboardingStartPage() {
         <button type="button" className="primary-btn" onClick={() => {
             startOnboarding();
             navigate('/onboarding/goal');
-        }}>
-          온보딩 시작
-        </button>
-        <button type="button" className="secondary-btn" onClick={() => navigate('/learn')}>
-          바로 커리큘럼 보기
-        </button>
+        }}>{__tx("\uC628\uBCF4\uB529 \uC2DC\uC791")}</button>
+        <button type="button" className="secondary-btn" onClick={() => navigate('/learn')}>{__tx("\uBC14\uB85C \uCEE4\uB9AC\uD058\uB7FC \uBCF4\uAE30")}</button>
       </div>
 
-      <p className="muted">
-        시작 상태: {startedAt ? __tx("\uC9C4\uD589 \uC911") : __tx("\uBBF8\uC2DC\uC791")}{__tx("| \uC644\uB8CC \uC0C1\uD0DC:")}{' '}
+      <p className="muted">{__tx("\uC2DC\uC791 \uC0C1\uD0DC:")}{startedAt ? __tx("\uC9C4\uD589 \uC911") : __tx("\uBBF8\uC2DC\uC791")}{__tx("| \uC644\uB8CC \uC0C1\uD0DC:")}{' '}
         {completedAt ? __tx("\uC644\uB8CC\uB428") : __tx("\uBBF8\uC644\uB8CC")}
       </p>
     </PagePlaceholder>);

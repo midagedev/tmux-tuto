@@ -73,12 +73,8 @@ export function OnboardingPreferencesPage() {
             setPreferences({ prefixKey, keyboardLayout });
             setSimulatorPrefix(prefixKey);
             navigate('/onboarding/first-mission');
-        }}>
-          첫 미션 시작
-        </button>
-        <button type="button" className="secondary-btn" onClick={() => navigate('/onboarding/goal')}>
-          이전 단계
-        </button>
+        }}>{__tx("\uCCAB \uBBF8\uC158 \uC2DC\uC791")}</button>
+        <button type="button" className="secondary-btn" onClick={() => navigate('/onboarding/goal')}>{__tx("\uC774\uC804 \uB2E8\uACC4")}</button>
       </div>
     </PagePlaceholder>);
 }

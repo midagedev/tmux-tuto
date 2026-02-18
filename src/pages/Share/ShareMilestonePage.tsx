@@ -31,9 +31,7 @@ export function ShareMilestonePage() {
     if (!milestone) {
         return (<PagePlaceholder eyebrow="Share" title={__tx("\uC54C \uC218 \uC5C6\uB294 \uB9C8\uC77C\uC2A4\uD1A4")} description={__tx("\uC9C0\uC6D0\uD558\uC9C0 \uC54A\uB294 \uACF5\uC720 \uACBD\uB85C\uC785\uB2C8\uB2E4. Progress \uD398\uC774\uC9C0\uC5D0\uC11C \uB2E4\uC2DC \uC0DD\uC131\uD574 \uC8FC\uC138\uC694.")}>
         <div className="inline-actions">
-          <Link to="/progress" className="primary-btn">
-            Progress로 이동
-          </Link>
+          <Link to="/progress" className="primary-btn">{__tx("Progress\uB85C \uC774\uB3D9")}</Link>
         </div>
       </PagePlaceholder>);
     }
@@ -43,11 +41,11 @@ export function ShareMilestonePage() {
         <h2>{milestone.title}</h2>
         <p>{milestone.description}</p>
         <ul className="link-list">
-          <li>닉네임: {effectivePayload.name}</li>
-          <li>레벨: {effectivePayload.level}</li>
+          <li>{__tx("\uB2C9\uB124\uC784:")}{effectivePayload.name}</li>
+          <li>{__tx("\uB808\uBCA8:")}{effectivePayload.level}</li>
           <li>XP: {effectivePayload.xp}</li>
-          <li>연속 학습일: {streakDays}</li>
-          <li>달성일: {effectivePayload.date}</li>
+          <li>{__tx("\uC5F0\uC18D \uD559\uC2B5\uC77C:")}{streakDays}</li>
+          <li>{__tx("\uB2EC\uC131\uC77C:")}{effectivePayload.date}</li>
         </ul>
       </div>
 
@@ -60,12 +58,8 @@ export function ShareMilestonePage() {
             copyTextToClipboard(shareUrl)
                 .then(() => setCopyStatus(__tx("\uACF5\uC720 \uB9C1\uD06C\uB97C \uBCF5\uC0AC\uD588\uC2B5\uB2C8\uB2E4.")))
                 .catch(() => setCopyStatus(__tx("\uD074\uB9BD\uBCF4\uB4DC \uBCF5\uC0AC\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.")));
-        }}>
-            링크 복사
-          </button>
-          <a className="primary-btn" href={buildTwitterIntentUrl(shareUrl, shareMessage)} target="_blank" rel="noreferrer">
-            X에서 공유
-          </a>
+        }}>{__tx("\uB9C1\uD06C \uBCF5\uC0AC")}</button>
+          <a className="primary-btn" href={buildTwitterIntentUrl(shareUrl, shareMessage)} target="_blank" rel="noreferrer">{__tx("X\uC5D0\uC11C \uACF5\uC720")}</a>
         </div>
         {copyStatus ? (<p className="muted" role="status" aria-live="polite">
             {copyStatus}

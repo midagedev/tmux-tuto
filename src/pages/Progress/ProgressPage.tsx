@@ -155,7 +155,7 @@ export function ProgressPage() {
             attemptNumber: 1,
             completedTrackSlugs,
         });
-        window.alert(`샘플 완료 처리: +${gainedXp} XP`);
+        window.alert(__tx("\uC0D8\uD50C \uC644\uB8CC \uCC98\uB9AC: +") + gainedXp + " XP");
     };
     return (<PagePlaceholder eyebrow="Progress" title={__tx("\uD559\uC2B5 \uC9C4\uD589\uB3C4")} description={__tx("XP, \uB808\uBCA8, \uC2A4\uD2B8\uB9AD, \uD2B8\uB799\uBCC4 \uC644\uB8CC \uD604\uD669\uC744 \uD655\uC778\uD569\uB2C8\uB2E4.")}>
       {!content ? (<EmptyState title={__tx("\uC9C4\uD589 \uB370\uC774\uD130\uB97C \uB85C\uB4DC\uD560 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4")} description={__tx("\uCF58\uD150\uCE20 \uB85C\uB4DC\uB97C \uB2E4\uC2DC \uD655\uC778\uD574 \uC8FC\uC138\uC694.")}/>) : (<div className="sim-panel">
@@ -167,8 +167,7 @@ export function ProgressPage() {
               <strong>{__tx("\uB808\uBCA8:")}</strong> {level}
             </p>
             <p>
-              <strong>{__tx("\uC5F0\uC18D \uD559\uC2B5:")}</strong> {streakDays}일
-            </p>
+              <strong>{__tx("\uC5F0\uC18D \uD559\uC2B5:")}</strong> {streakDays}{__tx("\uC77C")}</p>
             <p>
               <strong>{__tx("\uC644\uB8CC \uBBF8\uC158:")}</strong> {completedMissionSlugs.length}
             </p>
@@ -189,11 +188,9 @@ export function ProgressPage() {
                     const lesson = lessonBySlug.get(lessonSlug);
                     return (<li key={session.id}>
                           <strong>{mission?.title ?? session.missionSlug}</strong>
-                          <p className="muted">시작: {formatSessionDateTime(session.startedAt)}</p>
+                          <p className="muted">{__tx("\uC2DC\uC791:")}{formatSessionDateTime(session.startedAt)}</p>
                           <p className="muted">{lesson?.title ?? lessonSlug}</p>
-                          {lessonSlug ? (<Link className="secondary-btn" to={`/practice?lesson=${lessonSlug}&mission=${session.missionSlug}`}>
-                              이어서 실습
-                            </Link>) : null}
+                          {lessonSlug ? (<Link className="secondary-btn" to={`/practice?lesson=${lessonSlug}&mission=${session.missionSlug}`}>{__tx("\uC774\uC5B4\uC11C \uC2E4\uC2B5")}</Link>) : null}
                         </li>);
                 })}
                   </ul>)}
@@ -207,8 +204,7 @@ export function ProgressPage() {
                     const lesson = lessonBySlug.get(lessonSlug);
                     return (<li key={session.id}>
                           <strong>{mission?.title ?? session.missionSlug}</strong>
-                          <p className="muted">
-                            완료: {formatSessionDateTime(session.completedAt)} · XP +
+                          <p className="muted">{__tx("\uC644\uB8CC:")}{formatSessionDateTime(session.completedAt)} · XP +
                             {session.gainedXp ?? 0}
                           </p>
                           <p className="muted">{lesson?.title ?? lessonSlug}</p>
@@ -231,8 +227,7 @@ export function ProgressPage() {
           <section className="playbook-section">
             <h2>{__tx("Core \uC5C5\uC801")}</h2>
             <p className="muted">
-              {unlockedCoreAchievements.length}/{coreAchievementRows.length} 달성
-            </p>
+              {unlockedCoreAchievements.length}/{coreAchievementRows.length}{__tx("\uB2EC\uC131")}</p>
             <div className="achievement-grid">
               {coreAchievementRows.map((achievement) => (<article key={achievement.id} className={`achievement-card ${achievement.unlocked ? 'is-unlocked' : 'is-locked'}`}>
                   <h3>{achievement.title}</h3>
@@ -243,9 +238,7 @@ export function ProgressPage() {
                         xp,
                         date: shareDate,
                         badge: achievement.id,
-                    }), buildAchievementChallengeShareText(achievement.shareText, achievement.id))} target="_blank" rel="noreferrer">
-                      X 챌린지 공유
-                    </a>) : null}
+                    }), buildAchievementChallengeShareText(achievement.shareText, achievement.id))} target="_blank" rel="noreferrer">{__tx("X \uCC4C\uB9B0\uC9C0 \uACF5\uC720")}</a>) : null}
                 </article>))}
             </div>
           </section>
@@ -253,21 +246,20 @@ export function ProgressPage() {
           <section className="playbook-section">
             <h2>{__tx("Fun \uC5C5\uC801")}</h2>
             <p className="muted">
-              {unlockedFunAchievements.length}/{funAchievementRows.length} 달성
-            </p>
+              {unlockedFunAchievements.length}/{funAchievementRows.length}{__tx("\uB2EC\uC131")}</p>
             <ul className="link-list">
-              <li>pane 분할 누적: {tmuxSkillStats.splitCount}</li>
-              <li>최대 pane 수: {tmuxSkillStats.maxPaneCount}</li>
-              <li>window 생성: {tmuxSkillStats.newWindowCount}</li>
-              <li>session 생성: {tmuxSkillStats.newSessionCount}</li>
-              <li>copy-mode 진입: {tmuxSkillStats.copyModeCount}</li>
-              <li>pane resize 누적: {tmuxSkillStats.paneResizeCount}</li>
-              <li>pane 이동/선택 누적: {tmuxSkillStats.paneSelectCount}</li>
-              <li>layout 변경 누적: {tmuxSkillStats.layoutSelectCount}</li>
-              <li>zoom 토글 누적: {tmuxSkillStats.zoomToggleCount}</li>
-              <li>sync 토글 누적: {tmuxSkillStats.syncToggleCount}</li>
-              <li>command-prompt 실행: {tmuxSkillStats.commandPromptCount}</li>
-              <li>choose-tree 실행: {tmuxSkillStats.chooseTreeCount}</li>
+              <li>{__tx("pane \uBD84\uD560 \uB204\uC801:")}{tmuxSkillStats.splitCount}</li>
+              <li>{__tx("\uCD5C\uB300 pane \uC218:")}{tmuxSkillStats.maxPaneCount}</li>
+              <li>{__tx("window \uC0DD\uC131:")}{tmuxSkillStats.newWindowCount}</li>
+              <li>{__tx("session \uC0DD\uC131:")}{tmuxSkillStats.newSessionCount}</li>
+              <li>{__tx("copy-mode \uC9C4\uC785:")}{tmuxSkillStats.copyModeCount}</li>
+              <li>{__tx("pane resize \uB204\uC801:")}{tmuxSkillStats.paneResizeCount}</li>
+              <li>{__tx("pane \uC774\uB3D9/\uC120\uD0DD \uB204\uC801:")}{tmuxSkillStats.paneSelectCount}</li>
+              <li>{__tx("layout \uBCC0\uACBD \uB204\uC801:")}{tmuxSkillStats.layoutSelectCount}</li>
+              <li>{__tx("zoom \uD1A0\uAE00 \uB204\uC801:")}{tmuxSkillStats.zoomToggleCount}</li>
+              <li>{__tx("sync \uD1A0\uAE00 \uB204\uC801:")}{tmuxSkillStats.syncToggleCount}</li>
+              <li>{__tx("command-prompt \uC2E4\uD589:")}{tmuxSkillStats.commandPromptCount}</li>
+              <li>{__tx("choose-tree \uC2E4\uD589:")}{tmuxSkillStats.chooseTreeCount}</li>
             </ul>
             <div className="achievement-grid">
               {funAchievementRows.map((achievement) => (<article key={achievement.id} className={`achievement-card ${achievement.unlocked ? 'is-unlocked' : 'is-locked'}`}>
@@ -279,9 +271,7 @@ export function ProgressPage() {
                         xp,
                         date: shareDate,
                         badge: achievement.id,
-                    }), buildAchievementChallengeShareText(achievement.shareText, achievement.id))} target="_blank" rel="noreferrer">
-                      X 챌린지 공유
-                    </a>) : null}
+                    }), buildAchievementChallengeShareText(achievement.shareText, achievement.id))} target="_blank" rel="noreferrer">{__tx("X \uCC4C\uB9B0\uC9C0 \uACF5\uC720")}</a>) : null}
                 </article>))}
             </div>
           </section>
@@ -292,9 +282,7 @@ export function ProgressPage() {
                 {recommendedMissions.map((mission) => (<li key={mission.slug}>
                     <strong>{mission.title}</strong> <span className="muted">({mission.difficulty})</span>
                     <div className="inline-actions">
-                      <button type="button" className="secondary-btn" onClick={() => simulateMissionPass(mission)}>
-                        샘플 통과 처리
-                      </button>
+                      <button type="button" className="secondary-btn" onClick={() => simulateMissionPass(mission)}>{__tx("\uC0D8\uD50C \uD1B5\uACFC \uCC98\uB9AC")}</button>
                     </div>
                   </li>))}
               </ul>)}
@@ -305,8 +293,7 @@ export function ProgressPage() {
             {milestoneLinks.length === 0 ? (<p className="muted">{__tx("\uACF5\uC720 \uAC00\uB2A5\uD55C \uB9C8\uC77C\uC2A4\uD1A4\uC774 \uC544\uC9C1 \uC5C6\uC2B5\uB2C8\uB2E4.")}</p>) : (<ul className="link-list">
                 {milestoneLinks.map((item) => (<li key={item.milestoneSlug}>
                     <Link to={item.href} className="secondary-btn">
-                      {item.title} 공유 페이지 열기
-                    </Link>
+                      {item.title}{__tx("\uACF5\uC720 \uD398\uC774\uC9C0 \uC5F4\uAE30")}</Link>
                   </li>))}
               </ul>)}
           </section>

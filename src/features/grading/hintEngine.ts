@@ -57,7 +57,7 @@ export function getLiveHintForMission(mission: AppMission, result: MissionGradeR
     }
     return {
         hintLevel: 1,
-        hintText: `현재 가장 부족한 조건: ${formatPrimaryRule(result)}. ${getRuleActionHint(firstRule)}`,
+        hintText: __tx("\uD604\uC7AC \uAC00\uC7A5 \uBD80\uC871\uD55C \uC870\uAC74: ") + formatPrimaryRule(result) + ". " + getRuleActionHint(firstRule),
     };
 }
 export function getHintForMission(mission: AppMission, result: MissionGradeResult, attemptCount: number): HintPayload {
@@ -73,11 +73,11 @@ export function getHintForMission(mission: AppMission, result: MissionGradeResul
     if (normalizedAttempt === 2) {
         return {
             hintLevel: 2,
-            hintText: `${mission.hints[1] ?? `실패 조건: ${formatFailedRules(result)}`} 현재 핵심 조건: ${formatPrimaryRule(result)}`,
+            hintText: (mission.hints[1] ?? __tx("\uC2E4\uD328 \uC870\uAC74: ") + formatFailedRules(result)) + __tx(" \uD604\uC7AC \uD575\uC2EC \uC870\uAC74: ") + formatPrimaryRule(result),
         };
     }
     return {
         hintLevel: 3,
-        hintText: `정답 경로 요약: 먼저 목표 상태를 만들고, 마지막으로 제출하세요. 실패 조건: ${formatFailedRules(result)}. 우선순위: ${actionHint}`,
+        hintText: __tx("\uC815\uB2F5 \uACBD\uB85C \uC694\uC57D: \uBA3C\uC800 \uBAA9\uD45C \uC0C1\uD0DC\uB97C \uB9CC\uB4E4\uACE0, \uB9C8\uC9C0\uB9C9\uC73C\uB85C \uC81C\uCD9C\uD558\uC138\uC694. \uC2E4\uD328 \uC870\uAC74: ") + formatFailedRules(result) + __tx(". \uC6B0\uC120\uC21C\uC704: ") + actionHint,
     };
 }

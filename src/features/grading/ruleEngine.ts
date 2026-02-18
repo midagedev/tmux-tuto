@@ -91,7 +91,7 @@ export function evaluateMission(state: SimulatorState, mission: AppMission): Mis
                 operator: rule.operator,
                 expected: rule.value,
                 actual,
-                reason: `${rule.kind} ${rule.operator} ${JSON.stringify(rule.value)} 조건을 충족하지 못했습니다.`,
+                reason: rule.kind + " " + rule.operator + " " + JSON.stringify(rule.value) + __tx(" \uC870\uAC74\uC744 \uCDA9\uC871\uD558\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4."),
             });
         }
     });

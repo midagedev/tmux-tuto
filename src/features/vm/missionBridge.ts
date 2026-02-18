@@ -122,7 +122,7 @@ export function evaluateMissionWithVmSnapshot(mission: AppMission, snapshot: VmB
     if (unsupportedKinds.size > 0) {
         return {
             status: 'manual',
-            reason: `수동 확인 필요: ${Array.from(unsupportedKinds).join(', ')}`,
+            reason: __tx("\uC218\uB3D9 \uD655\uC778 \uD544\uC694: ") + Array.from(unsupportedKinds).join(', '),
             unsupportedKinds: Array.from(unsupportedKinds),
         };
     }
@@ -135,7 +135,7 @@ export function evaluateMissionWithVmSnapshot(mission: AppMission, snapshot: VmB
     }
     return {
         status: 'incomplete',
-        reason: `미충족 조건: ${failedRules[0]}`,
+        reason: __tx("\uBBF8\uCDA9\uC871 \uC870\uAC74: ") + failedRules[0],
         unsupportedKinds: [],
     };
 }

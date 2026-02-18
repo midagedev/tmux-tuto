@@ -160,9 +160,7 @@ export function LessonPage() {
         return (<PagePlaceholder eyebrow="Lesson" title={__tx("\uB808\uC2A8\uC744 \uCC3E\uC744 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4")} description={__tx("\uC798\uBABB\uB41C \uACBD\uB85C\uC774\uAC70\uB098 \uCF58\uD150\uCE20\uAC00 \uBCC0\uACBD\uB418\uC5C8\uC2B5\uB2C8\uB2E4.")}>
         <EmptyState title={__tx("\uC720\uD6A8\uD55C \uB808\uC2A8\uC774 \uC5C6\uC2B5\uB2C8\uB2E4")} description={__tx("\uCEE4\uB9AC\uD058\uB7FC \uD398\uC774\uC9C0\uC5D0\uC11C \uB2E4\uC2DC \uC120\uD0DD\uD574 \uC8FC\uC138\uC694.")}/>
         <div className="inline-actions">
-          <Link className="secondary-btn" to="/learn">
-            커리큘럼으로 이동
-          </Link>
+          <Link className="secondary-btn" to="/learn">{__tx("\uCEE4\uB9AC\uD058\uB7FC\uC73C\uB85C \uC774\uB3D9")}</Link>
         </div>
       </PagePlaceholder>);
     }
@@ -173,20 +171,16 @@ export function LessonPage() {
     }
     const { track, chapter, lesson, missions, termGlossary } = pageState;
     const lessonTerms = resolveLessonTerms(lesson, missions, termGlossary ?? null);
-    return (<PagePlaceholder eyebrow="Lesson" title={`${track.title} · ${chapter.title}`} description={`${lesson.title} · 예상 ${lesson.estimatedMinutes}분`}>
+    return (<PagePlaceholder eyebrow="Lesson" title={`${track.title} · ${chapter.title}`} description={lesson.title + __tx(" \u00B7 \uC608\uC0C1 ") + lesson.estimatedMinutes + __tx("\uBD84")}>
       <section className="lesson-section lesson-action-panel">
         <ul className="lesson-pill-row">
-          <li className="lesson-pill">예상 {lesson.estimatedMinutes}{__tx("\uBD84")}</li>
-          <li className="lesson-pill">학습 목표 {lesson.objectives.length}{__tx("\uAC1C")}</li>
-          <li className="lesson-pill">미션 {missions.length}{__tx("\uAC1C")}</li>
+          <li className="lesson-pill">{__tx("\uC608\uC0C1")}{lesson.estimatedMinutes}{__tx("\uBD84")}</li>
+          <li className="lesson-pill">{__tx("\uD559\uC2B5 \uBAA9\uD45C")}{lesson.objectives.length}{__tx("\uAC1C")}</li>
+          <li className="lesson-pill">{__tx("\uBBF8\uC158")}{missions.length}{__tx("\uAC1C")}</li>
         </ul>
         <div className="inline-actions">
-          <Link className="primary-btn" to={`/practice?lesson=${lesson.slug}`}>
-            시뮬레이터에서 레슨 시작
-          </Link>
-          <Link className="secondary-btn" to="/learn">
-            커리큘럼 목록
-          </Link>
+          <Link className="primary-btn" to={`/practice?lesson=${lesson.slug}`}>{__tx("\uC2DC\uBBAC\uB808\uC774\uD130\uC5D0\uC11C \uB808\uC2A8 \uC2DC\uC791")}</Link>
+          <Link className="secondary-btn" to="/learn">{__tx("\uCEE4\uB9AC\uD058\uB7FC \uBAA9\uB85D")}</Link>
         </div>
       </section>
 
@@ -209,13 +203,13 @@ export function LessonPage() {
         </ul>
 
         {lesson.successCriteria && lesson.successCriteria.length > 0 ? (<details className="lesson-detail-group">
-            <summary>완료 기준 {lesson.successCriteria.length}{__tx("\uAC1C")}</summary>
+            <summary>{__tx("\uC644\uB8CC \uAE30\uC900")}{lesson.successCriteria.length}{__tx("\uAC1C")}</summary>
             <ul className="link-list">
               {lesson.successCriteria.map((item, index) => (<li key={`${lesson.id}-success-${index}`}>{renderTextWithShortcutTooltip(item, `success-${index}`)}</li>))}
             </ul>
           </details>) : null}
         {lesson.failureStates && lesson.failureStates.length > 0 ? (<details className="lesson-detail-group">
-            <summary>부족 상태 {lesson.failureStates.length}{__tx("\uAC1C")}</summary>
+            <summary>{__tx("\uBD80\uC871 \uC0C1\uD0DC")}{lesson.failureStates.length}{__tx("\uAC1C")}</summary>
             <ul className="link-list">
               {lesson.failureStates.map((item, index) => (<li key={`${lesson.id}-failure-${index}`}>{renderTextWithShortcutTooltip(item, `failure-${index}`)}</li>))}
             </ul>
@@ -237,8 +231,7 @@ export function LessonPage() {
                 const restHints = mission.hints.slice(2);
                 return (<article key={mission.id} className="lesson-mission-card">
                   <h4>{mission.title}</h4>
-                  <p className="lesson-mission-meta">
-                    난이도 {mission.difficulty} · 초기 시나리오 {mission.initialScenario}
+                  <p className="lesson-mission-meta">{__tx("\uB09C\uC774\uB3C4")}{mission.difficulty}{__tx("\u00B7 \uCD08\uAE30 \uC2DC\uB098\uB9AC\uC624")}{mission.initialScenario}
                   </p>
                   {previewHints.length > 0 ? (<ul className="link-list lesson-mission-hints">
                       {previewHints.map((hint, index) => (<li key={`${mission.id}-hint-preview-${index}`}>
@@ -246,7 +239,7 @@ export function LessonPage() {
                         </li>))}
                     </ul>) : (<p className="muted">{__tx("\uD78C\uD2B8\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.")}</p>)}
                   {restHints.length > 0 ? (<details className="lesson-mission-more">
-                      <summary>힌트 {restHints.length}{__tx("\uAC1C \uB354 \uBCF4\uAE30")}</summary>
+                      <summary>{__tx("\uD78C\uD2B8")}{restHints.length}{__tx("\uAC1C \uB354 \uBCF4\uAE30")}</summary>
                       <ul className="link-list lesson-mission-hints">
                         {restHints.map((hint, index) => (<li key={`${mission.id}-hint-rest-${index}`}>
                             {renderTextWithShortcutTooltip(hint, `${mission.id}-hint-rest-${index}`)}

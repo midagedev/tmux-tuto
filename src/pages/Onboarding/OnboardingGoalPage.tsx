@@ -51,12 +51,8 @@ export function OnboardingGoalPage() {
                 return;
             }
             navigate('/onboarding/preferences');
-        }} disabled={!goal}>
-          입력 선호 설정으로 이동
-        </button>
-        <button type="button" className="secondary-btn" onClick={() => navigate('/onboarding/start')}>
-          이전 단계
-        </button>
+        }} disabled={!goal}>{__tx("\uC785\uB825 \uC120\uD638 \uC124\uC815\uC73C\uB85C \uC774\uB3D9")}</button>
+        <button type="button" className="secondary-btn" onClick={() => navigate('/onboarding/start')}>{__tx("\uC774\uC804 \uB2E8\uACC4")}</button>
       </div>
     </PagePlaceholder>);
 }

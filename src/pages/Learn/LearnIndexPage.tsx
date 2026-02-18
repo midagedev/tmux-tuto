@@ -86,12 +86,8 @@ export function LearnIndexPage() {
                 <strong>{__tx("\uCD5C\uC885 \uBAA9\uD45C:")}</strong> {pageData.learningJourney.targetOutcome}
               </p>
               <div className="inline-actions">
-                {learningPathEntry ? (<Link className="primary-btn" to={`/practice?lesson=${learningPathEntry.slug}`}>
-                    통합 경로 바로 시작
-                  </Link>) : null}
-                {paneNavigationEntry ? (<Link className="secondary-btn" to={`/practice?lesson=${paneNavigationEntry.slug}`}>
-                    pane 이동부터 시작
-                  </Link>) : null}
+                {learningPathEntry ? (<Link className="primary-btn" to={`/practice?lesson=${learningPathEntry.slug}`}>{__tx("\uD1B5\uD569 \uACBD\uB85C \uBC14\uB85C \uC2DC\uC791")}</Link>) : null}
+                {paneNavigationEntry ? (<Link className="secondary-btn" to={`/practice?lesson=${paneNavigationEntry.slug}`}>{__tx("pane \uC774\uB3D9\uBD80\uD130 \uC2DC\uC791")}</Link>) : null}
               </div>
             </section>) : null}
 
@@ -99,23 +95,18 @@ export function LearnIndexPage() {
             <header className="curriculum-track-head">
               <div>
                 <h2>{pageData.learningPath?.title ?? __tx("\uD1B5\uD569 \uB808\uC2A8 \uACBD\uB85C")}</h2>
-                <p className="muted">
-                  목표: {pageData.learningPath?.description ?? __tx("session/window/pane \uAE30\uCD08 \uC870\uC791\uBD80\uD130 pane \uC774\uB3D9, copy-mode, command-mode, \uC6D0\uACA9 \uC6B4\uC601\uAE4C\uC9C0 \uD55C \uD750\uB984\uC73C\uB85C \uC644\uB8CC")}
+                <p className="muted">{__tx("\uBAA9\uD45C:")}{pageData.learningPath?.description ?? __tx("session/window/pane \uAE30\uCD08 \uC870\uC791\uBD80\uD130 pane \uC774\uB3D9, copy-mode, command-mode, \uC6D0\uACA9 \uC6B4\uC601\uAE4C\uC9C0 \uD55C \uD750\uB984\uC73C\uB85C \uC644\uB8CC")}
                 </p>
               </div>
-              {learningPathEntry ? (<Link className="primary-btn" to={`/practice?lesson=${learningPathEntry.slug}`}>
-                  처음부터 시작
-                </Link>) : null}
+              {learningPathEntry ? (<Link className="primary-btn" to={`/practice?lesson=${learningPathEntry.slug}`}>{__tx("\uCC98\uC74C\uBD80\uD130 \uC2DC\uC791")}</Link>) : null}
             </header>
             <div className="curriculum-lesson-list">
               {orderedLessons.map((lesson) => (<div key={lesson.id} className="curriculum-lesson-row">
                   <Link className="curriculum-lesson-link" to={`/learn/${lesson.trackSlug}/${lesson.chapterSlug}/${lesson.slug}`}>
                     <strong>{lesson.title}</strong>
-                    <span>{lesson.estimatedMinutes}분 · 미션 {pageData.missionCounts[lesson.slug] ?? 0}{__tx("\uAC1C")}</span>
+                    <span>{lesson.estimatedMinutes}{__tx("\uBD84 \u00B7 \uBBF8\uC158")}{pageData.missionCounts[lesson.slug] ?? 0}{__tx("\uAC1C")}</span>
                   </Link>
-                  <Link className="secondary-btn" to={`/practice?lesson=${lesson.slug}`}>
-                    실습
-                  </Link>
+                  <Link className="secondary-btn" to={`/practice?lesson=${lesson.slug}`}>{__tx("\uC2E4\uC2B5")}</Link>
                 </div>))}
             </div>
           </section>

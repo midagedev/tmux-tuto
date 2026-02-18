@@ -18,22 +18,16 @@ export function OnboardingFirstMissionPassedPage() {
         <section className="onboarding-card">
           <h2>{__tx("\uD1B5\uACFC \uC694\uC57D")}</h2>
           <ul className="link-list">
-            <li>미션: {missionSlug}</li>
+            <li>{__tx("\uBBF8\uC158:")}{missionSlug}</li>
             <li>{__tx("\uD68D\uB4DD XP: +")}{gainedXp}</li>
           </ul>
-          <p className="muted">
-            이 페이지는 Cloudflare 분석에서 온보딩 첫 성공 이벤트 라우트로 사용됩니다.
-          </p>
+          <p className="muted">{__tx("\uC774 \uD398\uC774\uC9C0\uB294 Cloudflare \uBD84\uC11D\uC5D0\uC11C \uC628\uBCF4\uB529 \uCCAB \uC131\uACF5 \uC774\uBCA4\uD2B8 \uB77C\uC6B0\uD2B8\uB85C \uC0AC\uC6A9\uB429\uB2C8\uB2E4.")}</p>
         </section>
       </div>
 
       <div className="inline-actions">
-        <Link to="/onboarding/done" className="primary-btn">
-          온보딩 완료 화면으로
-        </Link>
-        <Link to="/practice" className="secondary-btn">
-          연습 계속하기
-        </Link>
+        <Link to="/onboarding/done" className="primary-btn">{__tx("\uC628\uBCF4\uB529 \uC644\uB8CC \uD654\uBA74\uC73C\uB85C")}</Link>
+        <Link to="/practice" className="secondary-btn">{__tx("\uC5F0\uC2B5 \uACC4\uC18D\uD558\uAE30")}</Link>
       </div>
     </PagePlaceholder>);
 }

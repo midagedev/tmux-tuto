@@ -28,12 +28,8 @@ export function PlaybookIndexPage() {
           <p>{__tx("2) \uAD00\uB828 \uD50C\uB808\uC774\uBD81\uC73C\uB85C \uC6B4\uC601 \uC808\uCC28 \uD655\uC778")}</p>
           <p>{__tx("3) \uC2E4\uC2B5 \uC6CC\uD06C\uBCA4\uCE58\uC5D0\uC11C \uBC14\uB85C \uAC80\uC99D")}</p>
           <div className="inline-actions">
-            <Link to="/cheatsheet" className="secondary-btn">
-              레퍼런스 허브로 이동
-            </Link>
-            <Link to="/practice?lesson=hello-tmux" className="secondary-btn">
-              실습 바로 열기
-            </Link>
+            <Link to="/cheatsheet" className="secondary-btn">{__tx("\uB808\uD37C\uB7F0\uC2A4 \uD5C8\uBE0C\uB85C \uC774\uB3D9")}</Link>
+            <Link to="/practice?lesson=hello-tmux" className="secondary-btn">{__tx("\uC2E4\uC2B5 \uBC14\uB85C \uC5F4\uAE30")}</Link>
           </div>
         </article>
       </section>
@@ -45,12 +41,9 @@ export function PlaybookIndexPage() {
                 {(groupedPlaybooks[category] ?? []).map((playbook) => (<article key={playbook.slug} className="reference-playbook-card">
                     <h3>{playbook.title}</h3>
                     <p className="muted">
-                      {playbook.estimatedMinutes}분 · 단계 {playbook.steps.length}개
-                    </p>
-                    <p className="muted">선행 지식: {playbook.prerequisites.join(', ') || __tx("\uC5C6\uC74C")}</p>
-                    <Link to={`/playbooks/${playbook.slug}`} className="text-link">
-                      상세 가이드 열기
-                    </Link>
+                      {playbook.estimatedMinutes}{__tx("\uBD84 \u00B7 \uB2E8\uACC4")}{playbook.steps.length}{__tx("\uAC1C")}</p>
+                    <p className="muted">{__tx("\uC120\uD589 \uC9C0\uC2DD:")}{playbook.prerequisites.join(', ') || __tx("\uC5C6\uC74C")}</p>
+                    <Link to={`/playbooks/${playbook.slug}`} className="text-link">{__tx("\uC0C1\uC138 \uAC00\uC774\uB4DC \uC5F4\uAE30")}</Link>
                   </article>))}
               </div>
             </section>))}

@@ -96,5 +96,5 @@ export function buildAbsoluteAchievementShareUrl(achievementId: string, payload?
 }
 export function buildAchievementChallengeShareText(shareText: string, achievementId: string) {
     const target = resolveAchievementShareTarget(achievementId);
-    return `tmux-tuto 업적 달성: ${shareText} 지금 ${target.challengeLabel} 챌린지에 도전해보세요.`;
+    return __tx("tmux-tuto \uC5C5\uC801 \uB2EC\uC131: ") + shareText + __tx(" \uC9C0\uAE08 ") + target.challengeLabel + __tx(" \uCC4C\uB9B0\uC9C0\uC5D0 \uB3C4\uC804\uD574\uBCF4\uC138\uC694.");
 }

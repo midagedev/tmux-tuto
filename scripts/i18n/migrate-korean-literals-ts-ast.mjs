@@ -50,6 +50,39 @@ function txCall(literal) {
   return ts.factory.createCallExpression(ts.factory.createIdentifier('__tx'), undefined, [literal]);
 }
 
+function createConcat(left, right) {
+  return ts.factory.createBinaryExpression(left, ts.SyntaxKind.PlusToken, right);
+}
+
+function buildTemplateReplacement(node) {
+  const parts = [];
+  const pushText = (text) => {
+    if (!text) return;
+    if (hasKorean(text)) {
+      parts.push(txCall(ts.factory.createStringLiteral(text)));
+    } else {
+      parts.push(ts.factory.createStringLiteral(text));
+    }
+  };
+
+  pushText(node.head.text);
+  for (const span of node.templateSpans) {
+    parts.push(span.expression);
+    pushText(span.literal.text);
+  }
+
+  if (parts.length === 0) {
+    return ts.factory.createStringLiteral('');
+  }
+
+  let expression = parts[0];
+  for (let index = 1; index < parts.length; index += 1) {
+    expression = createConcat(expression, parts[index]);
+  }
+
+  return expression;
+}
+
 function transformSource(sourceFile) {
   const visitor = (node) => {
     if (ts.isJsxAttribute(node) && node.initializer && ts.isStringLiteral(node.initializer)) {
@@ -62,8 +95,15 @@ function transformSource(sourceFile) {
 
     if (ts.isJsxText(node)) {
       const text = node.getText(sourceFile);
-      if (hasKorean(text) && text.trim() === text) {
-        return ts.factory.createJsxExpression(undefined, txCall(ts.factory.createStringLiteral(text)));
+      if (hasKorean(text)) {
+        const normalized = text.trim();
+        if (normalized.length === 0) {
+          return node;
+        }
+        return ts.factory.createJsxExpression(
+          undefined,
+          txCall(ts.factory.createStringLiteral(normalized)),
+        );
       }
     }
 
@@ -76,6 +116,13 @@ function transformSource(sourceFile) {
     if (ts.isNoSubstitutionTemplateLiteral(node) && hasKorean(node.text)) {
       if (!isAlreadyTxWrapped(node)) {
         return txCall(ts.factory.createStringLiteral(node.text));
+      }
+    }
+
+    if (ts.isTemplateExpression(node)) {
+      const fullText = node.getText(sourceFile);
+      if (hasKorean(fullText)) {
+        return buildTemplateReplacement(node);
       }
     }
 
