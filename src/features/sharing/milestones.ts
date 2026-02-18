@@ -1,5 +1,9 @@
 import { z } from 'zod';
-import rawMilestones from '../../content/v1/share-meta.json';
+import milestonesEn from '../../content/v1/i18n/en/share-meta.json';
+import milestonesKo from '../../content/v1/i18n/ko/share-meta.json';
+import milestonesJa from '../../content/v1/i18n/ja/share-meta.json';
+import milestonesZh from '../../content/v1/i18n/zh/share-meta.json';
+import { resolveLanguageFromRuntime } from '../../i18n/runtime';
 
 export type MilestoneSlug =
   | 'first-chapter-complete'
@@ -32,7 +36,16 @@ const milestoneSchema = z.object({
   ogImage: z.string().min(1),
 });
 
-const milestones = z.array(milestoneSchema).parse(rawMilestones) as MilestoneMeta[];
+const milestonesByLanguage = {
+  en: milestonesEn,
+  ko: milestonesKo,
+  ja: milestonesJa,
+  zh: milestonesZh,
+} as const;
+
+const milestones = z
+  .array(milestoneSchema)
+  .parse(milestonesByLanguage[resolveLanguageFromRuntime()] ?? milestonesByLanguage.en) as MilestoneMeta[];
 
 const MILESTONE_MAP = Object.fromEntries(
   milestones.map((entry) => [entry.slug, entry]),

@@ -1,0 +1,1664 @@
+{
+  "version": "1.0.0",
+  "generatedAt": "2026-02-18T00:00:00.000Z",
+  "tracks": [
+    {
+      "id": "track-a-foundations",
+      "slug": "track-a-foundations",
+      "title": "Track A Onramp & Foundations",
+      "summary": "첫 3분 온램프부터 세션/윈도우/패인의 핵심 개념과 기본 동작을 익힙니다.",
+      "order": 1,
+      "status": "active"
+    },
+    {
+      "id": "track-b-workflow",
+      "slug": "track-b-workflow",
+      "title": "Track B Daily Workflow",
+      "summary": "분할, 포커스 이동, 윈도우 순환을 실무 작업 흐름으로 연결합니다.",
+      "order": 2,
+      "status": "active"
+    },
+    {
+      "id": "track-c-deepwork",
+      "slug": "track-c-deepwork",
+      "title": "Track C Deep Work",
+      "summary": "copy-mode 검색과 command mode를 활용해 긴 세션에서도 생산성을 유지합니다.",
+      "order": 3,
+      "status": "active"
+    }
+  ],
+  "chapters": [
+    {
+      "id": "chapter-a-00",
+      "trackSlug": "track-a-foundations",
+      "slug": "tmux-onramp",
+      "title": "tmux Onramp",
+      "order": 0
+    },
+    {
+      "id": "chapter-a-01",
+      "trackSlug": "track-a-foundations",
+      "slug": "session-window-pane",
+      "title": "Session Window Pane",
+      "order": 1
+    },
+    {
+      "id": "chapter-a-02",
+      "trackSlug": "track-a-foundations",
+      "slug": "session-lifecycle",
+      "title": "Session Lifecycle",
+      "order": 2
+    },
+    {
+      "id": "chapter-b-01",
+      "trackSlug": "track-b-workflow",
+      "slug": "split-and-move",
+      "title": "Split and Move",
+      "order": 1
+    },
+    {
+      "id": "chapter-b-02",
+      "trackSlug": "track-b-workflow",
+      "slug": "pane-navigation",
+      "title": "Pane Navigation",
+      "order": 2
+    },
+    {
+      "id": "chapter-c-01",
+      "trackSlug": "track-c-deepwork",
+      "slug": "copy-mode-search",
+      "title": "Copy Mode Search",
+      "order": 1
+    },
+    {
+      "id": "chapter-c-02",
+      "trackSlug": "track-c-deepwork",
+      "slug": "command-mode-workflow",
+      "title": "Command Mode Workflow",
+      "order": 2
+    }
+  ],
+  "lessons": [
+    {
+      "id": "lesson-a-00",
+      "trackSlug": "track-a-foundations",
+      "chapterSlug": "tmux-onramp",
+      "slug": "hello-tmux",
+      "title": "첫 3분: tmux 맛보기",
+      "estimatedMinutes": 3,
+      "objectives": [
+        "tmux 명령 1회 실행",
+        "현재 tmux 상태를 확인하는 기본 루틴 익히기",
+        "다음 실습으로 넘어갈 준비"
+      ],
+      "overview": "tmux를 처음 켜보는 온램프 레슨입니다. SSH가 끊기거나 터미널을 닫아도 작업을 이어갈 수 있다는 핵심 가치를 3분 안에 체감합니다.",
+      "goal": "tmux를 \"작업 복구와 연속성\" 도구로 이해하고, 이후 레슨에서 계속 사용할 기본 확인 루틴(`tmux -V`, `tmux list-sessions`)을 익힙니다.",
+      "successCriteria": [
+        "`tmux -V` 명령을 직접 실행",
+        "`tmux list-sessions`로 현재 상태를 직접 확인",
+        "첫 레슨 미션 2개를 순서대로 완료해 첫 성공 경험 확보"
+      ],
+      "failureStates": [
+        "tmux 명령 실행 기록이 없어 첫 진입 성공 신호가 부족함",
+        "세션 조회 루틴이 없어 이후 레슨에서 현재 상태를 점검하기 어려움"
+      ]
+    },
+    {
+      "id": "lesson-a-01",
+      "trackSlug": "track-a-foundations",
+      "chapterSlug": "session-window-pane",
+      "slug": "basics",
+      "title": "기본 조작: Session/Window/Pane",
+      "estimatedMinutes": 10,
+      "objectives": [
+        "session 생성",
+        "window 생성/전환",
+        "기본 workspace 체크포인트 루틴 반복"
+      ],
+      "overview": "Session/Window/Pane의 역할을 실습으로 익혀 \"작업 공간을 어떻게 쪼개고 유지할지\"를 결정할 수 있게 만듭니다. 실무에서 서비스별 창 분리에 바로 연결됩니다.",
+      "goal": "한 세션 안에서 윈도우를 만들고 전환하며 현재 작업 위치를 잃지 않는 기본 루틴을 반복해 손에 익힙니다.",
+      "successCriteria": [
+        "새 session 생성",
+        "window 2개 이상 운영",
+        "`tmux list-windows`로 현재 workspace 상태를 점검"
+      ],
+      "failureStates": [
+        "session/window 중 한 축만 수행해 기본 작업 공간 구성이 불완전함",
+        "workspace 점검 루틴이 없어 다음 작업 전환 시 위치를 잃기 쉬움"
+      ]
+    },
+    {
+      "id": "lesson-a-01s",
+      "trackSlug": "track-a-foundations",
+      "chapterSlug": "session-window-pane",
+      "slug": "basics-shortcuts",
+      "title": "기본 조작: Session/Window/Pane (단축키)",
+      "estimatedMinutes": 9,
+      "objectives": [
+        "session 생성",
+        "window 생성/전환",
+        "동일 동작을 prefix 단축키로 1회 이상 재현"
+      ],
+      "overview": "Session/Window/Pane의 역할을 실습으로 익혀 \"작업 공간을 어떻게 쪼개고 유지할지\"를 결정할 수 있게 만듭니다. 실무에서 서비스별 창 분리에 바로 연결됩니다. 이 레슨은 동일 작업을 단축키로 반복해 손에 익히는 단계입니다.",
+      "goal": "한 세션 안에서 윈도우를 만들고 전환하며 현재 작업 위치를 잃지 않는 기본 루틴을 반복해 손에 익힙니다. 명령 경로 이후 동일 동작을 prefix 단축키로 재현해 실행 속도를 높입니다.",
+      "successCriteria": [
+        "명령 경로 1회 수행 후 동일 동작을 단축키로 1회 재현",
+        "새 session 생성",
+        "window 2개 이상 운영"
+      ],
+      "failureStates": [
+        "단축키 재현 기록이 없어 키 기반 루틴 전환이 검증되지 않음",
+        "session/window 중 한 축만 수행해 기본 작업 공간 구성이 불완전함"
+      ]
+    },
+    {
+      "id": "lesson-a-02",
+      "trackSlug": "track-a-foundations",
+      "chapterSlug": "session-lifecycle",
+      "slug": "attach-detach",
+      "title": "세션 유지 루틴",
+      "estimatedMinutes": 10,
+      "objectives": [
+        "detach/attach 루틴 실행",
+        "세션 목록 확인",
+        "복수 세션 재접속 루틴"
+      ],
+      "overview": "tmux를 쓰는 가장 큰 이유인 \"작업 복구\"를 다룹니다. 네트워크 단절이나 터미널 종료 상황에서도 세션을 잃지 않는 운영 습관을 만듭니다.",
+      "goal": "분리(detach)와 복귀(attach)를 반복해 중단 없는 원격/로컬 작업 루틴을 만들고, 복수 세션도 안정적으로 관리합니다.",
+      "successCriteria": [
+        "window 2개 이상 상태에서 세션 운영",
+        "session 2개 이상 관리",
+        "detach 후 attach로 같은 상태 복귀"
+      ],
+      "failureStates": [
+        "복수 session 운영 기록이 없어 작업 복구 루틴이 검증되지 않음",
+        "detach 후 재접속 흐름이 없어 실전 장애 상황 대응력이 부족함"
+      ]
+    },
+    {
+      "id": "lesson-a-02s",
+      "trackSlug": "track-a-foundations",
+      "chapterSlug": "session-lifecycle",
+      "slug": "attach-detach-shortcuts",
+      "title": "세션 유지 루틴 (단축키)",
+      "estimatedMinutes": 9,
+      "objectives": [
+        "detach/attach 루틴 실행",
+        "세션 목록 확인",
+        "동일 동작을 prefix 단축키로 1회 이상 재현"
+      ],
+      "overview": "tmux를 쓰는 가장 큰 이유인 \"작업 복구\"를 다룹니다. 네트워크 단절이나 터미널 종료 상황에서도 세션을 잃지 않는 운영 습관을 만듭니다. 이 레슨은 동일 작업을 단축키로 반복해 손에 익히는 단계입니다.",
+      "goal": "분리(detach)와 복귀(attach)를 반복해 중단 없는 원격/로컬 작업 루틴을 만들고, 복수 세션도 안정적으로 관리합니다. 명령 경로 이후 동일 동작을 prefix 단축키로 재현해 실행 속도를 높입니다.",
+      "successCriteria": [
+        "명령 경로 1회 수행 후 동일 동작을 단축키로 1회 재현",
+        "window 2개 이상 상태에서 세션 운영",
+        "session 2개 이상 관리"
+      ],
+      "failureStates": [
+        "단축키 재현 기록이 없어 키 기반 루틴 전환이 검증되지 않음",
+        "복수 session 운영 기록이 없어 작업 복구 루틴이 검증되지 않음"
+      ]
+    },
+    {
+      "id": "lesson-b-01",
+      "trackSlug": "track-b-workflow",
+      "chapterSlug": "split-and-move",
+      "slug": "split-resize",
+      "title": "분할과 리사이즈",
+      "estimatedMinutes": 12,
+      "objectives": [
+        "세로/가로 분할 모두 실행",
+        "pane 크기 조절",
+        "분할-조정 루틴 반복"
+      ],
+      "overview": "한 화면에서 코드/테스트/로그를 동시에 다루는 멀티패인 작업의 기본을 익힙니다. 분할 방향 선택과 크기 조절을 반복해 레이아웃 감각을 만듭니다.",
+      "goal": "작업 성격에 맞게 세로/가로 분할을 모두 사용하고, resize로 화면 비율을 조정해 맥락 전환 비용을 줄입니다.",
+      "successCriteria": [
+        "pane 2개 이상 분할",
+        "세로/가로 분할을 각각 1회 이상 실행",
+        "resize 명령으로 작업 영역을 직접 조정"
+      ],
+      "failureStates": [
+        "분할 방향을 한쪽만 사용해 상황별 레이아웃 선택 능력이 부족함",
+        "크기 조정 없이 고정 레이아웃만 사용해 작업 분배 효율이 낮음"
+      ]
+    },
+    {
+      "id": "lesson-b-01s",
+      "trackSlug": "track-b-workflow",
+      "chapterSlug": "split-and-move",
+      "slug": "split-resize-shortcuts",
+      "title": "분할과 리사이즈 (단축키)",
+      "estimatedMinutes": 11,
+      "objectives": [
+        "세로/가로 분할 모두 실행",
+        "pane 크기 조절",
+        "동일 동작을 prefix 단축키로 1회 이상 재현"
+      ],
+      "overview": "한 화면에서 코드/테스트/로그를 동시에 다루는 멀티패인 작업의 기본을 익힙니다. 분할 방향 선택과 크기 조절을 반복해 레이아웃 감각을 만듭니다. 이 레슨은 동일 작업을 단축키로 반복해 손에 익히는 단계입니다.",
+      "goal": "작업 성격에 맞게 세로/가로 분할을 모두 사용하고, resize로 화면 비율을 조정해 맥락 전환 비용을 줄입니다. 명령 경로 이후 동일 동작을 prefix 단축키로 재현해 실행 속도를 높입니다.",
+      "successCriteria": [
+        "명령 경로 1회 수행 후 동일 동작을 단축키로 1회 재현",
+        "pane 2개 이상 분할",
+        "세로/가로 분할을 각각 1회 이상 실행"
+      ],
+      "failureStates": [
+        "단축키 재현 기록이 없어 키 기반 루틴 전환이 검증되지 않음",
+        "분할 방향을 한쪽만 사용해 상황별 레이아웃 선택 능력이 부족함"
+      ]
+    },
+    {
+      "id": "lesson-b-02",
+      "trackSlug": "track-b-workflow",
+      "chapterSlug": "pane-navigation",
+      "slug": "pane-focus-flow",
+      "title": "패인 이동 루틴",
+      "estimatedMinutes": 10,
+      "objectives": [
+        "pane focus 이동",
+        "window 순환",
+        "포커스 이동 반복 숙달"
+      ],
+      "overview": "여러 pane/window를 사용할 때 길을 잃지 않도록 포커스 이동 루틴을 훈련합니다. 반복 이동으로 손이 기억하는 탐색 흐름을 만듭니다.",
+      "goal": "pane 포커스 이동과 window 순환을 결합해 복잡한 세션에서도 빠르게 원하는 작업 지점으로 복귀합니다.",
+      "successCriteria": [
+        "pane 3개 이상 구성",
+        "pane select 이동을 명시적으로 실행",
+        "window 순환 이동(next/prev) 루틴 실행"
+      ],
+      "failureStates": [
+        "pane 다중 구성 없이 단일 화면에 머물러 이동 루틴 검증이 부족함",
+        "포커스 이동 실행 기록이 없어 컨텍스트 전환 능력이 미확인 상태임"
+      ]
+    },
+    {
+      "id": "lesson-b-02s",
+      "trackSlug": "track-b-workflow",
+      "chapterSlug": "pane-navigation",
+      "slug": "pane-focus-flow-shortcuts",
+      "title": "패인 이동 루틴 (단축키)",
+      "estimatedMinutes": 9,
+      "objectives": [
+        "pane focus 이동",
+        "window 순환",
+        "동일 동작을 prefix 단축키로 1회 이상 재현"
+      ],
+      "overview": "여러 pane/window를 사용할 때 길을 잃지 않도록 포커스 이동 루틴을 훈련합니다. 반복 이동으로 손이 기억하는 탐색 흐름을 만듭니다. 이 레슨은 동일 작업을 단축키로 반복해 손에 익히는 단계입니다.",
+      "goal": "pane 포커스 이동과 window 순환을 결합해 복잡한 세션에서도 빠르게 원하는 작업 지점으로 복귀합니다. 명령 경로 이후 동일 동작을 prefix 단축키로 재현해 실행 속도를 높입니다.",
+      "successCriteria": [
+        "명령 경로 1회 수행 후 동일 동작을 단축키로 1회 재현",
+        "pane 3개 이상 구성",
+        "pane select 이동을 명시적으로 실행"
+      ],
+      "failureStates": [
+        "단축키 재현 기록이 없어 키 기반 루틴 전환이 검증되지 않음",
+        "pane 다중 구성 없이 단일 화면에 머물러 이동 루틴 검증이 부족함"
+      ]
+    },
+    {
+      "id": "lesson-c-01",
+      "trackSlug": "track-c-deepwork",
+      "chapterSlug": "copy-mode-search",
+      "slug": "copy-search",
+      "title": "Copy Mode 검색",
+      "estimatedMinutes": 12,
+      "objectives": [
+        "copy-mode 진입",
+        "검색 실행",
+        "성공/실패 케이스 반복 확인"
+      ],
+      "overview": "긴 로그/출력에서 필요한 정보를 빠르게 찾는 검색 루틴을 학습합니다. 성공/실패 케이스를 모두 훈련해 디버깅 속도를 높입니다.",
+      "goal": "마우스 없이 copy mode로 텍스트를 탐색하고, 검색 성공/실패를 빠르게 판단해 장애 대응 시간을 줄입니다.",
+      "successCriteria": [
+        "copy mode 진입",
+        "키워드 검색 성공",
+        "검색 실패 케이스를 재현하고 원인 구분"
+      ],
+      "failureStates": [
+        "copy-mode에서 검색 실행/매치 여부 확인이 없어 로그 탐색 루틴이 미완성임",
+        "성공/실패 케이스 구분이 없어 디버깅 판단력이 부족함"
+      ]
+    },
+    {
+      "id": "lesson-c-01s",
+      "trackSlug": "track-c-deepwork",
+      "chapterSlug": "copy-mode-search",
+      "slug": "copy-search-shortcuts",
+      "title": "Copy Mode 검색 (단축키)",
+      "estimatedMinutes": 11,
+      "objectives": [
+        "copy-mode 진입",
+        "검색 실행",
+        "동일 동작을 prefix 단축키로 1회 이상 재현"
+      ],
+      "overview": "긴 로그/출력에서 필요한 정보를 빠르게 찾는 검색 루틴을 학습합니다. 성공/실패 케이스를 모두 훈련해 디버깅 속도를 높입니다. 이 레슨은 동일 작업을 단축키로 반복해 손에 익히는 단계입니다.",
+      "goal": "마우스 없이 copy mode로 텍스트를 탐색하고, 검색 성공/실패를 빠르게 판단해 장애 대응 시간을 줄입니다. 명령 경로 이후 동일 동작을 prefix 단축키로 재현해 실행 속도를 높입니다.",
+      "successCriteria": [
+        "명령 경로 1회 수행 후 동일 동작을 단축키로 1회 재현",
+        "copy mode 진입",
+        "키워드 검색 성공"
+      ],
+      "failureStates": [
+        "단축키 재현 기록이 없어 키 기반 루틴 전환이 검증되지 않음",
+        "copy-mode에서 검색 실행/매치 여부 확인이 없어 로그 탐색 루틴이 미완성임"
+      ]
+    },
+    {
+      "id": "lesson-c-02",
+      "trackSlug": "track-c-deepwork",
+      "chapterSlug": "command-mode-workflow",
+      "slug": "command-subset",
+      "title": "Command Mode 운영",
+      "estimatedMinutes": 10,
+      "objectives": [
+        "명령 모드 진입",
+        "new-window 실행",
+        "choose-tree 기반 탐색 진입"
+      ],
+      "overview": "단축키로 하기 까다로운 작업을 command mode로 안정적으로 실행하는 방법을 다룹니다. 재현 가능한 명령 기반 운영 루틴에 집중합니다.",
+      "goal": "필요할 때 명령 기반으로 tmux 상태를 제어하고, command-prompt/choose-tree를 통해 복잡한 세션 탐색 속도를 높입니다.",
+      "successCriteria": [
+        "command-prompt 실행",
+        "command mode로 window 생성",
+        "choose-tree 진입으로 명령 기반 탐색 경험 확보"
+      ],
+      "failureStates": [
+        "command-prompt/choose-tree 실행 기록이 없어 명령 기반 운영 진입이 부족함",
+        "window 생성 미완료로 command mode 실전 적용이 검증되지 않음"
+      ]
+    },
+    {
+      "id": "lesson-c-02s",
+      "trackSlug": "track-c-deepwork",
+      "chapterSlug": "command-mode-workflow",
+      "slug": "command-subset-shortcuts",
+      "title": "Command Mode 운영 (단축키)",
+      "estimatedMinutes": 9,
+      "objectives": [
+        "명령 모드 진입",
+        "new-window 실행",
+        "동일 동작을 prefix 단축키로 1회 이상 재현"
+      ],
+      "overview": "단축키로 하기 까다로운 작업을 command mode로 안정적으로 실행하는 방법을 다룹니다. 재현 가능한 명령 기반 운영 루틴에 집중합니다. 이 레슨은 동일 작업을 단축키로 반복해 손에 익히는 단계입니다.",
+      "goal": "필요할 때 명령 기반으로 tmux 상태를 제어하고, command-prompt/choose-tree를 통해 복잡한 세션 탐색 속도를 높입니다. 명령 경로 이후 동일 동작을 prefix 단축키로 재현해 실행 속도를 높입니다.",
+      "successCriteria": [
+        "명령 경로 1회 수행 후 동일 동작을 단축키로 1회 재현",
+        "command-prompt 실행",
+        "command mode로 window 생성"
+      ],
+      "failureStates": [
+        "단축키 재현 기록이 없어 키 기반 루틴 전환이 검증되지 않음",
+        "command-prompt/choose-tree 실행 기록이 없어 명령 기반 운영 진입이 부족함"
+      ]
+    }
+  ],
+  "missions": [
+    {
+      "id": "mission-a-00",
+      "lessonSlug": "hello-tmux",
+      "slug": "hello-tmux-version-check",
+      "title": "tmux 명령 첫 실행",
+      "type": "state-check",
+      "difficulty": "beginner",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "tmux -V"
+        }
+      ],
+      "hints": [
+        "터미널에 `tmux -V`를 입력해 버전을 확인해 보세요.",
+        "띄어쓰기까지 그대로 `tmux -V`로 실행하면 바로 통과됩니다."
+      ]
+    },
+    {
+      "id": "mission-a-00b",
+      "lessonSlug": "hello-tmux",
+      "slug": "hello-tmux-session-list",
+      "title": "세션 상태 한 번 확인",
+      "type": "state-check",
+      "difficulty": "beginner",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "tmux list-sessions"
+        }
+      ],
+      "hints": [
+        "`tmux list-sessions`를 실행해 현재 세션 목록을 확인하세요.",
+        "세션이 없어도 명령 실행 기록이 남으면 통과합니다."
+      ]
+    },
+    {
+      "id": "mission-a-01",
+      "lessonSlug": "basics",
+      "slug": "session-create",
+      "title": "첫 세션 만들기",
+      "type": "state-check",
+      "difficulty": "beginner",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "sessionCount",
+          "operator": ">=",
+          "value": 1
+        }
+      ],
+      "hints": [
+        "명령어: `tmux new -As main` 을 실행하면 세션이 없으면 생성, 있으면 재사용합니다.",
+        "단축키 입력법: `Ctrl`을 누른 상태에서 `b`를 한 번 누르고 손을 뗀 뒤, 1초 안에 다음 키를 누르세요. command mode는 `Ctrl+b` 후 `:` 입니다."
+      ]
+    },
+    {
+      "id": "mission-a-01-s",
+      "lessonSlug": "basics-shortcuts",
+      "slug": "session-create-shortcuts",
+      "title": "첫 세션 만들기 (단축키)",
+      "type": "state-check",
+      "difficulty": "beginner",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "sessionCount",
+          "operator": ">=",
+          "value": 1
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.shortcut.execute"
+        }
+      ],
+      "hints": [
+        "먼저 같은 작업을 명령어로 1회 수행해 기준 상태를 만드세요.",
+        "동일 작업을 `Ctrl+b` 후 `:`로 command-prompt를 열어 `new-session -d -s backup`처럼 1회 더 실행해 보세요.",
+        "명령어: `tmux new -As main` 을 실행하면 세션이 없으면 생성, 있으면 재사용합니다.",
+        "단축키 입력법: `Ctrl`을 누른 상태에서 `b`를 한 번 누르고 손을 뗀 뒤, 1초 안에 다음 키를 누르세요. command mode는 `Ctrl+b` 후 `:` 입니다."
+      ]
+    },
+    {
+      "id": "mission-a-01b",
+      "lessonSlug": "basics",
+      "slug": "basics-window-open",
+      "title": "윈도우 2개 만들기",
+      "type": "state-check",
+      "difficulty": "beginner",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "windowCount",
+          "operator": ">=",
+          "value": 2
+        }
+      ],
+      "hints": [
+        "`tmux new-window -n work`로 새 윈도우를 만들어 보세요.",
+        "이미 세션이 있다면 `tmux new-window`만으로도 조건을 채울 수 있습니다.",
+        "단축키로 하려면 `Ctrl`을 누른 채 `b`를 입력하고 손을 뗀 다음 `c`를 누르세요. (`Ctrl+b` 후 `c`)"
+      ]
+    },
+    {
+      "id": "mission-a-01b-s",
+      "lessonSlug": "basics-shortcuts",
+      "slug": "basics-window-open-shortcuts",
+      "title": "윈도우 2개 만들기 (단축키)",
+      "type": "state-check",
+      "difficulty": "beginner",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "windowCount",
+          "operator": ">=",
+          "value": 2
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.shortcut.execute"
+        }
+      ],
+      "hints": [
+        "먼저 같은 작업을 명령어로 1회 수행해 기준 상태를 만드세요.",
+        "동일 작업을 `Ctrl+b` 후 `c`로 1회 더 실행해 window를 추가하세요.",
+        "`tmux new-window -n work`로 새 윈도우를 만들어 보세요.",
+        "이미 세션이 있다면 `tmux new-window`만으로도 조건을 채울 수 있습니다.",
+        "단축키로 하려면 `Ctrl`을 누른 채 `b`를 입력하고 손을 뗀 다음 `c`를 누르세요. (`Ctrl+b` 후 `c`)"
+      ]
+    },
+    {
+      "id": "mission-a-01c",
+      "lessonSlug": "basics",
+      "slug": "basics-workspace-routine",
+      "title": "기본 워크스페이스 루틴 반복",
+      "type": "state-check",
+      "difficulty": "beginner",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "sessionCount",
+          "operator": ">=",
+          "value": 1
+        },
+        {
+          "kind": "windowCount",
+          "operator": ">=",
+          "value": 2
+        },
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "tmux list-windows"
+        }
+      ],
+      "hints": [
+        "`tmux new -As main` → `tmux new-window -n work` → `tmux list-windows` 순서로 한 번에 실행하세요.",
+        "단축키를 쓰려면 `Ctrl`을 누른 채 `b`를 입력하고 손을 뗀 다음 `c`를 눌러 window를 만든 뒤 `tmux list-windows`로 체크포인트를 남기세요."
+      ]
+    },
+    {
+      "id": "mission-a-01c-s",
+      "lessonSlug": "basics-shortcuts",
+      "slug": "basics-workspace-routine-shortcuts",
+      "title": "기본 워크스페이스 루틴 반복 (단축키)",
+      "type": "state-check",
+      "difficulty": "beginner",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "sessionCount",
+          "operator": ">=",
+          "value": 1
+        },
+        {
+          "kind": "windowCount",
+          "operator": ">=",
+          "value": 2
+        },
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "tmux list-windows"
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.shortcut.execute"
+        }
+      ],
+      "hints": [
+        "먼저 같은 작업을 명령어로 1회 수행해 기준 상태를 만드세요.",
+        "명령 루틴 후 `Ctrl+b` + `c`(window 생성)와 `Ctrl+b` + `w`(트리/목록 확인)를 1회씩 반복하세요.",
+        "`tmux new -As main` → `tmux new-window -n work` → `tmux list-windows` 순서로 한 번에 실행하세요.",
+        "단축키를 쓰려면 `Ctrl`을 누른 채 `b`를 입력하고 손을 뗀 다음 `c`를 눌러 window를 만든 뒤 `tmux list-windows`로 체크포인트를 남기세요."
+      ]
+    },
+    {
+      "id": "mission-a-02",
+      "lessonSlug": "attach-detach",
+      "slug": "session-window-create",
+      "title": "윈도우 생성 후 유지",
+      "type": "state-check",
+      "difficulty": "beginner",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "windowCount",
+          "operator": ">=",
+          "value": 2
+        },
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "tmux list-windows"
+        }
+      ],
+      "hints": [
+        "현재 세션에서 window를 하나 더 만든 뒤 `tmux list-windows`로 상태를 확인하세요.",
+        "`Ctrl`을 누른 채 `b`를 입력하고 손을 뗀 다음 `c`를 눌러 window를 만든 뒤 확인 명령을 실행해도 통과합니다. (`Ctrl+b` 후 `c`)"
+      ]
+    },
+    {
+      "id": "mission-a-02-s",
+      "lessonSlug": "attach-detach-shortcuts",
+      "slug": "session-window-create-shortcuts",
+      "title": "윈도우 생성 후 유지 (단축키)",
+      "type": "state-check",
+      "difficulty": "beginner",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "windowCount",
+          "operator": ">=",
+          "value": 2
+        },
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "tmux list-windows"
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.shortcut.execute"
+        }
+      ],
+      "hints": [
+        "먼저 같은 작업을 명령어로 1회 수행해 기준 상태를 만드세요.",
+        "명령으로 생성한 뒤 `Ctrl+b` 후 `c`를 한 번 더 실행해 단축키 경로도 반복하세요.",
+        "현재 세션에서 window를 하나 더 만든 뒤 `tmux list-windows`로 상태를 확인하세요.",
+        "`Ctrl`을 누른 채 `b`를 입력하고 손을 뗀 다음 `c`를 눌러 window를 만든 뒤 확인 명령을 실행해도 통과합니다. (`Ctrl+b` 후 `c`)"
+      ]
+    },
+    {
+      "id": "mission-a-02b",
+      "lessonSlug": "attach-detach",
+      "slug": "session-multi-manage",
+      "title": "세션 2개 운영",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "sessionCount",
+          "operator": ">=",
+          "value": 2
+        }
+      ],
+      "hints": [
+        "다른 이름의 세션을 하나 더 생성해 보세요. 예: `tmux new-session -d -s backup`",
+        "`tmux list-sessions`에서 2개 이상 보이면 통과입니다."
+      ]
+    },
+    {
+      "id": "mission-a-02b-s",
+      "lessonSlug": "attach-detach-shortcuts",
+      "slug": "session-multi-manage-shortcuts",
+      "title": "세션 2개 운영 (단축키)",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "sessionCount",
+          "operator": ">=",
+          "value": 2
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.shortcut.execute"
+        }
+      ],
+      "hints": [
+        "먼저 같은 작업을 명령어로 1회 수행해 기준 상태를 만드세요.",
+        "단축키 경로는 `Ctrl+b` 후 `:`로 command-prompt를 열어 `new-session` 계열 명령을 실행하면 됩니다.",
+        "다른 이름의 세션을 하나 더 생성해 보세요. 예: `tmux new-session -d -s backup`",
+        "`tmux list-sessions`에서 2개 이상 보이면 통과입니다."
+      ]
+    },
+    {
+      "id": "mission-a-02c",
+      "lessonSlug": "attach-detach",
+      "slug": "session-attach-reconnect",
+      "title": "attach 명령으로 재접속",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "tmux detach-client"
+        },
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "tmux attach"
+        }
+      ],
+      "hints": [
+        "`tmux detach-client`로 분리한 뒤 `tmux attach -t main`으로 다시 붙어 보세요.",
+        "단축키로는 `Ctrl+b` 후 `d`로 detach 후 `tmux attach -t <세션명>`으로 복귀할 수 있습니다."
+      ]
+    },
+    {
+      "id": "mission-a-02c-s",
+      "lessonSlug": "attach-detach-shortcuts",
+      "slug": "session-attach-reconnect-shortcuts",
+      "title": "attach 명령으로 재접속 (단축키)",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "tmux detach-client"
+        },
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "tmux attach"
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.shortcut.execute"
+        }
+      ],
+      "hints": [
+        "먼저 같은 작업을 명령어로 1회 수행해 기준 상태를 만드세요.",
+        "`tmux detach-client` 경로를 `Ctrl+b` 후 `d`로도 1회 수행한 다음 attach를 이어서 실행하세요.",
+        "`tmux detach-client`로 분리한 뒤 `tmux attach -t main`으로 다시 붙어 보세요.",
+        "단축키로는 `Ctrl+b` 후 `d`로 detach 후 `tmux attach -t <세션명>`으로 복귀할 수 있습니다."
+      ]
+    },
+    {
+      "id": "mission-b-01",
+      "lessonSlug": "split-resize",
+      "slug": "split-two-panes",
+      "title": "패인 2개 만들기",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "paneCount",
+          "operator": ">=",
+          "value": 2
+        }
+      ],
+      "hints": [
+        "`tmux split-window`를 실행해 패인을 분할하세요.",
+        "처음에는 2개 패인만 만들어도 통과합니다. 이후 방향별 분할 미션에서 확장합니다."
+      ]
+    },
+    {
+      "id": "mission-b-01-s",
+      "lessonSlug": "split-resize-shortcuts",
+      "slug": "split-two-panes-shortcuts",
+      "title": "패인 2개 만들기 (단축키)",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "paneCount",
+          "operator": ">=",
+          "value": 2
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.shortcut.execute"
+        }
+      ],
+      "hints": [
+        "먼저 같은 작업을 명령어로 1회 수행해 기준 상태를 만드세요.",
+        "`tmux split-window` 실행 후 `Ctrl+b` + `%` 또는 `Ctrl+b` + `\"`로 분할을 1회 더 반복하세요.",
+        "`tmux split-window`를 실행해 패인을 분할하세요.",
+        "처음에는 2개 패인만 만들어도 통과합니다. 이후 방향별 분할 미션에서 확장합니다."
+      ]
+    },
+    {
+      "id": "mission-b-01c",
+      "lessonSlug": "split-resize",
+      "slug": "split-both-directions",
+      "title": "세로/가로 분할 모두 실행",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "split-window -h"
+        },
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "split-window -v"
+        },
+        {
+          "kind": "paneCount",
+          "operator": ">=",
+          "value": 3
+        }
+      ],
+      "hints": [
+        "`tmux split-window -h`와 `tmux split-window -v`를 각각 한 번씩 실행해 보세요.",
+        "코드/테스트/로그 3영역을 만든다고 생각하고 pane 3개 이상 상태를 유지하세요."
+      ]
+    },
+    {
+      "id": "mission-b-01c-s",
+      "lessonSlug": "split-resize-shortcuts",
+      "slug": "split-both-directions-shortcuts",
+      "title": "세로/가로 분할 모두 실행 (단축키)",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "split-window -h"
+        },
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "split-window -v"
+        },
+        {
+          "kind": "paneCount",
+          "operator": ">=",
+          "value": 3
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.shortcut.execute"
+        }
+      ],
+      "hints": [
+        "먼저 같은 작업을 명령어로 1회 수행해 기준 상태를 만드세요.",
+        "단축키 경로는 `Ctrl+b` + `%`(세로 분할), `Ctrl+b` + `\"`(가로 분할)을 각각 1회씩 수행하세요.",
+        "`tmux split-window -h`와 `tmux split-window -v`를 각각 한 번씩 실행해 보세요.",
+        "코드/테스트/로그 3영역을 만든다고 생각하고 pane 3개 이상 상태를 유지하세요."
+      ]
+    },
+    {
+      "id": "mission-b-01b",
+      "lessonSlug": "split-resize",
+      "slug": "split-resize-adjust",
+      "title": "resize로 레이아웃 조정",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.pane.resize"
+        }
+      ],
+      "hints": [
+        "`tmux resize-pane -R 5` 또는 `tmux resize-pane -L 5`를 실행해 보세요.",
+        "코드/로그 비중에 맞춰 비율을 바꿔 본 뒤 다시 `resize-pane`을 반대로 실행해 조정 감각을 익히세요."
+      ]
+    },
+    {
+      "id": "mission-b-01b-s",
+      "lessonSlug": "split-resize-shortcuts",
+      "slug": "split-resize-adjust-shortcuts",
+      "title": "resize로 레이아웃 조정 (단축키)",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.pane.resize"
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.shortcut.execute"
+        }
+      ],
+      "hints": [
+        "먼저 같은 작업을 명령어로 1회 수행해 기준 상태를 만드세요.",
+        "명령 경로 후 `Ctrl+b` + `H/J/K/L`로 리사이즈를 1회 더 반복하세요.",
+        "`tmux resize-pane -R 5` 또는 `tmux resize-pane -L 5`를 실행해 보세요.",
+        "코드/로그 비중에 맞춰 비율을 바꿔 본 뒤 다시 `resize-pane`을 반대로 실행해 조정 감각을 익히세요."
+      ]
+    },
+    {
+      "id": "mission-b-02",
+      "lessonSlug": "pane-focus-flow",
+      "slug": "pane-grid-layout",
+      "title": "3개 이상 패인 구성",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "paneCount",
+          "operator": ">=",
+          "value": 3
+        }
+      ],
+      "hints": [
+        "split을 한 번 더 실행해 pane 3개를 만들어 보세요.",
+        "`tmux list-panes`로 현재 개수를 확인할 수 있습니다."
+      ]
+    },
+    {
+      "id": "mission-b-02-s",
+      "lessonSlug": "pane-focus-flow-shortcuts",
+      "slug": "pane-grid-layout-shortcuts",
+      "title": "3개 이상 패인 구성 (단축키)",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "paneCount",
+          "operator": ">=",
+          "value": 3
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.shortcut.execute"
+        }
+      ],
+      "hints": [
+        "먼저 같은 작업을 명령어로 1회 수행해 기준 상태를 만드세요.",
+        "명령 분할 후 `Ctrl+b` + `%` 또는 `Ctrl+b` + `\"`를 추가로 실행해 pane 3개 이상을 맞추세요.",
+        "split을 한 번 더 실행해 pane 3개를 만들어 보세요.",
+        "`tmux list-panes`로 현재 개수를 확인할 수 있습니다."
+      ]
+    },
+    {
+      "id": "mission-b-02c",
+      "lessonSlug": "pane-focus-flow",
+      "slug": "pane-focus-select-practice",
+      "title": "패인 포커스 이동 반복",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "paneCount",
+          "operator": ">=",
+          "value": 2
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.pane.select"
+        }
+      ],
+      "hints": [
+        "기본 분할(`tmux split-window`) 기준으로 `tmux select-pane -U` 또는 `tmux select-pane -D`를 실행해 포커스를 이동하세요.",
+        "좌우 분할(`tmux split-window -h`)에서는 `tmux select-pane -L`/`tmux select-pane -R`를 사용하면 됩니다.",
+        "단축키(`Ctrl+b` 후 방향키)를 병행해도 좋고, 채점 기록을 위해 명령형 이동을 최소 1회 실행하세요."
+      ]
+    },
+    {
+      "id": "mission-b-02c-s",
+      "lessonSlug": "pane-focus-flow-shortcuts",
+      "slug": "pane-focus-select-practice-shortcuts",
+      "title": "패인 포커스 이동 반복 (단축키)",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "paneCount",
+          "operator": ">=",
+          "value": 2
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.pane.select"
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.shortcut.execute"
+        }
+      ],
+      "hints": [
+        "먼저 같은 작업을 명령어로 1회 수행해 기준 상태를 만드세요.",
+        "단축키 경로는 `Ctrl+b` 후 방향키로 포커스를 이동해 1회 더 반복하세요.",
+        "기본 분할(`tmux split-window`) 기준으로 `tmux select-pane -U` 또는 `tmux select-pane -D`를 실행해 포커스를 이동하세요.",
+        "좌우 분할(`tmux split-window -h`)에서는 `tmux select-pane -L`/`tmux select-pane -R`를 사용하면 됩니다.",
+        "단축키(`Ctrl+b` 후 방향키)를 병행해도 좋고, 채점 기록을 위해 명령형 이동을 최소 1회 실행하세요."
+      ]
+    },
+    {
+      "id": "mission-b-02b",
+      "lessonSlug": "pane-focus-flow",
+      "slug": "window-cycle-practice",
+      "title": "윈도우 순환 이동",
+      "type": "state-check",
+      "difficulty": "advanced",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "windowCount",
+          "operator": ">=",
+          "value": 2
+        },
+        {
+          "kind": "activeWindowIndex",
+          "operator": ">=",
+          "value": 1
+        }
+      ],
+      "hints": [
+        "window를 2개 이상 만든 뒤 `tmux next-window` 또는 `tmux previous-window`를 실행하세요.",
+        "왕복 이동(next 후 prev)을 반복해도 조건을 충족할 수 있습니다."
+      ]
+    },
+    {
+      "id": "mission-b-02b-s",
+      "lessonSlug": "pane-focus-flow-shortcuts",
+      "slug": "window-cycle-practice-shortcuts",
+      "title": "윈도우 순환 이동 (단축키)",
+      "type": "state-check",
+      "difficulty": "advanced",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "windowCount",
+          "operator": ">=",
+          "value": 2
+        },
+        {
+          "kind": "activeWindowIndex",
+          "operator": ">=",
+          "value": 1
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.shortcut.execute"
+        }
+      ],
+      "hints": [
+        "먼저 같은 작업을 명령어로 1회 수행해 기준 상태를 만드세요.",
+        "동일 동작을 `Ctrl+b` + `n` / `Ctrl+b` + `p`로 한 번 더 반복하세요.",
+        "window를 2개 이상 만든 뒤 `tmux next-window` 또는 `tmux previous-window`를 실행하세요.",
+        "왕복 이동(next 후 prev)을 반복해도 조건을 충족할 수 있습니다."
+      ]
+    },
+    {
+      "id": "mission-c-01",
+      "lessonSlug": "copy-search",
+      "slug": "copy-mode-search-keyword",
+      "title": "Copy Mode에서 검색",
+      "type": "state-check",
+      "difficulty": "advanced",
+      "initialScenario": "log-buffer",
+      "passRules": [
+        {
+          "kind": "modeIs",
+          "operator": "equals",
+          "value": "COPY_MODE"
+        },
+        {
+          "kind": "searchExecuted",
+          "operator": "equals",
+          "value": true
+        },
+        {
+          "kind": "searchMatchFound",
+          "operator": "equals",
+          "value": true
+        }
+      ],
+      "hints": [
+        "`tmux copy-mode` 후 검색을 실행해 매치가 있는 키워드를 찾아보세요.",
+        "모드/검색/매치 3개 조건이 모두 참이면 통과합니다."
+      ]
+    },
+    {
+      "id": "mission-c-01-s",
+      "lessonSlug": "copy-search-shortcuts",
+      "slug": "copy-mode-search-keyword-shortcuts",
+      "title": "Copy Mode에서 검색 (단축키)",
+      "type": "state-check",
+      "difficulty": "advanced",
+      "initialScenario": "log-buffer",
+      "passRules": [
+        {
+          "kind": "modeIs",
+          "operator": "equals",
+          "value": "COPY_MODE"
+        },
+        {
+          "kind": "searchExecuted",
+          "operator": "equals",
+          "value": true
+        },
+        {
+          "kind": "searchMatchFound",
+          "operator": "equals",
+          "value": true
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.shortcut.execute"
+        }
+      ],
+      "hints": [
+        "먼저 같은 작업을 명령어로 1회 수행해 기준 상태를 만드세요.",
+        "단축키 경로는 `Ctrl+b` + `[`로 copy-mode 진입 후 `/키워드` 검색을 수행하세요.",
+        "`tmux copy-mode` 후 검색을 실행해 매치가 있는 키워드를 찾아보세요.",
+        "모드/검색/매치 3개 조건이 모두 참이면 통과합니다."
+      ]
+    },
+    {
+      "id": "mission-c-01b",
+      "lessonSlug": "copy-search",
+      "slug": "copy-mode-no-match",
+      "title": "Copy Mode 검색 실패도 확인",
+      "type": "state-check",
+      "difficulty": "advanced",
+      "initialScenario": "log-buffer",
+      "passRules": [
+        {
+          "kind": "modeIs",
+          "operator": "equals",
+          "value": "COPY_MODE"
+        },
+        {
+          "kind": "searchExecuted",
+          "operator": "equals",
+          "value": true
+        },
+        {
+          "kind": "searchMatchFound",
+          "operator": "equals",
+          "value": false
+        }
+      ],
+      "hints": [
+        "일치 결과가 없을 키워드로 검색해 실패 케이스를 재현하세요.",
+        "검색은 실행되었지만 match가 false면 통과입니다."
+      ]
+    },
+    {
+      "id": "mission-c-01b-s",
+      "lessonSlug": "copy-search-shortcuts",
+      "slug": "copy-mode-no-match-shortcuts",
+      "title": "Copy Mode 검색 실패도 확인 (단축키)",
+      "type": "state-check",
+      "difficulty": "advanced",
+      "initialScenario": "log-buffer",
+      "passRules": [
+        {
+          "kind": "modeIs",
+          "operator": "equals",
+          "value": "COPY_MODE"
+        },
+        {
+          "kind": "searchExecuted",
+          "operator": "equals",
+          "value": true
+        },
+        {
+          "kind": "searchMatchFound",
+          "operator": "equals",
+          "value": false
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.shortcut.execute"
+        }
+      ],
+      "hints": [
+        "먼저 같은 작업을 명령어로 1회 수행해 기준 상태를 만드세요.",
+        "단축키 경로는 `Ctrl+b` + `[` 진입 후 결과 없는 키워드로 `/검색`을 1회 수행하세요.",
+        "일치 결과가 없을 키워드로 검색해 실패 케이스를 재현하세요.",
+        "검색은 실행되었지만 match가 false면 통과입니다."
+      ]
+    },
+    {
+      "id": "mission-c-02",
+      "lessonSlug": "command-subset",
+      "slug": "command-mode-prompt-intro",
+      "title": "command-prompt 실행",
+      "type": "state-check",
+      "difficulty": "advanced",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.command.prompt"
+        }
+      ],
+      "hints": [
+        "`tmux command-prompt -p \"cmd\"`를 실행해 명령 프롬프트를 열어 보세요.",
+        "command-prompt 액션이 기록되면 통과합니다."
+      ]
+    },
+    {
+      "id": "mission-c-02-s",
+      "lessonSlug": "command-subset-shortcuts",
+      "slug": "command-mode-prompt-intro-shortcuts",
+      "title": "command-prompt 실행 (단축키)",
+      "type": "state-check",
+      "difficulty": "advanced",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.command.prompt"
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.shortcut.execute"
+        }
+      ],
+      "hints": [
+        "먼저 같은 작업을 명령어로 1회 수행해 기준 상태를 만드세요.",
+        "동일 동작을 `Ctrl+b` + `:`로 command-prompt를 열어 1회 더 반복하세요.",
+        "`tmux command-prompt -p \"cmd\"`를 실행해 명령 프롬프트를 열어 보세요.",
+        "command-prompt 액션이 기록되면 통과합니다."
+      ]
+    },
+    {
+      "id": "mission-c-02b",
+      "lessonSlug": "command-subset",
+      "slug": "command-mode-new-window",
+      "title": "Command Mode로 window 생성",
+      "type": "state-check",
+      "difficulty": "scenario",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "windowCount",
+          "operator": ">=",
+          "value": 2
+        },
+        {
+          "kind": "activeWindowIndex",
+          "operator": ">=",
+          "value": 1
+        }
+      ],
+      "hints": [
+        "command mode에서 `new-window`를 실행해 새 window를 만드세요.",
+        "예: `tmux command-prompt -I \"new-window\"`로 진입 후 실행하면 조건 확인이 쉽습니다."
+      ]
+    },
+    {
+      "id": "mission-c-02b-s",
+      "lessonSlug": "command-subset-shortcuts",
+      "slug": "command-mode-new-window-shortcuts",
+      "title": "Command Mode로 window 생성 (단축키)",
+      "type": "state-check",
+      "difficulty": "scenario",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "windowCount",
+          "operator": ">=",
+          "value": 2
+        },
+        {
+          "kind": "activeWindowIndex",
+          "operator": ">=",
+          "value": 1
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.shortcut.execute"
+        }
+      ],
+      "hints": [
+        "먼저 같은 작업을 명령어로 1회 수행해 기준 상태를 만드세요.",
+        "단축키 경로는 `Ctrl+b` + `:`로 `new-window`를 실행해 1회 더 window를 만드세요.",
+        "command mode에서 `new-window`를 실행해 새 window를 만드세요.",
+        "예: `tmux command-prompt -I \"new-window\"`로 진입 후 실행하면 조건 확인이 쉽습니다."
+      ]
+    },
+    {
+      "id": "mission-c-02c",
+      "lessonSlug": "command-subset",
+      "slug": "command-mode-tree-intro",
+      "title": "choose-tree 탐색 진입",
+      "type": "state-check",
+      "difficulty": "scenario",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.choose.tree"
+        }
+      ],
+      "hints": [
+        "`tmux choose-tree -Z`를 실행해 트리 탐색을 열어 보세요.",
+        "세션/윈도우가 많아졌을 때 빠르게 이동할 대상 탐색에 유용합니다."
+      ]
+    },
+    {
+      "id": "mission-c-02c-s",
+      "lessonSlug": "command-subset-shortcuts",
+      "slug": "command-mode-tree-intro-shortcuts",
+      "title": "choose-tree 탐색 진입 (단축키)",
+      "type": "state-check",
+      "difficulty": "scenario",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.choose.tree"
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.shortcut.execute"
+        }
+      ],
+      "hints": [
+        "먼저 같은 작업을 명령어로 1회 수행해 기준 상태를 만드세요.",
+        "동일 동작을 `Ctrl+b` + `w`로 트리 탐색에 1회 더 진입해 반복하세요.",
+        "`tmux choose-tree -Z`를 실행해 트리 탐색을 열어 보세요.",
+        "세션/윈도우가 많아졌을 때 빠르게 이동할 대상 탐색에 유용합니다."
+      ]
+    }
+  ],
+  "playbooks": [
+    {
+      "id": "playbook-recommended-config",
+      "slug": "recommended-config",
+      "title": "권장 tmux.conf 베이스",
+      "category": "config",
+      "estimatedMinutes": 12,
+      "prerequisites": [
+        "track-a-foundations"
+      ],
+      "steps": [
+        {
+          "id": "p1",
+          "title": "기존 설정 백업",
+          "description": "기존 ~/.tmux.conf가 있으면 타임스탬프 백업을 먼저 만들어 롤백 가능 상태로 시작합니다.",
+          "command": "cp ~/.tmux.conf ~/.tmux.conf.bak.$(date +%Y%m%d-%H%M%S) 2>/dev/null || true"
+        },
+        {
+          "id": "p2",
+          "title": "핵심 옵션 적용",
+          "description": "마우스, 인덱스(1 시작), 히스토리, copy-mode 키 체계를 기본 운영값으로 넣습니다.",
+          "command": "printf '%s\\n' 'set -g mouse on' 'set -g base-index 1' 'setw -g pane-base-index 1' 'set -g history-limit 100000' 'setw -g mode-keys vi' >> ~/.tmux.conf"
+        },
+        {
+          "id": "p3",
+          "title": "재로딩/패인 이동 바인딩 추가",
+          "description": "리로드 단축키와 h/j/k/l 패인 이동 단축키를 추가합니다.",
+          "command": "printf '%s\\n' 'bind r source-file ~/.tmux.conf \\; display-message \"tmux.conf reloaded\"' 'bind -r h select-pane -L' 'bind -r j select-pane -D' 'bind -r k select-pane -U' 'bind -r l select-pane -R' >> ~/.tmux.conf"
+        },
+        {
+          "id": "p4",
+          "title": "실행 중 세션에 반영",
+          "description": "재시작 없이 현재 세션에 설정을 적용합니다.",
+          "command": "tmux source-file ~/.tmux.conf"
+        },
+        {
+          "id": "p5",
+          "title": "옵션 값 검증",
+          "description": "핵심 옵션이 의도한 값인지 직접 확인합니다.",
+          "command": "tmux show -g mouse; tmux show -g base-index; tmux show -gw pane-base-index; tmux show -gw mode-keys"
+        },
+        {
+          "id": "p6",
+          "title": "운영 동작 검증",
+          "description": "`prefix + r` 리로드와 `prefix + h/j/k/l` 이동이 실제로 동작하는지 확인합니다."
+        }
+      ],
+      "verification": [
+        "`tmux show -g mouse` 결과가 `mouse on`",
+        "`tmux show -g base-index` 결과가 `base-index 1`",
+        "`tmux show -gw pane-base-index` 결과가 `pane-base-index 1`",
+        "`prefix + r` 입력 시 `tmux.conf reloaded` 메시지 표시"
+      ],
+      "troubleshooting": [
+        {
+          "issue": "설정이 반영되지 않음",
+          "resolution": "`tmux source-file ~/.tmux.conf`를 다시 실행하고, 적용 세션이 맞는지 `tmux display-message -p '#S'`로 확인하세요."
+        },
+        {
+          "issue": "설정을 반복 실행해 중복 라인이 많아짐",
+          "resolution": "`awk '!seen[$0]++' ~/.tmux.conf > ~/.tmux.conf.clean && mv ~/.tmux.conf.clean ~/.tmux.conf`로 중복을 정리한 뒤 다시 로드하세요."
+        },
+        {
+          "issue": "패인 이동 단축키가 동작하지 않음",
+          "resolution": "현재 prefix를 `tmux show -g prefix`로 확인하고, tmux 버전이 낮다면 `bind -r` 대신 `bind`로 교체해 적용하세요."
+        }
+      ]
+    },
+    {
+      "id": "playbook-session-persistence",
+      "slug": "session-persistence",
+      "title": "tmux 세션 유지 루틴",
+      "category": "workflow",
+      "estimatedMinutes": 6,
+      "prerequisites": [
+        "track-a-foundations"
+      ],
+      "steps": [
+        {
+          "id": "p1",
+          "title": "세션 생성 또는 재사용",
+          "command": "tmux new -As main"
+        },
+        {
+          "id": "p2",
+          "title": "세션 목록 확인",
+          "command": "tmux ls"
+        },
+        {
+          "id": "p3",
+          "title": "detach/attach 반복",
+          "command": "tmux attach -t main"
+        }
+      ],
+      "verification": [
+        "재접속 후 동일 세션 복구",
+        "세션 목록 확인"
+      ],
+      "troubleshooting": [
+        {
+          "issue": "no sessions 오류",
+          "resolution": "먼저 tmux new -As main 으로 세션을 생성하세요."
+        },
+        {
+          "issue": "원치 않는 세션에 접속됨",
+          "resolution": "tmux ls 후 정확한 이름으로 attach 하세요."
+        }
+      ]
+    },
+    {
+      "id": "playbook-tailscale-ssh-workflow",
+      "slug": "tailscale-ssh-workflow",
+      "title": "Tailscale SSH 원격 작업",
+      "category": "remote",
+      "estimatedMinutes": 14,
+      "prerequisites": [
+        "track-a-foundations"
+      ],
+      "steps": [
+        {
+          "id": "p1",
+          "title": "원격 호스트에서 SSH 활성화",
+          "description": "대상 호스트에서 1회 실행해 Tailscale SSH를 열어둡니다.",
+          "command": "sudo tailscale set --ssh"
+        },
+        {
+          "id": "p2",
+          "title": "tailnet 상태 확인",
+          "description": "로컬에서 대상 호스트가 Online이며 tailnet에 참여 중인지 확인합니다.",
+          "command": "tailscale status"
+        },
+        {
+          "id": "p3",
+          "title": "연결성 사전 점검",
+          "description": "실제 접속 전 지연/경로를 점검해 실패 원인을 빠르게 분리합니다.",
+          "command": "tailscale ping host"
+        },
+        {
+          "id": "p4",
+          "title": "원격 접속 + tmux 세션 부트스트랩",
+          "description": "세션이 없으면 생성하고, 있으면 기존 세션으로 복귀합니다.",
+          "command": "tailscale ssh user@host 'tmux new -As work'"
+        },
+        {
+          "id": "p5",
+          "title": "원격 윈도우 표준 구성",
+          "description": "editor/logs 윈도우를 만들어 재접속 시 동일한 작업 구조를 유지합니다.",
+          "command": "tailscale ssh user@host 'tmux new-window -t work -n editor; tmux new-window -t work -n logs; tmux list-windows -t work'"
+        },
+        {
+          "id": "p6",
+          "title": "재접속 복구 확인",
+          "description": "다시 접속해 동일 세션/윈도우가 보존되는지 확인합니다.",
+          "command": "tailscale ssh user@host 'tmux ls; tmux attach -t work'"
+        }
+      ],
+      "verification": [
+        "`tailscale status`에서 대상 호스트가 Online 상태",
+        "`tailscale ping host`가 응답하고 접속 가능한 경로가 표시됨",
+        "`tailscale ssh user@host 'tmux ls'`에서 `work` 세션 확인",
+        "재접속 후 `editor/logs` 윈도우가 그대로 복구됨"
+      ],
+      "troubleshooting": [
+        {
+          "issue": "tailscale ssh 연결이 Permission denied로 실패",
+          "resolution": "ACL의 SSH 정책에 사용자/그룹이 허용됐는지 확인하고, 대상 호스트에서 `sudo tailscale set --ssh`를 다시 적용하세요."
+        },
+        {
+          "issue": "host를 찾을 수 없거나 Offline으로 표시됨",
+          "resolution": "대상 호스트에서 `tailscale up --ssh`를 실행해 tailnet에 재조인한 뒤, 로컬 `tailscale status`에서 정확한 MagicDNS 이름을 사용하세요."
+        },
+        {
+          "issue": "원격에서 tmux 명령이 없거나 세션이 없음",
+          "resolution": "원격 호스트에 tmux를 설치하고 `tailscale ssh user@host 'tmux new -As work'`로 기준 세션을 다시 생성하세요."
+        }
+      ]
+    }
+  ],
+  "learningPath": {
+    "title": "통합 레슨 경로",
+    "description": "Session/Window/Pane 기초 조작부터 pane 이동, copy-mode, command-mode, 원격 운영 루틴까지 하나의 흐름으로 학습합니다.",
+    "entryLessonSlug": "hello-tmux",
+    "paneNavigationLessonSlug": "pane-focus-flow",
+    "lessonSlugs": [
+      "hello-tmux",
+      "basics",
+      "basics-shortcuts",
+      "attach-detach",
+      "attach-detach-shortcuts",
+      "split-resize",
+      "split-resize-shortcuts",
+      "pane-focus-flow",
+      "pane-focus-flow-shortcuts",
+      "copy-search",
+      "copy-search-shortcuts",
+      "command-subset",
+      "command-subset-shortcuts"
+    ]
+  },
+  "termGlossary": [
+    {
+      "id": "session",
+      "title": "Session",
+      "aliases": [
+        "session",
+        "세션"
+      ],
+      "description": "작업 컨텍스트를 유지하는 최상위 단위입니다. SSH가 끊겨도 다시 붙어 이어서 작업할 수 있습니다."
+    },
+    {
+      "id": "window",
+      "title": "Window",
+      "aliases": [
+        "window",
+        "윈도우"
+      ],
+      "description": "세션 안의 탭 단위 작업 공간입니다. 서비스/역할별로 분리해 전환합니다."
+    },
+    {
+      "id": "pane",
+      "title": "Pane",
+      "aliases": [
+        "pane",
+        "패인"
+      ],
+      "description": "한 윈도우를 분할한 터미널 영역입니다. 코드/로그/테스트를 병렬로 볼 때 사용합니다."
+    },
+    {
+      "id": "prefix",
+      "title": "Prefix Key",
+      "aliases": [
+        "prefix",
+        "ctrl+b",
+        "ctrl+a"
+      ],
+      "description": "tmux 단축키 입력의 시작 키입니다. 기본값은 Ctrl+b입니다."
+    },
+    {
+      "id": "detach-attach",
+      "title": "Detach / Attach",
+      "aliases": [
+        "detach",
+        "attach",
+        "분리",
+        "재접속"
+      ],
+      "description": "세션에서 빠져나왔다가 다시 붙는 동작입니다. 세션 복구 루틴의 핵심입니다."
+    },
+    {
+      "id": "copy-mode",
+      "title": "Copy Mode",
+      "aliases": [
+        "copy-mode",
+        "copy mode",
+        "검색",
+        "scroll"
+      ],
+      "description": "스크롤, 검색, 선택 복사를 위한 모드입니다. 긴 로그 탐색에 사용합니다."
+    },
+    {
+      "id": "command-mode",
+      "title": "Command Mode",
+      "aliases": [
+        "command mode",
+        "command-mode",
+        "command-prompt",
+        "choose-tree"
+      ],
+      "description": "tmux 명령을 직접 실행하는 모드입니다. 복합 동작 자동화에 유용합니다."
+    },
+    {
+      "id": "layout",
+      "title": "Layout",
+      "aliases": [
+        "layout",
+        "레이아웃",
+        "resize",
+        "split"
+      ],
+      "description": "패인 배치를 의미합니다. 작업 성격에 맞춰 분할/크기/포커스를 조정합니다."
+    }
+  ],
+  "learningJourney": {
+    "title": "tmux 학습 여정",
+    "intro": "tmux는 터미널 작업을 세션으로 보존하고, 창과 패인을 통해 병렬 작업을 안정적으로 운영하게 해주는 도구입니다. 이 커리큘럼은 tmux가 처음인 개발자도 바로 실습으로 이해하도록 설계했습니다.",
+    "targetOutcome": "통합 레슨 경로를 완료하면 로컬/원격 터미널 어디서든 tmux 세션을 만들고, 분할·이동·검색·명령 모드를 활용해 끊김 없는 개발 루틴을 운영할 수 있습니다.",
+    "principles": [
+      "첫 레슨은 3분 안에 완료 가능한 가장 쉬운 성공 경험으로 시작합니다.",
+      "초급/심화를 따로 나누지 않고, 기초에서 운영 확장까지 하나의 흐름으로 이어갑니다.",
+      "모든 레슨은 실무 행동(명령/상태) 기준으로 학습 목표와 완료 기준을 명확히 제공합니다.",
+      "레슨 가이드에서 용어 설명과 미션 실행 순서를 함께 제공해 맥락 단절을 줄입니다.",
+      "레슨 -> 미션 -> 실습 루프를 반복하며 단축키 암기보다 작업 루틴 내재화에 집중합니다."
+    ]
+  }
+}

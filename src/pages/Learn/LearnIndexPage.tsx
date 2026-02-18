@@ -2,9 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { EmptyState } from '../../components/system/EmptyState';
 import { PagePlaceholder } from '../../components/system/PagePlaceholder';
-import { BRAND } from '../../app/brand';
+import { BRAND_NAME } from '../../app/brand';
 import { loadAppContent } from '../../features/curriculum/contentLoader';
 import type { AppContent, AppLesson, AppMission } from '../../features/curriculum/contentSchema';
+import { useI18n } from '../../i18n';
 
 type LearnPageData = {
   lessons: AppLesson[];
@@ -44,6 +45,7 @@ function sortLessonsByOrder(lessons: AppLesson[], order: readonly string[]) {
 }
 
 export function LearnIndexPage() {
+  const { t } = useI18n();
   const [pageData, setPageData] = useState<LearnPageData>({
     lessons: [],
     missionCounts: {},
@@ -90,12 +92,12 @@ export function LearnIndexPage() {
 
   return (
     <PagePlaceholder
-      eyebrow={`${BRAND.name} Learn`}
-      title="학습 경로"
-      description="초급/심화를 나누지 않고, 하나의 통합 실습 경로로 처음부터 운영 루틴까지 이어집니다."
+      eyebrow={`${BRAND_NAME} Learn`}
+      title={t('learn.title')}
+      description={t('learn.description')}
     >
       {pageData.lessons.length === 0 ? (
-        <EmptyState title="로드된 레슨이 없습니다" description="콘텐츠 파일을 확인해 주세요." />
+        <EmptyState title={t('learn.empty.title')} description={t('learn.empty.description')} />
       ) : (
         <div className="curriculum-track-list">
           {pageData.learningJourney ? (

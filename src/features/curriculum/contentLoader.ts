@@ -7,6 +7,8 @@ import {
   type AppPlaybook,
   type AppTrack,
 } from './contentSchema';
+import { resolveLanguageFromRuntime } from '../../i18n/runtime';
+import type { SupportedLanguage } from '../../i18n/messages';
 
 let cachedContent: AppContent | null = null;
 let rawContentPromise: Promise<unknown> | null = null;
@@ -17,7 +19,7 @@ export async function loadAppContent() {
   }
 
   if (!rawContentPromise) {
-    rawContentPromise = import('../../content/v1/content.json').then((module) => module.default);
+    rawContentPromise = loadRawContentByLanguage(resolveLanguageFromRuntime());
   }
 
   const rawContent = await rawContentPromise;
@@ -28,6 +30,21 @@ export async function loadAppContent() {
 export function clearContentCache() {
   cachedContent = null;
   rawContentPromise = null;
+}
+
+async function loadRawContentByLanguage(language: SupportedLanguage) {
+  const loaders: Record<SupportedLanguage, () => Promise<unknown>> = {
+    en: () => import('../../content/v1/i18n/en/content.json').then((module) => module.default),
+    ko: () => import('../../content/v1/i18n/ko/content.json').then((module) => module.default),
+    ja: () => import('../../content/v1/i18n/ja/content.json').then((module) => module.default),
+    zh: () => import('../../content/v1/i18n/zh/content.json').then((module) => module.default),
+  };
+
+  try {
+    return await loaders[language]();
+  } catch {
+    return loaders.en();
+  }
 }
 
 export function getTrackBySlug(content: AppContent, trackSlug: string): AppTrack | undefined {

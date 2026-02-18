@@ -1,0 +1,44 @@
+[
+  {
+    "slug": "first-chapter-complete",
+    "title": "첫 챕터 완료",
+    "description": "Onramp 첫 챕터의 모든 미션을 완료했습니다.",
+    "badge": "first_chapter_complete",
+    "ogImage": "/og/first-chapter-complete.v1.png"
+  },
+  {
+    "slug": "track-a-complete",
+    "title": "Track A 완료",
+    "description": "세션/윈도우/패인 기본 조작을 실습으로 익혔습니다.",
+    "badge": "track_a_complete",
+    "ogImage": "/og/track-a-complete.v1.png"
+  },
+  {
+    "slug": "track-b-complete",
+    "title": "Track B 완료",
+    "description": "분할, 이동, 리사이즈 기반 워크플로우 실습을 완료했습니다.",
+    "badge": "track_b_complete",
+    "ogImage": "/og/track-b-complete.v1.png"
+  },
+  {
+    "slug": "track-c-complete",
+    "title": "Track C 완료",
+    "description": "copy-mode와 command-mode 기반 deep work 루틴을 완료했습니다.",
+    "badge": "track_c_complete",
+    "ogImage": "/og/track-c-complete.v1.png"
+  },
+  {
+    "slug": "streak-7",
+    "title": "7일 스트릭 달성",
+    "description": "7일 연속 학습으로 tmux 루틴을 안정적으로 유지했습니다.",
+    "badge": "streak_7_days",
+    "ogImage": "/og/streak-7.v1.png"
+  },
+  {
+    "slug": "final-complete",
+    "title": "전체 커리큘럼 완료",
+    "description": "Track A~C 전체 실습을 완료했습니다.",
+    "badge": "full_curriculum_completed",
+    "ogImage": "/og/final-complete.v1.png"
+  }
+]

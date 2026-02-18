@@ -1,7 +1,8 @@
-import { lazy, Suspense, type ComponentType } from 'react';
+import { lazy, Suspense, type ComponentType, type ReactNode } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 import { LoadingState } from '../components/system/LoadingState';
 import { RouteErrorBoundary } from '../components/system/RouteErrorBoundary';
+import { useI18n } from '../i18n';
 import { AppShell } from './layout/AppShell';
 
 const HomePage = lazy(() => import('../pages/HomePage').then((module) => ({ default: module.HomePage })));
@@ -80,10 +81,15 @@ const OnboardingDonePage = lazy(() =>
 
 function renderLazyPage(Component: ComponentType) {
   return (
-    <Suspense fallback={<LoadingState message="페이지를 불러오는 중입니다..." />}>
+    <LocalizedSuspense>
       <Component />
-    </Suspense>
+    </LocalizedSuspense>
   );
+}
+
+function LocalizedSuspense({ children }: { children: ReactNode }) {
+  const { t } = useI18n();
+  return <Suspense fallback={<LoadingState message={t('router.loadingPage')} />}>{children}</Suspense>;
 }
 
 export function createAppRouter() {

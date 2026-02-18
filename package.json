@@ -9,6 +9,8 @@
     "vm:state:generate": "node scripts/generate-vm-initial-state.mjs",
     "generate:og": "node scripts/generate-og-images.mjs",
     "generate:share-meta": "node scripts/generate-share-meta-pages.mjs",
+    "i18n:sync-content-locales": "node scripts/i18n/sync-content-locales.mjs",
+    "i18n:extract-ui-dicts": "node scripts/i18n/extract-ui-locale-dicts.mjs",
     "verify:kpi-routes": "node scripts/verify-kpi-route-map.mjs",
     "verify:coverage-matrix": "node scripts/check-coverage-matrix.mjs",
     "benchmark:simulator": "vite-node scripts/benchmark-simulator.ts",

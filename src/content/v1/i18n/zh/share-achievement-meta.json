@@ -1,0 +1,92 @@
+[
+  {
+    "id": "first_mission_passed",
+    "title": "첫 미션 완료",
+    "description": "첫 실습 미션을 통과했습니다.",
+    "ogImage": "/og/final-complete.v1.png"
+  },
+  {
+    "id": "workspace_bootstrap",
+    "title": "워크스페이스 부트스트랩",
+    "description": "세션/윈도우/분할 기본기를 한 번에 완성했습니다.",
+    "ogImage": "/og/final-complete.v1.png"
+  },
+  {
+    "id": "copy_mode_starter",
+    "title": "Copy 모드 입문",
+    "description": "copy-mode를 실행해 로그 탐색 루틴에 진입했습니다.",
+    "ogImage": "/og/final-complete.v1.png"
+  },
+  {
+    "id": "command_flow_starter",
+    "title": "명령 흐름 입문",
+    "description": "command-prompt 또는 choose-tree를 실행했습니다.",
+    "ogImage": "/og/final-complete.v1.png"
+  },
+  {
+    "id": "track_a_completed",
+    "title": "Track A 완료",
+    "description": "기초 트랙 실습을 완료했습니다.",
+    "ogImage": "/og/track-a-complete.v1.png"
+  },
+  {
+    "id": "track_b_completed",
+    "title": "Track B 완료",
+    "description": "워크플로우 트랙 실습을 완료했습니다.",
+    "ogImage": "/og/track-b-complete.v1.png"
+  },
+  {
+    "id": "track_c_completed",
+    "title": "Track C 완료",
+    "description": "심화 트랙 실습을 완료했습니다.",
+    "ogImage": "/og/track-c-complete.v1.png"
+  },
+  {
+    "id": "full_curriculum_completed",
+    "title": "커리큘럼 완주",
+    "description": "Track A~C 전체를 완료했습니다.",
+    "ogImage": "/og/final-complete.v1.png"
+  },
+  {
+    "id": "streak_7_days",
+    "title": "7일 스트릭",
+    "description": "7일 연속 학습을 달성했습니다.",
+    "ogImage": "/og/streak-7.v1.png"
+  },
+  {
+    "id": "lesson_explorer",
+    "title": "레슨 탐험가",
+    "description": "서로 다른 레슨 3개 이상에서 실습했습니다.",
+    "ogImage": "/og/first-chapter-complete.v1.png"
+  },
+  {
+    "id": "pane_runner_30",
+    "title": "Pane 러너",
+    "description": "pane 분할 누적 30회를 달성했습니다.",
+    "ogImage": "/og/final-complete.v1.png"
+  },
+  {
+    "id": "pane_hundred",
+    "title": "Pane 백장",
+    "description": "pane 분할 누적 100회를 달성했습니다.",
+    "ogImage": "/og/final-complete.v1.png"
+  },
+  {
+    "id": "layout_alchemist",
+    "title": "레이아웃 연금술사",
+    "description": "레이아웃을 바꾸거나 다양한 레이아웃을 실험했습니다.",
+    "ogImage": "/og/final-complete.v1.png"
+  },
+  {
+    "id": "focus_navigator",
+    "title": "포커스 네비게이터",
+    "description": "pane 이동/리사이즈를 반복해 포커스 제어 루틴을 만들었습니다.",
+    "ogImage": "/og/final-complete.v1.png"
+  },
+  {
+    "id": "hidden_trickster",
+    "title": "숨은 트릭스터",
+    "description": "command-prompt와 choose-tree를 모두 사용했습니다.",
+    "ogImage": "/og/final-complete.v1.png"
+  }
+]
