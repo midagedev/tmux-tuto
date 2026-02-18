@@ -306,7 +306,7 @@
       ],
       "hints": [
         "명령어: `tmux new -As main` 을 실행하면 세션이 없으면 생성, 있으면 재사용합니다.",
-        "이미 tmux 안이라면 command mode(`prefix` 후 `:`)에서 `new-session -s main` 으로도 가능합니다."
+        "단축키 입력법: `Ctrl`을 누른 상태에서 `b`를 한 번 누르고 손을 뗀 뒤, 1초 안에 다음 키를 누르세요. command mode는 `Ctrl+b` 후 `:` 입니다."
       ]
     },
     {
@@ -326,7 +326,8 @@
       ],
       "hints": [
         "`tmux new-window -n work`로 새 윈도우를 만들어 보세요.",
-        "이미 세션이 있다면 `tmux new-window`만으로도 조건을 채울 수 있습니다."
+        "이미 세션이 있다면 `tmux new-window`만으로도 조건을 채울 수 있습니다.",
+        "단축키로 하려면 `Ctrl`을 누른 채 `b`를 입력하고 손을 뗀 다음 `c`를 누르세요. (`Ctrl+b` 후 `c`)"
       ]
     },
     {
@@ -356,7 +357,7 @@
       ],
       "hints": [
         "`tmux new -As main` → `tmux new-window -n work` → `tmux list-windows` 순서로 한 번에 실행하세요.",
-        "단축키를 쓰려면 `prefix + c`로 window를 만든 뒤 `tmux list-windows`로 체크포인트를 남기세요."
+        "단축키를 쓰려면 `Ctrl`을 누른 채 `b`를 입력하고 손을 뗀 다음 `c`를 눌러 window를 만든 뒤 `tmux list-windows`로 체크포인트를 남기세요."
       ]
     },
     {
@@ -381,7 +382,7 @@
       ],
       "hints": [
         "현재 세션에서 window를 하나 더 만든 뒤 `tmux list-windows`로 상태를 확인하세요.",
-        "`prefix + c`로 window를 만든 뒤 확인 명령을 실행해도 통과합니다."
+        "`Ctrl`을 누른 채 `b`를 입력하고 손을 뗀 다음 `c`를 눌러 window를 만든 뒤 확인 명령을 실행해도 통과합니다. (`Ctrl+b` 후 `c`)"
       ]
     },
     {
@@ -426,7 +427,7 @@
       ],
       "hints": [
         "`tmux detach-client`로 분리한 뒤 `tmux attach -t main`으로 다시 붙어 보세요.",
-        "단축키로는 `prefix + d`로 detach 후 `tmux attach -t <세션명>`으로 복귀할 수 있습니다."
+        "단축키로는 `Ctrl+b` 후 `d`로 detach 후 `tmux attach -t <세션명>`으로 복귀할 수 있습니다."
       ]
     },
     {
@@ -541,7 +542,7 @@
       ],
       "hints": [
         "`tmux select-pane -L` 또는 `tmux select-pane -R`를 여러 번 실행해 포커스를 이동하세요.",
-        "단축키(`prefix + 방향키`)를 병행해도 좋고, 채점 기록을 위해 명령형 이동을 최소 1회 실행하세요."
+        "단축키(`Ctrl+b` 후 방향키)를 병행해도 좋고, 채점 기록을 위해 명령형 이동을 최소 1회 실행하세요."
       ]
     },
     {

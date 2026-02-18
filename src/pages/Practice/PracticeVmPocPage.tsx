@@ -2132,6 +2132,12 @@ export function PracticeVmPocPage() {
 
                 <section className="vm-mission-command-block">
                   <h3>이 미션에서 입력할 명령</h3>
+                  <p className="muted">단축키 입력 순서 (xterm.js 동일)</p>
+                  <ul className="link-list">
+                    <li>`Ctrl` 키를 누른 채 `b`를 한 번 누르고 손을 뗍니다.</li>
+                    <li>그다음 1초 안에 다음 키를 누릅니다. 예: `c`, `%`, `"`, `d`.</li>
+                    <li>`Ctrl+b`를 계속 누르는 것이 아니라 `Ctrl+b` 다음 키 순서입니다.</li>
+                  </ul>
                   {selectedMissionCommands.length > 0 ? (
                     <div className="vm-mission-command-list">
                       {selectedMissionCommands.map((command) => (

@@ -116,6 +116,7 @@ export function LessonPage() {
   }
 
   const { track, chapter, lesson, missions } = pageState;
+  const hasPrefixShortcutMission = missions.some((mission) => mission.hints.some((hint) => hint.includes('Ctrl+b')));
 
   return (
     <PagePlaceholder
@@ -169,6 +170,18 @@ export function LessonPage() {
           ))}
         </ul>
       </section>
+
+      {hasPrefixShortcutMission ? (
+        <section className="lesson-section">
+          <h2>첫 단축키 입력법</h2>
+          <ol className="link-list">
+            <li>`Ctrl` 키를 누른 상태에서 `b`를 한 번 누른 뒤 손을 뗍니다.</li>
+            <li>1초 안에 다음 키를 누릅니다. 예: `c`, `%`, `"`, `d`.</li>
+            <li>즉, `Ctrl+b`를 계속 누르는 방식이 아니라 `Ctrl+b` 다음 키 순서입니다.</li>
+          </ol>
+          <p className="muted">xterm.js 실습 터미널도 같은 입력 순서를 사용합니다.</p>
+        </section>
+      ) : null}
 
       <div className="inline-actions">
         <Link className="primary-btn" to={`/practice?lesson=${lesson.slug}`}>
