@@ -37,6 +37,9 @@ export function CheatsheetPage() {
       description="분산된 메뉴를 하나의 허브로 묶었습니다. 명령/단축키를 찾고 바로 실습 또는 플레이북으로 이동하세요."
     >
       <section className="reference-hub-head">
+        <p className="muted">
+          단축키 표기 안내: `Ctrl+b`는 tmux 기본 prefix 키입니다. 문서의 `prefix`는 보통 `Ctrl+b`를 의미합니다.
+        </p>
         <input
           className="sim-input reference-search-input"
           value={query}
