@@ -6,6 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '..');
 const shareMetaPath = path.join(rootDir, 'src', 'content', 'v1', 'share-meta.json');
+const shareAchievementMetaPath = path.join(rootDir, 'src', 'content', 'v1', 'share-achievement-meta.json');
 const publicShareDir = path.join(rootDir, 'public', 'share');
 
 const defaultSiteUrl = 'https://tmux-tuto.pages.dev';
@@ -20,14 +21,14 @@ function escapeHtml(value) {
     .replaceAll("'", '&#39;');
 }
 
-function createHtml({ slug, title, description, ogImage }) {
-  const pageUrl = `${siteUrl}/share/${slug}`;
+function createHtml({ pathname, title, description, ogImage, fallbackRoot }) {
+  const pageUrl = `${siteUrl}${pathname}`;
   const imageUrl = `${siteUrl}${ogImage}`;
   const escapedTitle = escapeHtml(`${title} | tmux-tuto`);
   const escapedDescription = escapeHtml(description);
   const escapedPageUrl = escapeHtml(pageUrl);
   const escapedImageUrl = escapeHtml(imageUrl);
-  const fallbackRoot = '../../';
+  const escapedFallbackRoot = escapeHtml(fallbackRoot);
 
   return `<!doctype html>
 <html lang="ko">
@@ -46,7 +47,7 @@ function createHtml({ slug, title, description, ogImage }) {
     <meta name="twitter:description" content="${escapedDescription}" />
     <meta name="twitter:image" content="${escapedImageUrl}" />
     <link rel="canonical" href="${escapedPageUrl}" />
-    <meta http-equiv="refresh" content="2; url=${fallbackRoot}" />
+    <meta http-equiv="refresh" content="2; url=${escapedFallbackRoot}" />
     <script>
       (function () {
         var targetPath = window.location.pathname + window.location.search + window.location.hash;
@@ -62,7 +63,7 @@ function createHtml({ slug, title, description, ogImage }) {
       <h1>${escapeHtml(title)}</h1>
       <p>${escapedDescription}</p>
       <p>앱으로 이동 중입니다. 자동 이동이 되지 않으면 홈에서 다시 열어 주세요.</p>
-      <p><a href="${fallbackRoot}">tmux-tuto 홈으로 이동</a></p>
+      <p><a href="${escapedFallbackRoot}">tmux-tuto 홈으로 이동</a></p>
     </main>
   </body>
 </html>
@@ -70,15 +71,48 @@ function createHtml({ slug, title, description, ogImage }) {
 }
 
 async function generate() {
-  const raw = await fs.readFile(shareMetaPath, 'utf-8');
-  const milestones = JSON.parse(raw);
+  const [milestoneRaw, achievementRaw] = await Promise.all([
+    fs.readFile(shareMetaPath, 'utf-8'),
+    fs.readFile(shareAchievementMetaPath, 'utf-8'),
+  ]);
+  const milestones = JSON.parse(milestoneRaw);
+  const achievements = JSON.parse(achievementRaw);
 
   await fs.mkdir(publicShareDir, { recursive: true });
 
   for (const milestone of milestones) {
     const slugDir = path.join(publicShareDir, milestone.slug);
     await fs.mkdir(slugDir, { recursive: true });
-    await fs.writeFile(path.join(slugDir, 'index.html'), createHtml(milestone), 'utf-8');
+    await fs.writeFile(
+      path.join(slugDir, 'index.html'),
+      createHtml({
+        pathname: `/share/${milestone.slug}`,
+        title: milestone.title,
+        description: milestone.description,
+        ogImage: milestone.ogImage,
+        fallbackRoot: '../../',
+      }),
+      'utf-8',
+    );
+  }
+
+  const achievementDir = path.join(publicShareDir, 'achievement');
+  await fs.mkdir(achievementDir, { recursive: true });
+
+  for (const achievement of achievements) {
+    const idDir = path.join(achievementDir, achievement.id);
+    await fs.mkdir(idDir, { recursive: true });
+    await fs.writeFile(
+      path.join(idDir, 'index.html'),
+      createHtml({
+        pathname: `/share/achievement/${achievement.id}`,
+        title: achievement.title,
+        description: achievement.description,
+        ogImage: achievement.ogImage,
+        fallbackRoot: '../../../',
+      }),
+      'utf-8',
+    );
   }
 }
 

@@ -41,6 +41,9 @@ const MissionPassedPage = lazy(() =>
 const ShareMilestonePage = lazy(() =>
   import('../pages/Share/ShareMilestonePage').then((module) => ({ default: module.ShareMilestonePage })),
 );
+const ShareAchievementPage = lazy(() =>
+  import('../pages/Share/ShareAchievementPage').then((module) => ({ default: module.ShareAchievementPage })),
+);
 const NotFoundPage = lazy(() =>
   import('../pages/NotFoundPage').then((module) => ({ default: module.NotFoundPage })),
 );
@@ -112,6 +115,7 @@ export function createAppRouter() {
             element: renderLazyPage(OnboardingFirstMissionPassedPage),
           },
           { path: 'onboarding/done', element: renderLazyPage(OnboardingDonePage) },
+          { path: 'share/achievement/:achievementId', element: renderLazyPage(ShareAchievementPage) },
           { path: 'share/:milestoneSlug', element: renderLazyPage(ShareMilestonePage) },
           { path: '*', element: renderLazyPage(NotFoundPage) },
         ],

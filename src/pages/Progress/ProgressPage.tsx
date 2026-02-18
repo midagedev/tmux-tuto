@@ -7,7 +7,14 @@ import type { AppContent, AppMission } from '../../features/curriculum/contentSc
 import { listAchievementDefinitions } from '../../features/progress';
 import { useProgressStore } from '../../features/progress/progressStore';
 import type { MilestoneSlug } from '../../features/sharing';
-import { buildSharePath, buildTwitterIntentUrl, computeMilestoneProgress, getMilestoneMeta } from '../../features/sharing';
+import {
+  buildAbsoluteAchievementShareUrl,
+  buildAchievementChallengeShareText,
+  buildSharePath,
+  buildTwitterIntentUrl,
+  computeMilestoneProgress,
+  getMilestoneMeta,
+} from '../../features/sharing';
 
 function formatSessionDateTime(iso: string | null) {
   if (!iso) {
@@ -134,6 +141,7 @@ export function ProgressPage() {
   }, [content, completedMissionSlugs, streakDays]);
 
   const completedTrackSlugs = milestoneProgress.completedTrackSlugs;
+  const shareDate = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
   const coreAchievementRows = useMemo(() => {
     const unlockedSet = new Set(unlockedCoreAchievements);
@@ -150,12 +158,6 @@ export function ProgressPage() {
       unlocked: unlockedSet.has(achievement.id),
     }));
   }, [unlockedFunAchievements]);
-
-  const progressShareUrl = useMemo(() => {
-    const basePath = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
-    const progressPath = `${basePath}/progress`.replace(/\/{2,}/g, '/');
-    return new URL(progressPath, window.location.origin).toString();
-  }, []);
 
   const milestoneLinks = useMemo(() => {
     const date = new Date().toISOString().slice(0, 10);
@@ -303,13 +305,18 @@ export function ProgressPage() {
                     <a
                       className="text-link"
                       href={buildTwitterIntentUrl(
-                        progressShareUrl,
-                        `tmux-tuto 업적 달성: ${achievement.shareText}`,
+                        buildAbsoluteAchievementShareUrl(achievement.id, {
+                          level,
+                          xp,
+                          date: shareDate,
+                          badge: achievement.id,
+                        }),
+                        buildAchievementChallengeShareText(achievement.shareText, achievement.id),
                       )}
                       target="_blank"
                       rel="noreferrer"
                     >
-                      X 공유
+                      X 챌린지 공유
                     </a>
                   ) : null}
                 </article>
@@ -349,13 +356,18 @@ export function ProgressPage() {
                     <a
                       className="text-link"
                       href={buildTwitterIntentUrl(
-                        progressShareUrl,
-                        `tmux-tuto 업적 달성: ${achievement.shareText}`,
+                        buildAbsoluteAchievementShareUrl(achievement.id, {
+                          level,
+                          xp,
+                          date: shareDate,
+                          badge: achievement.id,
+                        }),
+                        buildAchievementChallengeShareText(achievement.shareText, achievement.id),
                       )}
                       target="_blank"
                       rel="noreferrer"
                     >
-                      X 공유
+                      X 챌린지 공유
                     </a>
                   ) : null}
                 </article>

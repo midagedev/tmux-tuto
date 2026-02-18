@@ -15,7 +15,7 @@ import {
 } from '../../features/progress/completionFeedbackQueue';
 import { getAchievementDefinition } from '../../features/progress';
 import { useProgressStore } from '../../features/progress/progressStore';
-import { buildTwitterIntentUrl } from '../../features/sharing';
+import { buildAbsoluteAchievementShareUrl, buildAchievementChallengeShareText, buildTwitterIntentUrl } from '../../features/sharing';
 import {
   evaluateMissionWithVmSnapshot,
   parseProbeMetricFromLine,
@@ -346,6 +346,19 @@ function getLessonStatusClass(status: LessonCompletionStatus) {
   }
 }
 
+function getCelebrationKindLabel(kind: CelebrationState['kind']) {
+  switch (kind) {
+    case 'mission':
+      return 'Mission Complete';
+    case 'lesson':
+      return 'Lesson Complete';
+    case 'achievement':
+      return 'Achievement';
+    default:
+      return 'Update';
+  }
+}
+
 export function PracticeVmPocPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [contentState, setContentState] = useState<{
@@ -375,6 +388,9 @@ export function PracticeVmPocPage() {
   const [mobileWorkbenchView, setMobileWorkbenchView] = useState<'mission' | 'terminal'>('terminal');
 
   const completedMissionSlugs = useProgressStore((store) => store.completedMissionSlugs);
+  const level = useProgressStore((store) => store.level);
+  const xp = useProgressStore((store) => store.xp);
+  const unlockedAchievements = useProgressStore((store) => store.unlockedAchievements);
   const missionSessions = useProgressStore((store) => store.missionSessions);
   const recordMissionPass = useProgressStore((store) => store.recordMissionPass);
   const recordTmuxActivity = useProgressStore((store) => store.recordTmuxActivity);
@@ -391,7 +407,6 @@ export function PracticeVmPocPage() {
   const probeLineBufferRef = useRef('');
   const autoProbeRef = useRef(autoProbe);
   const celebratedMissionSetRef = useRef(new Set<string>());
-  const celebratedLessonSetRef = useRef(new Set<string>());
   const seenCelebrationKeysRef = useRef(new Set<string>());
   const lastEmulatorOptionsRef = useRef<V86Options | null>(null);
   const vmInternalBridgeReadyRef = useRef(false);
@@ -650,6 +665,7 @@ export function PracticeVmPocPage() {
 
   const celebration = celebrationState.active;
   const celebrationQueueCount = celebrationState.queue.length;
+  const isAchievementCelebration = celebration?.kind === 'achievement';
 
   const enqueueCelebration = useCallback((nextCelebration: CelebrationState) => {
     if (seenCelebrationKeysRef.current.has(nextCelebration.key)) {
@@ -664,6 +680,59 @@ export function PracticeVmPocPage() {
     setCelebrationState((previous) => advanceCompletionFeedback(previous));
   }, []);
 
+  const announceAchievements = useCallback(
+    (achievementIds: string[]) => {
+      const uniqueIds = Array.from(new Set(achievementIds));
+      const definitions = uniqueIds
+        .map((achievementId) => getAchievementDefinition(achievementId))
+        .filter((definition): definition is NonNullable<ReturnType<typeof getAchievementDefinition>> =>
+          Boolean(definition),
+        );
+
+      if (definitions.length === 0) {
+        return;
+      }
+
+      const unseenDefinitions = definitions.filter(
+        (definition) => !seenCelebrationKeysRef.current.has(`achievement:${definition.id}`),
+      );
+      if (unseenDefinitions.length === 0) {
+        return;
+      }
+
+      if (unseenDefinitions.length === 1) {
+        const definition = unseenDefinitions[0];
+        enqueueCelebration({
+          key: `achievement:${definition.id}`,
+          kind: 'achievement',
+          message: `업적 달성: ${definition.title}`,
+          detail: definition.description,
+          achievementId: definition.id,
+        });
+        return;
+      }
+
+      const batchIds = unseenDefinitions.map((definition) => definition.id);
+      batchIds.forEach((id) => {
+        seenCelebrationKeysRef.current.add(`achievement:${id}`);
+      });
+
+      const preview = unseenDefinitions
+        .slice(0, 3)
+        .map((definition) => definition.title)
+        .join(' · ');
+      const hiddenCount = unseenDefinitions.length - 3;
+
+      enqueueCelebration({
+        key: `achievement-batch:${batchIds.join(',')}`,
+        kind: 'achievement',
+        message: `업적 ${unseenDefinitions.length}개 달성`,
+        detail: hiddenCount > 0 ? `${preview} 외 ${hiddenCount}개` : preview,
+      });
+    },
+    [enqueueCelebration],
+  );
+
   const celebrationAchievement = useMemo(() => {
     if (!celebration?.achievementId) {
       return null;
@@ -677,12 +746,15 @@ export function PracticeVmPocPage() {
       return null;
     }
 
-    const basePath = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
-    const progressPath = `${basePath}/progress`.replace(/\/{2,}/g, '/');
-    const shareUrl = new URL(progressPath, window.location.origin).toString();
-    const shareText = `tmux-tuto 업적 달성: ${celebrationAchievement.shareText}`;
+    const shareUrl = buildAbsoluteAchievementShareUrl(celebrationAchievement.id, {
+      level,
+      xp,
+      date: new Date().toISOString().slice(0, 10),
+      badge: celebrationAchievement.id,
+    });
+    const shareText = buildAchievementChallengeShareText(celebrationAchievement.shareText, celebrationAchievement.id);
     return buildTwitterIntentUrl(shareUrl, shareText);
-  }, [celebrationAchievement]);
+  }, [celebrationAchievement, level, xp]);
 
   useEffect(() => {
     autoProbeRef.current = autoProbe;
@@ -701,7 +773,9 @@ export function PracticeVmPocPage() {
       return;
     }
 
-    celebrationCloseButtonRef.current?.focus({ preventScroll: true });
+    if (!isAchievementCelebration) {
+      celebrationCloseButtonRef.current?.focus({ preventScroll: true });
+    }
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') {
@@ -716,10 +790,24 @@ export function PracticeVmPocPage() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
+  }, [advanceCelebration, celebration, isAchievementCelebration]);
+
+  useEffect(() => {
+    if (!celebration || celebration.kind !== 'achievement') {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      advanceCelebration();
+    }, 4200);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
   }, [advanceCelebration, celebration]);
 
   useEffect(() => {
-    if (!celebration) {
+    if (!celebration || celebration.kind === 'achievement') {
       return;
     }
 
@@ -860,21 +948,6 @@ export function PracticeVmPocPage() {
     setDebugLines((previous) => trimHistory([...previous, normalized], MAX_DEBUG_LINES));
   }, []);
 
-  const announceAchievement = useCallback((achievementId: string) => {
-    const definition = getAchievementDefinition(achievementId);
-    if (!definition) {
-      return;
-    }
-
-    enqueueCelebration({
-      key: `achievement:${definition.id}`,
-      kind: 'achievement',
-      message: `업적 달성: ${definition.title}`,
-      detail: definition.description,
-      achievementId: definition.id,
-    });
-  }, [enqueueCelebration]);
-
   const updateMetricByProbe = useCallback(
     (metric: VmProbeMetric) => {
       setVmStatus('running');
@@ -956,11 +1029,11 @@ export function PracticeVmPocPage() {
           lessonSlug: selectedLessonSlugRef.current,
         });
         if (unlocked.length > 0) {
-          unlocked.forEach((achievementId) => announceAchievement(achievementId));
+          announceAchievements(unlocked);
         }
       }
     },
-    [announceAchievement],
+    [announceAchievements],
   );
 
   const registerCommand = useCallback(
@@ -981,7 +1054,7 @@ export function PracticeVmPocPage() {
           lessonSlug: selectedLessonSlugRef.current,
         });
         if (unlocked.length > 0) {
-          unlocked.forEach((achievementId) => announceAchievement(achievementId));
+          announceAchievements(unlocked);
         }
       }
 
@@ -1001,7 +1074,75 @@ export function PracticeVmPocPage() {
         }));
       }
     },
-    [announceAchievement],
+    [announceAchievements],
+  );
+
+  const completeSelectedMission = useCallback(
+    (mode: 'auto' | 'manual') => {
+      if (!content || !selectedMission || !selectedLesson) {
+        return;
+      }
+
+      const missionSlug = selectedMission.slug;
+      if (completedMissionSlugs.includes(missionSlug)) {
+        return;
+      }
+
+      const previousUnlockedSet = new Set(unlockedAchievements);
+      const nextCompletedMissionSlugs = [...completedMissionSlugs, missionSlug];
+      const completedTrackSlugs = computeCompletedTrackSlugs(content, nextCompletedMissionSlugs);
+
+      const gainedXp = recordMissionPass({
+        missionSlug,
+        difficulty: selectedMission.difficulty,
+        hintLevel: mode === 'manual' ? 1 : 0,
+        attemptNumber: 1,
+        completedTrackSlugs,
+      });
+
+      const completedSetBefore = new Set(completedMissionSlugs);
+      const completedSetAfter = new Set(nextCompletedMissionSlugs);
+      const lessonWasCompleted =
+        lessonMissions.length > 0 && lessonMissions.every((mission) => completedSetBefore.has(mission.slug));
+      const lessonNowCompleted =
+        lessonMissions.length > 0 && lessonMissions.every((mission) => completedSetAfter.has(mission.slug));
+      const lessonJustCompleted = !lessonWasCompleted && lessonNowCompleted;
+
+      if (lessonJustCompleted) {
+        enqueueCelebration({
+          key: `lesson:${selectedLesson.slug}`,
+          kind: 'lesson',
+          message: `레슨 완료: ${selectedLesson.title}`,
+          detail: `${lessonMissions.length}개 미션을 모두 완료했습니다. XP +${gainedXp}`,
+        });
+      } else {
+        enqueueCelebration({
+          key: `mission:${missionSlug}`,
+          kind: 'mission',
+          message: mode === 'manual' ? `수동 완료 처리: ${selectedMission.title}` : `미션 완료: ${selectedMission.title}`,
+          detail: mode === 'manual' ? `수동 브리지 기록 완료, XP +${gainedXp}` : `자동 판정 통과, XP +${gainedXp}`,
+        });
+      }
+
+      const newlyUnlocked = useProgressStore
+        .getState()
+        .unlockedAchievements.filter((achievementId) => !previousUnlockedSet.has(achievementId));
+
+      if (newlyUnlocked.length > 0) {
+        announceAchievements(newlyUnlocked);
+      }
+    },
+    [
+      announceAchievements,
+      completedMissionSlugs,
+      content,
+      enqueueCelebration,
+      lessonMissions,
+      recordMissionPass,
+      selectedLesson,
+      selectedMission,
+      unlockedAchievements,
+    ],
   );
 
   const sendInternalCommand = useCallback((command: string) => {
@@ -1468,85 +1609,28 @@ export function PracticeVmPocPage() {
 
     celebratedMissionSetRef.current.add(missionSlug);
 
-    const completedTrackSlugs = computeCompletedTrackSlugs(content, [...completedMissionSlugs, missionSlug]);
-    const gainedXp = recordMissionPass({
-      missionSlug,
-      difficulty: selectedMission.difficulty,
-      hintLevel: 0,
-      attemptNumber: 1,
-      completedTrackSlugs,
-    });
-
-    enqueueCelebration({
-      key: `mission:${selectedMission.slug}`,
-      kind: 'mission',
-      message: `미션 완료: ${selectedMission.title}`,
-      detail: `자동 판정 통과, XP +${gainedXp}`,
-    });
+    completeSelectedMission('auto');
   }, [
+    completeSelectedMission,
     completedMissionSlugs,
     content,
-    enqueueCelebration,
-    recordMissionPass,
     selectedMission,
     selectedMissionStatus,
-    vmSnapshot,
   ]);
 
-  useEffect(() => {
-    if (!selectedLesson || lessonMissions.length === 0) {
-      return;
-    }
-
-    const completedSet = new Set(completedMissionSlugs);
-    const lessonCompleted = lessonMissions.every((mission) => completedSet.has(mission.slug));
-
-    if (!lessonCompleted) {
-      return;
-    }
-
-    if (celebratedLessonSetRef.current.has(selectedLesson.slug)) {
-      return;
-    }
-
-    celebratedLessonSetRef.current.add(selectedLesson.slug);
-    enqueueCelebration({
-      key: `lesson:${selectedLesson.slug}`,
-      kind: 'lesson',
-      message: `레슨 완료: ${selectedLesson.title}`,
-      detail: `${lessonMissions.length}개 미션을 모두 완료했습니다.`,
-    });
-  }, [completedMissionSlugs, enqueueCelebration, lessonMissions, selectedLesson]);
-
   const handleManualMissionComplete = useCallback(() => {
-    if (!content || !selectedMission) {
+    if (!selectedMission) {
       return;
     }
 
-    if (completedMissionSlugs.includes(selectedMission.slug)) {
+    const missionSlug = selectedMission.slug;
+    if (completedMissionSlugs.includes(missionSlug)) {
       return;
     }
 
-    const completedTrackSlugs = computeCompletedTrackSlugs(content, [
-      ...completedMissionSlugs,
-      selectedMission.slug,
-    ]);
-
-    const gainedXp = recordMissionPass({
-      missionSlug: selectedMission.slug,
-      difficulty: selectedMission.difficulty,
-      hintLevel: 1,
-      attemptNumber: 1,
-      completedTrackSlugs,
-    });
-
-    enqueueCelebration({
-      key: `mission:${selectedMission.slug}`,
-      kind: 'mission',
-      message: `수동 완료 처리: ${selectedMission.title}`,
-      detail: `수동 브리지 기록 완료, XP +${gainedXp}`,
-    });
-  }, [content, completedMissionSlugs, enqueueCelebration, recordMissionPass, selectedMission]);
+    celebratedMissionSetRef.current.add(missionSlug);
+    completeSelectedMission('manual');
+  }, [completeSelectedMission, completedMissionSlugs, selectedMission]);
 
   const lessonObjectivePreview = selectedLesson?.objectives.slice(0, 3) ?? [];
   const hiddenObjectiveCount = selectedLesson
@@ -1616,11 +1700,11 @@ export function PracticeVmPocPage() {
         </details>
 
         {celebration ? (
-          <section className="vm-celebration-overlay">
+          <section className={`vm-celebration-overlay ${isAchievementCelebration ? 'is-toast' : ''}`}>
             <section
-              className={`vm-celebration vm-celebration-${celebration.kind}`}
-              role="dialog"
-              aria-modal="true"
+              className={`vm-celebration vm-celebration-${celebration.kind} ${isAchievementCelebration ? 'is-toast' : ''}`}
+              role={isAchievementCelebration ? 'status' : 'dialog'}
+              aria-modal={isAchievementCelebration ? undefined : true}
               aria-live="polite"
               aria-label="완료 피드백"
             >
@@ -1629,11 +1713,18 @@ export function PracticeVmPocPage() {
                 <span />
                 <span />
               </div>
+              <div className="vm-celebration-header">
+                <span className={`vm-celebration-kind-chip is-${celebration.kind}`}>
+                  {getCelebrationKindLabel(celebration.kind)}
+                </span>
+                {celebrationQueueCount > 0 ? (
+                  <span className="vm-celebration-queue-chip">다음 {celebrationQueueCount}</span>
+                ) : null}
+              </div>
               <p>
                 <strong>{celebration.message}</strong>
               </p>
               <p>{celebration.detail}</p>
-              <p className="muted">대기 중인 알림 {celebrationQueueCount}개</p>
               {celebration.kind === 'mission' && nextIncompleteMission ? (
                 <section className="vm-celebration-next-action">
                   <p className="vm-celebration-next-label">추천 다음 단계</p>
@@ -1680,7 +1771,7 @@ export function PracticeVmPocPage() {
                 </Link>
                 {celebrationShareHref ? (
                   <a className="text-link" href={celebrationShareHref} target="_blank" rel="noreferrer">
-                    X 공유
+                    X 챌린지 공유
                   </a>
                 ) : null}
                 <button
