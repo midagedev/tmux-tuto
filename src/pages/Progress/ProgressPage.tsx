@@ -16,8 +16,8 @@ export function ProgressPage() {
   const level = useProgressStore((store) => store.level);
   const streakDays = useProgressStore((store) => store.streakDays);
   const completedMissionSlugs = useProgressStore((store) => store.completedMissionSlugs);
-  const unlockedCourseAchievements = useProgressStore((store) => store.unlockedCourseAchievements);
-  const unlockedSkillAchievements = useProgressStore((store) => store.unlockedSkillAchievements);
+  const unlockedCoreAchievements = useProgressStore((store) => store.unlockedCoreAchievements);
+  const unlockedFunAchievements = useProgressStore((store) => store.unlockedFunAchievements);
   const tmuxSkillStats = useProgressStore((store) => store.tmuxSkillStats);
   const recordMissionPass = useProgressStore((store) => store.recordMissionPass);
 
@@ -78,21 +78,21 @@ export function ProgressPage() {
     [trackProgress],
   );
 
-  const courseAchievementRows = useMemo(() => {
-    const unlockedSet = new Set(unlockedCourseAchievements);
-    return listAchievementDefinitions('course').map((achievement) => ({
+  const coreAchievementRows = useMemo(() => {
+    const unlockedSet = new Set(unlockedCoreAchievements);
+    return listAchievementDefinitions('core').map((achievement) => ({
       ...achievement,
       unlocked: unlockedSet.has(achievement.id),
     }));
-  }, [unlockedCourseAchievements]);
+  }, [unlockedCoreAchievements]);
 
-  const skillAchievementRows = useMemo(() => {
-    const unlockedSet = new Set(unlockedSkillAchievements);
-    return listAchievementDefinitions('skill').map((achievement) => ({
+  const funAchievementRows = useMemo(() => {
+    const unlockedSet = new Set(unlockedFunAchievements);
+    return listAchievementDefinitions('fun').map((achievement) => ({
       ...achievement,
       unlocked: unlockedSet.has(achievement.id),
     }));
-  }, [unlockedSkillAchievements]);
+  }, [unlockedFunAchievements]);
 
   const progressShareUrl = useMemo(() => {
     const basePath = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
@@ -195,12 +195,12 @@ export function ProgressPage() {
           </section>
 
           <section className="playbook-section">
-            <h2>코스 업적</h2>
+            <h2>Core 업적</h2>
             <p className="muted">
-              {unlockedCourseAchievements.length}/{courseAchievementRows.length} 달성
+              {unlockedCoreAchievements.length}/{coreAchievementRows.length} 달성
             </p>
             <div className="achievement-grid">
-              {courseAchievementRows.map((achievement) => (
+              {coreAchievementRows.map((achievement) => (
                 <article
                   key={achievement.id}
                   className={`achievement-card ${achievement.unlocked ? 'is-unlocked' : 'is-locked'}`}
@@ -227,9 +227,9 @@ export function ProgressPage() {
           </section>
 
           <section className="playbook-section">
-            <h2>tmux 스킬 업적</h2>
+            <h2>Fun 업적</h2>
             <p className="muted">
-              {unlockedSkillAchievements.length}/{skillAchievementRows.length} 달성
+              {unlockedFunAchievements.length}/{funAchievementRows.length} 달성
             </p>
             <ul className="link-list">
               <li>pane 분할 누적: {tmuxSkillStats.splitCount}</li>
@@ -246,7 +246,7 @@ export function ProgressPage() {
               <li>choose-tree 실행: {tmuxSkillStats.chooseTreeCount}</li>
             </ul>
             <div className="achievement-grid">
-              {skillAchievementRows.map((achievement) => (
+              {funAchievementRows.map((achievement) => (
                 <article
                   key={achievement.id}
                   className={`achievement-card ${achievement.unlocked ? 'is-unlocked' : 'is-locked'}`}

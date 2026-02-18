@@ -6,30 +6,20 @@ type XpInput = {
   hintLevel: 0 | 1 | 2 | 3;
 };
 
-export type CourseAchievementInput = {
+export type AchievementEvaluationInput = {
   completedMissionCount: number;
   streakDays: number;
   completedTrackSlugs: string[];
-};
-
-export type SkillAchievementInput = {
   splitCount: number;
-  maxPaneCount: number;
   newWindowCount: number;
   newSessionCount: number;
   copyModeCount: number;
   paneResizeCount: number;
   paneSelectCount: number;
-  paneSwapCount: number;
-  windowRotateCount: number;
   layoutSelectCount: number;
-  zoomToggleCount: number;
-  syncToggleCount: number;
   commandPromptCount: number;
   chooseTreeCount: number;
   uniqueLayoutCount: number;
-  zoomObserved: boolean;
-  syncObserved: boolean;
   lessonCount: number;
 };
 
@@ -130,15 +120,23 @@ export function calculateNextStreak(lastPassDate: string | null, nowIso: string,
   return 1;
 }
 
-export function computeCourseAchievements(input: CourseAchievementInput) {
+export function computeCoreAchievements(input: AchievementEvaluationInput) {
   const unlocked: string[] = [];
 
   if (input.completedMissionCount >= 1) {
     unlocked.push('first_mission_passed');
   }
 
-  if (input.streakDays >= 7) {
-    unlocked.push('streak_7_days');
+  if (input.newSessionCount >= 1 && input.newWindowCount >= 1 && input.splitCount >= 1) {
+    unlocked.push('workspace_bootstrap');
+  }
+
+  if (input.copyModeCount >= 1) {
+    unlocked.push('copy_mode_starter');
+  }
+
+  if (input.commandPromptCount >= 1 || input.chooseTreeCount >= 1) {
+    unlocked.push('command_flow_starter');
   }
 
   if (input.completedTrackSlugs.includes('track-a-foundations')) {
@@ -161,83 +159,44 @@ export function computeCourseAchievements(input: CourseAchievementInput) {
     unlocked.push('full_curriculum_completed');
   }
 
-  return unlocked;
-}
-
-export function computeAchievements(input: CourseAchievementInput) {
-  return computeCourseAchievements(input);
-}
-
-export function computeSkillAchievements(input: SkillAchievementInput) {
-  const unlocked: string[] = [];
-
-  if (input.splitCount >= 1) {
-    unlocked.push('skill_first_split');
-  }
-
-  if (input.maxPaneCount >= 3) {
-    unlocked.push('skill_triple_panes');
-  }
-
-  if (input.splitCount >= 20) {
-    unlocked.push('skill_split_20');
-  }
-
-  if (input.splitCount >= 100) {
-    unlocked.push('skill_split_100');
-  }
-
-  if (input.newWindowCount >= 1) {
-    unlocked.push('skill_first_window');
-  }
-
-  if (input.newSessionCount >= 1) {
-    unlocked.push('skill_first_session');
-  }
-
-  if (input.copyModeCount >= 1) {
-    unlocked.push('skill_first_copy_mode');
-  }
-
-  if (input.layoutSelectCount >= 1 || input.uniqueLayoutCount >= 2) {
-    unlocked.push('skill_layout_first');
-  }
-
-  if (input.zoomToggleCount >= 1 || input.zoomObserved) {
-    unlocked.push('skill_zoom_control');
-  }
-
-  if (input.syncToggleCount >= 1 || input.syncObserved) {
-    unlocked.push('skill_sync_control');
-  }
-
-  if (input.commandPromptCount >= 1) {
-    unlocked.push('skill_command_prompt');
-  }
-
-  if (input.chooseTreeCount >= 1) {
-    unlocked.push('skill_choose_tree');
-  }
-
-  if (input.paneResizeCount >= 5) {
-    unlocked.push('skill_resize_5');
-  }
-
-  if (input.paneSelectCount >= 10) {
-    unlocked.push('skill_pane_navigator');
-  }
-
-  if (input.paneSwapCount >= 1) {
-    unlocked.push('skill_swap_first');
-  }
-
-  if (input.windowRotateCount >= 1) {
-    unlocked.push('skill_rotate_first');
+  if (input.streakDays >= 7) {
+    unlocked.push('streak_7_days');
   }
 
   if (input.lessonCount >= 3) {
-    unlocked.push('skill_three_lessons');
+    unlocked.push('lesson_explorer');
   }
 
   return unlocked;
+}
+
+export function computeFunAchievements(input: AchievementEvaluationInput) {
+  const unlocked: string[] = [];
+
+  if (input.splitCount >= 30) {
+    unlocked.push('pane_runner_30');
+  }
+
+  if (input.splitCount >= 100) {
+    unlocked.push('pane_hundred');
+  }
+
+  if (input.layoutSelectCount >= 1 || input.uniqueLayoutCount >= 3) {
+    unlocked.push('layout_alchemist');
+  }
+
+  if (input.paneSelectCount >= 12 || input.paneResizeCount >= 8) {
+    unlocked.push('focus_navigator');
+  }
+
+  if (input.commandPromptCount >= 1 && input.chooseTreeCount >= 1) {
+    unlocked.push('hidden_trickster');
+  }
+
+  return unlocked;
+}
+
+// Backward-compatible helper used by legacy tests/callers.
+export function computeAchievements(input: AchievementEvaluationInput) {
+  return computeCoreAchievements(input);
 }

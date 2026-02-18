@@ -3,8 +3,8 @@ import {
   calculateLevelFromXp,
   calculateMissionXp,
   calculateNextStreak,
-  computeAchievements,
-  computeSkillAchievements,
+  computeCoreAchievements,
+  computeFunAchievements,
 } from './progressEngine';
 
 describe('progressEngine', () => {
@@ -35,53 +35,50 @@ describe('progressEngine', () => {
   });
 
   it('unlocks curriculum completion achievement when all tracks are complete', () => {
-    const achievements = computeAchievements({
+    const achievements = computeCoreAchievements({
       completedMissionCount: 10,
       streakDays: 8,
       completedTrackSlugs: ['track-a-foundations', 'track-b-workflow', 'track-c-deepwork'],
+      splitCount: 1,
+      newWindowCount: 1,
+      newSessionCount: 1,
+      copyModeCount: 1,
+      paneResizeCount: 0,
+      paneSelectCount: 0,
+      layoutSelectCount: 0,
+      commandPromptCount: 0,
+      chooseTreeCount: 0,
+      uniqueLayoutCount: 0,
+      lessonCount: 3,
     });
 
     expect(achievements).toContain('full_curriculum_completed');
     expect(achievements).toContain('streak_7_days');
+    expect(achievements).toContain('workspace_bootstrap');
   });
 
-  it('unlocks tmux skill achievements from action counters', () => {
-    const achievements = computeSkillAchievements({
+  it('unlocks fun achievements from action counters', () => {
+    const achievements = computeFunAchievements({
       splitCount: 100,
-      maxPaneCount: 3,
       newWindowCount: 1,
       newSessionCount: 1,
       copyModeCount: 1,
       paneResizeCount: 8,
       paneSelectCount: 12,
-      paneSwapCount: 1,
-      windowRotateCount: 1,
       layoutSelectCount: 1,
-      zoomToggleCount: 1,
-      syncToggleCount: 1,
       commandPromptCount: 1,
       chooseTreeCount: 1,
-      uniqueLayoutCount: 2,
-      zoomObserved: true,
-      syncObserved: true,
+      uniqueLayoutCount: 3,
       lessonCount: 3,
+      completedMissionCount: 0,
+      streakDays: 0,
+      completedTrackSlugs: [],
     });
 
-    expect(achievements).toContain('skill_first_split');
-    expect(achievements).toContain('skill_split_100');
-    expect(achievements).toContain('skill_triple_panes');
-    expect(achievements).toContain('skill_first_window');
-    expect(achievements).toContain('skill_first_session');
-    expect(achievements).toContain('skill_first_copy_mode');
-    expect(achievements).toContain('skill_layout_first');
-    expect(achievements).toContain('skill_zoom_control');
-    expect(achievements).toContain('skill_sync_control');
-    expect(achievements).toContain('skill_command_prompt');
-    expect(achievements).toContain('skill_choose_tree');
-    expect(achievements).toContain('skill_resize_5');
-    expect(achievements).toContain('skill_pane_navigator');
-    expect(achievements).toContain('skill_swap_first');
-    expect(achievements).toContain('skill_rotate_first');
-    expect(achievements).toContain('skill_three_lessons');
+    expect(achievements).toContain('pane_runner_30');
+    expect(achievements).toContain('pane_hundred');
+    expect(achievements).toContain('layout_alchemist');
+    expect(achievements).toContain('focus_navigator');
+    expect(achievements).toContain('hidden_trickster');
   });
 });
