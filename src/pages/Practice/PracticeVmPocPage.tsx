@@ -21,6 +21,7 @@ import {
   parseProbeMetricFromLine,
   parseTmuxActionsFromCommand,
   stripAnsi,
+  type VmBridgeSnapshot,
   type VmProbeMetric,
 } from '../../features/vm/missionBridge';
 import {
@@ -255,6 +256,246 @@ function getMetricBadgeClass(status: VmStatus) {
     return 'is-error';
   }
   return 'is-idle';
+}
+
+type MissionPreconditionItem = {
+  key: string;
+  label: string;
+  current: string;
+  satisfied: boolean;
+};
+
+const ACTION_HISTORY_COMMAND_SUGGESTIONS: Record<string, string> = {
+  'sim.pane.resize': 'tmux resize-pane -R 5',
+  'sim.command.prompt': 'tmux command-prompt -p "cmd"',
+  'sim.choose.tree': 'tmux choose-tree -Z',
+};
+
+function uniqueStrings(values: string[]) {
+  const normalized = values
+    .map((value) => value.trim())
+    .filter((value) => value.length > 0);
+  return Array.from(new Set(normalized));
+}
+
+function extractInlineCodeCandidates(text: string) {
+  return Array.from(text.matchAll(/`([^`]+)`/g))
+    .map((match) => match[1]?.trim() ?? '')
+    .filter((value) => value.length > 0);
+}
+
+function isLikelyCommandText(value: string) {
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) {
+    return false;
+  }
+
+  if (normalized.startsWith('tmux')) {
+    return true;
+  }
+
+  return /(new-window|split-window|resize-pane|choose-tree|command-prompt|next-window|previous-window|attach)/.test(
+    normalized,
+  );
+}
+
+function getRuleCommandSuggestions(rule: AppMission['passRules'][number]) {
+  switch (rule.kind) {
+    case 'shellHistoryText':
+      return typeof rule.value === 'string' ? [rule.value] : [];
+    case 'actionHistoryText':
+      if (typeof rule.value !== 'string') {
+        return [];
+      }
+      return ACTION_HISTORY_COMMAND_SUGGESTIONS[rule.value] ? [ACTION_HISTORY_COMMAND_SUGGESTIONS[rule.value]] : [];
+    case 'sessionCount':
+      return ['tmux new -As main'];
+    case 'windowCount':
+      return ['tmux new-window -n work'];
+    case 'paneCount':
+      return ['tmux split-window'];
+    case 'activeWindowIndex':
+      return ['tmux next-window'];
+    case 'modeIs':
+      return rule.value === 'COPY_MODE' ? ['tmux copy-mode'] : [];
+    case 'searchExecuted':
+    case 'searchMatchFound':
+      return ['tmux copy-mode', 'tmux send-keys -X search-backward "keyword"'];
+    default:
+      return [];
+  }
+}
+
+function buildMissionCommandSuggestions(mission: AppMission | null) {
+  if (!mission) {
+    return [];
+  }
+
+  const commandsFromRules = mission.passRules.flatMap((rule) => getRuleCommandSuggestions(rule));
+  const commandsFromHints = mission.hints
+    .flatMap((hint) => extractInlineCodeCandidates(hint))
+    .filter((candidate) => isLikelyCommandText(candidate));
+
+  return uniqueStrings([...commandsFromRules, ...commandsFromHints]).slice(0, 6);
+}
+
+function getRuleMetricValue(snapshot: VmBridgeSnapshot, kind: string): unknown {
+  switch (kind) {
+    case 'sessionCount':
+      return snapshot.sessionCount;
+    case 'windowCount':
+      return snapshot.windowCount;
+    case 'paneCount':
+      return snapshot.paneCount;
+    case 'modeIs':
+      return snapshot.modeIs;
+    case 'sessionName':
+      return snapshot.sessionName;
+    case 'activeWindowIndex':
+      return snapshot.activeWindowIndex;
+    case 'windowLayout':
+      return snapshot.windowLayout;
+    case 'windowZoomed':
+      return snapshot.windowZoomed;
+    case 'paneSynchronized':
+      return snapshot.paneSynchronized;
+    case 'searchExecuted':
+      return snapshot.searchExecuted;
+    case 'searchMatchFound':
+      return snapshot.searchMatchFound;
+    case 'actionHistoryText':
+      return snapshot.actionHistory.join(' ');
+    case 'shellHistoryText':
+      return snapshot.commandHistory.join(' ');
+    default:
+      return undefined;
+  }
+}
+
+function evaluateRuleOperator(actual: unknown, operator: string, expected: unknown) {
+  switch (operator) {
+    case 'equals':
+      return actual === expected;
+    case '>=':
+      return typeof actual === 'number' && typeof expected === 'number' && actual >= expected;
+    case '<=':
+      return typeof actual === 'number' && typeof expected === 'number' && actual <= expected;
+    case 'contains':
+      if (typeof actual === 'string' && typeof expected === 'string') {
+        return actual.includes(expected);
+      }
+      if (Array.isArray(actual)) {
+        return actual.some((value) => value === expected);
+      }
+      return false;
+    default:
+      return false;
+  }
+}
+
+function getRulePreconditionLabel(rule: AppMission['passRules'][number]) {
+  switch (rule.kind) {
+    case 'sessionCount':
+      return `세션 수가 ${rule.operator} ${String(rule.value)} 이어야 함`;
+    case 'windowCount':
+      return `윈도우 수가 ${rule.operator} ${String(rule.value)} 이어야 함`;
+    case 'paneCount':
+      return `패인 수가 ${rule.operator} ${String(rule.value)} 이어야 함`;
+    case 'activeWindowIndex':
+      return `활성 윈도우 인덱스가 ${rule.operator} ${String(rule.value)} 이어야 함`;
+    case 'modeIs':
+      return rule.value === 'COPY_MODE'
+        ? 'Copy Mode에 진입해야 함'
+        : `mode 값이 ${rule.operator} ${String(rule.value)} 이어야 함`;
+    case 'searchExecuted':
+      return 'Copy Mode에서 검색을 실행해야 함';
+    case 'searchMatchFound':
+      return rule.value === true ? '검색 결과가 있어야 함' : '검색 결과가 없어야 함';
+    case 'shellHistoryText':
+      return `쉘 히스토리에 ${JSON.stringify(rule.value)} 실행 기록이 있어야 함`;
+    case 'actionHistoryText':
+      return `tmux 액션 로그에 ${JSON.stringify(rule.value)} 기록이 있어야 함`;
+    default:
+      return `${rule.kind} ${rule.operator} ${JSON.stringify(rule.value)} 조건`;
+  }
+}
+
+function getRuleCurrentStateText(rule: AppMission['passRules'][number], snapshot: VmBridgeSnapshot) {
+  switch (rule.kind) {
+    case 'sessionCount':
+      return `현재 session: ${snapshot.sessionCount ?? '-'}`;
+    case 'windowCount':
+      return `현재 window: ${snapshot.windowCount ?? '-'}`;
+    case 'paneCount':
+      return `현재 pane: ${snapshot.paneCount ?? '-'}`;
+    case 'activeWindowIndex':
+      return `현재 activeWindow: ${snapshot.activeWindowIndex ?? '-'}`;
+    case 'modeIs':
+      return `현재 mode: ${snapshot.modeIs ?? '-'}`;
+    case 'searchExecuted':
+      return `현재 searchExecuted: ${snapshot.searchExecuted === null ? '-' : snapshot.searchExecuted ? 'yes' : 'no'}`;
+    case 'searchMatchFound':
+      return `현재 searchMatchFound: ${
+        snapshot.searchMatchFound === null ? '-' : snapshot.searchMatchFound ? 'yes' : 'no'
+      }`;
+    case 'shellHistoryText': {
+      const expected = typeof rule.value === 'string' ? rule.value : null;
+      if (!expected) {
+        return `최근 명령 ${snapshot.commandHistory.length}개`;
+      }
+      const found = snapshot.commandHistory.some((command) => command.includes(expected));
+      return found ? `최근 명령에서 "${expected}" 확인됨` : `최근 명령에서 "${expected}" 미확인`;
+    }
+    case 'actionHistoryText': {
+      const expected = typeof rule.value === 'string' ? rule.value : null;
+      if (!expected) {
+        return `최근 액션 ${snapshot.actionHistory.length}개`;
+      }
+      const found = snapshot.actionHistory.some((action) => action.includes(expected));
+      return found ? `최근 액션에서 "${expected}" 확인됨` : `최근 액션에서 "${expected}" 미확인`;
+    }
+    default:
+      return '현재 상태 측정값 없음';
+  }
+}
+
+function getInitialScenarioLabel(initialScenario: string) {
+  switch (initialScenario) {
+    case 'single-pane':
+      return '초기 시나리오: 단일 pane에서 시작';
+    case 'log-buffer':
+      return '초기 시나리오: 로그 버퍼가 준비된 pane에서 시작';
+    default:
+      return `초기 시나리오: ${initialScenario}`;
+  }
+}
+
+function buildMissionPreconditionItems(mission: AppMission | null, snapshot: VmBridgeSnapshot): MissionPreconditionItem[] {
+  if (!mission) {
+    return [];
+  }
+
+  const ruleItems = mission.passRules.map<MissionPreconditionItem>((rule, index) => {
+    const actual = getRuleMetricValue(snapshot, rule.kind);
+    const satisfied = actual !== null && actual !== undefined && evaluateRuleOperator(actual, rule.operator, rule.value);
+
+    return {
+      key: `${rule.kind}-${index}`,
+      label: getRulePreconditionLabel(rule),
+      current: getRuleCurrentStateText(rule, snapshot),
+      satisfied,
+    };
+  });
+
+  return [
+    {
+      key: 'initial-scenario',
+      label: getInitialScenarioLabel(mission.initialScenario),
+      current: '미션 진입 시 자동 적용',
+      satisfied: true,
+    },
+    ...ruleItems,
+  ];
 }
 
 function computeCompletedTrackSlugs(content: AppContent, completedMissionSlugs: string[]) {
@@ -1648,6 +1889,11 @@ export function PracticeVmPocPage() {
   const hiddenMissionHintCount = selectedMission
     ? Math.max(selectedMission.hints.length - missionHintPreview.length, 0)
     : 0;
+  const selectedMissionCommands = useMemo(() => buildMissionCommandSuggestions(selectedMission), [selectedMission]);
+  const selectedMissionPreconditions = useMemo(
+    () => buildMissionPreconditionItems(selectedMission, vmSnapshot),
+    [selectedMission, vmSnapshot],
+  );
 
   if (contentState.status === 'loading') {
     return (
@@ -1806,125 +2052,91 @@ export function PracticeVmPocPage() {
 
         <section className={`vm-workbench vm-workbench-view-${mobileWorkbenchView}`}>
           <aside className="vm-study-panel">
-            <section className="vm-curriculum-panel vm-curriculum-row-layout">
-              <div className="inline-actions">
-                <button
-                  type="button"
-                  className="secondary-btn"
-                  onClick={() => selectLessonForAction(BEGINNER_ENTRY_LESSON, { resetFilter: true })}
-                >
-                  초급 코어
-                </button>
-                <button
-                  type="button"
-                  className="secondary-btn"
-                  onClick={() => selectLessonForAction(ADVANCED_ENTRY_LESSON, { resetFilter: true })}
-                >
-                  심화 과정
-                </button>
-              </div>
-              <div className="vm-lesson-filter" role="tablist" aria-label="레슨 필터">
-                {LESSON_FILTER_OPTIONS.map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    className={`secondary-btn vm-lesson-filter-btn ${lessonFilter === option.value ? 'is-active' : ''}`}
-                    onClick={() => setLessonFilter(option.value)}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-              <section className="vm-lesson-catalog" aria-label="레슨 목록">
-                {filteredLessonRows.length === 0 ? (
-                  <p className="muted">선택한 필터에 해당하는 레슨이 없습니다.</p>
-                ) : (
-                  filteredLessonRows.map((row) => {
-                    const isActive = row.lesson.slug === selectedLessonSlug;
-                    const trackTitle = trackTitleMap.get(row.lesson.trackSlug) ?? row.lesson.trackSlug;
-                    const chapterTitle = chapterTitleMap.get(row.lesson.chapterSlug) ?? row.lesson.chapterSlug;
-
-                    return (
-                      <button
-                        key={row.lesson.id}
-                        type="button"
-                        className={`vm-lesson-row ${isActive ? 'is-active' : ''}`}
-                        onClick={() => selectLessonForAction(row.lesson.slug)}
-                        aria-pressed={isActive}
-                      >
-                        <span className="vm-lesson-row-main">
-                          <strong>{row.lesson.title}</strong>
-                          <small>
-                            {trackTitle} · {chapterTitle}
-                          </small>
-                        </span>
-                        <span className="vm-lesson-row-meta">
-                          <small>
-                            {row.completedMissionCount}/{row.totalMissionCount}
-                          </small>
-                          <span className={`vm-lesson-row-status ${getLessonStatusClass(row.status)}`}>
-                            {getLessonStatusLabel(row.status)}
-                          </span>
-                        </span>
-                      </button>
-                    );
-                  })
-                )}
-              </section>
-              <div className="vm-lesson-progress">
-                <p>
-                  <strong>Lesson 진행:</strong> {lessonCompletedMissionCount}/{lessonMissions.length}
-                </p>
-                <p className="muted">manual 판정 미션: {manualMissionCandidates.length}</p>
-              </div>
-              <div className={`vm-runtime-badge ${getMetricBadgeClass(vmStatus)}`}>
-                <span>VM 상태: {vmStatus}</span>
-                <span>{vmStatusText}</span>
-              </div>
-            </section>
-
-            {selectedLesson ? (
-              <section className="vm-lesson-card">
-                <p className="vm-lesson-card-path">
-                  {selectedLessonTrack?.title ?? selectedLesson.trackSlug} ·{' '}
-                  {selectedLessonChapter?.title ?? selectedLesson.chapterSlug}
-                </p>
-                <h2>{selectedLesson.title}</h2>
+            {selectedMission ? (
+              <article className="vm-mission-card vm-mission-priority-card">
+                <p className="vm-mission-priority-eyebrow">Priority 1</p>
+                <h2>
+                  현재 미션
+                  {selectedMissionOrder ? ` ${selectedMissionOrder}/${lessonMissions.length}` : ''}
+                </h2>
                 <p className="muted">
-                  예상 {selectedLesson.estimatedMinutes}분 · 목표 {selectedLesson.objectives.length}개
+                  {selectedMission.title} · 난이도 {getDifficultyLabel(selectedMission.difficulty)}
                 </p>
-                {selectedLesson.goal ? (
-                  <p>
-                    <strong>레슨 목표:</strong> {selectedLesson.goal}
-                  </p>
-                ) : null}
-                {lessonSuccessCriteriaPreview.length > 0 ? (
-                  <p className="muted">
-                    <strong>완료 기준:</strong> {lessonSuccessCriteriaPreview[0]}
-                    {hiddenSuccessCriteriaCount > 0 ? ` (+${hiddenSuccessCriteriaCount}개)` : ''}
-                  </p>
-                ) : null}
-                {lessonFailureStatePreview.length > 0 ? (
-                  <p className="muted">
-                    <strong>부족 상태:</strong> {lessonFailureStatePreview[0]}
-                    {hiddenFailureStateCount > 0 ? ` (+${hiddenFailureStateCount}개)` : ''}
-                  </p>
-                ) : null}
-                <ul className="link-list">
-                  {lessonObjectivePreview.map((objective) => (
-                    <li key={objective}>{objective}</li>
-                  ))}
-                  {hiddenObjectiveCount > 0 ? <li className="muted">+ {hiddenObjectiveCount}개 목표 더 있음</li> : null}
-                </ul>
+
+                <section className="vm-mission-command-block">
+                  <h3>이 미션에서 입력할 명령</h3>
+                  {selectedMissionCommands.length > 0 ? (
+                    <div className="vm-mission-command-list">
+                      {selectedMissionCommands.map((command) => (
+                        <button
+                          key={command}
+                          type="button"
+                          className="vm-mission-command-chip"
+                          onClick={() => {
+                            setCommandInput(command);
+                            setMobileWorkbenchView('terminal');
+                          }}
+                        >
+                          <code>{command}</code>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="muted">추천 명령을 찾지 못했습니다. 아래 힌트를 기준으로 직접 입력해 주세요.</p>
+                  )}
+                  <p className="muted">명령을 클릭하면 입력창에 채워지고 터미널 탭으로 전환됩니다.</p>
+                </section>
+
+                <section className="vm-mission-precondition-block">
+                  <h3>실행 전 프리컨디션</h3>
+                  <ul className="vm-precondition-list">
+                    {selectedMissionPreconditions.map((item) => (
+                      <li key={item.key} className={`vm-precondition-row ${item.satisfied ? 'is-satisfied' : 'is-pending'}`}>
+                        <span>{item.label}</span>
+                        <small>{item.current}</small>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+
                 <div className="inline-actions">
-                  <Link
+                  <button
+                    type="button"
                     className="secondary-btn"
-                    to={`/learn/${selectedLesson.trackSlug}/${selectedLesson.chapterSlug}/${selectedLesson.slug}`}
+                    onClick={() => setMobileWorkbenchView('terminal')}
                   >
-                    레슨 상세 보기
-                  </Link>
+                    터미널로 바로 이동
+                  </button>
                 </div>
-              </section>
+
+                <ul className="link-list">
+                  {missionHintPreview.map((hint) => (
+                    <li key={hint}>{hint}</li>
+                  ))}
+                </ul>
+                {hiddenMissionHintCount > 0 ? (
+                  <details className="vm-mission-hints-more">
+                    <summary>힌트 {hiddenMissionHintCount}개 더 보기</summary>
+                    <ul className="link-list">
+                      {selectedMission.hints.slice(missionHintPreview.length).map((hint) => (
+                        <li key={hint}>{hint}</li>
+                      ))}
+                    </ul>
+                  </details>
+                ) : null}
+                {selectedMissionStatus ? (
+                  <div className="vm-mission-status">
+                    <p>
+                      <strong>판정:</strong> {selectedMissionStatus.status} · {selectedMissionStatus.reason}
+                    </p>
+                    {selectedMissionStatus.status === 'manual' ? (
+                      <button type="button" className="secondary-btn" onClick={handleManualMissionComplete}>
+                        수동 완료 처리
+                      </button>
+                    ) : null}
+                  </div>
+                ) : null}
+              </article>
             ) : null}
 
             <section className="vm-next-action-card">
@@ -2006,24 +2218,6 @@ export function PracticeVmPocPage() {
               ) : null}
             </section>
 
-            {selectedMissionSession ? (
-              <section className="vm-session-card">
-                <p className="vm-session-card-eyebrow">현재 세션 상태</p>
-                <p>
-                  <strong>
-                    {selectedMissionSession.status === 'completed' ? '완료됨' : '진행 중'}
-                  </strong>
-                </p>
-                <p className="muted">시작: {formatSessionDateTime(selectedMissionSession.startedAt)}</p>
-                {selectedMissionSession.completedAt ? (
-                  <p className="muted">완료: {formatSessionDateTime(selectedMissionSession.completedAt)}</p>
-                ) : null}
-                {selectedMissionSession.gainedXp !== null ? (
-                  <p className="muted">획득 XP: +{selectedMissionSession.gainedXp}</p>
-                ) : null}
-              </section>
-            ) : null}
-
             <section className="vm-mission-list-card">
               <h2>미션 목록</h2>
               <div className="vm-mission-list">
@@ -2066,53 +2260,144 @@ export function PracticeVmPocPage() {
               </div>
             </section>
 
-            {selectedMission ? (
-              <article className="vm-mission-card">
-                <h2>
-                  현재 미션
-                  {selectedMissionOrder ? ` ${selectedMissionOrder}/${lessonMissions.length}` : ''}
-                </h2>
-                <p className="muted">
-                  {selectedMission.title} · 난이도 {getDifficultyLabel(selectedMission.difficulty)}
+            {selectedMissionSession ? (
+              <section className="vm-session-card">
+                <p className="vm-session-card-eyebrow">현재 세션 상태</p>
+                <p>
+                  <strong>
+                    {selectedMissionSession.status === 'completed' ? '완료됨' : '진행 중'}
+                  </strong>
                 </p>
-                <div className="inline-actions">
-                  <button
-                    type="button"
-                    className="secondary-btn"
-                    onClick={() => setMobileWorkbenchView('terminal')}
-                  >
-                    터미널로 바로 이동
-                  </button>
-                </div>
-                <ul className="link-list">
-                  {missionHintPreview.map((hint) => (
-                    <li key={hint}>{hint}</li>
-                  ))}
-                </ul>
-                {hiddenMissionHintCount > 0 ? (
-                  <details className="vm-mission-hints-more">
-                    <summary>힌트 {hiddenMissionHintCount}개 더 보기</summary>
-                    <ul className="link-list">
-                      {selectedMission.hints.slice(missionHintPreview.length).map((hint) => (
-                        <li key={hint}>{hint}</li>
-                      ))}
-                    </ul>
-                  </details>
+                <p className="muted">시작: {formatSessionDateTime(selectedMissionSession.startedAt)}</p>
+                {selectedMissionSession.completedAt ? (
+                  <p className="muted">완료: {formatSessionDateTime(selectedMissionSession.completedAt)}</p>
                 ) : null}
-                {selectedMissionStatus ? (
-                  <div className="vm-mission-status">
-                    <p>
-                      <strong>판정:</strong> {selectedMissionStatus.status} · {selectedMissionStatus.reason}
-                    </p>
-                    {selectedMissionStatus.status === 'manual' ? (
-                      <button type="button" className="secondary-btn" onClick={handleManualMissionComplete}>
-                        수동 완료 처리
-                      </button>
-                    ) : null}
-                  </div>
+                {selectedMissionSession.gainedXp !== null ? (
+                  <p className="muted">획득 XP: +{selectedMissionSession.gainedXp}</p>
                 ) : null}
-              </article>
+              </section>
             ) : null}
+
+            {selectedLesson ? (
+              <section className="vm-lesson-card">
+                <p className="vm-lesson-card-path">
+                  {selectedLessonTrack?.title ?? selectedLesson.trackSlug} ·{' '}
+                  {selectedLessonChapter?.title ?? selectedLesson.chapterSlug}
+                </p>
+                <h2>{selectedLesson.title}</h2>
+                <p className="muted">
+                  예상 {selectedLesson.estimatedMinutes}분 · 목표 {selectedLesson.objectives.length}개
+                </p>
+                {selectedLesson.goal ? (
+                  <p>
+                    <strong>레슨 목표:</strong> {selectedLesson.goal}
+                  </p>
+                ) : null}
+                {lessonSuccessCriteriaPreview.length > 0 ? (
+                  <p className="muted">
+                    <strong>완료 기준:</strong> {lessonSuccessCriteriaPreview[0]}
+                    {hiddenSuccessCriteriaCount > 0 ? ` (+${hiddenSuccessCriteriaCount}개)` : ''}
+                  </p>
+                ) : null}
+                {lessonFailureStatePreview.length > 0 ? (
+                  <p className="muted">
+                    <strong>부족 상태:</strong> {lessonFailureStatePreview[0]}
+                    {hiddenFailureStateCount > 0 ? ` (+${hiddenFailureStateCount}개)` : ''}
+                  </p>
+                ) : null}
+                <ul className="link-list">
+                  {lessonObjectivePreview.map((objective) => (
+                    <li key={objective}>{objective}</li>
+                  ))}
+                  {hiddenObjectiveCount > 0 ? <li className="muted">+ {hiddenObjectiveCount}개 목표 더 있음</li> : null}
+                </ul>
+                <div className="inline-actions">
+                  <Link
+                    className="secondary-btn"
+                    to={`/learn/${selectedLesson.trackSlug}/${selectedLesson.chapterSlug}/${selectedLesson.slug}`}
+                  >
+                    레슨 상세 보기
+                  </Link>
+                </div>
+              </section>
+            ) : null}
+
+            <section className="vm-curriculum-panel vm-curriculum-row-layout">
+              <div className="inline-actions">
+                <button
+                  type="button"
+                  className="secondary-btn"
+                  onClick={() => selectLessonForAction(BEGINNER_ENTRY_LESSON, { resetFilter: true })}
+                >
+                  초급 코어
+                </button>
+                <button
+                  type="button"
+                  className="secondary-btn"
+                  onClick={() => selectLessonForAction(ADVANCED_ENTRY_LESSON, { resetFilter: true })}
+                >
+                  심화 과정
+                </button>
+              </div>
+              <div className="vm-lesson-filter" role="tablist" aria-label="레슨 필터">
+                {LESSON_FILTER_OPTIONS.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    className={`secondary-btn vm-lesson-filter-btn ${lessonFilter === option.value ? 'is-active' : ''}`}
+                    onClick={() => setLessonFilter(option.value)}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+              <section className="vm-lesson-catalog" aria-label="레슨 목록">
+                {filteredLessonRows.length === 0 ? (
+                  <p className="muted">선택한 필터에 해당하는 레슨이 없습니다.</p>
+                ) : (
+                  filteredLessonRows.map((row) => {
+                    const isActive = row.lesson.slug === selectedLessonSlug;
+                    const trackTitle = trackTitleMap.get(row.lesson.trackSlug) ?? row.lesson.trackSlug;
+                    const chapterTitle = chapterTitleMap.get(row.lesson.chapterSlug) ?? row.lesson.chapterSlug;
+
+                    return (
+                      <button
+                        key={row.lesson.id}
+                        type="button"
+                        className={`vm-lesson-row ${isActive ? 'is-active' : ''}`}
+                        onClick={() => selectLessonForAction(row.lesson.slug)}
+                        aria-pressed={isActive}
+                      >
+                        <span className="vm-lesson-row-main">
+                          <strong>{row.lesson.title}</strong>
+                          <small>
+                            {trackTitle} · {chapterTitle}
+                          </small>
+                        </span>
+                        <span className="vm-lesson-row-meta">
+                          <small>
+                            {row.completedMissionCount}/{row.totalMissionCount}
+                          </small>
+                          <span className={`vm-lesson-row-status ${getLessonStatusClass(row.status)}`}>
+                            {getLessonStatusLabel(row.status)}
+                          </span>
+                        </span>
+                      </button>
+                    );
+                  })
+                )}
+              </section>
+              <div className="vm-lesson-progress">
+                <p>
+                  <strong>Lesson 진행:</strong> {lessonCompletedMissionCount}/{lessonMissions.length}
+                </p>
+                <p className="muted">manual 판정 미션: {manualMissionCandidates.length}</p>
+              </div>
+              <div className={`vm-runtime-badge ${getMetricBadgeClass(vmStatus)}`}>
+                <span>VM 상태: {vmStatus}</span>
+                <span>{vmStatusText}</span>
+              </div>
+            </section>
           </aside>
 
           <section className="vm-lab-panel">

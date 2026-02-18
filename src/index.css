@@ -1154,11 +1154,105 @@ a {
   border-radius: 10px;
   background: #ffffff;
   padding: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.vm-mission-priority-card {
+  border-color: #7dd3fc;
+  background: linear-gradient(165deg, #f8fdff 0%, #f0f9ff 100%);
+}
+
+.vm-mission-priority-eyebrow {
+  margin: 0;
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #0369a1;
+  font-weight: 700;
 }
 
 .vm-mission-card h2 {
   margin: 0 0 6px;
   font-size: 1rem;
+}
+
+.vm-mission-command-block {
+  display: grid;
+  gap: 8px;
+}
+
+.vm-mission-command-block h3,
+.vm-mission-precondition-block h3 {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.vm-mission-command-list {
+  display: grid;
+  gap: 8px;
+}
+
+.vm-mission-command-chip {
+  width: 100%;
+  text-align: left;
+  border: 1px solid #bae6fd;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.vm-mission-command-chip code {
+  font-size: 0.82rem;
+  color: #075985;
+  word-break: break-word;
+}
+
+.vm-mission-command-chip:hover {
+  border-color: #38bdf8;
+  background: #f0f9ff;
+}
+
+.vm-mission-precondition-block {
+  display: grid;
+  gap: 8px;
+}
+
+.vm-precondition-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.vm-precondition-row {
+  border: 1px dashed #dbe2ea;
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: grid;
+  gap: 4px;
+}
+
+.vm-precondition-row span {
+  font-size: 0.86rem;
+  line-height: 1.4;
+}
+
+.vm-precondition-row small {
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+}
+
+.vm-precondition-row.is-satisfied {
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+
+.vm-precondition-row.is-pending {
+  border-color: #fcd34d;
+  background: #fffbeb;
 }
 
 .vm-mission-status {
