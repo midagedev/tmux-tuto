@@ -928,6 +928,44 @@ a {
   font-size: 0.9rem;
 }
 
+.vm-next-action-card {
+  border: 1px solid #99f6e4;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #f0fdfa 0%, #ecfeff 100%);
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.vm-next-action-card h2 {
+  margin: 0;
+  font-size: 1.02rem;
+}
+
+.vm-next-action-card p {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.vm-next-action-eyebrow {
+  margin: 0;
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #0f766e;
+  font-weight: 700;
+}
+
+.vm-next-action-btn {
+  width: fit-content;
+}
+
+.vm-next-action-meta {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #0f766e;
+}
+
 .vm-mission-list-card {
   border: 1px solid #dbe2ea;
   border-radius: 10px;
@@ -1036,6 +1074,24 @@ a {
   margin: 0;
 }
 
+.vm-mission-hints-more {
+  margin-top: 8px;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  padding: 6px 8px;
+  background: #f8fbff;
+}
+
+.vm-mission-hints-more summary {
+  cursor: pointer;
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+}
+
+.vm-mission-hints-more .link-list {
+  margin-top: 8px;
+}
+
 .vm-lesson-progress {
   border: 1px dashed #dbeafe;
   border-radius: 10px;
@@ -1122,6 +1178,30 @@ a {
 
 .vm-celebration-actions {
   margin-top: 12px;
+  align-items: center;
+}
+
+.vm-celebration-next-action {
+  margin-top: 10px;
+  border: 1px dashed rgba(15, 118, 110, 0.4);
+  border-radius: 10px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.vm-celebration-next-label {
+  margin: 0 0 6px;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.vm-celebration-primary-btn {
+  width: 100%;
+  font-size: 1rem;
+  padding: 12px 14px;
+  box-shadow: 0 10px 20px rgba(14, 116, 144, 0.16);
 }
 
 .vm-celebration-burst {
@@ -1417,6 +1497,10 @@ a {
   .vm-poc-command-input {
     width: 100%;
     flex-basis: auto;
+  }
+
+  .vm-next-action-btn {
+    width: 100%;
   }
 
   .vm-poc-quick {

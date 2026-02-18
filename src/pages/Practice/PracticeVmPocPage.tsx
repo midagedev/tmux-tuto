@@ -485,19 +485,6 @@ export function PracticeVmPocPage() {
     return index === -1 ? null : index + 1;
   }, [lessonMissions, selectedMission]);
 
-  const nextMission = useMemo(() => {
-    if (!selectedMission) {
-      return null;
-    }
-
-    const index = lessonMissions.findIndex((mission) => mission.slug === selectedMission.slug);
-    if (index === -1) {
-      return null;
-    }
-
-    return lessonMissions[index + 1] ?? null;
-  }, [lessonMissions, selectedMission]);
-
   const nextLesson = useMemo(() => {
     if (!content || !selectedLesson) {
       return null;
@@ -510,6 +497,58 @@ export function PracticeVmPocPage() {
 
     return content.lessons[index + 1] ?? null;
   }, [content, selectedLesson]);
+
+  const selectedMissionCompleted = useMemo(() => {
+    if (!selectedMission) {
+      return false;
+    }
+    return completedMissionSlugs.includes(selectedMission.slug);
+  }, [completedMissionSlugs, selectedMission]);
+
+  const firstIncompleteMissionInLesson = useMemo(() => {
+    return lessonMissions.find((mission) => !completedMissionSlugs.includes(mission.slug)) ?? null;
+  }, [completedMissionSlugs, lessonMissions]);
+
+  const nextIncompleteMission = useMemo(() => {
+    if (!selectedMission) {
+      return firstIncompleteMissionInLesson;
+    }
+
+    const index = lessonMissions.findIndex((mission) => mission.slug === selectedMission.slug);
+    if (index === -1) {
+      return firstIncompleteMissionInLesson;
+    }
+
+    for (let cursor = index + 1; cursor < lessonMissions.length; cursor += 1) {
+      const mission = lessonMissions[cursor];
+      if (!completedMissionSlugs.includes(mission.slug)) {
+        return mission;
+      }
+    }
+
+    if (firstIncompleteMissionInLesson?.slug === selectedMission.slug) {
+      return null;
+    }
+    return firstIncompleteMissionInLesson;
+  }, [completedMissionSlugs, firstIncompleteMissionInLesson, lessonMissions, selectedMission]);
+
+  const lessonCompleted = lessonMissions.length > 0 && lessonCompletedMissionCount === lessonMissions.length;
+
+  const selectMissionForAction = useCallback((missionSlug: string) => {
+    setSelectedMissionSlug(missionSlug);
+    setMobileWorkbenchView('mission');
+  }, []);
+
+  const selectNextLessonForAction = useCallback(() => {
+    if (!content || !nextLesson) {
+      return;
+    }
+
+    setSelectedLessonSlug(nextLesson.slug);
+    const nextMissionInLesson = content.missions.find((mission) => mission.lessonSlug === nextLesson.slug);
+    setSelectedMissionSlug(nextMissionInLesson?.slug ?? '');
+    setMobileWorkbenchView('mission');
+  }, [content, nextLesson]);
 
   const celebration = celebrationState.active;
   const celebrationQueueCount = celebrationState.queue.length;
@@ -1431,6 +1470,10 @@ export function PracticeVmPocPage() {
   const hiddenFailureStateCount = selectedLesson
     ? Math.max((selectedLesson.failureStates?.length ?? 0) - lessonFailureStatePreview.length, 0)
     : 0;
+  const missionHintPreview = selectedMission?.hints.slice(0, 2) ?? [];
+  const hiddenMissionHintCount = selectedMission
+    ? Math.max(selectedMission.hints.length - missionHintPreview.length, 0)
+    : 0;
 
   if (contentState.status === 'loading') {
     return (
@@ -1501,37 +1544,47 @@ export function PracticeVmPocPage() {
               </p>
               <p>{celebration.detail}</p>
               <p className="muted">대기 중인 알림 {celebrationQueueCount}개</p>
+              {celebration.kind === 'mission' && nextIncompleteMission ? (
+                <section className="vm-celebration-next-action">
+                  <p className="vm-celebration-next-label">추천 다음 단계</p>
+                  <button
+                    type="button"
+                    className="primary-btn vm-celebration-primary-btn"
+                    onClick={() => {
+                      selectMissionForAction(nextIncompleteMission.slug);
+                      advanceCelebration();
+                    }}
+                  >
+                    다음 미션 시작
+                  </button>
+                  <p className="muted">다음: {nextIncompleteMission.title}</p>
+                </section>
+              ) : null}
+              {celebration.kind === 'lesson' && nextLesson ? (
+                <section className="vm-celebration-next-action">
+                  <p className="vm-celebration-next-label">추천 다음 단계</p>
+                  <button
+                    type="button"
+                    className="primary-btn vm-celebration-primary-btn"
+                    onClick={() => {
+                      selectNextLessonForAction();
+                      advanceCelebration();
+                    }}
+                  >
+                    다음 레슨 시작
+                  </button>
+                  <p className="muted">다음: {nextLesson.title}</p>
+                </section>
+              ) : null}
+              {celebration.kind === 'lesson' && !nextLesson ? (
+                <section className="vm-celebration-next-action">
+                  <p className="vm-celebration-next-label">추천 다음 단계</p>
+                  <Link className="primary-btn vm-celebration-primary-btn" to="/progress">
+                    학습 완료 현황 보기
+                  </Link>
+                </section>
+              ) : null}
               <div className="inline-actions vm-celebration-actions">
-                {celebration.kind === 'mission' && nextMission ? (
-                  <button
-                    type="button"
-                    className="primary-btn"
-                    onClick={() => {
-                      setSelectedMissionSlug(nextMission.slug);
-                      setMobileWorkbenchView('mission');
-                      advanceCelebration();
-                    }}
-                  >
-                    다음 미션
-                  </button>
-                ) : null}
-                {celebration.kind === 'lesson' && nextLesson ? (
-                  <button
-                    type="button"
-                    className="primary-btn"
-                    onClick={() => {
-                      setSelectedLessonSlug(nextLesson.slug);
-                      const nextMissionInLesson = content.missions.find(
-                        (mission) => mission.lessonSlug === nextLesson.slug,
-                      );
-                      setSelectedMissionSlug(nextMissionInLesson?.slug ?? '');
-                      setMobileWorkbenchView('mission');
-                      advanceCelebration();
-                    }}
-                  >
-                    다음 레슨
-                  </button>
-                ) : null}
                 <Link className="secondary-btn" to="/progress">
                   업적 보기
                 </Link>
@@ -1690,6 +1743,85 @@ export function PracticeVmPocPage() {
               </section>
             ) : null}
 
+            <section className="vm-next-action-card">
+              <p className="vm-next-action-eyebrow">Next Action</p>
+              <h2>지금 할 일</h2>
+              {!selectedMission ? (
+                <p className="muted">미션을 선택하면 바로 실행할 다음 행동을 안내합니다.</p>
+              ) : null}
+              {selectedMission && selectedMissionStatus?.status === 'complete' && !selectedMissionCompleted ? (
+                <p className="muted">완료 판정 반영 중입니다. 잠시 후 자동으로 완료 처리됩니다.</p>
+              ) : null}
+              {selectedMission && selectedMissionCompleted && nextIncompleteMission ? (
+                <>
+                  <p>
+                    <strong>{selectedMission.title}</strong> 완료됨. 다음 미션으로 이동해 이어서 진행하세요.
+                  </p>
+                  <button
+                    type="button"
+                    className="primary-btn vm-next-action-btn"
+                    onClick={() => selectMissionForAction(nextIncompleteMission.slug)}
+                  >
+                    다음 미션으로 이동
+                  </button>
+                  <p className="muted">다음: {nextIncompleteMission.title}</p>
+                </>
+              ) : null}
+              {selectedMission && selectedMissionCompleted && !nextIncompleteMission && lessonCompleted && nextLesson ? (
+                <>
+                  <p>
+                    <strong>현재 레슨 완료.</strong> 다음 레슨으로 넘어가 학습 흐름을 이어가세요.
+                  </p>
+                  <button type="button" className="primary-btn vm-next-action-btn" onClick={selectNextLessonForAction}>
+                    다음 레슨 시작
+                  </button>
+                  <p className="muted">다음: {nextLesson.title}</p>
+                </>
+              ) : null}
+              {selectedMission && selectedMissionCompleted && !nextIncompleteMission && lessonCompleted && !nextLesson ? (
+                <>
+                  <p>
+                    <strong>전체 레슨을 완료했습니다.</strong> 진행 현황에서 업적과 누적 XP를 확인하세요.
+                  </p>
+                  <Link className="primary-btn vm-next-action-btn" to="/progress">
+                    진행 현황 보기
+                  </Link>
+                </>
+              ) : null}
+              {selectedMission && !selectedMissionCompleted && selectedMissionStatus?.status === 'manual' ? (
+                <>
+                  <p>
+                    <strong>{selectedMission.title}</strong>는 자동 판정이 어려워 수동 완료가 필요합니다.
+                  </p>
+                  <button type="button" className="primary-btn vm-next-action-btn" onClick={handleManualMissionComplete}>
+                    수동 완료 처리
+                  </button>
+                </>
+              ) : null}
+              {selectedMission &&
+              !selectedMissionCompleted &&
+              selectedMissionStatus?.status !== 'manual' &&
+              selectedMissionStatus?.status !== 'complete' ? (
+                <>
+                  <p>
+                    <strong>{selectedMission.title}</strong> 미션 수행 중입니다. 터미널에서 힌트를 실행하고 완료 판정을 받으세요.
+                  </p>
+                  <button
+                    type="button"
+                    className="primary-btn vm-next-action-btn"
+                    onClick={() => setMobileWorkbenchView('terminal')}
+                  >
+                    터미널로 이동
+                  </button>
+                </>
+              ) : null}
+              {selectedMissionStatus ? (
+                <p className="vm-next-action-meta">
+                  현재 판정: {selectedMissionStatus.status} · {selectedMissionStatus.reason}
+                </p>
+              ) : null}
+            </section>
+
             <section className="vm-mission-list-card">
               <h2>미션 목록</h2>
               <div className="vm-mission-list">
@@ -1751,10 +1883,20 @@ export function PracticeVmPocPage() {
                   </button>
                 </div>
                 <ul className="link-list">
-                  {selectedMission.hints.map((hint) => (
+                  {missionHintPreview.map((hint) => (
                     <li key={hint}>{hint}</li>
                   ))}
                 </ul>
+                {hiddenMissionHintCount > 0 ? (
+                  <details className="vm-mission-hints-more">
+                    <summary>힌트 {hiddenMissionHintCount}개 더 보기</summary>
+                    <ul className="link-list">
+                      {selectedMission.hints.slice(missionHintPreview.length).map((hint) => (
+                        <li key={hint}>{hint}</li>
+                      ))}
+                    </ul>
+                  </details>
+                ) : null}
                 {selectedMissionStatus ? (
                   <div className="vm-mission-status">
                     <p>
