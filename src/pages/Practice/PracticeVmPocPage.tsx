@@ -28,6 +28,11 @@ type VmMetricState = {
   windowCount: number | null;
   paneCount: number | null;
   modeIs: string | null;
+  sessionName: string | null;
+  activeWindowIndex: number | null;
+  windowLayout: string | null;
+  windowZoomed: boolean | null;
+  paneSynchronized: boolean | null;
   searchExecuted: boolean | null;
   searchMatchFound: boolean | null;
 };
@@ -100,6 +105,21 @@ const QUICK_COMMANDS = [
     label: 'Copy Search 실패',
     command:
       'tmux has-session -t lesson 2>/dev/null || tmux new-session -d -s lesson; tmux copy-mode -t lesson:0.0; tmux send-keys -t lesson:0.0 -X search-backward "__TMUXWEB_NOT_FOUND__"; echo "[[TMUXWEB_PROBE:search:1]]"; echo "[[TMUXWEB_PROBE:searchMatched:0]]"',
+  },
+  {
+    label: '레이아웃 변경',
+    command:
+      'tmux has-session -t lesson 2>/dev/null || tmux new-session -d -s lesson; tmux select-layout -t lesson:0 even-horizontal; tmux display-message -p "#{window_layout}"',
+  },
+  {
+    label: 'Pane 줌 토글',
+    command:
+      'tmux has-session -t lesson 2>/dev/null || tmux new-session -d -s lesson; tmux resize-pane -t lesson:0.0 -Z; tmux display-message -p "#{window_zoomed_flag}"',
+  },
+  {
+    label: 'Pane Sync ON',
+    command:
+      'tmux has-session -t lesson 2>/dev/null || tmux new-session -d -s lesson; tmux set-window-option -t lesson:0 synchronize-panes on; tmux show-window-options -t lesson:0 -v synchronize-panes',
   },
 ] as const;
 
@@ -242,9 +262,26 @@ function createInitialMetrics(): VmMetricState {
     windowCount: null,
     paneCount: null,
     modeIs: null,
+    sessionName: null,
+    activeWindowIndex: null,
+    windowLayout: null,
+    windowZoomed: null,
+    paneSynchronized: null,
     searchExecuted: null,
     searchMatchFound: null,
   };
+}
+
+function formatLayout(layout: string | null) {
+  if (!layout) {
+    return '-';
+  }
+
+  if (layout.length <= 28) {
+    return layout;
+  }
+
+  return `${layout.slice(0, 28)}...`;
 }
 
 export function PracticeVmPocPage() {
@@ -320,6 +357,11 @@ export function PracticeVmPocPage() {
       windowCount: metrics.windowCount,
       paneCount: metrics.paneCount,
       modeIs: metrics.modeIs,
+      sessionName: metrics.sessionName,
+      activeWindowIndex: metrics.activeWindowIndex,
+      windowLayout: metrics.windowLayout,
+      windowZoomed: metrics.windowZoomed,
+      paneSynchronized: metrics.paneSynchronized,
       searchExecuted: metrics.searchExecuted,
       searchMatchFound: metrics.searchMatchFound,
       actionHistory,
@@ -592,6 +634,31 @@ export function PracticeVmPocPage() {
               ...previous,
               modeIs: metric.value === 1 ? 'COPY_MODE' : null,
             };
+          case 'sessionName':
+            return {
+              ...previous,
+              sessionName: metric.value.trim() || null,
+            };
+          case 'activeWindow':
+            return {
+              ...previous,
+              activeWindowIndex: metric.value >= 0 ? metric.value : null,
+            };
+          case 'layout':
+            return {
+              ...previous,
+              windowLayout: metric.value.trim() || null,
+            };
+          case 'zoomed':
+            return {
+              ...previous,
+              windowZoomed: metric.value === 1,
+            };
+          case 'sync':
+            return {
+              ...previous,
+              paneSynchronized: metric.value === 1,
+            };
           case 'search':
             return {
               ...previous,
@@ -607,11 +674,17 @@ export function PracticeVmPocPage() {
         }
       });
 
-      if (metric.key === 'pane') {
-        const nextPaneCount = metric.value >= 0 ? metric.value : null;
+      if (metric.key === 'pane' || metric.key === 'layout' || metric.key === 'zoomed' || metric.key === 'sync') {
+        const nextPaneCount = metric.key === 'pane' ? (metric.value >= 0 ? metric.value : null) : undefined;
+        const nextLayout = metric.key === 'layout' ? metric.value.trim() || null : undefined;
+        const nextZoomed = metric.key === 'zoomed' ? metric.value === 1 : undefined;
+        const nextSynchronized = metric.key === 'sync' ? metric.value === 1 : undefined;
         const unlocked = recordTmuxActivityRef.current({
           actions: [],
           paneCount: nextPaneCount,
+          windowLayout: nextLayout,
+          windowZoomed: nextZoomed,
+          paneSynchronized: nextSynchronized,
           lessonSlug: selectedLessonSlugRef.current,
         });
         if (unlocked.length > 0) {
@@ -1524,8 +1597,12 @@ export function PracticeVmPocPage() {
               </details>
 
               <p className="vm-poc-status">
-                metrics · sessions {metrics.sessionCount ?? '-'} / windows {metrics.windowCount ?? '-'} / panes{' '}
-                {metrics.paneCount ?? '-'} / mode {metrics.modeIs ?? '-'} / search{' '}
+                metrics · sessions {metrics.sessionCount ?? '-'} / sessionName {metrics.sessionName ?? '-'} / windows{' '}
+                {metrics.windowCount ?? '-'} / panes {metrics.paneCount ?? '-'} / activeWindow{' '}
+                {metrics.activeWindowIndex ?? '-'} / zoom{' '}
+                {metrics.windowZoomed === null ? '-' : metrics.windowZoomed ? 'yes' : 'no'} / sync{' '}
+                {metrics.paneSynchronized === null ? '-' : metrics.paneSynchronized ? 'yes' : 'no'} / layout{' '}
+                {formatLayout(metrics.windowLayout)} / mode {metrics.modeIs ?? '-'} / search{' '}
                 {metrics.searchExecuted === null ? '-' : metrics.searchExecuted ? 'yes' : 'no'} / match{' '}
                 {metrics.searchMatchFound === null ? '-' : metrics.searchMatchFound ? 'yes' : 'no'}
               </p>

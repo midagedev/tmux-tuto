@@ -52,6 +52,18 @@ describe('progressEngine', () => {
       newWindowCount: 1,
       newSessionCount: 1,
       copyModeCount: 1,
+      paneResizeCount: 8,
+      paneSelectCount: 12,
+      paneSwapCount: 1,
+      windowRotateCount: 1,
+      layoutSelectCount: 1,
+      zoomToggleCount: 1,
+      syncToggleCount: 1,
+      commandPromptCount: 1,
+      chooseTreeCount: 1,
+      uniqueLayoutCount: 2,
+      zoomObserved: true,
+      syncObserved: true,
       lessonCount: 3,
     });
 
@@ -61,6 +73,15 @@ describe('progressEngine', () => {
     expect(achievements).toContain('skill_first_window');
     expect(achievements).toContain('skill_first_session');
     expect(achievements).toContain('skill_first_copy_mode');
+    expect(achievements).toContain('skill_layout_first');
+    expect(achievements).toContain('skill_zoom_control');
+    expect(achievements).toContain('skill_sync_control');
+    expect(achievements).toContain('skill_command_prompt');
+    expect(achievements).toContain('skill_choose_tree');
+    expect(achievements).toContain('skill_resize_5');
+    expect(achievements).toContain('skill_pane_navigator');
+    expect(achievements).toContain('skill_swap_first');
+    expect(achievements).toContain('skill_rotate_first');
     expect(achievements).toContain('skill_three_lessons');
   });
 });

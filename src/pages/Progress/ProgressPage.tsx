@@ -237,6 +237,13 @@ export function ProgressPage() {
               <li>window 생성: {tmuxSkillStats.newWindowCount}</li>
               <li>session 생성: {tmuxSkillStats.newSessionCount}</li>
               <li>copy-mode 진입: {tmuxSkillStats.copyModeCount}</li>
+              <li>pane resize 누적: {tmuxSkillStats.paneResizeCount}</li>
+              <li>pane 이동/선택 누적: {tmuxSkillStats.paneSelectCount}</li>
+              <li>layout 변경 누적: {tmuxSkillStats.layoutSelectCount}</li>
+              <li>zoom 토글 누적: {tmuxSkillStats.zoomToggleCount}</li>
+              <li>sync 토글 누적: {tmuxSkillStats.syncToggleCount}</li>
+              <li>command-prompt 실행: {tmuxSkillStats.commandPromptCount}</li>
+              <li>choose-tree 실행: {tmuxSkillStats.chooseTreeCount}</li>
             </ul>
             <div className="achievement-grid">
               {skillAchievementRows.map((achievement) => (

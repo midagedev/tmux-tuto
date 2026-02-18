@@ -23,12 +23,27 @@ type TmuxSkillStats = {
   newWindowCount: number;
   newSessionCount: number;
   copyModeCount: number;
+  paneResizeCount: number;
+  paneSelectCount: number;
+  paneSwapCount: number;
+  windowRotateCount: number;
+  layoutSelectCount: number;
+  zoomToggleCount: number;
+  syncToggleCount: number;
+  commandPromptCount: number;
+  chooseTreeCount: number;
+  layoutSignatures: string[];
+  zoomObserved: boolean;
+  syncObserved: boolean;
   lessonSlugs: string[];
 };
 
 type TmuxActivityPayload = {
   actions: string[];
   paneCount?: number | null;
+  windowLayout?: string | null;
+  windowZoomed?: boolean | null;
+  paneSynchronized?: boolean | null;
   lessonSlug?: string | null;
 };
 
@@ -54,6 +69,18 @@ const INITIAL_TMUX_SKILL_STATS: TmuxSkillStats = {
   newWindowCount: 0,
   newSessionCount: 0,
   copyModeCount: 0,
+  paneResizeCount: 0,
+  paneSelectCount: 0,
+  paneSwapCount: 0,
+  windowRotateCount: 0,
+  layoutSelectCount: 0,
+  zoomToggleCount: 0,
+  syncToggleCount: 0,
+  commandPromptCount: 0,
+  chooseTreeCount: 0,
+  layoutSignatures: [],
+  zoomObserved: false,
+  syncObserved: false,
   lessonSlugs: [],
 };
 
@@ -114,6 +141,7 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
     const nextStats: TmuxSkillStats = {
       ...state.tmuxSkillStats,
       lessonSlugs: [...state.tmuxSkillStats.lessonSlugs],
+      layoutSignatures: [...state.tmuxSkillStats.layoutSignatures],
     };
 
     payload.actions.forEach((action) => {
@@ -130,6 +158,33 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         case 'sim.copymode.enter':
           nextStats.copyModeCount += 1;
           break;
+        case 'sim.pane.resize':
+          nextStats.paneResizeCount += 1;
+          break;
+        case 'sim.pane.select':
+          nextStats.paneSelectCount += 1;
+          break;
+        case 'sim.pane.swap':
+          nextStats.paneSwapCount += 1;
+          break;
+        case 'sim.window.rotate':
+          nextStats.windowRotateCount += 1;
+          break;
+        case 'sim.layout.select':
+          nextStats.layoutSelectCount += 1;
+          break;
+        case 'sim.pane.zoom.toggle':
+          nextStats.zoomToggleCount += 1;
+          break;
+        case 'sim.panes.sync.toggle':
+          nextStats.syncToggleCount += 1;
+          break;
+        case 'sim.command.prompt':
+          nextStats.commandPromptCount += 1;
+          break;
+        case 'sim.choose.tree':
+          nextStats.chooseTreeCount += 1;
+          break;
         default:
           break;
       }
@@ -137,6 +192,19 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
 
     if (typeof payload.paneCount === 'number' && payload.paneCount > nextStats.maxPaneCount) {
       nextStats.maxPaneCount = payload.paneCount;
+    }
+
+    const layout = payload.windowLayout?.trim() ?? '';
+    if (layout && !nextStats.layoutSignatures.includes(layout)) {
+      nextStats.layoutSignatures.push(layout);
+    }
+
+    if (payload.windowZoomed === true) {
+      nextStats.zoomObserved = true;
+    }
+
+    if (payload.paneSynchronized === true) {
+      nextStats.syncObserved = true;
     }
 
     const lessonSlug = payload.lessonSlug?.trim() ?? '';
@@ -150,6 +218,18 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
       newWindowCount: nextStats.newWindowCount,
       newSessionCount: nextStats.newSessionCount,
       copyModeCount: nextStats.copyModeCount,
+      paneResizeCount: nextStats.paneResizeCount,
+      paneSelectCount: nextStats.paneSelectCount,
+      paneSwapCount: nextStats.paneSwapCount,
+      windowRotateCount: nextStats.windowRotateCount,
+      layoutSelectCount: nextStats.layoutSelectCount,
+      zoomToggleCount: nextStats.zoomToggleCount,
+      syncToggleCount: nextStats.syncToggleCount,
+      commandPromptCount: nextStats.commandPromptCount,
+      chooseTreeCount: nextStats.chooseTreeCount,
+      uniqueLayoutCount: nextStats.layoutSignatures.length,
+      zoomObserved: nextStats.zoomObserved,
+      syncObserved: nextStats.syncObserved,
       lessonCount: nextStats.lessonSlugs.length,
     });
 

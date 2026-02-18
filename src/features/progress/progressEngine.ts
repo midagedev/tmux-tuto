@@ -18,6 +18,18 @@ export type SkillAchievementInput = {
   newWindowCount: number;
   newSessionCount: number;
   copyModeCount: number;
+  paneResizeCount: number;
+  paneSelectCount: number;
+  paneSwapCount: number;
+  windowRotateCount: number;
+  layoutSelectCount: number;
+  zoomToggleCount: number;
+  syncToggleCount: number;
+  commandPromptCount: number;
+  chooseTreeCount: number;
+  uniqueLayoutCount: number;
+  zoomObserved: boolean;
+  syncObserved: boolean;
   lessonCount: number;
 };
 
@@ -185,6 +197,42 @@ export function computeSkillAchievements(input: SkillAchievementInput) {
 
   if (input.copyModeCount >= 1) {
     unlocked.push('skill_first_copy_mode');
+  }
+
+  if (input.layoutSelectCount >= 1 || input.uniqueLayoutCount >= 2) {
+    unlocked.push('skill_layout_first');
+  }
+
+  if (input.zoomToggleCount >= 1 || input.zoomObserved) {
+    unlocked.push('skill_zoom_control');
+  }
+
+  if (input.syncToggleCount >= 1 || input.syncObserved) {
+    unlocked.push('skill_sync_control');
+  }
+
+  if (input.commandPromptCount >= 1) {
+    unlocked.push('skill_command_prompt');
+  }
+
+  if (input.chooseTreeCount >= 1) {
+    unlocked.push('skill_choose_tree');
+  }
+
+  if (input.paneResizeCount >= 5) {
+    unlocked.push('skill_resize_5');
+  }
+
+  if (input.paneSelectCount >= 10) {
+    unlocked.push('skill_pane_navigator');
+  }
+
+  if (input.paneSwapCount >= 1) {
+    unlocked.push('skill_swap_first');
+  }
+
+  if (input.windowRotateCount >= 1) {
+    unlocked.push('skill_rotate_first');
   }
 
   if (input.lessonCount >= 3) {
