@@ -14,9 +14,11 @@
 - Snapshot exists: warm restore path is used.
 - Snapshot missing: no error surfaced to learners, normal boot continues.
 - Probe bootstrap delay is shorter on warm restore.
+- Snapshot generation command:
+  - `npm run vm:state:generate`
 
-## Next step to complete warm start rollout
+## Regeneration checklist
 
-- Generate a stable VM state file at "boot complete + login ready + tmux ready" point.
-- Place it in `public/vm/alpine-tmux-ready.bin.zst`.
-- Validate that mission bridge probes still work after restore.
+- Rebuild VM rootfs first when login/banner behavior changes: `npm run vm:build`
+- Regenerate warm snapshot: `npm run vm:state:generate`
+- Validate `/practice` warm restore and probe-driven mission completion.

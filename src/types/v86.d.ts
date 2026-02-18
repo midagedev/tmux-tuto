@@ -7,6 +7,11 @@ declare module 'v86' {
     use_parts?: boolean;
   };
 
+  export type V86MemorySource = {
+    buffer: ArrayBuffer;
+    async?: boolean;
+  };
+
   export type V86Filesystem = {
     baseurl?: string;
     basefs?: V86FileSource;
@@ -20,7 +25,7 @@ declare module 'v86' {
     bios?: V86FileSource;
     vga_bios?: V86FileSource;
     state?: V86FileSource;
-    initial_state?: V86FileSource | ArrayBuffer;
+    initial_state?: V86FileSource | V86MemorySource;
     bzimage?: V86FileSource;
     initrd?: V86FileSource;
     hda?: V86FileSource;
@@ -44,5 +49,6 @@ declare module 'v86' {
     stop(): Promise<void> | void;
     destroy(): Promise<void> | void;
     is_running(): boolean;
+    save_state(): Promise<ArrayBuffer> | ArrayBuffer;
   }
 }

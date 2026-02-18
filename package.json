@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "vm:build": "./scripts/build-vm-image.sh",
+    "vm:state:generate": "node scripts/generate-vm-initial-state.mjs",
     "generate:og": "node scripts/generate-og-images.mjs",
     "generate:share-meta": "node scripts/generate-share-meta-pages.mjs",
     "verify:kpi-routes": "node scripts/verify-kpi-route-map.mjs",

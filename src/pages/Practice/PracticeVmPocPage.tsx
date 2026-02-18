@@ -4,6 +4,7 @@ import { FitAddon } from '@xterm/addon-fit';
 import { Terminal } from '@xterm/xterm';
 import '@xterm/xterm/css/xterm.css';
 import type V86 from 'v86';
+import type { V86Options } from 'v86';
 import { PagePlaceholder } from '../../components/system/PagePlaceholder';
 import { loadAppContent } from '../../features/curriculum/contentLoader';
 import type { AppContent, AppMission } from '../../features/curriculum/contentSchema';
@@ -34,8 +35,34 @@ type CelebrationState = {
   detail: string;
 };
 
+type VmInitialState = {
+  buffer: ArrayBuffer;
+};
+
+declare global {
+  interface Window {
+    __tmuxwebVmBridge?: {
+      isReady: () => boolean;
+      getStatus: () => {
+        status: VmStatus;
+        text: string;
+        metrics: VmMetricState;
+        debugLineCount: number;
+        lastDebugLine: string | null;
+      };
+      saveState: () => Promise<ArrayBuffer | null>;
+      sendProbe: () => void;
+      sendCommand: (command: string) => void;
+      getBootConfig: () => typeof VM_BOOT_CONFIG;
+      getLastEmulatorOptions: () => V86Options | null;
+    };
+  }
+}
+
 const MAX_HISTORY = 240;
 const MAX_DEBUG_LINES = 220;
+const V86_STATE_MAGIC_LE = 0x86768676;
+const ZSTD_MAGIC_LE = 0xfd2fb528;
 
 const PROBE_FUNCTION_NAME = '__tmuxweb_probe';
 
@@ -111,7 +138,16 @@ const VM_BOOT_CONFIG = {
     resolveAssetPath('vm/alpine-tmux-ready.bin.zst'),
 };
 
-async function loadVmInitialState(initialStatePath: string) {
+function hasValidVmStateMagic(buffer: ArrayBuffer) {
+  if (buffer.byteLength < 4) {
+    return false;
+  }
+
+  const magic = new DataView(buffer).getUint32(0, true);
+  return magic === V86_STATE_MAGIC_LE || magic === ZSTD_MAGIC_LE;
+}
+
+async function loadVmInitialState(initialStatePath: string): Promise<VmInitialState | null> {
   if (!initialStatePath) {
     return null;
   }
@@ -121,7 +157,18 @@ async function loadVmInitialState(initialStatePath: string) {
     if (!response.ok) {
       return null;
     }
-    return await response.arrayBuffer();
+
+    const contentType = (response.headers.get('content-type') ?? '').toLowerCase();
+    if (contentType.includes('text/html')) {
+      return null;
+    }
+
+    const stateBuffer = await response.arrayBuffer();
+    if (stateBuffer.byteLength < 1024 || !hasValidVmStateMagic(stateBuffer)) {
+      return null;
+    }
+
+    return { buffer: stateBuffer };
   } catch {
     return null;
   }
@@ -250,6 +297,7 @@ export function PracticeVmPocPage() {
   const probeTimerRef = useRef<number | null>(null);
   const celebratedMissionSetRef = useRef(new Set<string>());
   const celebratedLessonSetRef = useRef(new Set<string>());
+  const lastEmulatorOptionsRef = useRef<V86Options | null>(null);
 
   const lessonParam = searchParams.get('lesson') ?? '';
   const missionParam = searchParams.get('mission') ?? '';
@@ -563,6 +611,47 @@ export function PracticeVmPocPage() {
   );
 
   useEffect(() => {
+    if (!import.meta.env.DEV) {
+      return undefined;
+    }
+
+    window.__tmuxwebVmBridge = {
+      isReady: () => Boolean(emulatorRef.current),
+      getStatus: () => ({
+        status: vmStatus,
+        text: vmStatusText,
+        metrics,
+        debugLineCount: debugLines.length,
+        lastDebugLine: debugLines.length > 0 ? debugLines[debugLines.length - 1] : null,
+      }),
+      saveState: async () => {
+        const emulator = emulatorRef.current as (V86 & { save_state?: () => Promise<ArrayBuffer> | ArrayBuffer }) | null;
+        if (!emulator || typeof emulator.save_state !== 'function') {
+          return null;
+        }
+
+        const state = await emulator.save_state();
+        return state instanceof ArrayBuffer ? state : null;
+      },
+      sendProbe: () => {
+        if (!emulatorRef.current) {
+          return;
+        }
+        emulatorRef.current.serial0_send(`${PROBE_TRIGGER_COMMAND}\n`);
+      },
+      sendCommand: (command: string) => {
+        sendCommand(command);
+      },
+      getBootConfig: () => VM_BOOT_CONFIG,
+      getLastEmulatorOptions: () => lastEmulatorOptionsRef.current,
+    };
+
+    return () => {
+      delete window.__tmuxwebVmBridge;
+    };
+  }, [debugLines, metrics, sendCommand, vmStatus, vmStatusText]);
+
+  useEffect(() => {
     if (contentState.status !== 'ready') {
       return undefined;
     }
@@ -708,12 +797,12 @@ export function PracticeVmPocPage() {
           return;
         }
 
-        const useWarmStart = Boolean(initialState);
+        let useWarmStart = Boolean(initialState);
         if (useWarmStart) {
           setVmStatusText('빠른 시작 스냅샷 로딩 중...');
         }
 
-        const emulator = new V86Ctor({
+        const baseOptions: V86Options = {
           wasm_path: VM_BOOT_CONFIG.wasmPath,
           wasm_fallback_path: VM_BOOT_CONFIG.wasmFallbackPath,
           memory_size: 256 * 1024 * 1024,
@@ -731,9 +820,29 @@ export function PracticeVmPocPage() {
             'rw root=host9p rootfstype=9p rootflags=trans=virtio,cache=loose console=ttyS0 init=/sbin/init quiet loglevel=3',
           disable_keyboard: true,
           disable_mouse: true,
-          initial_state: initialState ?? undefined,
           autostart: true,
-        });
+        };
+
+        let emulator: V86;
+        if (useWarmStart) {
+          try {
+            emulator = new V86Ctor({
+              ...baseOptions,
+              initial_state: initialState ?? undefined,
+            });
+          } catch {
+            useWarmStart = false;
+            setVmStatusText('빠른 시작 스냅샷 복원 실패, 일반 부팅으로 전환');
+            emulator = new V86Ctor(baseOptions);
+          }
+        } else {
+          emulator = new V86Ctor(baseOptions);
+        }
+
+        lastEmulatorOptionsRef.current = {
+          ...baseOptions,
+          ...(useWarmStart ? { initial_state: initialState ?? undefined } : {}),
+        };
 
         emulatorRef.current = emulator;
 
