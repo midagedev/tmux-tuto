@@ -81,22 +81,24 @@ test.describe('vm practice smoke', () => {
     await expect(page.locator('.vm-achievement-feed-card')).toBeVisible();
     await expect(page.locator('.vm-achievement-feed-card')).toContainText('명령 흐름 입문');
     await expect(page.locator('.vm-achievement-feed-item').first()).toBeVisible({ timeout: 10_000 });
-    const unreadAchievementBadge = page.locator('.vm-achievement-feed-card button', { hasText: /새 업적 \d+/ });
+    const unreadAchievementBadge = page.locator('.vm-achievement-feed-card button', {
+      hasText: /새 업적 \d+|New achievements \d+/,
+    });
     if ((await unreadAchievementBadge.count()) > 0) {
       await expect(unreadAchievementBadge.first()).toBeVisible();
     }
     await expect(page.locator('.vm-celebration-overlay')).toHaveCount(0);
 
-    await sendVmCommand(page, 'tmux -V');
-    await expect(page).toHaveURL(/\/practice\?.*mission=hello-tmux-session-list/);
-
     const missionNav = page.locator('.vm-learning-nav-card').first();
     await expect(missionNav).toBeVisible();
-    await missionNav.getByRole('button', { name: '이전 미션' }).click();
-    await expect(page).toHaveURL(/\/practice\?.*mission=hello-tmux-version-check/);
-    const nextMissionButton = missionNav.getByRole('button', { name: '다음 미션' });
+    const nextMissionButton = missionNav.getByRole('button', { name: /다음 미션|Next mission/ });
     await expect(nextMissionButton).toBeEnabled();
     await nextMissionButton.click();
+    await expect(page).toHaveURL(/\/practice\?.*mission=hello-tmux-session-list/);
+    await page.locator('.vm-mission-row').first().click();
+    await expect(page).toHaveURL(/\/practice\?.*mission=hello-tmux-version-check/);
+
+    await sendVmCommand(page, 'tmux -V');
     await expect(page).toHaveURL(/\/practice\?.*mission=hello-tmux-session-list/);
 
     await sendVmCommand(page, 'tmux list-sessions');
@@ -104,7 +106,7 @@ test.describe('vm practice smoke', () => {
     await expect(nextLessonButton).toBeVisible({ timeout: 20_000 });
     await nextLessonButton.click();
     await expect(page).toHaveURL(/\/practice\?.*lesson=basics/);
-    await expect(page.locator('.vm-learning-nav-card button', { hasText: '이전 레슨' }).first()).toBeVisible();
+    await expect(page.locator('.vm-learning-nav-card button', { hasText: /이전 레슨|Previous lesson/ }).first()).toBeVisible();
 
     await expect
       .poll(async () => {
