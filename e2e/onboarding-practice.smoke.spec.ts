@@ -68,18 +68,35 @@ test.describe('vm practice smoke', () => {
     await expect(page.locator('.vm-mission-row.is-active')).toHaveCount(1);
   });
 
-  test('practice completion feedback supports queue, esc dismiss, and CTA flow @smoke', async ({ page }) => {
+  test('practice keeps flow focused with inline achievement feed and mission/lesson navigator @smoke', async ({ page }) => {
+    await page.addInitScript(() => {
+      window.localStorage.clear();
+      window.sessionStorage.clear();
+    });
     await page.goto('/practice?lesson=hello-tmux&mission=hello-tmux-version-check');
     await dismissAnalyticsBanner(page);
     await waitForVmReadyForSmoke(page);
 
-    const feedback = page.locator('.vm-celebration').first();
-
     await sendVmCommand(page, 'tmux command-prompt -p "cmd"');
-    await expect(feedback).toBeVisible();
-    await expect(feedback).toContainText('명령 흐름 입문');
-    await page.keyboard.press('Escape');
-    await expect(feedback).toBeHidden();
+    await expect(page.locator('.vm-achievement-feed-card')).toBeVisible();
+    await expect(page.locator('.vm-achievement-feed-card')).toContainText('명령 흐름 입문');
+    await expect(page.locator('.vm-achievement-feed-item').first()).toBeVisible({ timeout: 10_000 });
+    const unreadAchievementBadge = page.locator('.vm-achievement-feed-card button', {
+      hasText: /새 업적 \d+|New achievements \d+/,
+    });
+    if ((await unreadAchievementBadge.count()) > 0) {
+      await expect(unreadAchievementBadge.first()).toBeVisible();
+    }
+    await expect(page.locator('.vm-celebration-overlay')).toHaveCount(0);
+
+    const missionNav = page.locator('.vm-learning-nav-card').first();
+    await expect(missionNav).toBeVisible();
+    const nextMissionButton = missionNav.getByRole('button', { name: /다음 미션|Next mission/ });
+    await expect(nextMissionButton).toBeEnabled();
+    await nextMissionButton.click();
+    await expect(page).toHaveURL(/\/practice\?.*mission=hello-tmux-session-list/);
+    await page.locator('.vm-mission-row').first().click();
+    await expect(page).toHaveURL(/\/practice\?.*mission=hello-tmux-version-check/);
 
     await sendVmCommand(page, 'tmux -V');
     await expect(page).toHaveURL(/\/practice\?.*mission=hello-tmux-session-list/);
@@ -87,17 +104,9 @@ test.describe('vm practice smoke', () => {
     await sendVmCommand(page, 'tmux list-sessions');
     const nextLessonButton = page.locator('.vm-next-action-card .vm-next-action-btn').first();
     await expect(nextLessonButton).toBeVisible({ timeout: 20_000 });
-    const celebrationOverlay = page.locator('.vm-celebration-overlay');
-    for (let attempt = 0; attempt < 6; attempt += 1) {
-      const visible = await celebrationOverlay.isVisible().catch(() => false);
-      if (!visible) {
-        break;
-      }
-      await page.keyboard.press('Escape');
-      await page.waitForTimeout(80);
-    }
     await nextLessonButton.click();
     await expect(page).toHaveURL(/\/practice\?.*lesson=basics/);
+    await expect(page.locator('.vm-learning-nav-card button', { hasText: /이전 레슨|Previous lesson/ }).first()).toBeVisible();
 
     await expect
       .poll(async () => {

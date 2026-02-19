@@ -68,6 +68,15 @@ export function HomePage() {
   const changelogItems = [
     {
       date: '2026-02-19',
+      title: t('실습 UX 개선: 업적 피드/미션 네비게이션 개편'),
+      summary: t(
+        '업적 팝업을 인라인 피드로 전환하고, 미션/레슨 이동 버튼과 미션 완료 안내를 추가해 다음 단계 이동 흐름을 더 명확하게 만들었습니다.',
+      ),
+      to: '/practice?lesson=hello-tmux',
+      actionLabel: t('실습 열기'),
+    },
+    {
+      date: '2026-02-19',
       title: t('레이아웃/워크스페이스 병합 레슨 추가'),
       summary: t('pane 리사이즈/재배치 레슨 2종과 윈도우/세션 병합 중심 workspace-compose 레슨 2종을 추가했습니다.'),
       to: '/practice?lesson=workspace-compose',
