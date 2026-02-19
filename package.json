@@ -28,6 +28,7 @@
     "i18n:check": "npm run i18n:extract && npm run i18n:verify"
   },
   "dependencies": {
+    "@microsoft/clarity": "^1.0.2",
     "@xterm/addon-fit": "^0.11.0",
     "@xterm/xterm": "^6.0.0",
     "i18next": "^25.8.11",

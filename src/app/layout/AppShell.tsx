@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { AnalyticsConsentBanner } from '../../components/system/AnalyticsConsentBanner';
-import { useAnalyticsConsentState, useCloudflareAnalytics } from '../../features/analytics';
+import { useAnalyticsConsentState, useCloudflareAnalytics, useMicrosoftClarity } from '../../features/analytics';
 import { useSimulatorStore } from '../../features/simulator/simulatorStore';
 import { BRAND } from '../brand';
 import { LANGUAGE_STORAGE_KEY, SUPPORTED_LANGUAGE_CODES, type SupportedLanguageCode } from '../../i18n';
@@ -21,6 +21,7 @@ export function AppShell() {
   const location = useLocation();
   const { consent, setGranted, setDenied } = useAnalyticsConsentState();
   useCloudflareAnalytics(consent);
+  useMicrosoftClarity(consent);
   const hydrateSimulatorFromStorage = useSimulatorStore((store) => store.hydrateFromStorage);
   const mainLinks = [
     { to: '/learn', label: t('학습 경로') },

@@ -62,6 +62,13 @@ npm run lint          # eslint
 npm run build         # production build (Cloudflare Pages)
 ```
 
+### 분석 도구 설정 (선택)
+
+동의 기반으로 분석 스크립트가 로드됩니다.
+
+- `VITE_CF_WEB_ANALYTICS_TOKEN`: Cloudflare Web Analytics 토큰
+- `VITE_MS_CLARITY_PROJECT_ID`: Microsoft Clarity 프로젝트 ID
+
 ## 프로젝트 구조
 
 ```

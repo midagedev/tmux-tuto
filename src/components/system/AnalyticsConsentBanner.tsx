@@ -20,7 +20,9 @@ export function AnalyticsConsentBanner({
   return (
     <div className="analytics-banner" role="region" aria-label={t('Analytics consent')}>
       <p>
-        {t('사용성 개선을 위해 Cloudflare Web Analytics를 사용합니다. 동의하면 라우트 기반 이용량이 수집됩니다.')}
+        {t(
+          '사용성 개선을 위해 Cloudflare Web Analytics 및 Microsoft Clarity를 사용합니다. 동의하면 라우트 기반 이용량과 사용 행동 데이터가 수집됩니다.',
+        )}
       </p>
       <div className="inline-actions">
         <button type="button" className="primary-btn" onClick={onAccept}>

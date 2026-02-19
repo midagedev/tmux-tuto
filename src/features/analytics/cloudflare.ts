@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import Clarity from '@microsoft/clarity';
 
 export const ANALYTICS_CONSENT_KEY = 'analytics_consent';
 
@@ -8,11 +9,16 @@ export type AnalyticsConsent = 'unknown' | 'granted' | 'denied';
 declare global {
   interface Window {
     __tmuxCloudflareAnalyticsLoaded?: boolean;
+    __tmuxMicrosoftClarityLoaded?: boolean;
   }
 }
 
 function getToken() {
   return import.meta.env.VITE_CF_WEB_ANALYTICS_TOKEN as string | undefined;
+}
+
+function getClarityProjectId() {
+  return (import.meta.env.VITE_MS_CLARITY_PROJECT_ID as string | undefined) ?? 'vjo8dzp9t5';
 }
 
 function parseStoredConsent(raw: string | null): AnalyticsConsent {
@@ -54,6 +60,18 @@ function injectCloudflareBeacon(token: string) {
   script.setAttribute('data-cf-beacon', JSON.stringify({ token, spa: true }));
   document.head.appendChild(script);
   window.__tmuxCloudflareAnalyticsLoaded = true;
+  return true;
+}
+
+function injectMicrosoftClarity(projectId: string) {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+  if (window.__tmuxMicrosoftClarityLoaded) {
+    return true;
+  }
+  Clarity.init(projectId);
+  window.__tmuxMicrosoftClarityLoaded = true;
   return true;
 }
 
@@ -105,4 +123,17 @@ export function useCloudflareAnalytics(consent: AnalyticsConsent) {
     // Keep this explicit marker for debugging route capture during QA.
     window.dispatchEvent(new CustomEvent('tmux:route-view', { detail: location.pathname + location.search }));
   }, [consent, location.pathname, location.search]);
+}
+
+export function useMicrosoftClarity(consent: AnalyticsConsent) {
+  useEffect(() => {
+    if (consent !== 'granted') {
+      return;
+    }
+    const projectId = getClarityProjectId();
+    if (!projectId) {
+      return;
+    }
+    injectMicrosoftClarity(projectId);
+  }, [consent]);
 }
