@@ -47,6 +47,7 @@ import {
   type LessonCompletionStatus,
   type LessonFilter,
 } from './lessonProgress';
+import { resolveInitialLessonSlugFromQuery } from './urlState';
 
 type VmStatus = 'idle' | 'booting' | 'running' | 'stopped' | 'error';
 
@@ -1200,10 +1201,8 @@ export function PracticeVmPocPage() {
       return;
     }
 
-    const firstLessonSlug = content.lessons[0]?.slug ?? '';
-    const fromParam = content.lessons.some((lesson) => lesson.slug === lessonParam) ? lessonParam : '';
-    setSelectedLessonSlug(fromParam || firstLessonSlug);
-  }, [content, lessonParam, selectedLessonSlug]);
+    setSelectedLessonSlug(resolveInitialLessonSlugFromQuery(content, lessonParam, missionParam));
+  }, [content, lessonParam, missionParam, selectedLessonSlug]);
 
   useEffect(() => {
     if (!content || filteredLessonRows.length === 0) {
