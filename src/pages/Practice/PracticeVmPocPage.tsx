@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { Terminal } from '@xterm/xterm';
 import '@xterm/xterm/css/xterm.css';
 import type V86 from 'v86';
@@ -241,16 +243,16 @@ function appendActions(history: string[], actions: string[], max: number) {
   return trimHistory([...history, ...actions], max);
 }
 
-function getDifficultyLabel(difficulty: AppMission['difficulty']) {
+function getDifficultyLabel(t: TFunction, difficulty: AppMission['difficulty']) {
   switch (difficulty) {
     case 'beginner':
-      return '입문';
+      return t('입문');
     case 'daily':
-      return '실전';
+      return t('실전');
     case 'advanced':
-      return '고급';
+      return t('고급');
     case 'scenario':
-      return '시나리오';
+      return t('시나리오');
     default:
       return difficulty;
   }
@@ -305,7 +307,7 @@ function getShortcutTooltipForToken(token: string) {
   return null;
 }
 
-function renderPlainHintSegmentWithTooltip(text: string, keyPrefix: string) {
+function renderPlainHintSegmentWithTooltip(text: string, keyPrefix: string, t: TFunction) {
   return text.split(/(Ctrl\s*\+\s*b)/gi).map((segment, index) => {
     if (!segment) {
       return null;
@@ -316,8 +318,8 @@ function renderPlainHintSegmentWithTooltip(text: string, keyPrefix: string) {
         <span
           key={`${keyPrefix}-shortcut-${index}`}
           className="vm-shortcut-inline-tooltip"
-          title={SHORTCUT_TOOLTIP_TEXT}
-          aria-label={`단축키 안내: ${SHORTCUT_TOOLTIP_TEXT}`}
+          title={t(SHORTCUT_TOOLTIP_TEXT)}
+          aria-label={t('단축키 안내: {{shortcutTooltip}}', { shortcutTooltip: t(SHORTCUT_TOOLTIP_TEXT) })}
         >
           <code>Ctrl+b</code>
         </span>
@@ -328,11 +330,11 @@ function renderPlainHintSegmentWithTooltip(text: string, keyPrefix: string) {
   });
 }
 
-function renderHintTextWithTooltips(hint: string, keyPrefix: string) {
+function renderHintTextWithTooltips(hint: string, keyPrefix: string, t: TFunction) {
   return hint.split(/(`[^`]+`)/g).flatMap((segment, index) => {
     const codeMatch = segment.match(/^`([^`]+)`$/);
     if (!codeMatch) {
-      return renderPlainHintSegmentWithTooltip(segment, `${keyPrefix}-plain-${index}`);
+      return renderPlainHintSegmentWithTooltip(segment, `${keyPrefix}-plain-${index}`, t);
     }
 
     const token = codeMatch[1];
@@ -342,8 +344,8 @@ function renderHintTextWithTooltips(hint: string, keyPrefix: string) {
         <span
           key={`${keyPrefix}-code-${index}`}
           className="vm-shortcut-inline-tooltip"
-          title={shortcutTooltip}
-          aria-label={`단축키 안내: ${shortcutTooltip}`}
+          title={t(shortcutTooltip)}
+          aria-label={t('단축키 안내: {{shortcutTooltip}}', { shortcutTooltip: t(shortcutTooltip) })}
         >
           <code>{token}</code>
         </span>
@@ -463,84 +465,97 @@ function evaluateRuleOperator(actual: unknown, operator: string, expected: unkno
   }
 }
 
-function getRulePreconditionLabel(rule: AppMission['passRules'][number]) {
+function getRulePreconditionLabel(t: TFunction, rule: AppMission['passRules'][number]) {
   switch (rule.kind) {
     case 'sessionCount':
-      return `세션 수가 ${rule.operator} ${String(rule.value)} 이어야 함`;
+      return t('세션 수가 {{operator}} {{value}} 이어야 함', { operator: rule.operator, value: String(rule.value) });
     case 'windowCount':
-      return `윈도우 수가 ${rule.operator} ${String(rule.value)} 이어야 함`;
+      return t('윈도우 수가 {{operator}} {{value}} 이어야 함', { operator: rule.operator, value: String(rule.value) });
     case 'paneCount':
-      return `패인 수가 ${rule.operator} ${String(rule.value)} 이어야 함`;
+      return t('패인 수가 {{operator}} {{value}} 이어야 함', { operator: rule.operator, value: String(rule.value) });
     case 'activeWindowIndex':
-      return `활성 윈도우 인덱스가 ${rule.operator} ${String(rule.value)} 이어야 함`;
+      return t('활성 윈도우 인덱스가 {{operator}} {{value}} 이어야 함', {
+        operator: rule.operator,
+        value: String(rule.value),
+      });
     case 'modeIs':
       return rule.value === 'COPY_MODE'
-        ? 'Copy Mode에 진입해야 함'
-        : `mode 값이 ${rule.operator} ${String(rule.value)} 이어야 함`;
+        ? t('Copy Mode에 진입해야 함')
+        : t('mode 값이 {{operator}} {{value}} 이어야 함', { operator: rule.operator, value: String(rule.value) });
     case 'searchExecuted':
-      return 'Copy Mode에서 검색을 실행해야 함';
+      return t('Copy Mode에서 검색을 실행해야 함');
     case 'searchMatchFound':
-      return rule.value === true ? '검색 결과가 있어야 함' : '검색 결과가 없어야 함';
+      return rule.value === true ? t('검색 결과가 있어야 함') : t('검색 결과가 없어야 함');
     case 'shellHistoryText':
-      return `쉘 히스토리에 ${JSON.stringify(rule.value)} 실행 기록이 있어야 함`;
+      return t('쉘 히스토리에 {{value}} 실행 기록이 있어야 함', { value: JSON.stringify(rule.value) });
     case 'actionHistoryText':
-      return `tmux 액션 로그에 ${JSON.stringify(rule.value)} 기록이 있어야 함`;
+      return t('tmux 액션 로그에 {{value}} 기록이 있어야 함', { value: JSON.stringify(rule.value) });
     default:
-      return `${rule.kind} ${rule.operator} ${JSON.stringify(rule.value)} 조건`;
+      return t('{{kind}} {{operator}} {{value}} 조건', {
+        kind: rule.kind,
+        operator: rule.operator,
+        value: JSON.stringify(rule.value),
+      });
   }
 }
 
-function getRuleCurrentStateText(rule: AppMission['passRules'][number], snapshot: VmBridgeSnapshot) {
+function getRuleCurrentStateText(t: TFunction, rule: AppMission['passRules'][number], snapshot: VmBridgeSnapshot) {
   switch (rule.kind) {
     case 'sessionCount':
-      return `현재 session: ${snapshot.sessionCount ?? '-'}`;
+      return t('현재 session: {{value}}', { value: snapshot.sessionCount ?? '-' });
     case 'windowCount':
-      return `현재 window: ${snapshot.windowCount ?? '-'}`;
+      return t('현재 window: {{value}}', { value: snapshot.windowCount ?? '-' });
     case 'paneCount':
-      return `현재 pane: ${snapshot.paneCount ?? '-'}`;
+      return t('현재 pane: {{value}}', { value: snapshot.paneCount ?? '-' });
     case 'activeWindowIndex':
-      return `현재 activeWindow: ${snapshot.activeWindowIndex ?? '-'}`;
+      return t('현재 activeWindow: {{value}}', { value: snapshot.activeWindowIndex ?? '-' });
     case 'modeIs':
-      return `현재 mode: ${snapshot.modeIs ?? '-'}`;
+      return t('현재 mode: {{value}}', { value: snapshot.modeIs ?? '-' });
     case 'searchExecuted':
-      return `현재 searchExecuted: ${snapshot.searchExecuted === null ? '-' : snapshot.searchExecuted ? 'yes' : 'no'}`;
+      return t('현재 searchExecuted: {{value}}', {
+        value: snapshot.searchExecuted === null ? '-' : snapshot.searchExecuted ? 'yes' : 'no',
+      });
     case 'searchMatchFound':
-      return `현재 searchMatchFound: ${
-        snapshot.searchMatchFound === null ? '-' : snapshot.searchMatchFound ? 'yes' : 'no'
-      }`;
+      return t('현재 searchMatchFound: {{value}}', {
+        value: snapshot.searchMatchFound === null ? '-' : snapshot.searchMatchFound ? 'yes' : 'no',
+      });
     case 'shellHistoryText': {
       const expected = typeof rule.value === 'string' ? rule.value : null;
       if (!expected) {
-        return `최근 명령 ${snapshot.commandHistory.length}개`;
+        return t('최근 명령 {{count}}개', { count: snapshot.commandHistory.length });
       }
       const found = snapshot.commandHistory.some((command) => command.includes(expected));
-      return found ? `최근 명령에서 "${expected}" 확인됨` : `최근 명령에서 "${expected}" 미확인`;
+      return found
+        ? t('최근 명령에서 "{{expected}}" 확인됨', { expected })
+        : t('최근 명령에서 "{{expected}}" 미확인', { expected });
     }
     case 'actionHistoryText': {
       const expected = typeof rule.value === 'string' ? rule.value : null;
       if (!expected) {
-        return `최근 액션 ${snapshot.actionHistory.length}개`;
+        return t('최근 액션 {{count}}개', { count: snapshot.actionHistory.length });
       }
       const found = snapshot.actionHistory.some((action) => action.includes(expected));
-      return found ? `최근 액션에서 "${expected}" 확인됨` : `최근 액션에서 "${expected}" 미확인`;
+      return found
+        ? t('최근 액션에서 "{{expected}}" 확인됨', { expected })
+        : t('최근 액션에서 "{{expected}}" 미확인', { expected });
     }
     default:
-      return '현재 상태 측정값 없음';
+      return t('현재 상태 측정값 없음');
   }
 }
 
-function getInitialScenarioLabel(initialScenario: string) {
+function getInitialScenarioLabel(t: TFunction, initialScenario: string) {
   switch (initialScenario) {
     case 'single-pane':
-      return '초기 시나리오: 단일 pane에서 시작';
+      return t('초기 시나리오: 단일 pane에서 시작');
     case 'log-buffer':
-      return '초기 시나리오: 로그 버퍼가 준비된 pane에서 시작';
+      return t('초기 시나리오: 로그 버퍼가 준비된 pane에서 시작');
     default:
-      return `초기 시나리오: ${initialScenario}`;
+      return t('초기 시나리오: {{initialScenario}}', { initialScenario });
   }
 }
 
-function buildMissionPreconditionItems(mission: AppMission | null, snapshot: VmBridgeSnapshot): MissionPreconditionItem[] {
+function buildMissionPreconditionItems(t: TFunction, mission: AppMission | null, snapshot: VmBridgeSnapshot): MissionPreconditionItem[] {
   if (!mission) {
     return [];
   }
@@ -551,8 +566,8 @@ function buildMissionPreconditionItems(mission: AppMission | null, snapshot: VmB
 
     return {
       key: `${rule.kind}-${index}`,
-      label: getRulePreconditionLabel(rule),
-      current: getRuleCurrentStateText(rule, snapshot),
+      label: getRulePreconditionLabel(t, rule),
+      current: getRuleCurrentStateText(t, rule, snapshot),
       satisfied,
     };
   });
@@ -560,8 +575,8 @@ function buildMissionPreconditionItems(mission: AppMission | null, snapshot: VmB
   return [
     {
       key: 'initial-scenario',
-      label: getInitialScenarioLabel(mission.initialScenario),
-      current: '미션 진입 시 자동 적용',
+      label: getInitialScenarioLabel(t, mission.initialScenario),
+      current: t('미션 진입 시 자동 적용'),
       satisfied: true,
     },
     ...ruleItems,
@@ -615,15 +630,15 @@ function formatLayout(layout: string | null) {
   return `${layout.slice(0, 28)}...`;
 }
 
-function getLessonStatusLabel(status: LessonCompletionStatus) {
+function getLessonStatusLabel(t: TFunction, status: LessonCompletionStatus) {
   switch (status) {
     case 'completed':
-      return '완료';
+      return t('완료');
     case 'in-progress':
-      return '진행중';
+      return t('진행중');
     case 'not-started':
     default:
-      return '미시작';
+      return t('미시작');
   }
 }
 
@@ -653,6 +668,7 @@ function getCelebrationKindLabel(kind: CelebrationState['kind']) {
 }
 
 export function PracticeVmPocPage() {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [contentState, setContentState] = useState<{
     status: 'loading' | 'ready' | 'error';
@@ -666,7 +682,7 @@ export function PracticeVmPocPage() {
   const [selectedMissionSlug, setSelectedMissionSlug] = useState('');
   const [vmEpoch, setVmEpoch] = useState(0);
   const [vmStatus, setVmStatus] = useState<VmStatus>('idle');
-  const [vmStatusText, setVmStatusText] = useState('대기 중');
+  const [vmStatusText, setVmStatusText] = useState(t('대기 중'));
   const [commandInput, setCommandInput] = useState('tmux list-sessions');
   const [debugLines, setDebugLines] = useState<string[]>([]);
   const [actionHistory, setActionHistory] = useState<string[]>([]);
@@ -988,7 +1004,7 @@ export function PracticeVmPocPage() {
         enqueueCelebration({
           key: `achievement:${definition.id}`,
           kind: 'achievement',
-          message: `업적 달성: ${definition.title}`,
+          message: t('업적 달성: {{title}}', { title: definition.title }),
           detail: definition.description,
           achievementId: definition.id,
         });
@@ -1009,11 +1025,11 @@ export function PracticeVmPocPage() {
       enqueueCelebration({
         key: `achievement-batch:${batchIds.join(',')}`,
         kind: 'achievement',
-        message: `업적 ${unseenDefinitions.length}개 달성`,
-        detail: hiddenCount > 0 ? `${preview} 외 ${hiddenCount}개` : preview,
+        message: t('업적 {{count}}개 달성', { count: unseenDefinitions.length }),
+        detail: hiddenCount > 0 ? t('{{preview}} 외 {{hiddenCount}}개', { preview, hiddenCount }) : preview,
       });
     },
-    [enqueueCelebration],
+    [enqueueCelebration, t],
   );
 
   const celebrationAchievement = useMemo(() => {
@@ -1249,7 +1265,7 @@ export function PracticeVmPocPage() {
   const updateMetricByProbe = useCallback(
     (metric: VmProbeMetric) => {
       setVmStatus('running');
-      setVmStatusText('부팅 완료, 명령 입력 가능');
+      setVmStatusText(t('부팅 완료, 명령 입력 가능'));
 
       setMetrics((previous) => {
         switch (metric.key) {
@@ -1451,15 +1467,21 @@ export function PracticeVmPocPage() {
         enqueueCelebration({
           key: `lesson:${selectedLesson.slug}`,
           kind: 'lesson',
-          message: `레슨 완료: ${selectedLesson.title}`,
-          detail: `${lessonMissions.length}개 미션을 모두 완료했습니다. XP +${gainedXp}`,
+          message: t('레슨 완료: {{title}}', { title: selectedLesson.title }),
+          detail: t('{{count}}개 미션을 모두 완료했습니다. XP +{{gainedXp}}', { count: lessonMissions.length, gainedXp }),
         });
       } else {
         enqueueCelebration({
           key: `mission:${missionSlug}`,
           kind: 'mission',
-          message: mode === 'manual' ? `수동 완료 처리: ${selectedMission.title}` : `미션 완료: ${selectedMission.title}`,
-          detail: mode === 'manual' ? `수동 브리지 기록 완료, XP +${gainedXp}` : `자동 판정 통과, XP +${gainedXp}`,
+          message:
+            mode === 'manual'
+              ? t('수동 완료 처리: {{title}}', { title: selectedMission.title })
+              : t('미션 완료: {{title}}', { title: selectedMission.title }),
+          detail:
+            mode === 'manual'
+              ? t('수동 브리지 기록 완료, XP +{{gainedXp}}', { gainedXp })
+              : t('자동 판정 통과, XP +{{gainedXp}}', { gainedXp }),
         });
       }
 
@@ -1487,6 +1509,7 @@ export function PracticeVmPocPage() {
       recordMissionPass,
       selectedLesson,
       selectedMission,
+      t,
       unlockedAchievements,
     ],
   );
@@ -1617,12 +1640,12 @@ export function PracticeVmPocPage() {
     let stopListener: ((value?: unknown) => void) | null = null;
 
     setVmStatus('booting');
-    setVmStatusText('v86 초기화 중');
+    setVmStatusText(t('v86 초기화 중'));
 
     const host = terminalHostRef.current;
     if (!host) {
       setVmStatus('error');
-      setVmStatusText('터미널 DOM 초기화 실패');
+      setVmStatusText(t('터미널 DOM 초기화 실패'));
       return undefined;
     }
 
@@ -1732,7 +1755,7 @@ export function PracticeVmPocPage() {
         const normalizedLine = plainLine.toLowerCase();
         const hasShellPrompt = /[#$]\s*$/.test(plainLine.trimEnd());
         if (normalizedLine.includes('login:') || hasShellPrompt) {
-          setVmStatusText('부팅 완료, 명령 입력 가능');
+          setVmStatusText(t('부팅 완료, 명령 입력 가능'));
           setVmStatus('running');
         }
 
@@ -1790,7 +1813,7 @@ export function PracticeVmPocPage() {
         }
 
         const V86Ctor = module.default;
-        setVmStatusText('VM 시작 이미지 확인 중...');
+        setVmStatusText(t('VM 시작 이미지 확인 중...'));
 
         const initialState = disableWarmStart ? null : await loadVmInitialState(VM_BOOT_CONFIG.initialStatePath);
         if (!isMounted) {
@@ -1799,7 +1822,7 @@ export function PracticeVmPocPage() {
 
         let useWarmStart = Boolean(initialState);
         if (useWarmStart) {
-          setVmStatusText('빠른 시작 스냅샷 로딩 중...');
+          setVmStatusText(t('빠른 시작 스냅샷 로딩 중...'));
         }
 
         const baseOptions: V86Options = {
@@ -1834,7 +1857,7 @@ export function PracticeVmPocPage() {
             });
           } catch {
             useWarmStart = false;
-            setVmStatusText('빠른 시작 스냅샷 복원 실패, 일반 부팅으로 전환');
+            setVmStatusText(t('빠른 시작 스냅샷 복원 실패, 일반 부팅으로 전환'));
             emulator = new V86Ctor(baseOptions);
           }
         } else {
@@ -1850,12 +1873,12 @@ export function PracticeVmPocPage() {
         emulatorRef.current = emulator;
 
         loadedListener = () => {
-          setVmStatusText(useWarmStart ? '빠른 시작 스냅샷 복원 완료' : '커널 및 루트FS 로딩 완료');
+          setVmStatusText(useWarmStart ? t('빠른 시작 스냅샷 복원 완료') : t('커널 및 루트FS 로딩 완료'));
         };
 
         stopListener = () => {
           setVmStatus('stopped');
-          setVmStatusText('VM이 중지되었습니다');
+          setVmStatusText(t('VM이 중지되었습니다'));
         };
 
         serialListener = (value) => {
@@ -1878,7 +1901,7 @@ export function PracticeVmPocPage() {
         emulator.add_listener('serial1-output-byte', serialProbeListener);
 
         setVmStatus('booting');
-        setVmStatusText('VM 부팅 중...');
+        setVmStatusText(t('VM 부팅 중...'));
 
         const probeBootstrapDelayMs = useWarmStart ? 700 : 2600;
         window.setTimeout(() => {
@@ -1904,7 +1927,7 @@ export function PracticeVmPocPage() {
         }, probeBootstrapDelayMs);
       } catch {
         setVmStatus('error');
-        setVmStatusText('v86 초기화 실패 (bios/wasm 경로 확인 필요)');
+        setVmStatusText(t('v86 초기화 실패 (bios/wasm 경로 확인 필요)'));
       }
     })();
 
@@ -2019,16 +2042,16 @@ export function PracticeVmPocPage() {
 
   const selectedMissionCommands = useMemo(() => buildMissionCommandSuggestions(selectedMission), [selectedMission]);
   const selectedMissionPreconditions = useMemo(
-    () => buildMissionPreconditionItems(selectedMission, vmSnapshot),
-    [selectedMission, vmSnapshot],
+    () => buildMissionPreconditionItems(t, selectedMission, vmSnapshot),
+    [selectedMission, t, vmSnapshot],
   );
 
   if (contentState.status === 'loading') {
     return (
       <PagePlaceholder
         eyebrow="Practice"
-        title="Browser VM 초기화 중"
-        description="커리큘럼과 VM 리소스를 로딩하고 있습니다."
+        title={t('Browser VM 초기화 중')}
+        description={t('커리큘럼과 VM 리소스를 로딩하고 있습니다.')}
       />
     );
   }
@@ -2037,8 +2060,8 @@ export function PracticeVmPocPage() {
     return (
       <PagePlaceholder
         eyebrow="Practice"
-        title="VM Practice 로드 실패"
-        description="커리큘럼 데이터를 읽지 못했습니다."
+        title={t('VM Practice 로드 실패')}
+        description={t('커리큘럼 데이터를 읽지 못했습니다.')}
       >
         <div className="inline-actions">
           <button
@@ -2048,7 +2071,7 @@ export function PracticeVmPocPage() {
               window.location.reload();
             }}
           >
-            새로고침
+            {t('새로고침')}
           </button>
         </div>
       </PagePlaceholder>
@@ -2058,11 +2081,11 @@ export function PracticeVmPocPage() {
   return (
     <PagePlaceholder
       eyebrow="Practice"
-      title="tmux 실습"
+      title={t('tmux 실습')}
       description=""
     >
       <p className="vm-mobile-hint">
-        원활한 실습을 위해 데스크톱 브라우저 사용을 권장합니다.
+        {t('원활한 실습을 위해 데스크톱 브라우저 사용을 권장합니다.')}
       </p>
       <div className="vm-poc-panel">
         {celebration ? (
@@ -2072,7 +2095,7 @@ export function PracticeVmPocPage() {
               role={isAchievementCelebration ? 'status' : 'dialog'}
               aria-modal={isAchievementCelebration ? undefined : true}
               aria-live="polite"
-              aria-label="완료 피드백"
+              aria-label={t('완료 피드백')}
             >
               <div className="vm-celebration-burst" aria-hidden="true">
                 <span />
@@ -2084,7 +2107,7 @@ export function PracticeVmPocPage() {
                   {getCelebrationKindLabel(celebration.kind)}
                 </span>
                 {celebrationQueueCount > 0 ? (
-                  <span className="vm-celebration-queue-chip">다음 {celebrationQueueCount}</span>
+                  <span className="vm-celebration-queue-chip">{t('다음 {{count}}', { count: celebrationQueueCount })}</span>
                 ) : null}
               </div>
               <p>
@@ -2093,7 +2116,7 @@ export function PracticeVmPocPage() {
               <p>{celebration.detail}</p>
               {celebration.kind === 'mission' && nextIncompleteMission ? (
                 <section className="vm-celebration-next-action">
-                  <p className="vm-celebration-next-label">추천 다음 단계</p>
+                  <p className="vm-celebration-next-label">{t('추천 다음 단계')}</p>
                   <button
                     type="button"
                     className="primary-btn vm-celebration-primary-btn"
@@ -2102,14 +2125,14 @@ export function PracticeVmPocPage() {
                       advanceCelebration();
                     }}
                   >
-                    다음 미션 시작
+                    {t('다음 미션 시작')}
                   </button>
-                  <p className="muted">다음: {nextIncompleteMission.title}</p>
+                  <p className="muted">{t('다음: {{title}}', { title: nextIncompleteMission.title })}</p>
                 </section>
               ) : null}
               {celebration.kind === 'lesson' && nextLesson ? (
                 <section className="vm-celebration-next-action">
-                  <p className="vm-celebration-next-label">추천 다음 단계</p>
+                  <p className="vm-celebration-next-label">{t('추천 다음 단계')}</p>
                   <button
                     type="button"
                     className="primary-btn vm-celebration-primary-btn"
@@ -2118,26 +2141,26 @@ export function PracticeVmPocPage() {
                       advanceCelebration();
                     }}
                   >
-                    다음 레슨 시작
+                    {t('다음 레슨 시작')}
                   </button>
-                  <p className="muted">다음: {nextLesson.title}</p>
+                  <p className="muted">{t('다음: {{title}}', { title: nextLesson.title })}</p>
                 </section>
               ) : null}
               {celebration.kind === 'lesson' && !nextLesson ? (
                 <section className="vm-celebration-next-action">
-                  <p className="vm-celebration-next-label">추천 다음 단계</p>
+                  <p className="vm-celebration-next-label">{t('추천 다음 단계')}</p>
                   <Link className="primary-btn vm-celebration-primary-btn" to="/progress">
-                    학습 완료 현황 보기
+                    {t('학습 완료 현황 보기')}
                   </Link>
                 </section>
               ) : null}
               <div className="inline-actions vm-celebration-actions">
                 <Link className="secondary-btn" to="/progress">
-                  업적 보기
+                  {t('업적 보기')}
                 </Link>
                 {celebrationShareHref ? (
                   <a className="text-link" href={celebrationShareHref} target="_blank" rel="noreferrer">
-                    X 챌린지 공유
+                    {t('X 챌린지 공유')}
                   </a>
                 ) : null}
                 <button
@@ -2146,27 +2169,27 @@ export function PracticeVmPocPage() {
                   className="secondary-btn"
                   onClick={advanceCelebration}
                 >
-                  닫기 (Esc)
+                  {t('닫기 (Esc)')}
                 </button>
               </div>
             </section>
           </section>
         ) : null}
 
-        <div className="vm-mobile-switch" role="tablist" aria-label="실습 화면 전환">
+        <div className="vm-mobile-switch" role="tablist" aria-label={t('실습 화면 전환')}>
           <button
             type="button"
             className={`secondary-btn ${mobileWorkbenchView === 'mission' ? 'is-active' : ''}`}
             onClick={() => setMobileWorkbenchView('mission')}
           >
-            미션
+            {t('미션')}
           </button>
           <button
             type="button"
             className={`secondary-btn ${mobileWorkbenchView === 'terminal' ? 'is-active' : ''}`}
             onClick={() => setMobileWorkbenchView('terminal')}
           >
-            터미널
+            {t('터미널')}
           </button>
         </div>
 
@@ -2174,26 +2197,29 @@ export function PracticeVmPocPage() {
           <section className="vm-lesson-banner">
             <div className="vm-lesson-banner-header">
               <span className="vm-lesson-banner-path">
-                {selectedLessonTrack?.title ?? selectedLesson.trackSlug} ·{' '}
-                {selectedLessonChapter?.title ?? selectedLesson.chapterSlug}
+                {t(selectedLessonTrack?.title ?? selectedLesson.trackSlug)} ·{' '}
+                {t(selectedLessonChapter?.title ?? selectedLesson.chapterSlug)}
               </span>
-              <h2 className="vm-lesson-banner-title">{selectedLesson.title}</h2>
+              <h2 className="vm-lesson-banner-title">{t(selectedLesson.title)}</h2>
               <span className="vm-lesson-banner-meta">
-                {selectedLesson.estimatedMinutes}분 · 목표 {selectedLesson.objectives.length} · 미션{' '}
-                {lessonMissions.length}
+                {t('{{minutes}}분 · 목표 {{objectiveCount}} · 미션 {{missionCount}}', {
+                  minutes: selectedLesson.estimatedMinutes,
+                  objectiveCount: selectedLesson.objectives.length,
+                  missionCount: lessonMissions.length,
+                })}
               </span>
             </div>
             <div className="vm-lesson-banner-body">
               <div className="vm-lesson-banner-col">
                 {selectedLesson.overview ? (
                   <p>
-                    {renderTextWithShortcutTooltip(selectedLesson.overview, 'banner-overview')}
+                    {renderTextWithShortcutTooltip(t(selectedLesson.overview), 'banner-overview')}
                   </p>
                 ) : null}
                 {selectedLesson.goal ? (
                   <p className="vm-lesson-banner-goal">
-                    <strong>목표:</strong>{' '}
-                    {renderTextWithShortcutTooltip(selectedLesson.goal, 'banner-goal')}
+                    <strong>{t('목표:')}</strong>{' '}
+                    {renderTextWithShortcutTooltip(t(selectedLesson.goal), 'banner-goal')}
                   </p>
                 ) : null}
               </div>
@@ -2201,7 +2227,7 @@ export function PracticeVmPocPage() {
                 <ul className="vm-lesson-banner-objectives">
                   {selectedLesson.objectives.map((objective, index) => (
                     <li key={`banner-obj-${index}`}>
-                      {renderTextWithShortcutTooltip(objective, `banner-obj-${index}`)}
+                      {renderTextWithShortcutTooltip(t(objective), `banner-obj-${index}`)}
                     </li>
                   ))}
                 </ul>
@@ -2210,22 +2236,22 @@ export function PracticeVmPocPage() {
             <div className="vm-lesson-banner-footer">
               {selectedLesson.successCriteria && selectedLesson.successCriteria.length > 0 ? (
                 <span className="vm-lesson-banner-tag">
-                  <strong>완료:</strong>{' '}
+                  <strong>{t('완료:')}</strong>{' '}
                   {selectedLesson.successCriteria.map((item, index) => (
                     <span key={`banner-sc-${index}`}>
                       {index > 0 ? ' · ' : ''}
-                      {renderTextWithShortcutTooltip(item, `banner-sc-${index}`)}
+                      {renderTextWithShortcutTooltip(t(item), `banner-sc-${index}`)}
                     </span>
                   ))}
                 </span>
               ) : null}
               {selectedLesson.failureStates && selectedLesson.failureStates.length > 0 ? (
                 <span className="vm-lesson-banner-tag is-warn">
-                  <strong>부족:</strong>{' '}
+                  <strong>{t('부족:')}</strong>{' '}
                   {selectedLesson.failureStates.map((item, index) => (
                     <span key={`banner-fs-${index}`}>
                       {index > 0 ? ' · ' : ''}
-                      {renderTextWithShortcutTooltip(item, `banner-fs-${index}`)}
+                      {renderTextWithShortcutTooltip(t(item), `banner-fs-${index}`)}
                     </span>
                   ))}
                 </span>
@@ -2233,10 +2259,10 @@ export function PracticeVmPocPage() {
             </div>
             {bannerLessonTerms.length > 0 ? (
               <div className="vm-lesson-banner-terms-row">
-                <span className="vm-lesson-banner-terms-label">용어사전</span>
+                <span className="vm-lesson-banner-terms-label">{t('용어사전')}</span>
                 {bannerLessonTerms.map((term) => (
                   <span key={term.id} className="vm-lesson-banner-term">
-                    <strong>{term.title}</strong> {term.description}
+                    <strong>{t(term.title)}</strong> {t(term.description)}
                   </span>
                 ))}
               </div>
@@ -2250,15 +2276,15 @@ export function PracticeVmPocPage() {
               <article className="vm-mission-card vm-mission-priority-card">
                 <p className="vm-mission-priority-eyebrow">Priority 1</p>
                 <h2>
-                  현재 미션
+                  {t('현재 미션')}
                   {selectedMissionOrder ? ` ${selectedMissionOrder}/${lessonMissions.length}` : ''}
                 </h2>
                 <p className="muted">
-                  {selectedMission.title} · 난이도 {getDifficultyLabel(selectedMission.difficulty)}
+                  {t(selectedMission.title)} · {t('난이도')} {getDifficultyLabel(t, selectedMission.difficulty)}
                 </p>
 
                 <section className="vm-mission-command-block">
-                  <h3>이 미션에서 입력할 명령</h3>
+                  <h3>{t('이 미션에서 입력할 명령')}</h3>
                   {selectedMissionCommands.length > 0 ? (
                     <div className="vm-mission-command-list">
                       {selectedMissionCommands.map((command) => (
@@ -2276,13 +2302,13 @@ export function PracticeVmPocPage() {
                       ))}
                     </div>
                   ) : (
-                    <p className="muted">추천 명령을 찾지 못했습니다. 아래 힌트를 기준으로 직접 입력해 주세요.</p>
+                    <p className="muted">{t('추천 명령을 찾지 못했습니다. 아래 힌트를 기준으로 직접 입력해 주세요.')}</p>
                   )}
-                  <p className="muted">명령을 클릭하면 입력창에 채워지고 터미널 탭으로 전환됩니다.</p>
+                  <p className="muted">{t('명령을 클릭하면 입력창에 채워지고 터미널 탭으로 전환됩니다.')}</p>
                 </section>
 
                 <section className="vm-mission-precondition-block">
-                  <h3>실행 전 프리컨디션</h3>
+                  <h3>{t('실행 전 프리컨디션')}</h3>
                   <ul className="vm-precondition-list">
                     {selectedMissionPreconditions.map((item) => (
                       <li key={item.key} className={`vm-precondition-row ${item.satisfied ? 'is-satisfied' : 'is-pending'}`}>
@@ -2295,15 +2321,15 @@ export function PracticeVmPocPage() {
 
                 <ul className="link-list">
                   {missionHintPreview.map((hint, index) => (
-                    <li key={hint}>{renderHintTextWithTooltips(hint, `hint-preview-${index}`)}</li>
+                        <li key={hint}>{renderHintTextWithTooltips(t(hint), `hint-preview-${index}`, t)}</li>
                   ))}
                 </ul>
                 {hiddenMissionHintCount > 0 ? (
                   <details className="vm-mission-hints-more">
-                    <summary>힌트 {hiddenMissionHintCount}개 더 보기</summary>
+                    <summary>{t('힌트 {{count}}개 더 보기', { count: hiddenMissionHintCount })}</summary>
                     <ul className="link-list">
                       {selectedMission.hints.slice(missionHintPreview.length).map((hint, index) => (
-                        <li key={hint}>{renderHintTextWithTooltips(hint, `hint-more-${index}`)}</li>
+                        <li key={hint}>{renderHintTextWithTooltips(t(hint), `hint-more-${index}`, t)}</li>
                       ))}
                     </ul>
                   </details>
@@ -2311,11 +2337,11 @@ export function PracticeVmPocPage() {
                 {selectedMissionStatus ? (
                   <div className="vm-mission-status">
                     <p>
-                      <strong>판정:</strong> {selectedMissionStatus.status} · {selectedMissionStatus.reason}
+                      <strong>{t('판정:')}</strong> {selectedMissionStatus.status} · {t(selectedMissionStatus.reason)}
                     </p>
                     {selectedMissionStatus.status === 'manual' ? (
                       <button type="button" className="secondary-btn" onClick={handleManualMissionComplete}>
-                        수동 완료 처리
+                        {t('수동 완료 처리')}
                       </button>
                     ) : null}
                   </div>
@@ -2325,7 +2351,7 @@ export function PracticeVmPocPage() {
 
             <section className="vm-mission-list-card">
               <div className="vm-mission-list-header">
-                <h2>미션 {lessonCompletedMissionCount}/{lessonMissions.length}</h2>
+                <h2>{t('미션 {{completed}}/{{total}}', { completed: lessonCompletedMissionCount, total: lessonMissions.length })}</h2>
                 <span className="vm-mission-list-action">
                   {selectedMission && selectedMissionCompleted && nextIncompleteMission ? (
                     <button
@@ -2333,29 +2359,29 @@ export function PracticeVmPocPage() {
                       className="primary-btn vm-next-action-btn"
                       onClick={() => selectMissionForAction(nextIncompleteMission.slug)}
                     >
-                      다음 미션
+                      {t('다음 미션')}
                     </button>
                   ) : null}
                   {selectedMission && selectedMissionCompleted && !nextIncompleteMission && lessonCompleted && nextLesson ? (
                     <button type="button" className="primary-btn vm-next-action-btn" onClick={selectNextLessonForAction}>
-                      다음 레슨
+                      {t('다음 레슨')}
                     </button>
                   ) : null}
                   {selectedMission && selectedMissionCompleted && !nextIncompleteMission && lessonCompleted && !nextLesson ? (
                     <Link className="primary-btn vm-next-action-btn" to="/progress">
-                      완료 현황
+                      {t('완료 현황')}
                     </Link>
                   ) : null}
                   {selectedMission && !selectedMissionCompleted && selectedMissionStatus?.status === 'manual' ? (
                     <button type="button" className="secondary-btn vm-next-action-btn" onClick={handleManualMissionComplete}>
-                      수동 완료
+                      {t('수동 완료')}
                     </button>
                   ) : null}
                 </span>
               </div>
               {selectedMissionStatus ? (
                 <p className="vm-mission-list-status">
-                  판정: {selectedMissionStatus.status} · {selectedMissionStatus.reason}
+                  {t('판정:')} {selectedMissionStatus.status} · {t(selectedMissionStatus.reason)}
                 </p>
               ) : null}
               <div className="vm-mission-list">
@@ -2365,17 +2391,17 @@ export function PracticeVmPocPage() {
                   const isCompleted = completedMissionSlugs.includes(mission.slug);
 
                   let badgeClass = 'is-pending';
-                  let badgeLabel = '대기';
+                  let badgeLabel = t('대기');
 
                   if (isCompleted) {
                     badgeClass = 'is-complete';
-                    badgeLabel = '완료';
+                    badgeLabel = t('완료');
                   } else if (missionStatus?.status === 'complete') {
                     badgeClass = 'is-live-complete';
-                    badgeLabel = '실시간 통과';
+                    badgeLabel = t('실시간 통과');
                   } else if (missionStatus?.status === 'manual') {
                     badgeClass = 'is-manual';
-                    badgeLabel = '수동';
+                    badgeLabel = t('수동');
                   }
 
                   return (
@@ -2387,9 +2413,9 @@ export function PracticeVmPocPage() {
                     >
                       <span className="vm-mission-row-main">
                         <strong>
-                          {index + 1}. {mission.title}
+                          {index + 1}. {t(mission.title)}
                         </strong>
-                        <small>난이도 {getDifficultyLabel(mission.difficulty)}</small>
+                        <small>{t('난이도')} {getDifficultyLabel(t, mission.difficulty)}</small>
                       </span>
                       <span className={`vm-mission-row-badge ${badgeClass}`}>{badgeLabel}</span>
                     </button>
@@ -2405,10 +2431,10 @@ export function PracticeVmPocPage() {
                   className="secondary-btn"
                   onClick={() => selectLessonForAction(LEARNING_PATH_ENTRY_LESSON, { resetFilter: true })}
                 >
-                  통합 학습 경로 처음으로
+                  {t('통합 학습 경로 처음으로')}
                 </button>
               </div>
-              <div className="vm-lesson-filter" role="tablist" aria-label="레슨 필터">
+              <div className="vm-lesson-filter" role="tablist" aria-label={t('레슨 필터')}>
                 {LESSON_FILTER_OPTIONS.map((option) => (
                   <button
                     key={option.value}
@@ -2416,13 +2442,13 @@ export function PracticeVmPocPage() {
                     className={`secondary-btn vm-lesson-filter-btn ${lessonFilter === option.value ? 'is-active' : ''}`}
                     onClick={() => setLessonFilter(option.value)}
                   >
-                    {option.label}
+                    {t(option.label)}
                   </button>
                 ))}
               </div>
-              <section className="vm-lesson-catalog" aria-label="레슨 목록">
+              <section className="vm-lesson-catalog" aria-label={t('레슨 목록')}>
                 {filteredLessonRows.length === 0 ? (
-                  <p className="muted">선택한 필터에 해당하는 레슨이 없습니다.</p>
+                  <p className="muted">{t('선택한 필터에 해당하는 레슨이 없습니다.')}</p>
                 ) : (
                   filteredLessonRows.map((row) => {
                     const isActive = row.lesson.slug === selectedLessonSlug;
@@ -2438,9 +2464,9 @@ export function PracticeVmPocPage() {
                         aria-pressed={isActive}
                       >
                         <span className="vm-lesson-row-main">
-                          <strong>{row.lesson.title}</strong>
+                          <strong>{t(row.lesson.title)}</strong>
                           <small>
-                            {trackTitle} · {chapterTitle}
+                            {t(trackTitle)} · {t(chapterTitle)}
                           </small>
                         </span>
                         <span className="vm-lesson-row-meta">
@@ -2448,7 +2474,7 @@ export function PracticeVmPocPage() {
                             {row.completedMissionCount}/{row.totalMissionCount}
                           </small>
                           <span className={`vm-lesson-row-status ${getLessonStatusClass(row.status)}`}>
-                            {getLessonStatusLabel(row.status)}
+                            {getLessonStatusLabel(t, row.status)}
                           </span>
                         </span>
                       </button>
@@ -2458,12 +2484,12 @@ export function PracticeVmPocPage() {
               </section>
               <div className="vm-lesson-progress">
                 <p>
-                  <strong>Lesson 진행:</strong> {lessonCompletedMissionCount}/{lessonMissions.length}
+                  <strong>{t('Lesson 진행:')}</strong> {lessonCompletedMissionCount}/{lessonMissions.length}
                 </p>
-                <p className="muted">manual 판정 미션: {manualMissionCandidates.length}</p>
+                <p className="muted">{t('manual 판정 미션: {{count}}', { count: manualMissionCandidates.length })}</p>
               </div>
               <div className={`vm-runtime-badge ${getMetricBadgeClass(vmStatus)}`}>
-                <span>VM 상태: {vmStatus}</span>
+                <span>{t('VM 상태: {{vmStatus}}', { vmStatus })}</span>
                 <span>{vmStatusText}</span>
               </div>
             </section>
@@ -2473,7 +2499,7 @@ export function PracticeVmPocPage() {
             <section className="vm-poc-controls">
               <div className="inline-actions">
                 <Link className="secondary-btn" to="/learn">
-                  커리큘럼으로 이동
+                  {t('커리큘럼으로 이동')}
                 </Link>
                 <button
                   type="button"
@@ -2482,7 +2508,7 @@ export function PracticeVmPocPage() {
                     setVmEpoch((value) => value + 1);
                   }}
                 >
-                  VM 재시작
+                  {t('VM 재시작')}
                 </button>
                 <label className="vm-poc-check" htmlFor="auto-probe-toggle">
                   <input
@@ -2500,7 +2526,7 @@ export function PracticeVmPocPage() {
                     sendInternalCommand(PROBE_TRIGGER_COMMAND);
                   }}
                 >
-                  Probe 지금 실행
+                  {t('Probe 지금 실행')}
                 </button>
               </div>
 
@@ -2519,16 +2545,16 @@ export function PracticeVmPocPage() {
                   aria-label="VM shell command"
                 />
                 <button type="submit" className="primary-btn" disabled={vmStatus === 'error'}>
-                  명령 실행
+                  {t('명령 실행')}
                 </button>
               </form>
 
               <details className="vm-poc-quick-wrap">
-                <summary>자주 쓰는 명령 빠르게 실행</summary>
+                <summary>{t('자주 쓰는 명령 빠르게 실행')}</summary>
                 <div className="vm-poc-quick">
                   {QUICK_COMMANDS.map((item) => (
                     <button key={item.label} type="button" className="secondary-btn" onClick={() => sendCommand(item.command)}>
-                      {item.label}
+                      {t(item.label)}
                     </button>
                   ))}
                 </div>
@@ -2551,7 +2577,7 @@ export function PracticeVmPocPage() {
             </section>
 
             <details className="vm-poc-debug">
-              <summary>브리지 디버그</summary>
+              <summary>{t('브리지 디버그')}</summary>
               <div className="vm-debug-grid">
                 <article>
                   <h3>Recent Action History</h3>

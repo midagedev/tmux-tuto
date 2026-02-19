@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { EmptyState } from '../../components/system/EmptyState';
 import { PagePlaceholder } from '../../components/system/PagePlaceholder';
 import { BRAND } from '../../app/brand';
@@ -44,6 +45,7 @@ function sortLessonsByOrder(lessons: AppLesson[], order: readonly string[]) {
 }
 
 export function LearnIndexPage() {
+  const { t } = useTranslation();
   const [pageData, setPageData] = useState<LearnPageData>({
     lessons: [],
     missionCounts: {},
@@ -91,30 +93,30 @@ export function LearnIndexPage() {
   return (
     <PagePlaceholder
       eyebrow={`${BRAND.name} Learn`}
-      title="학습 경로"
-      description="초급/심화를 나누지 않고, 하나의 통합 실습 경로로 처음부터 운영 루틴까지 이어집니다."
+      title={t('학습 경로')}
+      description={t('초급/심화를 나누지 않고, 하나의 통합 실습 경로로 처음부터 운영 루틴까지 이어집니다.')}
     >
       {pageData.lessons.length === 0 ? (
-        <EmptyState title="로드된 레슨이 없습니다" description="콘텐츠 파일을 확인해 주세요." />
+        <EmptyState title={t('로드된 레슨이 없습니다')} description={t('콘텐츠 파일을 확인해 주세요.')} />
       ) : (
         <div className="curriculum-track-list">
           {pageData.learningJourney ? (
-            <section className="learning-journey-card" aria-label="Learning Journey">
-              <p className="page-eyebrow">tmux-tuto 방식</p>
-              <h2>{pageData.learningJourney.title}</h2>
-              <p>{pageData.learningJourney.intro}</p>
+            <section className="learning-journey-card" aria-label={t('Learning Journey')}>
+              <p className="page-eyebrow">{t('tmux-tuto 방식')}</p>
+              <h2>{t(pageData.learningJourney.title)}</h2>
+              <p>{t(pageData.learningJourney.intro)}</p>
               <p>
-                <strong>최종 목표:</strong> {pageData.learningJourney.targetOutcome}
+                <strong>{t('최종 목표:')}</strong> {t(pageData.learningJourney.targetOutcome)}
               </p>
               <div className="inline-actions">
                 {learningPathEntry ? (
                   <Link className="primary-btn" to={`/practice?lesson=${learningPathEntry.slug}`}>
-                    통합 경로 바로 시작
+                    {t('통합 경로 바로 시작')}
                   </Link>
                 ) : null}
                 {paneNavigationEntry ? (
                   <Link className="secondary-btn" to={`/practice?lesson=${paneNavigationEntry.slug}`}>
-                    pane 이동부터 시작
+                    {t('pane 이동부터 시작')}
                   </Link>
                 ) : null}
               </div>
@@ -124,14 +126,20 @@ export function LearnIndexPage() {
           <section className="curriculum-track-card learning-level-card">
             <header className="curriculum-track-head">
               <div>
-                <h2>{pageData.learningPath?.title ?? '통합 레슨 경로'}</h2>
+                <h2>{pageData.learningPath?.title ? t(pageData.learningPath.title) : t('통합 레슨 경로')}</h2>
                 <p className="muted">
-                  목표: {pageData.learningPath?.description ?? 'session/window/pane 기초 조작부터 pane 이동, copy-mode, command-mode, 원격 운영까지 한 흐름으로 완료'}
+                  {t('목표: {{description}}', {
+                    description:
+                      (pageData.learningPath?.description ? t(pageData.learningPath.description) : null) ??
+                      t(
+                        'session/window/pane 기초 조작부터 pane 이동, copy-mode, command-mode, 원격 운영까지 한 흐름으로 완료',
+                      ),
+                  })}
                 </p>
               </div>
               {learningPathEntry ? (
                 <Link className="primary-btn" to={`/practice?lesson=${learningPathEntry.slug}`}>
-                  처음부터 시작
+                  {t('처음부터 시작')}
                 </Link>
               ) : null}
             </header>
@@ -142,11 +150,16 @@ export function LearnIndexPage() {
                     className="curriculum-lesson-link"
                     to={`/learn/${lesson.trackSlug}/${lesson.chapterSlug}/${lesson.slug}`}
                   >
-                    <strong>{lesson.title}</strong>
-                    <span>{lesson.estimatedMinutes}분 · 미션 {pageData.missionCounts[lesson.slug] ?? 0}개</span>
+                    <strong>{t(lesson.title)}</strong>
+                    <span>
+                      {t('{{minutes}}분 · 미션 {{count}}개', {
+                        minutes: lesson.estimatedMinutes,
+                        count: pageData.missionCounts[lesson.slug] ?? 0,
+                      })}
+                    </span>
                   </Link>
                   <Link className="secondary-btn" to={`/practice?lesson=${lesson.slug}`}>
-                    실습
+                    {t('실습')}
                   </Link>
                 </div>
               ))}

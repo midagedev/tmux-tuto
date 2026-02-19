@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { EmptyState } from '../../components/system/EmptyState';
 import { PagePlaceholder } from '../../components/system/PagePlaceholder';
 import { loadAppContent } from '../../features/curriculum/contentLoader';
@@ -26,7 +27,7 @@ function formatSessionDateTime(iso: string | null) {
     return '-';
   }
 
-  return date.toLocaleString('ko-KR', {
+  return date.toLocaleString(undefined, {
     month: '2-digit',
     day: '2-digit',
     hour: '2-digit',
@@ -35,6 +36,7 @@ function formatSessionDateTime(iso: string | null) {
 }
 
 export function ProgressPage() {
+  const { t } = useTranslation();
   const [content, setContent] = useState<AppContent | null>(null);
 
   const xp = useProgressStore((store) => store.xp);
@@ -186,44 +188,48 @@ export function ProgressPage() {
       completedTrackSlugs,
     });
 
-    window.alert(`샘플 완료 처리: +${gainedXp} XP`);
+    window.alert(t('샘플 완료 처리: +{{gainedXp}} XP', { gainedXp }));
   };
 
   return (
     <PagePlaceholder
-      eyebrow="Progress"
-      title="학습 진행도"
-      description="XP, 레벨, 스트릭, 트랙별 완료 현황을 확인합니다."
+      eyebrow={t('Progress')}
+      title={t('학습 진행도')}
+      description={t('XP, 레벨, 스트릭, 트랙별 완료 현황을 확인합니다.')}
     >
       {!content ? (
-        <EmptyState title="진행 데이터를 로드할 수 없습니다" description="콘텐츠 로드를 다시 확인해 주세요." />
+        <EmptyState
+          title={t('진행 데이터를 로드할 수 없습니다')}
+          description={t('콘텐츠 로드를 다시 확인해 주세요.')}
+        />
       ) : (
         <div className="sim-panel">
           <div className="sim-summary">
             <p>
-              <strong>XP:</strong> {xp}
+              <strong>{t('XP:')}</strong> {xp}
             </p>
             <p>
-              <strong>레벨:</strong> {level}
+              <strong>{t('레벨:')}</strong> {level}
             </p>
             <p>
-              <strong>연속 학습:</strong> {streakDays}일
+              <strong>{t('연속 학습:')}</strong> {streakDays}
+              {t('일')}
             </p>
             <p>
-              <strong>완료 미션:</strong> {completedMissionSlugs.length}
+              <strong>{t('완료 미션:')}</strong> {completedMissionSlugs.length}
             </p>
             <p>
-              <strong>pane 분할 누적:</strong> {tmuxSkillStats.splitCount}
+              <strong>{t('pane 분할 누적:')}</strong> {tmuxSkillStats.splitCount}
             </p>
           </div>
 
           <section className="playbook-section">
-            <h2>세션 히스토리</h2>
+            <h2>{t('세션 히스토리')}</h2>
             <div className="progress-session-grid">
               <article>
-                <h3>진행 중 세션</h3>
+                <h3>{t('진행 중 세션')}</h3>
                 {inProgressSessions.length === 0 ? (
-                  <p className="muted">진행 중인 세션이 없습니다.</p>
+                  <p className="muted">{t('진행 중인 세션이 없습니다.')}</p>
                 ) : (
                   <ul className="link-list">
                     {inProgressSessions.map((session) => {
@@ -232,15 +238,17 @@ export function ProgressPage() {
                       const lesson = lessonBySlug.get(lessonSlug);
                       return (
                         <li key={session.id}>
-                          <strong>{mission?.title ?? session.missionSlug}</strong>
-                          <p className="muted">시작: {formatSessionDateTime(session.startedAt)}</p>
-                          <p className="muted">{lesson?.title ?? lessonSlug}</p>
+                          <strong>{t(mission?.title ?? session.missionSlug)}</strong>
+                          <p className="muted">
+                            {t('시작: {{startedAt}}', { startedAt: formatSessionDateTime(session.startedAt) })}
+                          </p>
+                          <p className="muted">{t(lesson?.title ?? lessonSlug)}</p>
                           {lessonSlug ? (
                             <Link
                               className="secondary-btn"
                               to={`/practice?lesson=${lessonSlug}&mission=${session.missionSlug}`}
                             >
-                              이어서 실습
+                              {t('이어서 실습')}
                             </Link>
                           ) : null}
                         </li>
@@ -250,9 +258,9 @@ export function ProgressPage() {
                 )}
               </article>
               <article>
-                <h3>최근 완료 세션</h3>
+                <h3>{t('최근 완료 세션')}</h3>
                 {recentCompletedSessions.length === 0 ? (
-                  <p className="muted">완료한 세션이 없습니다.</p>
+                  <p className="muted">{t('완료한 세션이 없습니다.')}</p>
                 ) : (
                   <ul className="link-list">
                     {recentCompletedSessions.map((session) => {
@@ -261,12 +269,14 @@ export function ProgressPage() {
                       const lesson = lessonBySlug.get(lessonSlug);
                       return (
                         <li key={session.id}>
-                          <strong>{mission?.title ?? session.missionSlug}</strong>
+                          <strong>{t(mission?.title ?? session.missionSlug)}</strong>
                           <p className="muted">
-                            완료: {formatSessionDateTime(session.completedAt)} · XP +
-                            {session.gainedXp ?? 0}
+                            {t('완료: {{completedAt}} · XP +{{gainedXp}}', {
+                              completedAt: formatSessionDateTime(session.completedAt),
+                              gainedXp: session.gainedXp ?? 0,
+                            })}
                           </p>
-                          <p className="muted">{lesson?.title ?? lessonSlug}</p>
+                          <p className="muted">{t(lesson?.title ?? lessonSlug)}</p>
                         </li>
                       );
                     })}
@@ -277,20 +287,23 @@ export function ProgressPage() {
           </section>
 
           <section className="playbook-section">
-            <h2>트랙 진행률</h2>
+            <h2>{t('트랙 진행률')}</h2>
             <ul className="link-list">
               {trackProgress.map((track) => (
                 <li key={track.trackSlug}>
-                  <strong>{track.trackTitle}</strong> - {track.completedCount}/{track.totalCount} ({track.ratio}%)
+                  <strong>{t(track.trackTitle)}</strong> - {track.completedCount}/{track.totalCount} ({track.ratio}%)
                 </li>
               ))}
             </ul>
           </section>
 
           <section className="playbook-section">
-            <h2>Core 업적</h2>
+            <h2>{t('Core 업적')}</h2>
             <p className="muted">
-              {unlockedCoreAchievements.length}/{coreAchievementRows.length} 달성
+              {t('{{unlocked}}/{{total}} 달성', {
+                unlocked: unlockedCoreAchievements.length,
+                total: coreAchievementRows.length,
+              })}
             </p>
             <div className="achievement-grid">
               {coreAchievementRows.map((achievement) => (
@@ -298,9 +311,9 @@ export function ProgressPage() {
                   key={achievement.id}
                   className={`achievement-card ${achievement.unlocked ? 'is-unlocked' : 'is-locked'}`}
                 >
-                  <h3>{achievement.title}</h3>
-                  <p>{achievement.description}</p>
-                  <p className="muted">{achievement.unlocked ? '달성됨' : '미달성'}</p>
+                  <h3>{t(achievement.title)}</h3>
+                  <p>{t(achievement.description)}</p>
+                  <p className="muted">{achievement.unlocked ? t('달성됨') : t('미달성')}</p>
                   {achievement.unlocked ? (
                     <a
                       className="text-link"
@@ -316,7 +329,7 @@ export function ProgressPage() {
                       target="_blank"
                       rel="noreferrer"
                     >
-                      X 챌린지 공유
+                      {t('X 챌린지 공유')}
                     </a>
                   ) : null}
                 </article>
@@ -325,23 +338,26 @@ export function ProgressPage() {
           </section>
 
           <section className="playbook-section">
-            <h2>Fun 업적</h2>
+            <h2>{t('Fun 업적')}</h2>
             <p className="muted">
-              {unlockedFunAchievements.length}/{funAchievementRows.length} 달성
+              {t('{{unlocked}}/{{total}} 달성', {
+                unlocked: unlockedFunAchievements.length,
+                total: funAchievementRows.length,
+              })}
             </p>
             <ul className="link-list">
-              <li>pane 분할 누적: {tmuxSkillStats.splitCount}</li>
-              <li>최대 pane 수: {tmuxSkillStats.maxPaneCount}</li>
-              <li>window 생성: {tmuxSkillStats.newWindowCount}</li>
-              <li>session 생성: {tmuxSkillStats.newSessionCount}</li>
-              <li>copy-mode 진입: {tmuxSkillStats.copyModeCount}</li>
-              <li>pane resize 누적: {tmuxSkillStats.paneResizeCount}</li>
-              <li>pane 이동/선택 누적: {tmuxSkillStats.paneSelectCount}</li>
-              <li>layout 변경 누적: {tmuxSkillStats.layoutSelectCount}</li>
-              <li>zoom 토글 누적: {tmuxSkillStats.zoomToggleCount}</li>
-              <li>sync 토글 누적: {tmuxSkillStats.syncToggleCount}</li>
-              <li>command-prompt 실행: {tmuxSkillStats.commandPromptCount}</li>
-              <li>choose-tree 실행: {tmuxSkillStats.chooseTreeCount}</li>
+              <li>{t('pane 분할 누적: {{count}}', { count: tmuxSkillStats.splitCount })}</li>
+              <li>{t('최대 pane 수: {{count}}', { count: tmuxSkillStats.maxPaneCount })}</li>
+              <li>{t('window 생성: {{count}}', { count: tmuxSkillStats.newWindowCount })}</li>
+              <li>{t('session 생성: {{count}}', { count: tmuxSkillStats.newSessionCount })}</li>
+              <li>{t('copy-mode 진입: {{count}}', { count: tmuxSkillStats.copyModeCount })}</li>
+              <li>{t('pane resize 누적: {{count}}', { count: tmuxSkillStats.paneResizeCount })}</li>
+              <li>{t('pane 이동/선택 누적: {{count}}', { count: tmuxSkillStats.paneSelectCount })}</li>
+              <li>{t('layout 변경 누적: {{count}}', { count: tmuxSkillStats.layoutSelectCount })}</li>
+              <li>{t('zoom 토글 누적: {{count}}', { count: tmuxSkillStats.zoomToggleCount })}</li>
+              <li>{t('sync 토글 누적: {{count}}', { count: tmuxSkillStats.syncToggleCount })}</li>
+              <li>{t('command-prompt 실행: {{count}}', { count: tmuxSkillStats.commandPromptCount })}</li>
+              <li>{t('choose-tree 실행: {{count}}', { count: tmuxSkillStats.chooseTreeCount })}</li>
             </ul>
             <div className="achievement-grid">
               {funAchievementRows.map((achievement) => (
@@ -349,9 +365,9 @@ export function ProgressPage() {
                   key={achievement.id}
                   className={`achievement-card ${achievement.unlocked ? 'is-unlocked' : 'is-locked'}`}
                 >
-                  <h3>{achievement.title}</h3>
-                  <p>{achievement.description}</p>
-                  <p className="muted">{achievement.unlocked ? '달성됨' : '미달성'}</p>
+                  <h3>{t(achievement.title)}</h3>
+                  <p>{t(achievement.description)}</p>
+                  <p className="muted">{achievement.unlocked ? t('달성됨') : t('미달성')}</p>
                   {achievement.unlocked ? (
                     <a
                       className="text-link"
@@ -367,7 +383,7 @@ export function ProgressPage() {
                       target="_blank"
                       rel="noreferrer"
                     >
-                      X 챌린지 공유
+                      {t('X 챌린지 공유')}
                     </a>
                   ) : null}
                 </article>
@@ -376,21 +392,21 @@ export function ProgressPage() {
           </section>
 
           <section className="playbook-section">
-            <h2>다음 추천 미션</h2>
+            <h2>{t('다음 추천 미션')}</h2>
             {recommendedMissions.length === 0 ? (
-              <p className="muted">모든 미션을 완료했습니다.</p>
+              <p className="muted">{t('모든 미션을 완료했습니다.')}</p>
             ) : (
               <ul className="link-list">
                 {recommendedMissions.map((mission) => (
                   <li key={mission.slug}>
-                    <strong>{mission.title}</strong> <span className="muted">({mission.difficulty})</span>
+                    <strong>{t(mission.title)}</strong> <span className="muted">({t(mission.difficulty)})</span>
                     <div className="inline-actions">
                       <button
                         type="button"
                         className="secondary-btn"
                         onClick={() => simulateMissionPass(mission)}
                       >
-                        샘플 통과 처리
+                        {t('샘플 통과 처리')}
                       </button>
                     </div>
                   </li>
@@ -400,15 +416,15 @@ export function ProgressPage() {
           </section>
 
           <section className="playbook-section">
-            <h2>마일스톤 공유</h2>
+            <h2>{t('마일스톤 공유')}</h2>
             {milestoneLinks.length === 0 ? (
-              <p className="muted">공유 가능한 마일스톤이 아직 없습니다.</p>
+              <p className="muted">{t('공유 가능한 마일스톤이 아직 없습니다.')}</p>
             ) : (
               <ul className="link-list">
                 {milestoneLinks.map((item) => (
                   <li key={item.milestoneSlug}>
                     <Link to={item.href} className="secondary-btn">
-                      {item.title} 공유 페이지 열기
+                      {t('{{title}} 공유 페이지 열기', { title: t(item.title) })}
                     </Link>
                   </li>
                 ))}

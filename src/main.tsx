@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import { createAppRouter } from './app/router';
+import './i18n';
 import './index.css';
 
 function applyRedirectedPathFrom404() {
