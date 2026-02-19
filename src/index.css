@@ -1819,6 +1819,17 @@ a {
   font-size: 1rem;
 }
 
+.vm-mission-complete-flash {
+  margin: 0;
+  border: 1px solid #99f6e4;
+  border-radius: 8px;
+  background: #ecfeff;
+  color: #0f766e;
+  padding: 6px 8px;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
 .vm-mission-command-block {
   display: grid;
   gap: 8px;

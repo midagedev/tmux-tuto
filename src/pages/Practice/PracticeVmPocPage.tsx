@@ -691,6 +691,7 @@ export function PracticeVmPocPage() {
   const [achievementFeed, setAchievementFeed] = useState<AchievementFeedEntry[]>([]);
   const [achievementUnreadCount, setAchievementUnreadCount] = useState(0);
   const [achievementLiveMessage, setAchievementLiveMessage] = useState('');
+  const [missionCompletionMessage, setMissionCompletionMessage] = useState('');
   const [autoProbe, setAutoProbe] = useState(true);
   const [lessonFilter, setLessonFilter] = useState<LessonFilter>('all');
   const [mobileWorkbenchView, setMobileWorkbenchView] = useState<'mission' | 'terminal'>('terminal');
@@ -1122,6 +1123,19 @@ export function PracticeVmPocPage() {
   }, [achievementLiveMessage]);
 
   useEffect(() => {
+    if (!missionCompletionMessage) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setMissionCompletionMessage('');
+    }, 3600);
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [missionCompletionMessage]);
+
+  useEffect(() => {
     let isMounted = true;
 
     loadAppContent()
@@ -1478,6 +1492,16 @@ export function PracticeVmPocPage() {
         scheduleAchievementAnnouncements(newlyUnlocked);
       }
 
+      setMissionCompletionMessage(
+        !lessonJustCompleted && nextMissionAfterCompletion
+          ? t('미션 완료: {{title}} · 자동으로 다음 미션으로 이동했습니다.', {
+              title: t(selectedMission.title),
+            })
+          : t('미션 완료: {{title}}', {
+              title: t(selectedMission.title),
+            }),
+      );
+
       if (!lessonJustCompleted && nextMissionAfterCompletion) {
         setSelectedMissionSlug(nextMissionAfterCompletion.slug);
         startMissionSession({
@@ -1495,6 +1519,7 @@ export function PracticeVmPocPage() {
       selectedLesson,
       selectedMission,
       startMissionSession,
+      t,
       unlockedAchievements,
     ],
   );
@@ -1643,6 +1668,7 @@ export function PracticeVmPocPage() {
     setAchievementFeed([]);
     setAchievementUnreadCount(0);
     setAchievementLiveMessage('');
+    setMissionCompletionMessage('');
     seenAchievementIdsRef.current.clear();
     inputLineBufferRef.current = '';
     inputEscapeSequenceRef.current = false;
@@ -2184,6 +2210,11 @@ export function PracticeVmPocPage() {
                 <p className="muted">
                   {t(selectedMission.title)} · {t('난이도')} {getDifficultyLabel(t, selectedMission.difficulty)}
                 </p>
+                {missionCompletionMessage ? (
+                  <p className="vm-mission-complete-flash" role="status" aria-live="polite">
+                    {missionCompletionMessage}
+                  </p>
+                ) : null}
 
                 <section className="vm-learning-nav-card">
                   <div className="vm-learning-nav-group">
