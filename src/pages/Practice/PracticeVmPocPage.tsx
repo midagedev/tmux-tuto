@@ -728,8 +728,6 @@ export function PracticeVmPocPage() {
   const searchProbeTimerRef = useRef<number | null>(null);
   const achievementAnnounceTimerRef = useRef<number | null>(null);
   const pendingAchievementIdsRef = useRef(new Set<string>());
-  const prevLessonParamRef = useRef('');
-  const prevMissionParamRef = useRef('');
 
   const lessonParam = searchParams.get('lesson') ?? '';
   const missionParam = searchParams.get('mission') ?? '';
@@ -1198,33 +1196,13 @@ export function PracticeVmPocPage() {
   }, []);
 
   useEffect(() => {
-    if (!content) {
+    if (!content || selectedLessonSlug) {
       return;
     }
 
-    // Initial load: no lesson selected yet → apply URL param or default
-    if (!selectedLessonSlug) {
-      const firstLessonSlug = content.lessons[0]?.slug ?? '';
-      const fromParam = content.lessons.some((lesson) => lesson.slug === lessonParam) ? lessonParam : '';
-      const next = fromParam || firstLessonSlug;
-      setSelectedLessonSlug(next);
-      prevLessonParamRef.current = lessonParam;
-      return;
-    }
-
-    // Only react when the URL param actually changed (external navigation,
-    // e.g. link from cheatsheet). Ignore when state changed but URL is stale.
-    const lessonParamChanged = lessonParam !== prevLessonParamRef.current;
-    prevLessonParamRef.current = lessonParam;
-
-    if (
-      lessonParamChanged &&
-      lessonParam &&
-      lessonParam !== selectedLessonSlug &&
-      content.lessons.some((lesson) => lesson.slug === lessonParam)
-    ) {
-      setSelectedLessonSlug(lessonParam);
-    }
+    const firstLessonSlug = content.lessons[0]?.slug ?? '';
+    const fromParam = content.lessons.some((lesson) => lesson.slug === lessonParam) ? lessonParam : '';
+    setSelectedLessonSlug(fromParam || firstLessonSlug);
   }, [content, lessonParam, selectedLessonSlug]);
 
   useEffect(() => {
@@ -1253,20 +1231,6 @@ export function PracticeVmPocPage() {
       if (selectedMissionSlug) {
         setSelectedMissionSlug('');
       }
-      return;
-    }
-
-    // Only react when the URL mission param actually changed (external navigation).
-    const missionParamChanged = missionParam !== prevMissionParamRef.current;
-    prevMissionParamRef.current = missionParam;
-
-    if (
-      missionParamChanged &&
-      missionParam &&
-      missionParam !== selectedMissionSlug &&
-      missions.some((mission) => mission.slug === missionParam)
-    ) {
-      setSelectedMissionSlug(missionParam);
       return;
     }
 
