@@ -75,6 +75,41 @@ function injectMicrosoftClarity(projectId: string) {
   return true;
 }
 
+function getDeviceType() {
+  if (typeof navigator === 'undefined') {
+    return 'unknown';
+  }
+  const ua = navigator.userAgent.toLowerCase();
+  if (/tablet|ipad/.test(ua)) {
+    return 'tablet';
+  }
+  if (/mobile|iphone|android/.test(ua)) {
+    return 'mobile';
+  }
+  return 'desktop';
+}
+
+function applyClarityConsentV2(consent: AnalyticsConsent) {
+  if (!window.__tmuxMicrosoftClarityLoaded) {
+    return;
+  }
+
+  if (consent === 'granted') {
+    Clarity.consentV2({
+      ad_Storage: 'granted',
+      analytics_Storage: 'granted',
+    });
+    return;
+  }
+
+  if (consent === 'denied') {
+    Clarity.consentV2({
+      ad_Storage: 'denied',
+      analytics_Storage: 'denied',
+    });
+  }
+}
+
 export function useAnalyticsConsentState() {
   const [consent, setConsent] = useState<AnalyticsConsent>('unknown');
 
@@ -126,8 +161,11 @@ export function useCloudflareAnalytics(consent: AnalyticsConsent) {
 }
 
 export function useMicrosoftClarity(consent: AnalyticsConsent) {
+  const location = useLocation();
+
   useEffect(() => {
     if (consent !== 'granted') {
+      applyClarityConsentV2(consent);
       return;
     }
     const projectId = getClarityProjectId();
@@ -135,5 +173,30 @@ export function useMicrosoftClarity(consent: AnalyticsConsent) {
       return;
     }
     injectMicrosoftClarity(projectId);
+    applyClarityConsentV2(consent);
   }, [consent]);
+
+  useEffect(() => {
+    if (consent !== 'granted' || !window.__tmuxMicrosoftClarityLoaded) {
+      return;
+    }
+
+    Clarity.setTag('route', location.pathname);
+    Clarity.setTag('pathWithQuery', `${location.pathname}${location.search}`);
+    Clarity.setTag('deviceType', getDeviceType());
+  }, [consent, location.pathname, location.search]);
+}
+
+export function setClarityTag(key: string, value: string) {
+  if (typeof window === 'undefined' || !window.__tmuxMicrosoftClarityLoaded) {
+    return;
+  }
+  Clarity.setTag(key, value);
+}
+
+export function trackClarityEvent(name: string) {
+  if (typeof window === 'undefined' || !window.__tmuxMicrosoftClarityLoaded) {
+    return;
+  }
+  Clarity.event(name);
 }
