@@ -68,24 +68,17 @@ export function HomePage() {
   const changelogItems = [
     {
       date: '2026-02-19',
-      title: t('VM 실습 안정화'),
-      summary: t('VM 부팅 경로와 상태 표시를 정비해 실습 재진입이 더 안정적입니다.'),
-      to: '/practice?lesson=hello-tmux',
+      title: t('레이아웃/워크스페이스 병합 레슨 추가'),
+      summary: t('pane 리사이즈/재배치 레슨 2종과 윈도우/세션 병합 중심 workspace-compose 레슨 2종을 추가했습니다.'),
+      to: '/practice?lesson=workspace-compose',
       actionLabel: t('실습 열기'),
     },
     {
       date: '2026-02-18',
-      title: t('커리큘럼 통합 경로 정비'),
-      summary: t('레슨 가이드, 미션 순서, 힌트 흐름을 통합해 처음부터 따라가기 쉽게 정리했습니다.'),
-      to: '/learn',
-      actionLabel: t('경로 열기'),
-    },
-    {
-      date: '2026-02-17',
-      title: t('공유/업적 페이지 개선'),
-      summary: t('업적 공유 카드와 챌린지 링크를 정리해 결과 공유 동선을 단순화했습니다.'),
-      to: '/progress',
-      actionLabel: t('진행도(선택) 보기'),
+      title: t('서비스 오픈'),
+      summary: t('2026-02-18 저녁에 tmux-tuto를 첫 공개했습니다.'),
+      to: '/practice?lesson=hello-tmux',
+      actionLabel: t('바로 실습 시작'),
     },
   ] as const;
 

@@ -177,6 +177,88 @@
       ]
     },
     {
+      "missionSlug": "layout-preset-apply",
+      "track": "B",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "pane.split",
+        "layout.select",
+        "layout.intent.build"
+      ],
+      "requiredRuleKinds": [
+        "paneCount",
+        "actionHistoryText"
+      ]
+    },
+    {
+      "missionSlug": "layout-resize-balance",
+      "track": "B",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "pane.resize",
+        "layout.balance"
+      ],
+      "requiredRuleKinds": [
+        "paneCount",
+        "actionHistoryText"
+      ]
+    },
+    {
+      "missionSlug": "layout-rearrange-swap",
+      "track": "B",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "pane.join",
+        "layout.rearrange",
+        "layout.select"
+      ],
+      "requiredRuleKinds": [
+        "paneCount",
+        "actionHistoryText"
+      ]
+    },
+    {
+      "missionSlug": "workspace-inventory-check",
+      "track": "B",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "session.list",
+        "window.list",
+        "workspace.inventory"
+      ],
+      "requiredRuleKinds": [
+        "shellHistoryText"
+      ]
+    },
+    {
+      "missionSlug": "workspace-join-from-window",
+      "track": "B",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "pane.join",
+        "workspace.import.pane"
+      ],
+      "requiredRuleKinds": [
+        "paneCount",
+        "actionHistoryText",
+        "shellHistoryText"
+      ]
+    },
+    {
+      "missionSlug": "workspace-link-window",
+      "track": "B",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "session.create",
+        "window.link",
+        "workspace.merge"
+      ],
+      "requiredRuleKinds": [
+        "sessionCount",
+        "shellHistoryText"
+      ]
+    },
+    {
       "missionSlug": "copy-mode-search-keyword",
       "track": "C",
       "scenarioPresetId": "log-buffer",
@@ -414,6 +496,95 @@
       "requiredRuleKinds": [
         "windowCount",
         "activeWindowIndex",
+        "actionHistoryText"
+      ]
+    },
+    {
+      "missionSlug": "layout-preset-apply-shortcuts",
+      "track": "B",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "pane.split",
+        "layout.select",
+        "layout.intent.build",
+        "shortcut.practice"
+      ],
+      "requiredRuleKinds": [
+        "paneCount",
+        "actionHistoryText"
+      ]
+    },
+    {
+      "missionSlug": "layout-resize-balance-shortcuts",
+      "track": "B",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "pane.resize",
+        "layout.balance",
+        "shortcut.practice"
+      ],
+      "requiredRuleKinds": [
+        "paneCount",
+        "actionHistoryText"
+      ]
+    },
+    {
+      "missionSlug": "layout-rearrange-swap-shortcuts",
+      "track": "B",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "pane.join",
+        "layout.rearrange",
+        "shortcut.practice"
+      ],
+      "requiredRuleKinds": [
+        "paneCount",
+        "actionHistoryText"
+      ]
+    },
+    {
+      "missionSlug": "workspace-inventory-check-shortcuts",
+      "track": "B",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "session.list",
+        "window.list",
+        "workspace.inventory",
+        "shortcut.practice"
+      ],
+      "requiredRuleKinds": [
+        "shellHistoryText",
+        "actionHistoryText"
+      ]
+    },
+    {
+      "missionSlug": "workspace-join-from-window-shortcuts",
+      "track": "B",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "pane.join",
+        "workspace.import.pane",
+        "shortcut.practice"
+      ],
+      "requiredRuleKinds": [
+        "paneCount",
+        "actionHistoryText",
+        "shellHistoryText"
+      ]
+    },
+    {
+      "missionSlug": "workspace-link-window-shortcuts",
+      "track": "B",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "session.create",
+        "window.link",
+        "workspace.merge",
+        "shortcut.practice"
+      ],
+      "requiredRuleKinds": [
+        "sessionCount",
+        "shellHistoryText",
         "actionHistoryText"
       ]
     },

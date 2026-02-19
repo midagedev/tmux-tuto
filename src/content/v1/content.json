@@ -296,6 +296,102 @@
       ]
     },
     {
+      "id": "lesson-b-03",
+      "trackSlug": "track-b-workflow",
+      "chapterSlug": "pane-navigation",
+      "slug": "layout-craft",
+      "title": "레이아웃 제작 루틴",
+      "estimatedMinutes": 12,
+      "objectives": [
+        "레이아웃 프리셋 선택",
+        "pane 리사이즈로 비율 조정",
+        "pane 재배치(join/swap) 적용"
+      ],
+      "overview": "split 이후 select-layout, resize, swap을 조합해 원하는 작업 화면을 빠르게 만드는 루틴을 학습합니다.",
+      "goal": "코드/로그/실행 영역 비율을 의도적으로 설계하고 필요 시 즉시 재배치할 수 있는 layout 제작 능력을 만듭니다.",
+      "successCriteria": [
+        "pane 3개 이상 구성",
+        "select-layout 실행 기록",
+        "resize-pane과 join-pane/swap-pane을 각각 1회 이상 실행"
+      ],
+      "failureStates": [
+        "레이아웃 선택 없이 분할만 반복해 원하는 구조를 고정하지 못함",
+        "재배치(join/swap) 없이 포커스 이동만 수행해 화면 구조 제어가 부족함"
+      ]
+    },
+    {
+      "id": "lesson-b-03s",
+      "trackSlug": "track-b-workflow",
+      "chapterSlug": "pane-navigation",
+      "slug": "layout-craft-shortcuts",
+      "title": "레이아웃 제작 루틴 (단축키)",
+      "estimatedMinutes": 11,
+      "objectives": [
+        "레이아웃 프리셋 선택",
+        "pane 리사이즈로 비율 조정",
+        "동일 동작을 prefix 단축키로 1회 이상 재현"
+      ],
+      "overview": "split 이후 select-layout, resize, swap을 조합해 원하는 작업 화면을 빠르게 만드는 루틴을 학습합니다. 이 레슨은 동일 작업을 단축키로 반복해 손에 익히는 단계입니다.",
+      "goal": "코드/로그/실행 영역 비율을 의도적으로 설계하고 필요 시 즉시 재배치할 수 있는 layout 제작 능력을 만듭니다. 명령 경로 이후 동일 동작을 prefix 단축키로 재현해 실행 속도를 높입니다.",
+      "successCriteria": [
+        "명령 경로 1회 수행 후 동일 동작을 단축키로 1회 재현",
+        "pane 3개 이상 구성",
+        "select-layout 실행 기록"
+      ],
+      "failureStates": [
+        "단축키 재현 기록이 없어 키 기반 루틴 전환이 검증되지 않음",
+        "레이아웃 선택 없이 분할만 반복해 원하는 구조를 고정하지 못함"
+      ]
+    },
+    {
+      "id": "lesson-b-04",
+      "trackSlug": "track-b-workflow",
+      "chapterSlug": "pane-navigation",
+      "slug": "workspace-compose",
+      "title": "워크스페이스 병합 루틴",
+      "estimatedMinutes": 12,
+      "objectives": [
+        "윈도우/세션 인벤토리 확인",
+        "다른 window의 pane 가져오기(join-pane)",
+        "window 연결(link-window)로 작업면 확장"
+      ],
+      "overview": "여러 window/session에 흩어진 작업을 list-sessions/list-windows로 파악하고 join/link로 현재 작업면에 병합하는 루틴을 학습합니다.",
+      "goal": "필요한 pane/window를 현재 작업 맥락으로 불러와 합치고, 끊김 없이 운영하는 workspace compose 능력을 만듭니다.",
+      "successCriteria": [
+        "list-sessions/list-windows로 현재 인벤토리 점검",
+        "join-pane -s로 다른 window의 pane을 현재 window로 가져오기",
+        "link-window 실행으로 window를 연결해 병합"
+      ],
+      "failureStates": [
+        "현재 window 내부 조작만 반복해 분산된 작업 컨텍스트를 합치지 못함",
+        "목록 점검 없이 병합해 source/target 혼선이 발생함"
+      ]
+    },
+    {
+      "id": "lesson-b-04s",
+      "trackSlug": "track-b-workflow",
+      "chapterSlug": "pane-navigation",
+      "slug": "workspace-compose-shortcuts",
+      "title": "워크스페이스 병합 루틴 (단축키)",
+      "estimatedMinutes": 11,
+      "objectives": [
+        "윈도우/세션 인벤토리 확인",
+        "다른 window의 pane 가져오기(join-pane)",
+        "동일 동작을 prefix 단축키로 1회 이상 재현"
+      ],
+      "overview": "여러 window/session에 흩어진 작업을 list-sessions/list-windows로 파악하고 join/link로 현재 작업면에 병합하는 루틴을 학습합니다. 이 레슨은 동일 작업을 단축키로 반복해 손에 익히는 단계입니다.",
+      "goal": "필요한 pane/window를 현재 작업 맥락으로 불러와 합치고, 끊김 없이 운영하는 workspace compose 능력을 만듭니다. 명령 경로 이후 동일 동작을 prefix 단축키로 재현해 실행 속도를 높입니다.",
+      "successCriteria": [
+        "명령 경로 1회 수행 후 동일 동작을 단축키로 1회 재현",
+        "join-pane -s로 다른 window의 pane을 현재 window로 가져오기",
+        "link-window 실행으로 window를 연결해 병합"
+      ],
+      "failureStates": [
+        "단축키 재현 기록이 없어 키 기반 루틴 전환이 검증되지 않음",
+        "목록 점검 없이 병합해 source/target 혼선이 발생함"
+      ]
+    },
+    {
       "id": "lesson-c-01",
       "trackSlug": "track-c-deepwork",
       "chapterSlug": "copy-mode-search",
@@ -1082,6 +1178,364 @@
       ]
     },
     {
+      "id": "mission-b-03",
+      "lessonSlug": "layout-craft",
+      "slug": "layout-preset-apply",
+      "title": "레이아웃 프리셋 적용",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "paneCount",
+          "operator": ">=",
+          "value": 3
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.layout.select"
+        }
+      ],
+      "hints": [
+        "`tmux split-window -h`, `tmux split-window -v`로 pane 3개를 만든 뒤 `tmux select-layout even-horizontal` 또는 `tmux select-layout tiled`를 실행하세요.",
+        "`tmux list-panes`와 `tmux display-message -p '#{window_layout}'`로 적용 상태를 확인하세요."
+      ]
+    },
+    {
+      "id": "mission-b-03b",
+      "lessonSlug": "layout-craft",
+      "slug": "layout-resize-balance",
+      "title": "리사이즈로 비율 조정",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "paneCount",
+          "operator": ">=",
+          "value": 2
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.pane.resize"
+        }
+      ],
+      "hints": [
+        "`tmux resize-pane -L 5`/`-R 5` 또는 `tmux resize-pane -U 3`/`-D 3`로 영역 비율을 조정하세요.",
+        "작은 조정(3~5칸)을 2~3번 반복하면 원하는 비율을 만들기 쉽습니다."
+      ]
+    },
+    {
+      "id": "mission-b-03c",
+      "lessonSlug": "layout-craft",
+      "slug": "layout-rearrange-swap",
+      "title": "join/swap으로 pane 재배치",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "paneCount",
+          "operator": ">=",
+          "value": 2
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.pane.join"
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.layout.select"
+        }
+      ],
+      "hints": [
+        "`tmux join-pane -hb -s :.3 -t :.0`처럼 오른쪽 아래 pane을 첫 번째 컬럼으로 옮겨 보세요.",
+        "`tmux swap-pane -s :.0 -t :.1` 또는 `tmux select-layout tiled`로 순서를 정리하면 원하는 3컬럼 형태를 맞추기 쉽습니다."
+      ]
+    },
+    {
+      "id": "mission-b-03-s",
+      "lessonSlug": "layout-craft-shortcuts",
+      "slug": "layout-preset-apply-shortcuts",
+      "title": "레이아웃 프리셋 적용 (단축키)",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "paneCount",
+          "operator": ">=",
+          "value": 3
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.layout.select"
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.shortcut.execute"
+        }
+      ],
+      "hints": [
+        "먼저 같은 작업을 명령어로 1회 수행해 기준 상태를 만드세요.",
+        "명령 경로 후 `Ctrl+b` + `%` 또는 `Ctrl+b` + `\"`로 분할을 한 번 더 수행해 단축키 실행 기록을 남기세요.",
+        "`tmux split-window -h`, `tmux split-window -v`로 pane 3개를 만든 뒤 `tmux select-layout even-horizontal` 또는 `tmux select-layout tiled`를 실행하세요."
+      ]
+    },
+    {
+      "id": "mission-b-03b-s",
+      "lessonSlug": "layout-craft-shortcuts",
+      "slug": "layout-resize-balance-shortcuts",
+      "title": "리사이즈로 비율 조정 (단축키)",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "paneCount",
+          "operator": ">=",
+          "value": 2
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.pane.resize"
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.shortcut.execute"
+        }
+      ],
+      "hints": [
+        "먼저 같은 작업을 명령어로 1회 수행해 기준 상태를 만드세요.",
+        "명령 경로 후 `Ctrl+b` + `H/J/K/L`로 리사이즈를 1회 더 반복하세요.",
+        "`tmux resize-pane -L 5`/`-R 5` 또는 `tmux resize-pane -U 3`/`-D 3`로 영역 비율을 조정하세요."
+      ]
+    },
+    {
+      "id": "mission-b-03c-s",
+      "lessonSlug": "layout-craft-shortcuts",
+      "slug": "layout-rearrange-swap-shortcuts",
+      "title": "join/swap으로 pane 재배치 (단축키)",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "paneCount",
+          "operator": ">=",
+          "value": 2
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.pane.join"
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.shortcut.execute"
+        }
+      ],
+      "hints": [
+        "먼저 같은 작업을 명령어로 1회 수행해 기준 상태를 만드세요.",
+        "join은 `tmux join-pane -hb -s :.3 -t :.0`처럼 명령으로 실행하고, 단축키 기록은 `Ctrl+b` + `%` 또는 `Ctrl+b` + `H/J/K/L` 중 하나를 1회 수행해 남기세요.",
+        "필요하면 `tmux swap-pane -s :.0 -t :.1`로 세부 순서를 바꾼 뒤 `tmux select-layout tiled`로 마무리하세요."
+      ]
+    },
+    {
+      "id": "mission-b-04",
+      "lessonSlug": "workspace-compose",
+      "slug": "workspace-inventory-check",
+      "title": "세션/윈도우 인벤토리 점검",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "tmux list-sessions"
+        },
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "tmux list-windows"
+        }
+      ],
+      "hints": [
+        "`tmux list-sessions`와 `tmux list-windows`를 순서대로 실행해 현재 인벤토리를 먼저 확인하세요.",
+        "병합 작업 전 목록을 점검하면 source/target 지정 실수를 크게 줄일 수 있습니다."
+      ]
+    },
+    {
+      "id": "mission-b-04b",
+      "lessonSlug": "workspace-compose",
+      "slug": "workspace-join-from-window",
+      "title": "다른 window pane 가져오기",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "paneCount",
+          "operator": ">=",
+          "value": 2
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.pane.join"
+        },
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "join-pane"
+        }
+      ],
+      "hints": [
+        "`tmux new-window -n logs`로 보조 window를 만든 뒤 `tmux join-pane -h -s :1.0 -t :0.0`처럼 pane을 가져오세요.",
+        "가져온 뒤 `tmux list-panes`로 현재 window의 pane 구성을 확인하세요."
+      ]
+    },
+    {
+      "id": "mission-b-04c",
+      "lessonSlug": "workspace-compose",
+      "slug": "workspace-link-window",
+      "title": "link-window로 window 병합",
+      "type": "state-check",
+      "difficulty": "advanced",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "sessionCount",
+          "operator": ">=",
+          "value": 2
+        },
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "link-window"
+        },
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "tmux list-windows"
+        }
+      ],
+      "hints": [
+        "`tmux new-session -d -s aux` 후 `tmux new-window -t aux -n audit`로 source window를 만든 다음 `tmux link-window -s aux:1 -t main:`를 실행하세요.",
+        "마지막에 `tmux list-windows -t main`으로 연결 결과를 확인하세요."
+      ]
+    },
+    {
+      "id": "mission-b-04-s",
+      "lessonSlug": "workspace-compose-shortcuts",
+      "slug": "workspace-inventory-check-shortcuts",
+      "title": "세션/윈도우 인벤토리 점검 (단축키)",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "tmux list-sessions"
+        },
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "tmux list-windows"
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.shortcut.execute"
+        }
+      ],
+      "hints": [
+        "먼저 같은 작업을 명령어로 1회 수행해 기준 상태를 만드세요.",
+        "인벤토리 점검 후 `Ctrl+b` + `n` 또는 `Ctrl+b` + `p`를 1회 실행해 단축키 재현 기록을 남기세요."
+      ]
+    },
+    {
+      "id": "mission-b-04b-s",
+      "lessonSlug": "workspace-compose-shortcuts",
+      "slug": "workspace-join-from-window-shortcuts",
+      "title": "다른 window pane 가져오기 (단축키)",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "paneCount",
+          "operator": ">=",
+          "value": 2
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.pane.join"
+        },
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "join-pane"
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.shortcut.execute"
+        }
+      ],
+      "hints": [
+        "먼저 같은 작업을 명령어로 1회 수행해 기준 상태를 만드세요.",
+        "join은 `tmux join-pane -h -s :1.0 -t :0.0`처럼 명령으로 실행하고, 단축키 기록은 `Ctrl+b` + `%` 또는 `Ctrl+b` + `H/J/K/L` 중 하나를 1회 수행해 남기세요."
+      ]
+    },
+    {
+      "id": "mission-b-04c-s",
+      "lessonSlug": "workspace-compose-shortcuts",
+      "slug": "workspace-link-window-shortcuts",
+      "title": "link-window로 window 병합 (단축키)",
+      "type": "state-check",
+      "difficulty": "advanced",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "sessionCount",
+          "operator": ">=",
+          "value": 2
+        },
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "link-window"
+        },
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "tmux list-windows"
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.shortcut.execute"
+        }
+      ],
+      "hints": [
+        "먼저 같은 작업을 명령어로 1회 수행해 기준 상태를 만드세요.",
+        "`tmux link-window -s aux:1 -t main:`로 병합한 뒤 `Ctrl+b` + `n` 또는 `Ctrl+b` + `p`를 1회 실행해 단축키 재현 기록을 남기세요."
+      ]
+    },
+    {
       "id": "mission-c-01",
       "lessonSlug": "copy-search",
       "slug": "copy-mode-search-keyword",
@@ -1558,6 +2012,10 @@
       "attach-detach-shortcuts",
       "split-resize",
       "split-resize-shortcuts",
+      "layout-craft",
+      "layout-craft-shortcuts",
+      "workspace-compose",
+      "workspace-compose-shortcuts",
       "pane-focus-flow",
       "pane-focus-flow-shortcuts",
       "copy-search",

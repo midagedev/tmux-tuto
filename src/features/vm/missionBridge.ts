@@ -218,6 +218,10 @@ export function parseTmuxActionsFromCommand(command: string) {
     actions.add('sim.pane.swap');
   }
 
+  if (/\btmux\s+(join-pane|joinp|move-pane|movep)\b/.test(normalized)) {
+    actions.add('sim.pane.join');
+  }
+
   if (/\btmux\s+(rotate-window|rotatew)\b/.test(normalized)) {
     actions.add('sim.window.rotate');
   }

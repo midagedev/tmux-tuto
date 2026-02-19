@@ -281,6 +281,7 @@ type MissionPreconditionItem = {
 
 const ACTION_HISTORY_COMMAND_SUGGESTIONS: Record<string, string> = {
   'sim.pane.resize': 'tmux resize-pane -R 5',
+  'sim.pane.join': 'tmux join-pane -hb -s :.3 -t :.0',
   'sim.command.prompt': 'tmux command-prompt -p "cmd"',
   'sim.choose.tree': 'tmux choose-tree -Z',
 };
