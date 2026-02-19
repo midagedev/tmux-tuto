@@ -758,7 +758,7 @@
   "select-layout 실행 기록": "select-layout execution recorded",
   "resize-pane과 swap-pane을 각각 1회 이상 실행": "Execute resize-pane and swap-pane at least once each",
   "resize-pane과 join-pane/swap-pane을 각각 1회 이상 실행": "Execute resize-pane and join-pane/swap-pane at least once each",
-  "레이아웃 선택 없이 분할만 반복해 원하는 구조를 고정하지 못함": "Only repeated splits without choosing layouts, so the target structure was not stabilized",
+  "레이아웃 선택 없이 분할만 반복해 원하는 구조를 고정하지 못함": "Repeating splits without selecting a layout keeps the target structure unstable",
   "재배치(swap) 없이 포커스 이동만 수행해 화면 구조 제어가 부족함": "Only moved focus without swap-based rearrangement, so screen structure control is insufficient",
   "재배치(join/swap) 없이 포커스 이동만 수행해 화면 구조 제어가 부족함": "Only moved focus without join/swap rearrangement, so screen structure control is insufficient",
   "레이아웃 제작 루틴 (단축키)": "Layout Craft Routine (Shortcuts)",

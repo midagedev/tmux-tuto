@@ -1397,7 +1397,7 @@
         {
           "kind": "shellHistoryText",
           "operator": "contains",
-          "value": "join-pane -s"
+          "value": "join-pane"
         }
       ],
       "hints": [
@@ -1487,7 +1487,7 @@
         {
           "kind": "shellHistoryText",
           "operator": "contains",
-          "value": "join-pane -s"
+          "value": "join-pane"
         },
         {
           "kind": "actionHistoryText",
