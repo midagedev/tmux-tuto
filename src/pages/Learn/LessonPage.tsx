@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { PagePlaceholder } from '../../components/system/PagePlaceholder';
 import { useEffect, useState } from 'react';
 import { EmptyState } from '../../components/system/EmptyState';
@@ -32,6 +33,7 @@ type LessonPageState =
     };
 
 export function LessonPage() {
+  const { t } = useTranslation();
   const { trackSlug, chapterSlug, lessonSlug } = useParams();
   const [pageState, setPageState] = useState<LessonPageState>({ status: 'loading' });
 
@@ -86,7 +88,7 @@ export function LessonPage() {
 
   if (pageState.status === 'loading') {
     return (
-      <PagePlaceholder eyebrow="Lesson" title="레슨 로딩 중" description="레슨 정보를 불러오고 있습니다." />
+      <PagePlaceholder eyebrow="Lesson" title={t('레슨 로딩 중')} description={t('레슨 정보를 불러오고 있습니다.')} />
     );
   }
 
@@ -94,13 +96,13 @@ export function LessonPage() {
     return (
       <PagePlaceholder
         eyebrow="Lesson"
-        title="레슨을 찾을 수 없습니다"
-        description="잘못된 경로이거나 콘텐츠가 변경되었습니다."
+        title={t('레슨을 찾을 수 없습니다')}
+        description={t('잘못된 경로이거나 콘텐츠가 변경되었습니다.')}
       >
-        <EmptyState title="유효한 레슨이 없습니다" description="커리큘럼 페이지에서 다시 선택해 주세요." />
+        <EmptyState title={t('유효한 레슨이 없습니다')} description={t('커리큘럼 페이지에서 다시 선택해 주세요.')} />
         <div className="inline-actions">
           <Link className="secondary-btn" to="/learn">
-            커리큘럼으로 이동
+            {t('커리큘럼으로 이동')}
           </Link>
         </div>
       </PagePlaceholder>
@@ -111,10 +113,10 @@ export function LessonPage() {
     return (
       <PagePlaceholder
         eyebrow="Lesson"
-        title="레슨 로드 실패"
-        description="콘텐츠를 읽는 중 오류가 발생했습니다."
+        title={t('레슨 로드 실패')}
+        description={t('콘텐츠를 읽는 중 오류가 발생했습니다.')}
       >
-        <EmptyState title="레슨 정보를 읽지 못했습니다" description="잠시 후 다시 시도해 주세요." />
+        <EmptyState title={t('레슨 정보를 읽지 못했습니다')} description={t('잠시 후 다시 시도해 주세요.')} />
       </PagePlaceholder>
     );
   }
@@ -126,40 +128,40 @@ export function LessonPage() {
     <PagePlaceholder
       eyebrow="Lesson"
       title={`${track.title} · ${chapter.title}`}
-      description={`${lesson.title} · 예상 ${lesson.estimatedMinutes}분`}
+      description={t('{{title}} · 예상 {{minutes}}분', { title: lesson.title, minutes: lesson.estimatedMinutes })}
     >
       <section className="lesson-section lesson-action-panel">
         <ul className="lesson-pill-row">
-          <li className="lesson-pill">예상 {lesson.estimatedMinutes}분</li>
-          <li className="lesson-pill">학습 목표 {lesson.objectives.length}개</li>
-          <li className="lesson-pill">미션 {missions.length}개</li>
+          <li className="lesson-pill">{t('예상 {{minutes}}분', { minutes: lesson.estimatedMinutes })}</li>
+          <li className="lesson-pill">{t('학습 목표 {{count}}개', { count: lesson.objectives.length })}</li>
+          <li className="lesson-pill">{t('미션 {{count}}개', { count: missions.length })}</li>
         </ul>
         <div className="inline-actions">
           <Link className="primary-btn" to={`/practice?lesson=${lesson.slug}`}>
-            시뮬레이터에서 레슨 시작
+            {t('시뮬레이터에서 레슨 시작')}
           </Link>
           <Link className="secondary-btn" to="/learn">
-            커리큘럼 목록
+            {t('커리큘럼 목록')}
           </Link>
         </div>
       </section>
 
       <section className="lesson-section lesson-brief">
-        <h2>레슨 가이드</h2>
+        <h2>{t('레슨 가이드')}</h2>
         <div className="lesson-summary">
           {lesson.overview ? (
             <p>
-              <strong>레슨 소개:</strong> {renderTextWithShortcutTooltip(lesson.overview, 'lesson-overview')}
+              <strong>{t('레슨 소개:')}</strong> {renderTextWithShortcutTooltip(lesson.overview, 'lesson-overview')}
             </p>
           ) : null}
           {lesson.goal ? (
             <p>
-              <strong>이 레슨의 목표:</strong> {renderTextWithShortcutTooltip(lesson.goal, 'lesson-goal')}
+              <strong>{t('이 레슨의 목표:')}</strong> {renderTextWithShortcutTooltip(lesson.goal, 'lesson-goal')}
             </p>
           ) : null}
         </div>
 
-        <h3>학습 목표</h3>
+        <h3>{t('학습 목표')}</h3>
         <ul className="link-list">
           {lesson.objectives.map((objective, index) => (
             <li key={`${lesson.id}-objective-${index}`}>
@@ -170,7 +172,7 @@ export function LessonPage() {
 
         {lesson.successCriteria && lesson.successCriteria.length > 0 ? (
           <details className="lesson-detail-group">
-            <summary>완료 기준 {lesson.successCriteria.length}개</summary>
+            <summary>{t('완료 기준 {{count}}개', { count: lesson.successCriteria.length })}</summary>
             <ul className="link-list">
               {lesson.successCriteria.map((item, index) => (
                 <li key={`${lesson.id}-success-${index}`}>{renderTextWithShortcutTooltip(item, `success-${index}`)}</li>
@@ -180,7 +182,7 @@ export function LessonPage() {
         ) : null}
         {lesson.failureStates && lesson.failureStates.length > 0 ? (
           <details className="lesson-detail-group">
-            <summary>부족 상태 {lesson.failureStates.length}개</summary>
+            <summary>{t('부족 상태 {{count}}개', { count: lesson.failureStates.length })}</summary>
             <ul className="link-list">
               {lesson.failureStates.map((item, index) => (
                 <li key={`${lesson.id}-failure-${index}`}>{renderTextWithShortcutTooltip(item, `failure-${index}`)}</li>
@@ -191,7 +193,7 @@ export function LessonPage() {
 
         {lessonTerms.length > 0 ? (
           <>
-            <h3>용어 빠른 설명</h3>
+            <h3>{t('용어 빠른 설명')}</h3>
             <ul className="link-list">
               {lessonTerms.map((term) => (
                 <li key={term.id}>
@@ -202,9 +204,9 @@ export function LessonPage() {
           </>
         ) : null}
 
-        <h3>미션 실행 순서 ({missions.length})</h3>
+        <h3>{t('미션 실행 순서 ({{count}})', { count: missions.length })}</h3>
         {missions.length === 0 ? (
-          <p className="muted">등록된 미션이 없습니다.</p>
+          <p className="muted">{t('등록된 미션이 없습니다.')}</p>
         ) : (
           <div className="lesson-mission-grid">
             {missions.map((mission) => {
@@ -215,7 +217,10 @@ export function LessonPage() {
                 <article key={mission.id} className="lesson-mission-card">
                   <h4>{mission.title}</h4>
                   <p className="lesson-mission-meta">
-                    난이도 {mission.difficulty} · 초기 시나리오 {mission.initialScenario}
+                    {t('난이도 {{difficulty}} · 초기 시나리오 {{scenario}}', {
+                      difficulty: mission.difficulty,
+                      scenario: mission.initialScenario,
+                    })}
                   </p>
                   {previewHints.length > 0 ? (
                     <ul className="link-list lesson-mission-hints">
@@ -226,11 +231,11 @@ export function LessonPage() {
                       ))}
                     </ul>
                   ) : (
-                    <p className="muted">힌트가 없습니다.</p>
+                    <p className="muted">{t('힌트가 없습니다.')}</p>
                   )}
                   {restHints.length > 0 ? (
                     <details className="lesson-mission-more">
-                      <summary>힌트 {restHints.length}개 더 보기</summary>
+                      <summary>{t('힌트 {{count}}개 더 보기', { count: restHints.length })}</summary>
                       <ul className="link-list lesson-mission-hints">
                         {restHints.map((hint, index) => (
                           <li key={`${mission.id}-hint-rest-${index}`}>

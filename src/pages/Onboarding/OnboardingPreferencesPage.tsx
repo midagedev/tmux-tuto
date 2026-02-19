@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { PagePlaceholder } from '../../components/system/PagePlaceholder';
 import type { KeyboardLayout } from '../../features/onboarding/onboardingStore';
 import { useOnboardingStore } from '../../features/onboarding/onboardingStore';
 import { useSimulatorStore } from '../../features/simulator/simulatorStore';
 
 export function OnboardingPreferencesPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const startedAt = useOnboardingStore((store) => store.startedAt);
   const goal = useOnboardingStore((store) => store.goal);
@@ -30,13 +32,13 @@ export function OnboardingPreferencesPage() {
 
   return (
     <PagePlaceholder
-      eyebrow="Onboarding"
-      title="입력/환경 선호 설정"
-      description="prefix와 키보드 레이아웃을 맞춰 실습 입력을 실제 환경과 가깝게 만듭니다."
+      eyebrow={t('Onboarding')}
+      title={t('입력/환경 선호 설정')}
+      description={t('prefix와 키보드 레이아웃을 맞춰 실습 입력을 실제 환경과 가깝게 만듭니다.')}
     >
       <div className="onboarding-layout">
         <section className="onboarding-card">
-          <h2>Prefix 키</h2>
+          <h2>{t('Prefix 키')}</h2>
           <div className="onboarding-control-group">
             <label className="onboarding-radio">
               <input
@@ -47,8 +49,8 @@ export function OnboardingPreferencesPage() {
                 onChange={() => setPrefixKey('C-b')}
               />
               <span>
-                <strong>Ctrl+b (권장)</strong>
-                <small>tmux 기본값</small>
+                <strong>{t('Ctrl+b (권장)')}</strong>
+                <small>{t('tmux 기본값')}</small>
               </span>
             </label>
 
@@ -62,14 +64,14 @@ export function OnboardingPreferencesPage() {
               />
               <span>
                 <strong>Ctrl+a</strong>
-                <small>GNU screen 호환 선호 시</small>
+                <small>{t('GNU screen 호환 선호 시')}</small>
               </span>
             </label>
           </div>
         </section>
 
         <section className="onboarding-card">
-          <h2>키보드 레이아웃</h2>
+          <h2>{t('키보드 레이아웃')}</h2>
           <div className="onboarding-control-group">
             <label className="onboarding-radio">
               <input
@@ -81,7 +83,7 @@ export function OnboardingPreferencesPage() {
               />
               <span>
                 <strong>Mac</strong>
-                <small>Option/Command 키 표기 기준</small>
+                <small>{t('Option/Command 키 표기 기준')}</small>
               </span>
             </label>
 
@@ -95,7 +97,7 @@ export function OnboardingPreferencesPage() {
               />
               <span>
                 <strong>Windows/Linux</strong>
-                <small>Ctrl/Alt 표기 기준</small>
+                <small>{t('Ctrl/Alt 표기 기준')}</small>
               </span>
             </label>
           </div>
@@ -112,10 +114,10 @@ export function OnboardingPreferencesPage() {
             navigate('/onboarding/first-mission');
           }}
         >
-          첫 미션 시작
+          {t('첫 미션 시작')}
         </button>
         <button type="button" className="secondary-btn" onClick={() => navigate('/onboarding/goal')}>
-          이전 단계
+          {t('이전 단계')}
         </button>
       </div>
     </PagePlaceholder>

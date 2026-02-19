@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { PagePlaceholder } from '../../components/system/PagePlaceholder';
 import type { OnboardingGoal } from '../../features/onboarding/onboardingStore';
 import { useOnboardingStore } from '../../features/onboarding/onboardingStore';
@@ -27,6 +28,7 @@ const GOAL_OPTIONS: Array<{
 ];
 
 export function OnboardingGoalPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const startedAt = useOnboardingStore((store) => store.startedAt);
   const goal = useOnboardingStore((store) => store.goal);
@@ -40,9 +42,9 @@ export function OnboardingGoalPage() {
 
   return (
     <PagePlaceholder
-      eyebrow="Onboarding"
-      title="학습 목표 선택"
-      description="당신의 현재 목적에 맞춰 추천 트랙과 플레이북을 결정합니다."
+      eyebrow={t('Onboarding')}
+      title={t('학습 목표 선택')}
+      description={t('당신의 현재 목적에 맞춰 추천 트랙과 플레이북을 결정합니다.')}
     >
       <div className="onboarding-layout">
         {GOAL_OPTIONS.map((option) => {
@@ -55,8 +57,8 @@ export function OnboardingGoalPage() {
               onClick={() => setGoal(option.value)}
               aria-pressed={selected}
             >
-              <strong>{option.title}</strong>
-              <p>{option.description}</p>
+              <strong>{t(option.title)}</strong>
+              <p>{t(option.description)}</p>
             </button>
           );
         })}
@@ -74,10 +76,10 @@ export function OnboardingGoalPage() {
           }}
           disabled={!goal}
         >
-          입력 선호 설정으로 이동
+          {t('입력 선호 설정으로 이동')}
         </button>
         <button type="button" className="secondary-btn" onClick={() => navigate('/onboarding/start')}>
-          이전 단계
+          {t('이전 단계')}
         </button>
       </div>
     </PagePlaceholder>

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { PagePlaceholder } from '../../components/system/PagePlaceholder';
 import { loadAppContent } from '../../features/curriculum/contentLoader';
 import type { AppContent } from '../../features/curriculum/contentSchema';
@@ -10,6 +11,7 @@ import {
 import { useOnboardingStore } from '../../features/onboarding/onboardingStore';
 
 export function OnboardingDonePage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [content, setContent] = useState<AppContent | null>(null);
   const goal = useOnboardingStore((store) => store.goal);
@@ -53,29 +55,33 @@ export function OnboardingDonePage() {
 
   return (
     <PagePlaceholder
-      eyebrow="Onboarding"
-      title="온보딩 완료"
-      description="첫 실습이 완료되었습니다. 지금 바로 오늘 할 1개 미션을 시작하세요."
+      eyebrow={t('Onboarding')}
+      title={t('온보딩 완료')}
+      description={t('첫 실습이 완료되었습니다. 지금 바로 오늘 할 1개 미션을 시작하세요.')}
     >
       <div className="onboarding-layout">
         <section className="onboarding-card">
-          <h2>설정 요약</h2>
+          <h2>{t('설정 요약')}</h2>
           <ul className="link-list">
-            <li>목표: {goal ? getGoalLabel(goal) : '업무용 기초 빨리 익히기'}</li>
-            <li>Prefix: {prefixKey}</li>
-            <li>키보드: {keyboardLayout === 'mac' ? 'Mac' : 'Windows/Linux'}</li>
+            <li>{t('목표: {{goal}}', { goal: goal ? getGoalLabel(goal) : t('업무용 기초 빨리 익히기') })}</li>
+            <li>{t('Prefix: {{prefixKey}}', { prefixKey })}</li>
+            <li>
+              {t('키보드: {{keyboard}}', {
+                keyboard: keyboardLayout === 'mac' ? t('Mac') : t('Windows/Linux'),
+              })}
+            </li>
           </ul>
         </section>
 
         <section className="onboarding-card">
-          <h2>개인화 추천</h2>
+          <h2>{t('개인화 추천')}</h2>
           <ul className="link-list">
             <li>
-              추천 트랙: <strong>{recommendedTrackTitle}</strong>
+              {t('추천 트랙:')} <strong>{recommendedTrackTitle}</strong>
               <p className="muted">{recommendation.trackReason}</p>
             </li>
             <li>
-              추천 플레이북: <strong>{recommendedPlaybookTitle}</strong>
+              {t('추천 플레이북:')} <strong>{recommendedPlaybookTitle}</strong>
               <p className="muted">{recommendation.playbookReason}</p>
             </li>
           </ul>
@@ -84,10 +90,10 @@ export function OnboardingDonePage() {
 
       <div className="inline-actions">
         <Link to="/learn" className="primary-btn">
-          오늘 1개 미션 시작
+          {t('오늘 1개 미션 시작')}
         </Link>
         <Link to={`/playbooks/${recommendation.playbookSlug}`} className="secondary-btn">
-          추천 플레이북 열기
+          {t('추천 플레이북 열기')}
         </Link>
       </div>
     </PagePlaceholder>
