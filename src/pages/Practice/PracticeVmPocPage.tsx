@@ -728,6 +728,7 @@ export function PracticeVmPocPage() {
   const searchProbeTimerRef = useRef<number | null>(null);
   const achievementAnnounceTimerRef = useRef<number | null>(null);
   const pendingAchievementIdsRef = useRef(new Set<string>());
+  const isSyncingUrlRef = useRef(false);
 
   const lessonParam = searchParams.get('lesson') ?? '';
   const missionParam = searchParams.get('mission') ?? '';
@@ -1196,13 +1197,27 @@ export function PracticeVmPocPage() {
   }, []);
 
   useEffect(() => {
-    if (!content || selectedLessonSlug) {
+    if (!content) {
       return;
     }
 
-    const firstLessonSlug = content.lessons[0]?.slug ?? '';
-    const fromParam = content.lessons.some((lesson) => lesson.slug === lessonParam) ? lessonParam : '';
-    setSelectedLessonSlug(fromParam || firstLessonSlug);
+    // Initial load: no lesson selected yet → apply URL param or default
+    if (!selectedLessonSlug) {
+      const firstLessonSlug = content.lessons[0]?.slug ?? '';
+      const fromParam = content.lessons.some((lesson) => lesson.slug === lessonParam) ? lessonParam : '';
+      setSelectedLessonSlug(fromParam || firstLessonSlug);
+      return;
+    }
+
+    // URL changed externally (e.g. link from cheatsheet) → follow the URL
+    if (
+      !isSyncingUrlRef.current &&
+      lessonParam &&
+      lessonParam !== selectedLessonSlug &&
+      content.lessons.some((lesson) => lesson.slug === lessonParam)
+    ) {
+      setSelectedLessonSlug(lessonParam);
+    }
   }, [content, lessonParam, selectedLessonSlug]);
 
   useEffect(() => {
@@ -1231,6 +1246,17 @@ export function PracticeVmPocPage() {
       if (selectedMissionSlug) {
         setSelectedMissionSlug('');
       }
+      return;
+    }
+
+    // URL mission param changed externally → follow the URL
+    if (
+      !isSyncingUrlRef.current &&
+      missionParam &&
+      missionParam !== selectedMissionSlug &&
+      missions.some((mission) => mission.slug === missionParam)
+    ) {
+      setSelectedMissionSlug(missionParam);
       return;
     }
 
@@ -1281,9 +1307,29 @@ export function PracticeVmPocPage() {
     }
 
     if (changed) {
+      isSyncingUrlRef.current = true;
       setSearchParams(nextParams, { replace: true });
+      // Reset after the current React commit so subsequent external URL
+      // changes are not mistakenly treated as internal syncs.
+      queueMicrotask(() => {
+        isSyncingUrlRef.current = false;
+      });
     }
   }, [searchParams, selectedLessonSlug, selectedMissionSlug, setSearchParams]);
+
+  useEffect(() => {
+    if (!selectedLessonSlug) {
+      return;
+    }
+    setClarityTag('practiceLesson', selectedLessonSlug);
+  }, [selectedLessonSlug]);
+
+  useEffect(() => {
+    if (!selectedMissionSlug) {
+      return;
+    }
+    setClarityTag('practiceMission', selectedMissionSlug);
+  }, [selectedMissionSlug]);
 
   const pushDebugLine = useCallback((line: string) => {
     const normalized = line.trimEnd();
