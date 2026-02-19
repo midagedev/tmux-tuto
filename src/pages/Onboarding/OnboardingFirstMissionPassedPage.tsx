@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { PagePlaceholder } from '../../components/system/PagePlaceholder';
+import { trackClarityEvent } from '../../features/analytics';
 import { useOnboardingStore } from '../../features/onboarding/onboardingStore';
 
 export function OnboardingFirstMissionPassedPage() {
@@ -38,10 +39,22 @@ export function OnboardingFirstMissionPassedPage() {
       </div>
 
       <div className="inline-actions">
-        <Link to="/onboarding/done" className="primary-btn">
+        <Link
+          to="/onboarding/done"
+          className="primary-btn"
+          onClick={() => {
+            trackClarityEvent('onboarding_first_mission_passed_next_clicked');
+          }}
+        >
           {t('온보딩 완료 화면으로')}
         </Link>
-        <Link to="/practice" className="secondary-btn">
+        <Link
+          to="/practice"
+          className="secondary-btn"
+          onClick={() => {
+            trackClarityEvent('onboarding_first_mission_passed_practice_clicked');
+          }}
+        >
           {t('연습 계속하기')}
         </Link>
       </div>

@@ -91,10 +91,22 @@ export function OnboardingDonePage() {
       </div>
 
       <div className="inline-actions">
-        <Link to="/learn" className="primary-btn">
+        <Link
+          to="/learn"
+          className="primary-btn"
+          onClick={() => {
+            trackClarityEvent('onboarding_done_start_mission_clicked');
+          }}
+        >
           {t('오늘 1개 미션 시작')}
         </Link>
-        <Link to={`/playbooks/${recommendation.playbookSlug}`} className="secondary-btn">
+        <Link
+          to={`/playbooks/${recommendation.playbookSlug}`}
+          className="secondary-btn"
+          onClick={() => {
+            trackClarityEvent('onboarding_done_playbook_clicked');
+          }}
+        >
           {t('추천 플레이북 열기')}
         </Link>
       </div>
