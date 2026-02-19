@@ -10,6 +10,7 @@ const OUT_FILES = {
   ja: path.join(OUT_DIR, 'ja.json'),
   zh: path.join(OUT_DIR, 'zh.json'),
 };
+const CONTENT_FILE = path.join(SRC_DIR, 'content', 'v1', 'content.json');
 
 const TARGET_EXTENSIONS = new Set(['.ts', '.tsx']);
 
@@ -77,6 +78,40 @@ function extractQuotedLiterals(source) {
   return hits;
 }
 
+function extractTFunctionKeys(source) {
+  const hits = new Set();
+  const regex = /\bt\(\s*'([^']*[가-힣][^']*)'\s*(?:,|\))/g;
+
+  for (const match of source.matchAll(regex)) {
+    const key = normalizeSentence(match[1] ?? '');
+    if (!key) {
+      continue;
+    }
+    hits.add(key);
+  }
+
+  return hits;
+}
+
+function collectKoreanStrings(value, out) {
+  if (typeof value === 'string') {
+    const normalized = normalizeSentence(value);
+    if (normalized && hasKorean(normalized)) {
+      out.add(normalized);
+    }
+    return;
+  }
+
+  if (Array.isArray(value)) {
+    value.forEach((item) => collectKoreanStrings(item, out));
+    return;
+  }
+
+  if (value && typeof value === 'object') {
+    Object.values(value).forEach((item) => collectKoreanStrings(item, out));
+  }
+}
+
 async function run() {
   const files = await walk(SRC_DIR);
   const sentences = new Set();
@@ -85,9 +120,18 @@ async function run() {
     files.map(async (filePath) => {
       const source = await fs.readFile(filePath, 'utf8');
       const found = extractQuotedLiterals(source);
+      const tKeys = extractTFunctionKeys(source);
       found.forEach((sentence) => sentences.add(sentence));
+      tKeys.forEach((sentence) => sentences.add(sentence));
     }),
   );
+
+  try {
+    const content = JSON.parse(await fs.readFile(CONTENT_FILE, 'utf8'));
+    collectKoreanStrings(content, sentences);
+  } catch {
+    // Ignore content parse/read failures and continue extraction from source files.
+  }
 
   const sorted = Array.from(sentences).sort((a, b) => a.localeCompare(b, 'ko'));
   const ko = Object.fromEntries(sorted.map((sentence) => [sentence, sentence]));
