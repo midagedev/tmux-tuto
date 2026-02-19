@@ -110,8 +110,16 @@ async function waitForProbeMetricsReady(page: Page) {
 }
 
 async function runCommandAndProbe(page: Page, command: string) {
+  const debugLineCountBefore = (await getVmBridgeStatus(page)).debugLineCount;
   await sendVmCommand(page, command);
-  await page.waitForTimeout(120);
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    await page.waitForTimeout(120);
+    await triggerProbeFromTerminal(page);
+
+    if ((await getVmBridgeStatus(page)).debugLineCount > debugLineCountBefore) {
+      return;
+    }
+  }
 }
 
 async function resetProgress(page: Page) {
@@ -134,7 +142,10 @@ async function selectLessonByTitle(page: Page, title: string) {
 async function selectMissionByTitle(page: Page, title: string) {
   const row = page.locator('.vm-mission-row').filter({ hasText: title }).first();
   await expect(row).toBeVisible({ timeout: RULE_TIMEOUT_MS });
-  await row.click();
+  const classes = (await row.getAttribute('class')) ?? '';
+  if (!classes.includes('is-active')) {
+    await row.click({ force: true });
+  }
   await expect(row).toHaveClass(/is-active/, { timeout: RULE_TIMEOUT_MS });
 }
 
@@ -146,16 +157,18 @@ async function isMissionCompleted(page: Page, missionSlug: string) {
 }
 
 async function ensureSessionCountAtLeast(page: Page, minCount: number) {
-  const current = (await getVmBridgeStatus(page)).metrics.sessionCount ?? 0;
-  if (current >= minCount) {
-    return;
-  }
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const current = (await getVmBridgeStatus(page)).metrics.sessionCount ?? 0;
+    if (current >= minCount) {
+      return;
+    }
 
-  if (minCount >= 1) {
-    await runCommandAndProbe(page, 'tmux has-session -t lesson 2>/dev/null || tmux new-session -d -s lesson');
-  }
-  if (minCount >= 2) {
-    await runCommandAndProbe(page, 'tmux has-session -t lesson2 2>/dev/null || tmux new-session -d -s lesson2');
+    if (minCount >= 1) {
+      await runCommandAndProbe(page, 'tmux has-session -t lesson 2>/dev/null || tmux new-session -d -s lesson');
+    }
+    if (minCount >= 2) {
+      await runCommandAndProbe(page, 'tmux has-session -t lesson2 2>/dev/null || tmux new-session -d -s lesson2');
+    }
   }
 
   await expect
