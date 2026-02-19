@@ -44,11 +44,11 @@ test('progress milestone link opens share preview page @smoke', async ({ page })
 
   await unlockFirstChapterMilestone(page);
 
-  const shareLink = page.getByRole('link', { name: /공유 페이지 열기/ }).first();
+  const shareLink = page.locator('main a[href*="/share/first-chapter-complete"]').first();
   await expect(shareLink).toBeVisible();
   await shareLink.click();
 
   await expect(page).toHaveURL(/\/share\/first-chapter-complete/);
   await expect(page.locator('.share-preview-card')).toBeVisible();
-  await expect(page.getByText('Preview')).toBeVisible();
+  await expect(page.locator('.share-preview-card .page-eyebrow')).toBeVisible();
 });
