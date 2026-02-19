@@ -68,9 +68,9 @@ export function HomePage() {
   const changelogItems = [
     {
       date: '2026-02-19',
-      title: t('레이아웃 제작 레슨 추가'),
-      summary: t('pane 리사이즈/재배치 중심의 layout-craft 레슨 2종을 추가했습니다.'),
-      to: '/practice?lesson=layout-craft',
+      title: t('레이아웃/워크스페이스 병합 레슨 추가'),
+      summary: t('pane 리사이즈/재배치 레슨 2종과 윈도우/세션 병합 중심 workspace-compose 레슨 2종을 추가했습니다.'),
+      to: '/practice?lesson=workspace-compose',
       actionLabel: t('실습 열기'),
     },
     {

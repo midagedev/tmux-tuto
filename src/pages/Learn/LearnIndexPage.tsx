@@ -24,6 +24,8 @@ const LEARNING_PATH_ORDER = [
   'split-resize-shortcuts',
   'layout-craft',
   'layout-craft-shortcuts',
+  'workspace-compose',
+  'workspace-compose-shortcuts',
   'pane-focus-flow',
   'pane-focus-flow-shortcuts',
   'copy-search',
