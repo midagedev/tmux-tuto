@@ -1,4 +1,4 @@
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
-  Content-Security-Policy: default-src 'self'; img-src 'self' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' blob: https://static.cloudflareinsights.com https://www.clarity.ms; worker-src 'self' blob:; child-src 'self' blob:; style-src 'self' 'unsafe-inline'; connect-src 'self' https://cloudflareinsights.com https://www.google-analytics.com https://*.clarity.ms;
+  Content-Security-Policy: default-src 'self'; img-src 'self' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' blob: https://static.cloudflareinsights.com https://www.clarity.ms https://scripts.clarity.ms; worker-src 'self' blob:; child-src 'self' blob:; style-src 'self' 'unsafe-inline'; connect-src 'self' https://cloudflareinsights.com https://www.google-analytics.com https://*.clarity.ms;
