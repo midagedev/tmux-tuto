@@ -777,5 +777,7 @@
   "swap은 `tmux swap-pane -s :.0 -t :.1`처럼 명령으로 실행하고, 단축키 기록은 `Ctrl+b` + `%` 또는 `Ctrl+b` + `H/J/K/L` 중 하나를 1회 수행해 남기세요.": "Run swap via command (for example `tmux swap-pane -s :.0 -t :.1`), and leave shortcut history by doing one of `Ctrl+b` + `%` or `Ctrl+b` + `H/J/K/L` once.",
   "서비스 오픈": "Launch",
   "2026-02-18 저녁에 tmux-tuto를 첫 공개했습니다.": "tmux-tuto was first launched on the evening of 2026-02-18.",
-  "zoom 토글 누적: {{count}}": "zoom toggle accumulation: {{count}}"
+  "zoom 토글 누적: {{count}}": "zoom toggle accumulation: {{count}}",
+  "레이아웃 제작 레슨 추가": "Added layout-craft lessons",
+  "pane 리사이즈/재배치 중심의 layout-craft 레슨 2종을 추가했습니다.": "Added two layout-craft lessons focused on pane resize and rearrangement."
 }

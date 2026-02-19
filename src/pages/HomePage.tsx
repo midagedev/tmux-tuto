@@ -67,6 +67,13 @@ export function HomePage() {
   ] as const;
   const changelogItems = [
     {
+      date: '2026-02-19',
+      title: t('레이아웃 제작 레슨 추가'),
+      summary: t('pane 리사이즈/재배치 중심의 layout-craft 레슨 2종을 추가했습니다.'),
+      to: '/practice?lesson=layout-craft',
+      actionLabel: t('실습 열기'),
+    },
+    {
       date: '2026-02-18',
       title: t('서비스 오픈'),
       summary: t('2026-02-18 저녁에 tmux-tuto를 첫 공개했습니다.'),
