@@ -22,6 +22,8 @@ const LEARNING_PATH_ORDER = [
   'attach-detach-shortcuts',
   'split-resize',
   'split-resize-shortcuts',
+  'layout-craft',
+  'layout-craft-shortcuts',
   'pane-focus-flow',
   'pane-focus-flow-shortcuts',
   'copy-search',
