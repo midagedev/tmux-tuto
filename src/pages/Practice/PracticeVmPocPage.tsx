@@ -47,6 +47,7 @@ import {
   type LessonCompletionStatus,
   type LessonFilter,
 } from './lessonProgress';
+import { resolveInitialLessonSlugFromQuery } from './urlState';
 
 type VmStatus = 'idle' | 'booting' | 'running' | 'stopped' | 'error';
 
@@ -1200,13 +1201,11 @@ export function PracticeVmPocPage() {
       return;
     }
 
-    const firstLessonSlug = content.lessons[0]?.slug ?? '';
-    const fromParam = content.lessons.some((lesson) => lesson.slug === lessonParam) ? lessonParam : '';
-    setSelectedLessonSlug(fromParam || firstLessonSlug);
-  }, [content, lessonParam, selectedLessonSlug]);
+    setSelectedLessonSlug(resolveInitialLessonSlugFromQuery(content, lessonParam, missionParam));
+  }, [content, lessonParam, missionParam, selectedLessonSlug]);
 
   useEffect(() => {
-    if (!content || filteredLessonRows.length === 0) {
+    if (!content || !selectedLessonSlug || filteredLessonRows.length === 0) {
       return;
     }
 
@@ -1508,6 +1507,7 @@ export function PracticeVmPocPage() {
       const lessonNowCompleted =
         lessonMissions.length > 0 && lessonMissions.every((mission) => completedSetAfter.has(mission.slug));
       const lessonJustCompleted = !lessonWasCompleted && lessonNowCompleted;
+      const nextMissionAfterCompletion = lessonMissions.find((mission) => !completedSetAfter.has(mission.slug)) ?? null;
 
       if (lessonJustCompleted) {
         trackClarityEvent('practice_lesson_completed');
@@ -1540,6 +1540,14 @@ export function PracticeVmPocPage() {
       if (newlyUnlocked.length > 0) {
         scheduleAchievementAnnouncements(newlyUnlocked);
       }
+
+      if (!lessonJustCompleted && nextMissionAfterCompletion) {
+        setSelectedMissionSlug(nextMissionAfterCompletion.slug);
+        startMissionSession({
+          missionSlug: nextMissionAfterCompletion.slug,
+          lessonSlug: selectedLesson.slug,
+        });
+      }
     },
     [
       completedMissionSlugs,
@@ -1550,6 +1558,7 @@ export function PracticeVmPocPage() {
       scheduleAchievementAnnouncements,
       selectedLesson,
       selectedMission,
+      startMissionSession,
       t,
       unlockedAchievements,
     ],
