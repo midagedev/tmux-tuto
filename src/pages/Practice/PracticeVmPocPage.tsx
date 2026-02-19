@@ -727,6 +727,7 @@ export function PracticeVmPocPage() {
   const shortcutTelemetryStateRef = useRef(createTmuxShortcutTelemetryState());
   const searchProbeTimerRef = useRef<number | null>(null);
   const achievementAnnounceTimerRef = useRef<number | null>(null);
+  const pendingAchievementIdsRef = useRef(new Set<string>());
 
   const lessonParam = searchParams.get('lesson') ?? '';
   const missionParam = searchParams.get('mission') ?? '';
@@ -941,6 +942,7 @@ export function PracticeVmPocPage() {
         lessonSlug: selectedLessonSlugRef.current,
       });
       setMobileWorkbenchView('mission');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     },
     [startMissionSession],
   );
@@ -1037,6 +1039,38 @@ export function PracticeVmPocPage() {
     [enqueueCelebration, t],
   );
 
+  const scheduleAchievementAnnouncements = useCallback(
+    (achievementIds: string[]) => {
+      if (achievementIds.length === 0) {
+        return;
+      }
+
+      achievementIds.forEach((achievementId) => {
+        pendingAchievementIdsRef.current.add(achievementId);
+      });
+
+      if (achievementAnnounceTimerRef.current !== null) {
+        return;
+      }
+
+      achievementAnnounceTimerRef.current = window.setTimeout(() => {
+        achievementAnnounceTimerRef.current = null;
+        const pendingIds = Array.from(pendingAchievementIdsRef.current);
+        pendingAchievementIdsRef.current.clear();
+        announceAchievements(pendingIds);
+      }, ACHIEVEMENT_CELEBRATION_DELAY_MS);
+    },
+    [announceAchievements],
+  );
+
+  const clearScheduledAchievementAnnouncements = useCallback(() => {
+    if (achievementAnnounceTimerRef.current !== null) {
+      window.clearTimeout(achievementAnnounceTimerRef.current);
+      achievementAnnounceTimerRef.current = null;
+    }
+    pendingAchievementIdsRef.current.clear();
+  }, []);
+
   const celebrationAchievement = useMemo(() => {
     if (!celebration?.achievementId) {
       return null;
@@ -1069,15 +1103,8 @@ export function PracticeVmPocPage() {
   }, [selectedLessonSlug]);
 
   useEffect(() => {
-    return () => {
-      if (achievementAnnounceTimerRef.current === null) {
-        return;
-      }
-
-      window.clearTimeout(achievementAnnounceTimerRef.current);
-      achievementAnnounceTimerRef.current = null;
-    };
-  }, []);
+    return clearScheduledAchievementAnnouncements;
+  }, [clearScheduledAchievementAnnouncements]);
 
   useEffect(() => {
     recordTmuxActivityRef.current = recordTmuxActivity;
@@ -1348,11 +1375,11 @@ export function PracticeVmPocPage() {
           lessonSlug: selectedLessonSlugRef.current,
         });
         if (unlocked.length > 0) {
-          announceAchievements(unlocked);
+          scheduleAchievementAnnouncements(unlocked);
         }
       }
     },
-    [announceAchievements],
+    [scheduleAchievementAnnouncements, t],
   );
 
   const sendInternalCommand = useCallback((command: string) => {
@@ -1413,7 +1440,7 @@ export function PracticeVmPocPage() {
           lessonSlug: selectedLessonSlugRef.current,
         });
         if (unlocked.length > 0) {
-          announceAchievements(unlocked);
+          scheduleAchievementAnnouncements(unlocked);
         }
       }
 
@@ -1434,7 +1461,7 @@ export function PracticeVmPocPage() {
         requestSearchProbe();
       }
     },
-    [announceAchievements, requestSearchProbe],
+    [requestSearchProbe, scheduleAchievementAnnouncements],
   );
 
   const completeSelectedMission = useCallback(
@@ -1497,23 +1524,16 @@ export function PracticeVmPocPage() {
         .unlockedAchievements.filter((achievementId) => !previousUnlockedSet.has(achievementId));
 
       if (newlyUnlocked.length > 0) {
-        if (achievementAnnounceTimerRef.current !== null) {
-          window.clearTimeout(achievementAnnounceTimerRef.current);
-        }
-
-        achievementAnnounceTimerRef.current = window.setTimeout(() => {
-          announceAchievements(newlyUnlocked);
-          achievementAnnounceTimerRef.current = null;
-        }, ACHIEVEMENT_CELEBRATION_DELAY_MS);
+        scheduleAchievementAnnouncements(newlyUnlocked);
       }
     },
     [
-      announceAchievements,
       completedMissionSlugs,
       content,
       enqueueCelebration,
       lessonMissions,
       recordMissionPass,
+      scheduleAchievementAnnouncements,
       selectedLesson,
       selectedMission,
       t,
@@ -1676,10 +1696,7 @@ export function PracticeVmPocPage() {
       window.clearTimeout(searchProbeTimerRef.current);
       searchProbeTimerRef.current = null;
     }
-    if (achievementAnnounceTimerRef.current !== null) {
-      window.clearTimeout(achievementAnnounceTimerRef.current);
-      achievementAnnounceTimerRef.current = null;
-    }
+    clearScheduledAchievementAnnouncements();
 
     const terminal = new Terminal({
       cursorBlink: true,
@@ -1981,12 +1998,14 @@ export function PracticeVmPocPage() {
     };
   }, [
     captureInteractiveCommandInput,
+    clearScheduledAchievementAnnouncements,
     contentState.status,
     disableWarmStart,
     pushDebugLine,
     registerCommand,
     requestSearchProbe,
     sendInternalCommand,
+    t,
     updateMetricByProbe,
     vmEpoch,
   ]);
@@ -2360,6 +2379,44 @@ export function PracticeVmPocPage() {
                       </button>
                     ) : null}
                   </div>
+                ) : null}
+                {selectedMission && selectedMissionCompleted ? (
+                  <section className="vm-next-action-card" aria-live="polite">
+                    <p className="vm-next-action-eyebrow">{t('추천 다음 단계')}</p>
+                    {nextIncompleteMission ? (
+                      <>
+                        <h2>{t('다음 미션 진행')}</h2>
+                        <p>{t('방금 완료한 흐름을 이어서 바로 진행할 수 있습니다.')}</p>
+                        <button
+                          type="button"
+                          className="primary-btn vm-next-action-btn"
+                          onClick={() => selectMissionForAction(nextIncompleteMission.slug)}
+                        >
+                          {t('다음 미션')}
+                        </button>
+                        <p className="vm-next-action-meta">{t('다음: {{title}}', { title: nextIncompleteMission.title })}</p>
+                      </>
+                    ) : null}
+                    {!nextIncompleteMission && lessonCompleted && nextLesson ? (
+                      <>
+                        <h2>{t('다음 레슨 진행')}</h2>
+                        <p>{t('현재 레슨을 모두 완료했습니다. 바로 다음 레슨으로 이동하세요.')}</p>
+                        <button type="button" className="primary-btn vm-next-action-btn" onClick={selectNextLessonForAction}>
+                          {t('다음 레슨')}
+                        </button>
+                        <p className="vm-next-action-meta">{t('다음: {{title}}', { title: nextLesson.title })}</p>
+                      </>
+                    ) : null}
+                    {!nextIncompleteMission && lessonCompleted && !nextLesson ? (
+                      <>
+                        <h2>{t('학습 경로 완료')}</h2>
+                        <p>{t('모든 레슨을 마쳤습니다. 완료 현황에서 진행률과 업적을 확인하세요.')}</p>
+                        <Link className="primary-btn vm-next-action-btn" to="/progress">
+                          {t('완료 현황')}
+                        </Link>
+                      </>
+                    ) : null}
+                  </section>
                 ) : null}
               </article>
             ) : null}
