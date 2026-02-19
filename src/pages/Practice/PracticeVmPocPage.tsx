@@ -97,6 +97,7 @@ const ZSTD_MAGIC_LE = 0xfd2fb528;
 const DEFAULT_TERMINAL_COLS = 80;
 const DEFAULT_TERMINAL_ROWS = 24;
 const BANNER_TRIGGER_COMMAND = '/usr/bin/tmux-tuto-banner';
+const ACHIEVEMENT_CELEBRATION_DELAY_MS = 1500;
 const TERMINAL_GEOMETRY_SYNC_COMMAND = buildTerminalGeometrySyncCommand(
   DEFAULT_TERMINAL_COLS,
   DEFAULT_TERMINAL_ROWS,
@@ -726,6 +727,7 @@ export function PracticeVmPocPage() {
   const metricsRef = useRef<VmMetricState>(createInitialMetrics());
   const shortcutTelemetryStateRef = useRef(createTmuxShortcutTelemetryState());
   const searchProbeTimerRef = useRef<number | null>(null);
+  const achievementAnnounceTimerRef = useRef<number | null>(null);
 
   const lessonParam = searchParams.get('lesson') ?? '';
   const missionParam = searchParams.get('mission') ?? '';
@@ -1078,6 +1080,17 @@ export function PracticeVmPocPage() {
   useEffect(() => {
     selectedLessonSlugRef.current = selectedLessonSlug;
   }, [selectedLessonSlug]);
+
+  useEffect(() => {
+    return () => {
+      if (achievementAnnounceTimerRef.current === null) {
+        return;
+      }
+
+      window.clearTimeout(achievementAnnounceTimerRef.current);
+      achievementAnnounceTimerRef.current = null;
+    };
+  }, []);
 
   useEffect(() => {
     recordTmuxActivityRef.current = recordTmuxActivity;
@@ -1489,7 +1502,14 @@ export function PracticeVmPocPage() {
         .unlockedAchievements.filter((achievementId) => !previousUnlockedSet.has(achievementId));
 
       if (newlyUnlocked.length > 0) {
-        announceAchievements(newlyUnlocked);
+        if (achievementAnnounceTimerRef.current !== null) {
+          window.clearTimeout(achievementAnnounceTimerRef.current);
+        }
+
+        achievementAnnounceTimerRef.current = window.setTimeout(() => {
+          announceAchievements(newlyUnlocked);
+          achievementAnnounceTimerRef.current = null;
+        }, ACHIEVEMENT_CELEBRATION_DELAY_MS);
       }
     },
     [
@@ -1659,6 +1679,10 @@ export function PracticeVmPocPage() {
     if (searchProbeTimerRef.current !== null) {
       window.clearTimeout(searchProbeTimerRef.current);
       searchProbeTimerRef.current = null;
+    }
+    if (achievementAnnounceTimerRef.current !== null) {
+      window.clearTimeout(achievementAnnounceTimerRef.current);
+      achievementAnnounceTimerRef.current = null;
     }
 
     const terminal = new Terminal({
