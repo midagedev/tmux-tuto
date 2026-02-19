@@ -12,15 +12,8 @@ import { loadAppContent } from '../../features/curriculum/contentLoader';
 import type { AppContent, AppMission } from '../../features/curriculum/contentSchema';
 import { resolveLessonTerms } from '../../features/curriculum/lessonTerms';
 import { renderTextWithShortcutTooltip } from '../../features/curriculum/shortcutTooltip';
-import {
-  advanceCompletionFeedback,
-  enqueueCompletionFeedback,
-  type CompletionFeedbackItem,
-  type CompletionFeedbackQueueState,
-} from '../../features/progress/completionFeedbackQueue';
 import { getAchievementDefinition } from '../../features/progress';
 import { useProgressStore } from '../../features/progress/progressStore';
-import { buildAbsoluteAchievementShareUrl, buildAchievementChallengeShareText, buildTwitterIntentUrl } from '../../features/sharing';
 import {
   evaluateMissionWithVmSnapshot,
   parseProbeMetricFromLine,
@@ -65,8 +58,12 @@ type VmMetricState = {
   searchMatchFound: boolean | null;
 };
 
-type CelebrationState = CompletionFeedbackItem;
-type CelebrationQueueState = CompletionFeedbackQueueState;
+type AchievementFeedEntry = {
+  id: string;
+  title: string;
+  description: string;
+  unlockedAt: string;
+};
 
 type VmInitialState = {
   buffer: ArrayBuffer;
@@ -101,7 +98,8 @@ const ZSTD_MAGIC_LE = 0xfd2fb528;
 const DEFAULT_TERMINAL_COLS = 80;
 const DEFAULT_TERMINAL_ROWS = 24;
 const BANNER_TRIGGER_COMMAND = '/usr/bin/tmux-tuto-banner';
-const ACHIEVEMENT_CELEBRATION_DELAY_MS = 1500;
+const ACHIEVEMENT_FEED_BATCH_DELAY_MS = 400;
+const MAX_ACHIEVEMENT_FEED_ITEMS = 8;
 const TERMINAL_GEOMETRY_SYNC_COMMAND = buildTerminalGeometrySyncCommand(
   DEFAULT_TERMINAL_COLS,
   DEFAULT_TERMINAL_ROWS,
@@ -657,17 +655,16 @@ function getLessonStatusClass(status: LessonCompletionStatus) {
   }
 }
 
-function getCelebrationKindLabel(kind: CelebrationState['kind']) {
-  switch (kind) {
-    case 'mission':
-      return 'Mission Complete';
-    case 'lesson':
-      return 'Lesson Complete';
-    case 'achievement':
-      return 'Achievement';
-    default:
-      return 'Update';
+function formatUnlockedTime(iso: string) {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) {
+    return '-';
   }
+
+  return date.toLocaleTimeString(undefined, {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 }
 
 export function PracticeVmPocPage() {
@@ -691,17 +688,14 @@ export function PracticeVmPocPage() {
   const [actionHistory, setActionHistory] = useState<string[]>([]);
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [metrics, setMetrics] = useState<VmMetricState>(createInitialMetrics());
-  const [celebrationState, setCelebrationState] = useState<CelebrationQueueState>({
-    active: null,
-    queue: [],
-  });
+  const [achievementFeed, setAchievementFeed] = useState<AchievementFeedEntry[]>([]);
+  const [achievementUnreadCount, setAchievementUnreadCount] = useState(0);
+  const [achievementLiveMessage, setAchievementLiveMessage] = useState('');
   const [autoProbe, setAutoProbe] = useState(true);
   const [lessonFilter, setLessonFilter] = useState<LessonFilter>('all');
   const [mobileWorkbenchView, setMobileWorkbenchView] = useState<'mission' | 'terminal'>('terminal');
 
   const completedMissionSlugs = useProgressStore((store) => store.completedMissionSlugs);
-  const level = useProgressStore((store) => store.level);
-  const xp = useProgressStore((store) => store.xp);
   const unlockedAchievements = useProgressStore((store) => store.unlockedAchievements);
   const recordMissionPass = useProgressStore((store) => store.recordMissionPass);
   const recordTmuxActivity = useProgressStore((store) => store.recordTmuxActivity);
@@ -710,7 +704,6 @@ export function PracticeVmPocPage() {
   const terminalHostRef = useRef<HTMLDivElement | null>(null);
   const terminalRef = useRef<Terminal | null>(null);
   const emulatorRef = useRef<V86 | null>(null);
-  const celebrationCloseButtonRef = useRef<HTMLButtonElement | null>(null);
   const inputLineBufferRef = useRef('');
   const inputEscapeSequenceRef = useRef(false);
   const outputEscapeSequenceRef = useRef(false);
@@ -718,7 +711,7 @@ export function PracticeVmPocPage() {
   const probeLineBufferRef = useRef('');
   const autoProbeRef = useRef(autoProbe);
   const celebratedMissionSetRef = useRef(new Set<string>());
-  const seenCelebrationKeysRef = useRef(new Set<string>());
+  const seenAchievementIdsRef = useRef(new Set<string>());
   const lastEmulatorOptionsRef = useRef<V86Options | null>(null);
   const vmInternalBridgeReadyRef = useRef(false);
   const vmWarmBannerPendingRef = useRef(false);
@@ -848,14 +841,33 @@ export function PracticeVmPocPage() {
     return lessonMissions.filter((mission) => missionStatusMap.get(mission.slug)?.status === 'manual');
   }, [lessonMissions, missionStatusMap]);
 
-  const selectedMissionOrder = useMemo(() => {
+  const selectedMissionIndex = useMemo(() => {
     if (!selectedMission) {
+      return -1;
+    }
+    return lessonMissions.findIndex((mission) => mission.slug === selectedMission.slug);
+  }, [lessonMissions, selectedMission]);
+
+  const selectedMissionOrder = selectedMissionIndex >= 0 ? selectedMissionIndex + 1 : null;
+
+  const previousMissionInLesson = selectedMissionIndex > 0 ? lessonMissions[selectedMissionIndex - 1] : null;
+  const nextMissionInLesson =
+    selectedMissionIndex >= 0 && selectedMissionIndex < lessonMissions.length - 1
+      ? lessonMissions[selectedMissionIndex + 1]
+      : null;
+
+  const previousLesson = useMemo(() => {
+    if (!content || !selectedLesson) {
       return null;
     }
 
-    const index = lessonMissions.findIndex((mission) => mission.slug === selectedMission.slug);
-    return index === -1 ? null : index + 1;
-  }, [lessonMissions, selectedMission]);
+    const index = content.lessons.findIndex((lesson) => lesson.slug === selectedLesson.slug);
+    if (index <= 0) {
+      return null;
+    }
+
+    return content.lessons[index - 1] ?? null;
+  }, [content, selectedLesson]);
 
   const nextLesson = useMemo(() => {
     if (!content || !selectedLesson) {
@@ -967,21 +979,27 @@ export function PracticeVmPocPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [completedMissionSlugs, content, nextLesson, startMissionSession]);
 
-  const celebration = celebrationState.active;
-  const celebrationQueueCount = celebrationState.queue.length;
-  const isAchievementCelebration = celebration?.kind === 'achievement';
-
-  const enqueueCelebration = useCallback((nextCelebration: CelebrationState) => {
-    if (seenCelebrationKeysRef.current.has(nextCelebration.key)) {
+  const selectPreviousLessonForAction = useCallback(() => {
+    if (!content || !previousLesson) {
       return;
     }
-    seenCelebrationKeysRef.current.add(nextCelebration.key);
 
-    setCelebrationState((previous) => enqueueCompletionFeedback(previous, nextCelebration));
-  }, []);
+    setSelectedLessonSlug(previousLesson.slug);
+    const previousLessonMissions = content.missions.filter((mission) => mission.lessonSlug === previousLesson.slug);
+    const nextMissionSlug = resolveDefaultMissionSlugForLesson(previousLessonMissions, completedMissionSlugs);
+    setSelectedMissionSlug(nextMissionSlug);
+    if (nextMissionSlug) {
+      startMissionSession({
+        missionSlug: nextMissionSlug,
+        lessonSlug: previousLesson.slug,
+      });
+    }
+    setMobileWorkbenchView('mission');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [completedMissionSlugs, content, previousLesson, startMissionSession]);
 
-  const advanceCelebration = useCallback(() => {
-    setCelebrationState((previous) => advanceCompletionFeedback(previous));
+  const markAchievementFeedAsRead = useCallback(() => {
+    setAchievementUnreadCount(0);
   }, []);
 
   const announceAchievements = useCallback(
@@ -998,46 +1016,44 @@ export function PracticeVmPocPage() {
       }
 
       const unseenDefinitions = definitions.filter(
-        (definition) => !seenCelebrationKeysRef.current.has(`achievement:${definition.id}`),
+        (definition) => !seenAchievementIdsRef.current.has(definition.id),
       );
       if (unseenDefinitions.length === 0) {
         return;
       }
 
+      unseenDefinitions.forEach((definition) => {
+        seenAchievementIdsRef.current.add(definition.id);
+      });
+
       setClarityTag('achievementUnlockedCount', String(unseenDefinitions.length));
       trackClarityEvent('practice_achievement_unlocked');
 
-      if (unseenDefinitions.length === 1) {
-        const definition = unseenDefinitions[0];
-        enqueueCelebration({
-          key: `achievement:${definition.id}`,
-          kind: 'achievement',
-          message: t('업적 달성: {{title}}', { title: definition.title }),
-          detail: definition.description,
-          achievementId: definition.id,
+      const nowIso = new Date().toISOString();
+      setAchievementFeed((previous) => {
+        const nextFeed = [...previous];
+        unseenDefinitions.forEach((definition) => {
+          const existingIndex = nextFeed.findIndex((entry) => entry.id === definition.id);
+          if (existingIndex !== -1) {
+            nextFeed.splice(existingIndex, 1);
+          }
+          nextFeed.unshift({
+            id: definition.id,
+            title: definition.title,
+            description: definition.description,
+            unlockedAt: nowIso,
+          });
         });
-        return;
-      }
-
-      const batchIds = unseenDefinitions.map((definition) => definition.id);
-      batchIds.forEach((id) => {
-        seenCelebrationKeysRef.current.add(`achievement:${id}`);
+        return nextFeed.slice(0, MAX_ACHIEVEMENT_FEED_ITEMS);
       });
-
-      const preview = unseenDefinitions
-        .slice(0, 3)
-        .map((definition) => definition.title)
-        .join(' · ');
-      const hiddenCount = unseenDefinitions.length - 3;
-
-      enqueueCelebration({
-        key: `achievement-batch:${batchIds.join(',')}`,
-        kind: 'achievement',
-        message: t('업적 {{count}}개 달성', { count: unseenDefinitions.length }),
-        detail: hiddenCount > 0 ? t('{{preview}} 외 {{hiddenCount}}개', { preview, hiddenCount }) : preview,
-      });
+      setAchievementUnreadCount((count) => count + unseenDefinitions.length);
+      setAchievementLiveMessage(
+        unseenDefinitions.length === 1
+          ? t('업적 달성: {{title}}', { title: unseenDefinitions[0].title })
+          : t('업적 {{count}}개 달성', { count: unseenDefinitions.length }),
+      );
     },
-    [enqueueCelebration, t],
+    [t],
   );
 
   const scheduleAchievementAnnouncements = useCallback(
@@ -1059,7 +1075,7 @@ export function PracticeVmPocPage() {
         const pendingIds = Array.from(pendingAchievementIdsRef.current);
         pendingAchievementIdsRef.current.clear();
         announceAchievements(pendingIds);
-      }, ACHIEVEMENT_CELEBRATION_DELAY_MS);
+      }, ACHIEVEMENT_FEED_BATCH_DELAY_MS);
     },
     [announceAchievements],
   );
@@ -1071,29 +1087,6 @@ export function PracticeVmPocPage() {
     }
     pendingAchievementIdsRef.current.clear();
   }, []);
-
-  const celebrationAchievement = useMemo(() => {
-    if (!celebration?.achievementId) {
-      return null;
-    }
-
-    return getAchievementDefinition(celebration.achievementId);
-  }, [celebration?.achievementId]);
-
-  const celebrationShareHref = useMemo(() => {
-    if (!celebrationAchievement) {
-      return null;
-    }
-
-    const shareUrl = buildAbsoluteAchievementShareUrl(celebrationAchievement.id, {
-      level,
-      xp,
-      date: new Date().toISOString().slice(0, 10),
-      badge: celebrationAchievement.id,
-    });
-    const shareText = buildAchievementChallengeShareText(celebrationAchievement.shareText, celebrationAchievement.id);
-    return buildTwitterIntentUrl(shareUrl, shareText);
-  }, [celebrationAchievement, level, xp]);
 
   useEffect(() => {
     autoProbeRef.current = autoProbe;
@@ -1116,55 +1109,17 @@ export function PracticeVmPocPage() {
   }, [metrics]);
 
   useEffect(() => {
-    if (!celebration) {
-      return;
-    }
-
-    if (!isAchievementCelebration) {
-      celebrationCloseButtonRef.current?.focus({ preventScroll: true });
-    }
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') {
-        return;
-      }
-
-      event.preventDefault();
-      advanceCelebration();
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [advanceCelebration, celebration, isAchievementCelebration]);
-
-  useEffect(() => {
-    if (!celebration || celebration.kind !== 'achievement') {
+    if (!achievementLiveMessage) {
       return;
     }
 
     const timer = window.setTimeout(() => {
-      advanceCelebration();
-    }, 4200);
-
+      setAchievementLiveMessage('');
+    }, 2600);
     return () => {
       window.clearTimeout(timer);
     };
-  }, [advanceCelebration, celebration]);
-
-  useEffect(() => {
-    if (!celebration || celebration.kind === 'achievement') {
-      return;
-    }
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [celebration]);
+  }, [achievementLiveMessage]);
 
   useEffect(() => {
     let isMounted = true;
@@ -1492,7 +1447,7 @@ export function PracticeVmPocPage() {
       const nextCompletedMissionSlugs = [...completedMissionSlugs, missionSlug];
       const completedTrackSlugs = computeCompletedTrackSlugs(content, nextCompletedMissionSlugs);
 
-      const gainedXp = recordMissionPass({
+      recordMissionPass({
         missionSlug,
         difficulty: selectedMission.difficulty,
         hintLevel: mode === 'manual' ? 1 : 0,
@@ -1511,26 +1466,8 @@ export function PracticeVmPocPage() {
 
       if (lessonJustCompleted) {
         trackClarityEvent('practice_lesson_completed');
-        enqueueCelebration({
-          key: `lesson:${selectedLesson.slug}`,
-          kind: 'lesson',
-          message: t('레슨 완료: {{title}}', { title: selectedLesson.title }),
-          detail: t('{{count}}개 미션을 모두 완료했습니다. XP +{{gainedXp}}', { count: lessonMissions.length, gainedXp }),
-        });
       } else {
         trackClarityEvent(mode === 'manual' ? 'practice_mission_completed_manual' : 'practice_mission_completed_auto');
-        enqueueCelebration({
-          key: `mission:${missionSlug}`,
-          kind: 'mission',
-          message:
-            mode === 'manual'
-              ? t('수동 완료 처리: {{title}}', { title: selectedMission.title })
-              : t('미션 완료: {{title}}', { title: selectedMission.title }),
-          detail:
-            mode === 'manual'
-              ? t('수동 브리지 기록 완료, XP +{{gainedXp}}', { gainedXp })
-              : t('자동 판정 통과, XP +{{gainedXp}}', { gainedXp }),
-        });
       }
 
       const newlyUnlocked = useProgressStore
@@ -1552,14 +1489,12 @@ export function PracticeVmPocPage() {
     [
       completedMissionSlugs,
       content,
-      enqueueCelebration,
       lessonMissions,
       recordMissionPass,
       scheduleAchievementAnnouncements,
       selectedLesson,
       selectedMission,
       startMissionSession,
-      t,
       unlockedAchievements,
     ],
   );
@@ -1705,8 +1640,10 @@ export function PracticeVmPocPage() {
     setActionHistory([]);
     setCommandHistory([]);
     setDebugLines([]);
-    setCelebrationState({ active: null, queue: [] });
-    seenCelebrationKeysRef.current.clear();
+    setAchievementFeed([]);
+    setAchievementUnreadCount(0);
+    setAchievementLiveMessage('');
+    seenAchievementIdsRef.current.clear();
     inputLineBufferRef.current = '';
     inputEscapeSequenceRef.current = false;
     outputEscapeSequenceRef.current = false;
@@ -2137,101 +2074,9 @@ export function PracticeVmPocPage() {
         {t('원활한 실습을 위해 데스크톱 브라우저 사용을 권장합니다.')}
       </p>
       <div className="vm-poc-panel">
-        {celebration ? (
-          <section className={`vm-celebration-overlay ${isAchievementCelebration ? 'is-toast' : ''}`}>
-            <section
-              className={`vm-celebration vm-celebration-${celebration.kind} ${isAchievementCelebration ? 'is-toast' : ''}`}
-              role={isAchievementCelebration ? 'status' : 'dialog'}
-              aria-modal={isAchievementCelebration ? undefined : true}
-              aria-live="polite"
-              aria-label={t('완료 피드백')}
-            >
-              <div className="vm-celebration-burst" aria-hidden="true">
-                <span />
-                <span />
-                <span />
-              </div>
-              <div className="vm-celebration-header">
-                <span className={`vm-celebration-kind-chip is-${celebration.kind}`}>
-                  {getCelebrationKindLabel(celebration.kind)}
-                </span>
-                {celebrationQueueCount > 0 ? (
-                  <span className="vm-celebration-queue-chip">{t('다음 {{count}}', { count: celebrationQueueCount })}</span>
-                ) : null}
-              </div>
-              <p>
-                <strong>{celebration.message}</strong>
-              </p>
-              <p>{celebration.detail}</p>
-              {celebration.kind === 'mission' && nextIncompleteMission ? (
-                <section className="vm-celebration-next-action">
-                  <p className="vm-celebration-next-label">{t('추천 다음 단계')}</p>
-                  <button
-                    type="button"
-                    className="primary-btn vm-celebration-primary-btn"
-                    onClick={() => {
-                      selectMissionForAction(nextIncompleteMission.slug);
-                      advanceCelebration();
-                    }}
-                  >
-                    {t('다음 미션 시작')}
-                  </button>
-                  <p className="muted">{t('다음: {{title}}', { title: nextIncompleteMission.title })}</p>
-                </section>
-              ) : null}
-              {celebration.kind === 'lesson' && nextLesson ? (
-                <section className="vm-celebration-next-action">
-                  <p className="vm-celebration-next-label">{t('추천 다음 단계')}</p>
-                  <button
-                    type="button"
-                    className="primary-btn vm-celebration-primary-btn"
-                    onClick={() => {
-                      selectNextLessonForAction();
-                      advanceCelebration();
-                    }}
-                  >
-                    {t('다음 레슨 시작')}
-                  </button>
-                  <p className="muted">{t('다음: {{title}}', { title: nextLesson.title })}</p>
-                </section>
-              ) : null}
-              {celebration.kind === 'lesson' && !nextLesson ? (
-                <section className="vm-celebration-next-action">
-                  <p className="vm-celebration-next-label">{t('추천 다음 단계')}</p>
-                  <Link className="primary-btn vm-celebration-primary-btn" to="/progress">
-                    {t('학습 완료 현황 보기')}
-                  </Link>
-                </section>
-              ) : null}
-              <div className="inline-actions vm-celebration-actions">
-                <Link className="secondary-btn" to="/progress">
-                  {t('업적 보기')}
-                </Link>
-                {celebrationShareHref ? (
-                  <a
-                    className="text-link"
-                    href={celebrationShareHref}
-                    target="_blank"
-                    rel="noreferrer"
-                    onClick={() => {
-                      trackClarityEvent('practice_achievement_share_clicked');
-                    }}
-                  >
-                    {t('X 챌린지 공유')}
-                  </a>
-                ) : null}
-                <button
-                  ref={celebrationCloseButtonRef}
-                  type="button"
-                  className="secondary-btn"
-                  onClick={advanceCelebration}
-                >
-                  {t('닫기 (Esc)')}
-                </button>
-              </div>
-            </section>
-          </section>
-        ) : null}
+        <p className="sr-only" role="status" aria-live="polite">
+          {achievementLiveMessage}
+        </p>
 
         <div className="vm-mobile-switch" role="tablist" aria-label={t('실습 화면 전환')}>
           <button
@@ -2340,6 +2185,54 @@ export function PracticeVmPocPage() {
                   {t(selectedMission.title)} · {t('난이도')} {getDifficultyLabel(t, selectedMission.difficulty)}
                 </p>
 
+                <section className="vm-learning-nav-card">
+                  <div className="vm-learning-nav-group">
+                    <p className="vm-learning-nav-label">{t('미션 이동')}</p>
+                    <div className="inline-actions">
+                      <button
+                        type="button"
+                        className="secondary-btn"
+                        disabled={!previousMissionInLesson}
+                        onClick={() => {
+                          if (previousMissionInLesson) {
+                            selectMissionForAction(previousMissionInLesson.slug);
+                          }
+                        }}
+                      >
+                        {t('이전 미션')}
+                      </button>
+                      <button
+                        type="button"
+                        className="secondary-btn"
+                        disabled={!nextMissionInLesson}
+                        onClick={() => {
+                          if (nextMissionInLesson) {
+                            selectMissionForAction(nextMissionInLesson.slug);
+                          }
+                        }}
+                      >
+                        {t('다음 미션')}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="vm-learning-nav-group">
+                    <p className="vm-learning-nav-label">{t('레슨 이동')}</p>
+                    <div className="inline-actions">
+                      <button
+                        type="button"
+                        className="secondary-btn"
+                        disabled={!previousLesson}
+                        onClick={selectPreviousLessonForAction}
+                      >
+                        {t('이전 레슨')}
+                      </button>
+                      <button type="button" className="secondary-btn" disabled={!nextLesson} onClick={selectNextLessonForAction}>
+                        {t('다음 레슨')}
+                      </button>
+                    </div>
+                  </div>
+                </section>
+
                 <section className="vm-mission-command-block">
                   <h3>{t('이 미션에서 입력할 명령')}</h3>
                   {selectedMissionCommands.length > 0 ? (
@@ -2444,35 +2337,43 @@ export function PracticeVmPocPage() {
               </article>
             ) : null}
 
+            <section className="vm-achievement-feed-card" aria-label={t('이번 세션 업적')}>
+              <div className="vm-achievement-feed-header">
+                <h2>{t('이번 세션 업적')}</h2>
+                {achievementUnreadCount > 0 ? (
+                  <button type="button" className="secondary-btn" onClick={markAchievementFeedAsRead}>
+                    {t('새 업적 {{count}}', { count: achievementUnreadCount })}
+                  </button>
+                ) : null}
+              </div>
+              {achievementFeed.length === 0 ? (
+                <p className="muted">{t('업적이 해금되면 여기에 기록됩니다.')}</p>
+              ) : (
+                <ul className="vm-achievement-feed-list">
+                  {achievementFeed.map((entry, index) => (
+                    <li
+                      key={entry.id}
+                      className={`vm-achievement-feed-item ${index < achievementUnreadCount ? 'is-unread' : ''}`}
+                    >
+                      <div className="vm-achievement-feed-item-head">
+                        <strong>{t(entry.title)}</strong>
+                        <small>{formatUnlockedTime(entry.unlockedAt)}</small>
+                      </div>
+                      <p>{t(entry.description)}</p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <div className="inline-actions">
+                <Link className="secondary-btn" to="/progress">
+                  {t('Progress에서 업적 보기')}
+                </Link>
+              </div>
+            </section>
+
             <section className="vm-mission-list-card">
               <div className="vm-mission-list-header">
                 <h2>{t('미션 {{completed}}/{{total}}', { completed: lessonCompletedMissionCount, total: lessonMissions.length })}</h2>
-                <span className="vm-mission-list-action">
-                  {selectedMission && selectedMissionCompleted && nextIncompleteMission ? (
-                    <button
-                      type="button"
-                      className="primary-btn vm-next-action-btn"
-                      onClick={() => selectMissionForAction(nextIncompleteMission.slug)}
-                    >
-                      {t('다음 미션')}
-                    </button>
-                  ) : null}
-                  {selectedMission && selectedMissionCompleted && !nextIncompleteMission && lessonCompleted && nextLesson ? (
-                    <button type="button" className="primary-btn vm-next-action-btn" onClick={selectNextLessonForAction}>
-                      {t('다음 레슨')}
-                    </button>
-                  ) : null}
-                  {selectedMission && selectedMissionCompleted && !nextIncompleteMission && lessonCompleted && !nextLesson ? (
-                    <Link className="primary-btn vm-next-action-btn" to="/progress">
-                      {t('완료 현황')}
-                    </Link>
-                  ) : null}
-                  {selectedMission && !selectedMissionCompleted && selectedMissionStatus?.status === 'manual' ? (
-                    <button type="button" className="secondary-btn vm-next-action-btn" onClick={handleManualMissionComplete}>
-                      {t('수동 완료')}
-                    </button>
-                  ) : null}
-                </span>
               </div>
               {selectedMissionStatus ? (
                 <p className="vm-mission-list-status">
