@@ -1508,6 +1508,7 @@ export function PracticeVmPocPage() {
       const lessonNowCompleted =
         lessonMissions.length > 0 && lessonMissions.every((mission) => completedSetAfter.has(mission.slug));
       const lessonJustCompleted = !lessonWasCompleted && lessonNowCompleted;
+      const nextMissionAfterCompletion = lessonMissions.find((mission) => !completedSetAfter.has(mission.slug)) ?? null;
 
       if (lessonJustCompleted) {
         trackClarityEvent('practice_lesson_completed');
@@ -1540,6 +1541,14 @@ export function PracticeVmPocPage() {
       if (newlyUnlocked.length > 0) {
         scheduleAchievementAnnouncements(newlyUnlocked);
       }
+
+      if (!lessonJustCompleted && nextMissionAfterCompletion) {
+        setSelectedMissionSlug(nextMissionAfterCompletion.slug);
+        startMissionSession({
+          missionSlug: nextMissionAfterCompletion.slug,
+          lessonSlug: selectedLesson.slug,
+        });
+      }
     },
     [
       completedMissionSlugs,
@@ -1550,6 +1559,7 @@ export function PracticeVmPocPage() {
       scheduleAchievementAnnouncements,
       selectedLesson,
       selectedMission,
+      startMissionSession,
       t,
       unlockedAchievements,
     ],
