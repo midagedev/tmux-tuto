@@ -1206,7 +1206,7 @@ export function PracticeVmPocPage() {
   }, [content, lessonParam, selectedLessonSlug]);
 
   useEffect(() => {
-    if (!content || filteredLessonRows.length === 0) {
+    if (!content || filteredLessonRows.length === 0 || !selectedLessonSlug) {
       return;
     }
 
