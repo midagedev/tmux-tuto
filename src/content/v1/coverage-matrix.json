@@ -208,7 +208,7 @@
       "track": "B",
       "scenarioPresetId": "single-pane",
       "capabilities": [
-        "pane.swap",
+        "pane.join",
         "layout.rearrange",
         "layout.select"
       ],
@@ -492,7 +492,7 @@
       "track": "B",
       "scenarioPresetId": "single-pane",
       "capabilities": [
-        "pane.swap",
+        "pane.join",
         "layout.rearrange",
         "shortcut.practice"
       ],

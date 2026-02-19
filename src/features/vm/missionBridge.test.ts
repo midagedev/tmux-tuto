@@ -48,9 +48,10 @@ describe('parseProbeMetricFromLine', () => {
 describe('parseTmuxActionsFromCommand', () => {
   it('extracts advanced tmux actions', () => {
     const actions = parseTmuxActionsFromCommand(
-      'tmux select-layout even-horizontal; tmux resize-pane -Z; tmux set-window-option synchronize-panes on',
+      'tmux join-pane -hb -s :.3 -t :.0; tmux select-layout even-horizontal; tmux resize-pane -Z; tmux set-window-option synchronize-panes on',
     );
 
+    expect(actions).toContain('sim.pane.join');
     expect(actions).toContain('sim.layout.select');
     expect(actions).toContain('sim.pane.resize');
     expect(actions).toContain('sim.pane.zoom.toggle');
