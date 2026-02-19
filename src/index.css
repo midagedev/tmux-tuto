@@ -447,6 +447,68 @@ a {
   text-underline-offset: 2px;
 }
 
+.home-changelog-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.home-changelog-head {
+  display: grid;
+  gap: 4px;
+}
+
+.home-changelog-head h2 {
+  margin: 0;
+  font-size: 0.98rem;
+}
+
+.home-changelog-head p {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.home-changelog-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+}
+
+.home-changelog-item {
+  border: 1px solid #dbe4f2;
+  border-radius: 12px;
+  background: #fdfefe;
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.home-changelog-date {
+  margin: 0;
+  color: #3e5e8f;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.home-changelog-item h3 {
+  margin: 0;
+  font-size: 0.94rem;
+}
+
+.home-changelog-item p {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
 .reference-hub-head {
   display: grid;
   gap: 10px;
@@ -2789,6 +2851,7 @@ a {
 
   .home-stage-grid,
   .home-surface-grid,
+  .home-changelog-list,
   .reference-grid,
   .reference-playbook-grid {
     grid-template-columns: 1fr;

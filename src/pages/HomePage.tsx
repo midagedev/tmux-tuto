@@ -65,6 +65,29 @@ export function HomePage() {
       href: 'https://formulae.brew.sh/formula/tmux',
     },
   ] as const;
+  const changelogItems = [
+    {
+      date: '2026-02-19',
+      title: t('VM 실습 안정화'),
+      summary: t('VM 부팅 경로와 상태 표시를 정비해 실습 재진입이 더 안정적입니다.'),
+      to: '/practice?lesson=hello-tmux',
+      actionLabel: t('실습 열기'),
+    },
+    {
+      date: '2026-02-18',
+      title: t('커리큘럼 통합 경로 정비'),
+      summary: t('레슨 가이드, 미션 순서, 힌트 흐름을 통합해 처음부터 따라가기 쉽게 정리했습니다.'),
+      to: '/learn',
+      actionLabel: t('경로 열기'),
+    },
+    {
+      date: '2026-02-17',
+      title: t('공유/업적 페이지 개선'),
+      summary: t('업적 공유 카드와 챌린지 링크를 정리해 결과 공유 동선을 단순화했습니다.'),
+      to: '/progress',
+      actionLabel: t('진행도(선택) 보기'),
+    },
+  ] as const;
 
   return (
     <PagePlaceholder
@@ -140,6 +163,25 @@ export function HomePage() {
             </Link>
           </article>
         ))}
+      </section>
+
+      <section className="home-changelog-card" aria-label={t('최근 변경 사항')}>
+        <div className="home-changelog-head">
+          <h2>{t('업데이트 로그')}</h2>
+          <p className="muted">{t('최근 반영된 변경 사항입니다. 새로운 흐름부터 먼저 확인하세요.')}</p>
+        </div>
+        <ul className="home-changelog-list">
+          {changelogItems.map((item) => (
+            <li key={`${item.date}-${item.title}`} className="home-changelog-item">
+              <p className="home-changelog-date">{item.date}</p>
+              <h3>{item.title}</h3>
+              <p>{item.summary}</p>
+              <Link to={item.to} className="text-link">
+                {item.actionLabel}
+              </Link>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section className="home-links-card" aria-label={t('프로젝트 링크')}>

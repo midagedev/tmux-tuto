@@ -739,5 +739,14 @@
   "X 챌린지 공유": "Share X challenge",
   "X에서 공유": "Share on X",
   "XP, 레벨, 스트릭, 트랙별 완료 현황을 확인합니다.": "XP, check completion status for each level, streak, and track.",
+  "업데이트 로그": "Update Log",
+  "최근 변경 사항": "Recent Changes",
+  "최근 반영된 변경 사항입니다. 새로운 흐름부터 먼저 확인하세요.": "Recently shipped updates. Check the new flow first.",
+  "VM 실습 안정화": "VM Practice Stabilization",
+  "VM 부팅 경로와 상태 표시를 정비해 실습 재진입이 더 안정적입니다.": "We refined VM boot paths and status indicators for more stable re-entry into practice.",
+  "커리큘럼 통합 경로 정비": "Integrated Curriculum Path Update",
+  "레슨 가이드, 미션 순서, 힌트 흐름을 통합해 처음부터 따라가기 쉽게 정리했습니다.": "Lesson guides, mission order, and hint flow were unified to make the path easier to follow from the start.",
+  "공유/업적 페이지 개선": "Share/Achievement Page Improvements",
+  "업적 공유 카드와 챌린지 링크를 정리해 결과 공유 동선을 단순화했습니다.": "Achievement share cards and challenge links were reorganized to simplify the sharing flow.",
   "zoom 토글 누적: {{count}}": "zoom toggle accumulation: {{count}}"
 }
