@@ -1196,13 +1196,26 @@ export function PracticeVmPocPage() {
   }, []);
 
   useEffect(() => {
-    if (!content || selectedLessonSlug) {
+    if (!content) {
       return;
     }
 
-    const firstLessonSlug = content.lessons[0]?.slug ?? '';
-    const fromParam = content.lessons.some((lesson) => lesson.slug === lessonParam) ? lessonParam : '';
-    setSelectedLessonSlug(fromParam || firstLessonSlug);
+    // Initial load: no lesson selected yet → apply URL param or default
+    if (!selectedLessonSlug) {
+      const firstLessonSlug = content.lessons[0]?.slug ?? '';
+      const fromParam = content.lessons.some((lesson) => lesson.slug === lessonParam) ? lessonParam : '';
+      setSelectedLessonSlug(fromParam || firstLessonSlug);
+      return;
+    }
+
+    // URL lesson param changed to a different valid lesson → follow the URL
+    if (
+      lessonParam &&
+      lessonParam !== selectedLessonSlug &&
+      content.lessons.some((lesson) => lesson.slug === lessonParam)
+    ) {
+      setSelectedLessonSlug(lessonParam);
+    }
   }, [content, lessonParam, selectedLessonSlug]);
 
   useEffect(() => {
@@ -1231,6 +1244,16 @@ export function PracticeVmPocPage() {
       if (selectedMissionSlug) {
         setSelectedMissionSlug('');
       }
+      return;
+    }
+
+    // URL mission param changed to a different valid mission → follow the URL
+    if (
+      missionParam &&
+      missionParam !== selectedMissionSlug &&
+      missions.some((mission) => mission.slug === missionParam)
+    ) {
+      setSelectedMissionSlug(missionParam);
       return;
     }
 
@@ -1284,6 +1307,20 @@ export function PracticeVmPocPage() {
       setSearchParams(nextParams, { replace: true });
     }
   }, [searchParams, selectedLessonSlug, selectedMissionSlug, setSearchParams]);
+
+  useEffect(() => {
+    if (!selectedLessonSlug) {
+      return;
+    }
+    setClarityTag('practiceLesson', selectedLessonSlug);
+  }, [selectedLessonSlug]);
+
+  useEffect(() => {
+    if (!selectedMissionSlug) {
+      return;
+    }
+    setClarityTag('practiceMission', selectedMissionSlug);
+  }, [selectedMissionSlug]);
 
   const pushDebugLine = useCallback((line: string) => {
     const normalized = line.trimEnd();
