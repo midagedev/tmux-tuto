@@ -43,7 +43,7 @@ export function ShareAchievementPage() {
     ? buildAbsoluteAchievementShareUrl(achievement.id, effectivePayload)
     : window.location.href;
   const shareMessage = achievement
-    ? buildAchievementChallengeShareText(achievement.shareText, achievement.id)
+    ? buildAchievementChallengeShareText(t(achievement.shareText), achievement.id)
     : t('tmux-tuto 업적 챌린지를 공유합니다.');
   const challengeTarget = achievement ? resolveAchievementShareTarget(achievement.id) : null;
   const payloadBroken = Boolean(searchParams.get('d')) && !decodedPayload;
@@ -65,11 +65,11 @@ export function ShareAchievementPage() {
   }
 
   return (
-    <PagePlaceholder eyebrow={t('Share')} title={achievement.title} description={achievement.description}>
+    <PagePlaceholder eyebrow={t('Share')} title={t(achievement.title)} description={t(achievement.description)}>
       <div className="share-preview-card">
         <p className="page-eyebrow">{t('Achievement Challenge')}</p>
-        <h2>{achievement.title}</h2>
-        <p>{achievement.description}</p>
+        <h2>{t(achievement.title)}</h2>
+        <p>{t(achievement.description)}</p>
         <ul className="link-list">
           <li>{t('닉네임: {{name}}', { name: effectivePayload.name })}</li>
           <li>{t('레벨: {{level}}', { level: effectivePayload.level })}</li>
@@ -78,7 +78,7 @@ export function ShareAchievementPage() {
           <li>{t('달성일: {{date}}', { date: effectivePayload.date })}</li>
           <li>
             {t('추천 챌린지: {{challenge}}', {
-              challenge: challengeTarget?.challengeLabel ?? t('첫 3분: tmux 맛보기'),
+              challenge: challengeTarget?.challengeLabel ? t(challengeTarget.challengeLabel) : t('첫 3분: tmux 맛보기'),
             })}
           </li>
         </ul>

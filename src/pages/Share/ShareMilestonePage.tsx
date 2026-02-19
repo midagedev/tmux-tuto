@@ -42,7 +42,7 @@ export function ShareMilestonePage() {
       ? buildAbsoluteShareUrl(milestoneSlug, effectivePayload)
       : window.location.href;
   const shareMessage = milestone
-    ? `${milestone.title}: ${milestone.description}`
+    ? `${t(milestone.title)}: ${t(milestone.description)}`
     : t('tmux 학습 마일스톤을 공유합니다.');
 
   const payloadBroken = Boolean(searchParams.get('d')) && !decodedPayload;
@@ -66,13 +66,13 @@ export function ShareMilestonePage() {
   return (
     <PagePlaceholder
       eyebrow={t('Share')}
-      title={milestone.title}
-      description={milestone.description}
+      title={t(milestone.title)}
+      description={t(milestone.description)}
     >
       <div className="share-preview-card">
         <p className="page-eyebrow">{t('Preview')}</p>
-        <h2>{milestone.title}</h2>
-        <p>{milestone.description}</p>
+        <h2>{t(milestone.title)}</h2>
+        <p>{t(milestone.description)}</p>
         <ul className="link-list">
           <li>{t('닉네임: {{name}}', { name: effectivePayload.name })}</li>
           <li>{t('레벨: {{level}}', { level: effectivePayload.level })}</li>

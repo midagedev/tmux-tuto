@@ -42,7 +42,7 @@ export function PlaybookDetailPage() {
   return (
     <PagePlaceholder
       eyebrow={t('Playbook')}
-      title={playbookSlug ?? t('playbook')}
+      title={playbook ? t(playbook.title) : playbookSlug ?? t('playbook')}
       description={t('플레이북 상세 단계, 명령 복사, 검증 체크리스트를 표시합니다.')}
     >
       {!playbook ? (
@@ -54,8 +54,8 @@ export function PlaybookDetailPage() {
             <ol className="link-list">
               {playbook.steps.map((step) => (
                 <li key={step.id}>
-                  <strong>{step.title}</strong>
-                  {step.description ? <div className="muted">{step.description}</div> : null}
+                  <strong>{t(step.title)}</strong>
+                  {step.description ? <div className="muted">{t(step.description)}</div> : null}
                   {step.command ? (
                     <div className="playbook-command-row">
                       <code className="playbook-command">{step.command}</code>
@@ -84,7 +84,7 @@ export function PlaybookDetailPage() {
             <h2>{t('Verification')}</h2>
             <ul className="link-list">
               {playbook.verification.map((item) => (
-                <li key={item}>{item}</li>
+                <li key={item}>{t(item)}</li>
               ))}
             </ul>
 
@@ -92,8 +92,8 @@ export function PlaybookDetailPage() {
             <ul className="link-list">
               {playbook.troubleshooting.map((item) => (
                 <li key={item.issue}>
-                  <strong>{item.issue}</strong>
-                  <div className="muted">{item.resolution}</div>
+                  <strong>{t(item.issue)}</strong>
+                  <div className="muted">{t(item.resolution)}</div>
                 </li>
               ))}
             </ul>

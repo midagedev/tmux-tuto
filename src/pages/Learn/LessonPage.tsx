@@ -127,8 +127,8 @@ export function LessonPage() {
   return (
     <PagePlaceholder
       eyebrow="Lesson"
-      title={`${track.title} · ${chapter.title}`}
-      description={t('{{title}} · 예상 {{minutes}}분', { title: lesson.title, minutes: lesson.estimatedMinutes })}
+      title={`${t(track.title)} · ${t(chapter.title)}`}
+      description={t('{{title}} · 예상 {{minutes}}분', { title: t(lesson.title), minutes: lesson.estimatedMinutes })}
     >
       <section className="lesson-section lesson-action-panel">
         <ul className="lesson-pill-row">
@@ -151,12 +151,12 @@ export function LessonPage() {
         <div className="lesson-summary">
           {lesson.overview ? (
             <p>
-              <strong>{t('레슨 소개:')}</strong> {renderTextWithShortcutTooltip(lesson.overview, 'lesson-overview')}
+              <strong>{t('레슨 소개:')}</strong> {renderTextWithShortcutTooltip(t(lesson.overview), 'lesson-overview')}
             </p>
           ) : null}
           {lesson.goal ? (
             <p>
-              <strong>{t('이 레슨의 목표:')}</strong> {renderTextWithShortcutTooltip(lesson.goal, 'lesson-goal')}
+              <strong>{t('이 레슨의 목표:')}</strong> {renderTextWithShortcutTooltip(t(lesson.goal), 'lesson-goal')}
             </p>
           ) : null}
         </div>
@@ -165,7 +165,7 @@ export function LessonPage() {
         <ul className="link-list">
           {lesson.objectives.map((objective, index) => (
             <li key={`${lesson.id}-objective-${index}`}>
-              {renderTextWithShortcutTooltip(objective, `objective-${index}`)}
+              {renderTextWithShortcutTooltip(t(objective), `objective-${index}`)}
             </li>
           ))}
         </ul>
@@ -175,7 +175,7 @@ export function LessonPage() {
             <summary>{t('완료 기준 {{count}}개', { count: lesson.successCriteria.length })}</summary>
             <ul className="link-list">
               {lesson.successCriteria.map((item, index) => (
-                <li key={`${lesson.id}-success-${index}`}>{renderTextWithShortcutTooltip(item, `success-${index}`)}</li>
+                <li key={`${lesson.id}-success-${index}`}>{renderTextWithShortcutTooltip(t(item), `success-${index}`)}</li>
               ))}
             </ul>
           </details>
@@ -185,7 +185,7 @@ export function LessonPage() {
             <summary>{t('부족 상태 {{count}}개', { count: lesson.failureStates.length })}</summary>
             <ul className="link-list">
               {lesson.failureStates.map((item, index) => (
-                <li key={`${lesson.id}-failure-${index}`}>{renderTextWithShortcutTooltip(item, `failure-${index}`)}</li>
+                <li key={`${lesson.id}-failure-${index}`}>{renderTextWithShortcutTooltip(t(item), `failure-${index}`)}</li>
               ))}
             </ul>
           </details>
@@ -197,7 +197,7 @@ export function LessonPage() {
             <ul className="link-list">
               {lessonTerms.map((term) => (
                 <li key={term.id}>
-                  <strong>{term.title}:</strong> {term.description}
+                  <strong>{t(term.title)}:</strong> {t(term.description)}
                 </li>
               ))}
             </ul>
@@ -215,7 +215,7 @@ export function LessonPage() {
 
               return (
                 <article key={mission.id} className="lesson-mission-card">
-                  <h4>{mission.title}</h4>
+                  <h4>{t(mission.title)}</h4>
                   <p className="lesson-mission-meta">
                     {t('난이도 {{difficulty}} · 초기 시나리오 {{scenario}}', {
                       difficulty: mission.difficulty,
@@ -226,7 +226,7 @@ export function LessonPage() {
                     <ul className="link-list lesson-mission-hints">
                       {previewHints.map((hint, index) => (
                         <li key={`${mission.id}-hint-preview-${index}`}>
-                          {renderTextWithShortcutTooltip(hint, `${mission.id}-hint-preview-${index}`)}
+                          {renderTextWithShortcutTooltip(t(hint), `${mission.id}-hint-preview-${index}`)}
                         </li>
                       ))}
                     </ul>
@@ -239,7 +239,7 @@ export function LessonPage() {
                       <ul className="link-list lesson-mission-hints">
                         {restHints.map((hint, index) => (
                           <li key={`${mission.id}-hint-rest-${index}`}>
-                            {renderTextWithShortcutTooltip(hint, `${mission.id}-hint-rest-${index}`)}
+                            {renderTextWithShortcutTooltip(t(hint), `${mission.id}-hint-rest-${index}`)}
                           </li>
                         ))}
                       </ul>

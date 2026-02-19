@@ -37,7 +37,7 @@
   "입력 순서: Ctrl 키를 누른 채 b를 누른 뒤 손을 떼고, 다음 키를 입력하세요.": "Input sequence: Hold down the Ctrl key and press b, then release and enter the following key.",
   "작업 컨텍스트를 유지하는 최상위 단위입니다. SSH가 끊겨도 다시 붙어 이어서 작업할 수 있습니다.": "The highest-level unit that holds the task context. Even if SSH is disconnected, you can reconnect and continue working.",
   "지원하지 않는 공유 경로입니다. Progress 페이지에서 다시 생성해 주세요.": "Shared path not supported. Please create it again on the Progress page.",
-  "첫 3분: tmux 맛보기": "First 3 minutes: Taste tmux",
+  "첫 3분: tmux 맛보기": "First 3 Minutes: Try tmux",
   "첫 실습: 패인 2개 만들기": "First exercise: create 2 panes",
   "첫 실습이 완료되었습니다. 지금 바로 오늘 할 1개 미션을 시작하세요.": "The first exercise has been completed. Start one mission today right now.",
   "초급부터 심화까지, tmux를 단순하고 실전적으로 익힙니다.": "From beginner to advanced, learn tmux simply and practically.",
@@ -764,5 +764,7 @@
   "레이아웃을 바꾸거나 다양한 레이아웃을 실험했습니다.": "Changed layouts or experimented with various layouts.",
   "미충족 조건: shellHistoryText contains \"tmux -V\"": "Unmet condition: shellHistoryText contains \"tmux -V\"",
   "포커스 네비게이터": "Focus navigator",
-  "숨은 트릭스터": "Hidden trickster"
+  "숨은 트릭스터": "Hidden trickster",
+  "첫 챕터 완료": "First chapter complete",
+  "Onramp 첫 챕터의 모든 미션을 완료했습니다.": "Completed all missions in the first Onramp chapter."
 }
