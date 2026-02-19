@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { PagePlaceholder } from '../../components/system/PagePlaceholder';
 import { EmptyState } from '../../components/system/EmptyState';
+import { setClarityTag, trackClarityEvent } from '../../features/analytics';
 import { loadAppContent } from '../../features/curriculum/contentLoader';
 import type { AppMission } from '../../features/curriculum/contentSchema';
 import { getHintForMission, getLiveHintForMission } from '../../features/grading/hintEngine';
@@ -44,6 +45,10 @@ export function OnboardingFirstMissionPage() {
   }, [goal, navigate, startedAt]);
 
   useEffect(() => {
+    trackClarityEvent('onboarding_first_mission_viewed');
+  }, []);
+
+  useEffect(() => {
     loadAppContent()
       .then((content) => {
         const firstMission = content.missions.find((item) => item.slug === 'split-two-panes') ?? null;
@@ -83,12 +88,14 @@ export function OnboardingFirstMissionPage() {
 
     const grade = evaluateMission(simulatorState, mission);
     if (grade.passed) {
+      setClarityTag('onboardingFirstMissionSlug', mission.slug);
       const gainedXp = recordMissionPass({
         missionSlug: mission.slug,
         difficulty: mission.difficulty,
         hintLevel: maxHintLevelUsed,
         attemptNumber: Math.max(1, attemptCount + 1),
       });
+      trackClarityEvent('onboarding_first_mission_passed');
       markFirstMissionPassed();
       navigate(`/onboarding/first-mission/passed?missionSlug=${mission.slug}&xp=${gainedXp}`);
       return;
@@ -100,6 +107,7 @@ export function OnboardingFirstMissionPage() {
     setMaxHintLevelUsed((prev) => (hint.hintLevel > prev ? hint.hintLevel : prev));
     setHintText(hint.hintText);
     setFeedback(grade.failedRules[0]?.reason ?? t('조건을 충족하지 못했습니다.'));
+    trackClarityEvent('onboarding_first_mission_failed');
   };
 
   return (

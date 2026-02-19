@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { PagePlaceholder } from '../../components/system/PagePlaceholder';
+import { trackClarityEvent } from '../../features/analytics';
 import { useOnboardingStore } from '../../features/onboarding/onboardingStore';
 
 export function OnboardingStartPage() {
@@ -45,6 +46,7 @@ export function OnboardingStartPage() {
           type="button"
           className="primary-btn"
           onClick={() => {
+            trackClarityEvent('onboarding_start_clicked');
             startOnboarding();
             navigate('/onboarding/goal');
           }}
@@ -54,7 +56,10 @@ export function OnboardingStartPage() {
         <button
           type="button"
           className="secondary-btn"
-          onClick={() => navigate('/learn')}
+          onClick={() => {
+            trackClarityEvent('onboarding_skip_to_curriculum');
+            navigate('/learn');
+          }}
         >
           {t('바로 커리큘럼 보기')}
         </button>
