@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { AnalyticsConsentBanner } from '../../components/system/AnalyticsConsentBanner';
-import { useAnalyticsConsentState, useCloudflareAnalytics, useMicrosoftClarity } from '../../features/analytics';
+import { setClarityTag, useAnalyticsConsentState, useCloudflareAnalytics, useMicrosoftClarity } from '../../features/analytics';
 import { useSimulatorStore } from '../../features/simulator/simulatorStore';
 import { BRAND } from '../brand';
 import { LANGUAGE_STORAGE_KEY, SUPPORTED_LANGUAGE_CODES, type SupportedLanguageCode } from '../../i18n';
@@ -56,6 +56,14 @@ export function AppShell() {
 
     localStorage.setItem(LANGUAGE_STORAGE_KEY, normalized);
   }, [i18n.language, location.hash, location.pathname, location.search, navigate]);
+
+  useEffect(() => {
+    const normalized = i18n.language.split('-')[0] as SupportedLanguageCode;
+    if (!SUPPORTED_LANGUAGE_CODES.includes(normalized)) {
+      return;
+    }
+    setClarityTag('language', normalized);
+  }, [i18n.language]);
 
   const handleLanguageChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const next = event.target.value as SupportedLanguageCode;

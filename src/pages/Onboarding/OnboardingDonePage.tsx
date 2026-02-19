@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { PagePlaceholder } from '../../components/system/PagePlaceholder';
+import { trackClarityEvent } from '../../features/analytics';
 import { loadAppContent } from '../../features/curriculum/contentLoader';
 import type { AppContent } from '../../features/curriculum/contentSchema';
 import {
@@ -41,6 +42,7 @@ export function OnboardingDonePage() {
 
   useEffect(() => {
     if (firstMissionPassedAt && !completedAt) {
+      trackClarityEvent('onboarding_completed');
       completeOnboarding();
     }
   }, [completeOnboarding, completedAt, firstMissionPassedAt]);
@@ -89,10 +91,22 @@ export function OnboardingDonePage() {
       </div>
 
       <div className="inline-actions">
-        <Link to="/learn" className="primary-btn">
+        <Link
+          to="/learn"
+          className="primary-btn"
+          onClick={() => {
+            trackClarityEvent('onboarding_done_start_mission_clicked');
+          }}
+        >
           {t('오늘 1개 미션 시작')}
         </Link>
-        <Link to={`/playbooks/${recommendation.playbookSlug}`} className="secondary-btn">
+        <Link
+          to={`/playbooks/${recommendation.playbookSlug}`}
+          className="secondary-btn"
+          onClick={() => {
+            trackClarityEvent('onboarding_done_playbook_clicked');
+          }}
+        >
           {t('추천 플레이북 열기')}
         </Link>
       </div>

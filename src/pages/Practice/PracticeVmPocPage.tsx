@@ -7,6 +7,7 @@ import '@xterm/xterm/css/xterm.css';
 import type V86 from 'v86';
 import type { V86Options } from 'v86';
 import { PagePlaceholder } from '../../components/system/PagePlaceholder';
+import { setClarityTag, trackClarityEvent } from '../../features/analytics';
 import { loadAppContent } from '../../features/curriculum/contentLoader';
 import type { AppContent, AppMission } from '../../features/curriculum/contentSchema';
 import { resolveLessonTerms } from '../../features/curriculum/lessonTerms';
@@ -999,6 +1000,9 @@ export function PracticeVmPocPage() {
         return;
       }
 
+      setClarityTag('achievementUnlockedCount', String(unseenDefinitions.length));
+      trackClarityEvent('practice_achievement_unlocked');
+
       if (unseenDefinitions.length === 1) {
         const definition = unseenDefinitions[0];
         enqueueCelebration({
@@ -1464,6 +1468,7 @@ export function PracticeVmPocPage() {
       const lessonJustCompleted = !lessonWasCompleted && lessonNowCompleted;
 
       if (lessonJustCompleted) {
+        trackClarityEvent('practice_lesson_completed');
         enqueueCelebration({
           key: `lesson:${selectedLesson.slug}`,
           kind: 'lesson',
@@ -1471,6 +1476,7 @@ export function PracticeVmPocPage() {
           detail: t('{{count}}개 미션을 모두 완료했습니다. XP +{{gainedXp}}', { count: lessonMissions.length, gainedXp }),
         });
       } else {
+        trackClarityEvent(mode === 'manual' ? 'practice_mission_completed_manual' : 'practice_mission_completed_auto');
         enqueueCelebration({
           key: `mission:${missionSlug}`,
           kind: 'mission',
@@ -2159,7 +2165,15 @@ export function PracticeVmPocPage() {
                   {t('업적 보기')}
                 </Link>
                 {celebrationShareHref ? (
-                  <a className="text-link" href={celebrationShareHref} target="_blank" rel="noreferrer">
+                  <a
+                    className="text-link"
+                    href={celebrationShareHref}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={() => {
+                      trackClarityEvent('practice_achievement_share_clicked');
+                    }}
+                  >
                     {t('X 챌린지 공유')}
                   </a>
                 ) : null}
