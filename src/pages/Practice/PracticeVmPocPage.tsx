@@ -728,7 +728,8 @@ export function PracticeVmPocPage() {
   const searchProbeTimerRef = useRef<number | null>(null);
   const achievementAnnounceTimerRef = useRef<number | null>(null);
   const pendingAchievementIdsRef = useRef(new Set<string>());
-  const isSyncingUrlRef = useRef(false);
+  const prevLessonParamRef = useRef('');
+  const prevMissionParamRef = useRef('');
 
   const lessonParam = searchParams.get('lesson') ?? '';
   const missionParam = searchParams.get('mission') ?? '';
@@ -1205,13 +1206,19 @@ export function PracticeVmPocPage() {
     if (!selectedLessonSlug) {
       const firstLessonSlug = content.lessons[0]?.slug ?? '';
       const fromParam = content.lessons.some((lesson) => lesson.slug === lessonParam) ? lessonParam : '';
-      setSelectedLessonSlug(fromParam || firstLessonSlug);
+      const next = fromParam || firstLessonSlug;
+      setSelectedLessonSlug(next);
+      prevLessonParamRef.current = lessonParam;
       return;
     }
 
-    // URL changed externally (e.g. link from cheatsheet) → follow the URL
+    // Only react when the URL param actually changed (external navigation,
+    // e.g. link from cheatsheet). Ignore when state changed but URL is stale.
+    const lessonParamChanged = lessonParam !== prevLessonParamRef.current;
+    prevLessonParamRef.current = lessonParam;
+
     if (
-      !isSyncingUrlRef.current &&
+      lessonParamChanged &&
       lessonParam &&
       lessonParam !== selectedLessonSlug &&
       content.lessons.some((lesson) => lesson.slug === lessonParam)
@@ -1249,9 +1256,12 @@ export function PracticeVmPocPage() {
       return;
     }
 
-    // URL mission param changed externally → follow the URL
+    // Only react when the URL mission param actually changed (external navigation).
+    const missionParamChanged = missionParam !== prevMissionParamRef.current;
+    prevMissionParamRef.current = missionParam;
+
     if (
-      !isSyncingUrlRef.current &&
+      missionParamChanged &&
       missionParam &&
       missionParam !== selectedMissionSlug &&
       missions.some((mission) => mission.slug === missionParam)
@@ -1307,13 +1317,7 @@ export function PracticeVmPocPage() {
     }
 
     if (changed) {
-      isSyncingUrlRef.current = true;
       setSearchParams(nextParams, { replace: true });
-      // Reset after the current React commit so subsequent external URL
-      // changes are not mistakenly treated as internal syncs.
-      queueMicrotask(() => {
-        isSyncingUrlRef.current = false;
-      });
     }
   }, [searchParams, selectedLessonSlug, selectedMissionSlug, setSearchParams]);
 
