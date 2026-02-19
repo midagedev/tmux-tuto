@@ -103,10 +103,10 @@ export function LearnIndexPage() {
           {pageData.learningJourney ? (
             <section className="learning-journey-card" aria-label={t('Learning Journey')}>
               <p className="page-eyebrow">{t('tmux-tuto 방식')}</p>
-              <h2>{pageData.learningJourney.title}</h2>
-              <p>{pageData.learningJourney.intro}</p>
+              <h2>{t(pageData.learningJourney.title)}</h2>
+              <p>{t(pageData.learningJourney.intro)}</p>
               <p>
-                <strong>{t('최종 목표:')}</strong> {pageData.learningJourney.targetOutcome}
+                <strong>{t('최종 목표:')}</strong> {t(pageData.learningJourney.targetOutcome)}
               </p>
               <div className="inline-actions">
                 {learningPathEntry ? (
@@ -126,11 +126,11 @@ export function LearnIndexPage() {
           <section className="curriculum-track-card learning-level-card">
             <header className="curriculum-track-head">
               <div>
-                <h2>{pageData.learningPath?.title ?? t('통합 레슨 경로')}</h2>
+                <h2>{pageData.learningPath?.title ? t(pageData.learningPath.title) : t('통합 레슨 경로')}</h2>
                 <p className="muted">
                   {t('목표: {{description}}', {
                     description:
-                      pageData.learningPath?.description ??
+                      (pageData.learningPath?.description ? t(pageData.learningPath.description) : null) ??
                       t(
                         'session/window/pane 기초 조작부터 pane 이동, copy-mode, command-mode, 원격 운영까지 한 흐름으로 완료',
                       ),
@@ -150,7 +150,7 @@ export function LearnIndexPage() {
                     className="curriculum-lesson-link"
                     to={`/learn/${lesson.trackSlug}/${lesson.chapterSlug}/${lesson.slug}`}
                   >
-                    <strong>{lesson.title}</strong>
+                    <strong>{t(lesson.title)}</strong>
                     <span>
                       {t('{{minutes}}분 · 미션 {{count}}개', {
                         minutes: lesson.estimatedMinutes,

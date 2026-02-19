@@ -2173,10 +2173,10 @@ export function PracticeVmPocPage() {
           <section className="vm-lesson-banner">
             <div className="vm-lesson-banner-header">
               <span className="vm-lesson-banner-path">
-                {selectedLessonTrack?.title ?? selectedLesson.trackSlug} ·{' '}
-                {selectedLessonChapter?.title ?? selectedLesson.chapterSlug}
+                {t(selectedLessonTrack?.title ?? selectedLesson.trackSlug)} ·{' '}
+                {t(selectedLessonChapter?.title ?? selectedLesson.chapterSlug)}
               </span>
-              <h2 className="vm-lesson-banner-title">{selectedLesson.title}</h2>
+              <h2 className="vm-lesson-banner-title">{t(selectedLesson.title)}</h2>
               <span className="vm-lesson-banner-meta">
                 {t('{{minutes}}분 · 목표 {{objectiveCount}} · 미션 {{missionCount}}', {
                   minutes: selectedLesson.estimatedMinutes,
@@ -2189,13 +2189,13 @@ export function PracticeVmPocPage() {
               <div className="vm-lesson-banner-col">
                 {selectedLesson.overview ? (
                   <p>
-                    {renderTextWithShortcutTooltip(selectedLesson.overview, 'banner-overview')}
+                    {renderTextWithShortcutTooltip(t(selectedLesson.overview), 'banner-overview')}
                   </p>
                 ) : null}
                 {selectedLesson.goal ? (
                   <p className="vm-lesson-banner-goal">
                     <strong>{t('목표:')}</strong>{' '}
-                    {renderTextWithShortcutTooltip(selectedLesson.goal, 'banner-goal')}
+                    {renderTextWithShortcutTooltip(t(selectedLesson.goal), 'banner-goal')}
                   </p>
                 ) : null}
               </div>
@@ -2203,7 +2203,7 @@ export function PracticeVmPocPage() {
                 <ul className="vm-lesson-banner-objectives">
                   {selectedLesson.objectives.map((objective, index) => (
                     <li key={`banner-obj-${index}`}>
-                      {renderTextWithShortcutTooltip(objective, `banner-obj-${index}`)}
+                      {renderTextWithShortcutTooltip(t(objective), `banner-obj-${index}`)}
                     </li>
                   ))}
                 </ul>
@@ -2216,7 +2216,7 @@ export function PracticeVmPocPage() {
                   {selectedLesson.successCriteria.map((item, index) => (
                     <span key={`banner-sc-${index}`}>
                       {index > 0 ? ' · ' : ''}
-                      {renderTextWithShortcutTooltip(item, `banner-sc-${index}`)}
+                      {renderTextWithShortcutTooltip(t(item), `banner-sc-${index}`)}
                     </span>
                   ))}
                 </span>
@@ -2227,7 +2227,7 @@ export function PracticeVmPocPage() {
                   {selectedLesson.failureStates.map((item, index) => (
                     <span key={`banner-fs-${index}`}>
                       {index > 0 ? ' · ' : ''}
-                      {renderTextWithShortcutTooltip(item, `banner-fs-${index}`)}
+                      {renderTextWithShortcutTooltip(t(item), `banner-fs-${index}`)}
                     </span>
                   ))}
                 </span>
@@ -2238,7 +2238,7 @@ export function PracticeVmPocPage() {
                 <span className="vm-lesson-banner-terms-label">{t('용어사전')}</span>
                 {bannerLessonTerms.map((term) => (
                   <span key={term.id} className="vm-lesson-banner-term">
-                    <strong>{term.title}</strong> {term.description}
+                    <strong>{t(term.title)}</strong> {t(term.description)}
                   </span>
                 ))}
               </div>
@@ -2256,7 +2256,7 @@ export function PracticeVmPocPage() {
                   {selectedMissionOrder ? ` ${selectedMissionOrder}/${lessonMissions.length}` : ''}
                 </h2>
                 <p className="muted">
-                  {selectedMission.title} · {t('난이도')} {getDifficultyLabel(t, selectedMission.difficulty)}
+                  {t(selectedMission.title)} · {t('난이도')} {getDifficultyLabel(t, selectedMission.difficulty)}
                 </p>
 
                 <section className="vm-mission-command-block">
@@ -2297,7 +2297,7 @@ export function PracticeVmPocPage() {
 
                 <ul className="link-list">
                   {missionHintPreview.map((hint, index) => (
-                    <li key={hint}>{renderHintTextWithTooltips(hint, `hint-preview-${index}`, t)}</li>
+                        <li key={hint}>{renderHintTextWithTooltips(t(hint), `hint-preview-${index}`, t)}</li>
                   ))}
                 </ul>
                 {hiddenMissionHintCount > 0 ? (
@@ -2305,7 +2305,7 @@ export function PracticeVmPocPage() {
                     <summary>{t('힌트 {{count}}개 더 보기', { count: hiddenMissionHintCount })}</summary>
                     <ul className="link-list">
                       {selectedMission.hints.slice(missionHintPreview.length).map((hint, index) => (
-                        <li key={hint}>{renderHintTextWithTooltips(hint, `hint-more-${index}`, t)}</li>
+                        <li key={hint}>{renderHintTextWithTooltips(t(hint), `hint-more-${index}`, t)}</li>
                       ))}
                     </ul>
                   </details>
@@ -2313,7 +2313,7 @@ export function PracticeVmPocPage() {
                 {selectedMissionStatus ? (
                   <div className="vm-mission-status">
                     <p>
-                      <strong>{t('판정:')}</strong> {selectedMissionStatus.status} · {selectedMissionStatus.reason}
+                      <strong>{t('판정:')}</strong> {selectedMissionStatus.status} · {t(selectedMissionStatus.reason)}
                     </p>
                     {selectedMissionStatus.status === 'manual' ? (
                       <button type="button" className="secondary-btn" onClick={handleManualMissionComplete}>
@@ -2357,7 +2357,7 @@ export function PracticeVmPocPage() {
               </div>
               {selectedMissionStatus ? (
                 <p className="vm-mission-list-status">
-                  {t('판정:')} {selectedMissionStatus.status} · {selectedMissionStatus.reason}
+                  {t('판정:')} {selectedMissionStatus.status} · {t(selectedMissionStatus.reason)}
                 </p>
               ) : null}
               <div className="vm-mission-list">
@@ -2389,7 +2389,7 @@ export function PracticeVmPocPage() {
                     >
                       <span className="vm-mission-row-main">
                         <strong>
-                          {index + 1}. {mission.title}
+                          {index + 1}. {t(mission.title)}
                         </strong>
                         <small>{t('난이도')} {getDifficultyLabel(t, mission.difficulty)}</small>
                       </span>
@@ -2440,9 +2440,9 @@ export function PracticeVmPocPage() {
                         aria-pressed={isActive}
                       >
                         <span className="vm-lesson-row-main">
-                          <strong>{row.lesson.title}</strong>
+                          <strong>{t(row.lesson.title)}</strong>
                           <small>
-                            {trackTitle} · {chapterTitle}
+                            {t(trackTitle)} · {t(chapterTitle)}
                           </small>
                         </span>
                         <span className="vm-lesson-row-meta">

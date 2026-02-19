@@ -27,7 +27,7 @@ function formatSessionDateTime(iso: string | null) {
     return '-';
   }
 
-  return date.toLocaleString('ko-KR', {
+  return date.toLocaleString(undefined, {
     month: '2-digit',
     day: '2-digit',
     hour: '2-digit',
@@ -238,11 +238,11 @@ export function ProgressPage() {
                       const lesson = lessonBySlug.get(lessonSlug);
                       return (
                         <li key={session.id}>
-                          <strong>{mission?.title ?? session.missionSlug}</strong>
+                          <strong>{t(mission?.title ?? session.missionSlug)}</strong>
                           <p className="muted">
                             {t('시작: {{startedAt}}', { startedAt: formatSessionDateTime(session.startedAt) })}
                           </p>
-                          <p className="muted">{lesson?.title ?? lessonSlug}</p>
+                          <p className="muted">{t(lesson?.title ?? lessonSlug)}</p>
                           {lessonSlug ? (
                             <Link
                               className="secondary-btn"
@@ -269,14 +269,14 @@ export function ProgressPage() {
                       const lesson = lessonBySlug.get(lessonSlug);
                       return (
                         <li key={session.id}>
-                          <strong>{mission?.title ?? session.missionSlug}</strong>
+                          <strong>{t(mission?.title ?? session.missionSlug)}</strong>
                           <p className="muted">
                             {t('완료: {{completedAt}} · XP +{{gainedXp}}', {
                               completedAt: formatSessionDateTime(session.completedAt),
                               gainedXp: session.gainedXp ?? 0,
                             })}
                           </p>
-                          <p className="muted">{lesson?.title ?? lessonSlug}</p>
+                          <p className="muted">{t(lesson?.title ?? lessonSlug)}</p>
                         </li>
                       );
                     })}
@@ -291,7 +291,7 @@ export function ProgressPage() {
             <ul className="link-list">
               {trackProgress.map((track) => (
                 <li key={track.trackSlug}>
-                  <strong>{track.trackTitle}</strong> - {track.completedCount}/{track.totalCount} ({track.ratio}%)
+                  <strong>{t(track.trackTitle)}</strong> - {track.completedCount}/{track.totalCount} ({track.ratio}%)
                 </li>
               ))}
             </ul>
@@ -311,8 +311,8 @@ export function ProgressPage() {
                   key={achievement.id}
                   className={`achievement-card ${achievement.unlocked ? 'is-unlocked' : 'is-locked'}`}
                 >
-                  <h3>{achievement.title}</h3>
-                  <p>{achievement.description}</p>
+                  <h3>{t(achievement.title)}</h3>
+                  <p>{t(achievement.description)}</p>
                   <p className="muted">{achievement.unlocked ? t('달성됨') : t('미달성')}</p>
                   {achievement.unlocked ? (
                     <a
@@ -365,8 +365,8 @@ export function ProgressPage() {
                   key={achievement.id}
                   className={`achievement-card ${achievement.unlocked ? 'is-unlocked' : 'is-locked'}`}
                 >
-                  <h3>{achievement.title}</h3>
-                  <p>{achievement.description}</p>
+                  <h3>{t(achievement.title)}</h3>
+                  <p>{t(achievement.description)}</p>
                   <p className="muted">{achievement.unlocked ? t('달성됨') : t('미달성')}</p>
                   {achievement.unlocked ? (
                     <a
@@ -399,7 +399,7 @@ export function ProgressPage() {
               <ul className="link-list">
                 {recommendedMissions.map((mission) => (
                   <li key={mission.slug}>
-                    <strong>{mission.title}</strong> <span className="muted">({mission.difficulty})</span>
+                    <strong>{t(mission.title)}</strong> <span className="muted">({t(mission.difficulty)})</span>
                     <div className="inline-actions">
                       <button
                         type="button"
@@ -424,7 +424,7 @@ export function ProgressPage() {
                 {milestoneLinks.map((item) => (
                   <li key={item.milestoneSlug}>
                     <Link to={item.href} className="secondary-btn">
-                      {t('{{title}} 공유 페이지 열기', { title: item.title })}
+                      {t('{{title}} 공유 페이지 열기', { title: t(item.title) })}
                     </Link>
                   </li>
                 ))}

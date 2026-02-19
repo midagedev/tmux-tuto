@@ -75,9 +75,9 @@ export function AppShell() {
           <div className="app-header-brand-row">
             <NavLink to="/" className="brand">
               <span className="brand-name">{BRAND.name}</span>
-              <small className="brand-subtitle">{BRAND.descriptor}</small>
+              <small className="brand-subtitle">{t('tmux 실습 학습')}</small>
             </NavLink>
-            <p className="app-header-summary">{BRAND.tagline}</p>
+            <p className="app-header-summary">{t('초급부터 심화까지, tmux를 단순하고 실전적으로 익힙니다.')}</p>
           </div>
 
           <div className="app-header-nav-row">

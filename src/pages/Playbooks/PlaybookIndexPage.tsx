@@ -56,11 +56,11 @@ export function PlaybookIndexPage() {
         <div className="reference-playbook-groups">
           {categories.map((category) => (
             <section key={category} className="reference-section">
-              <h2>{category}</h2>
+              <h2>{t(category)}</h2>
               <div className="reference-playbook-grid">
                 {(groupedPlaybooks[category] ?? []).map((playbook) => (
                   <article key={playbook.slug} className="reference-playbook-card">
-                    <h3>{playbook.title}</h3>
+                    <h3>{t(playbook.title)}</h3>
                     <p className="muted">
                       {t('{{minutes}}분 · 단계 {{steps}}개', {
                         minutes: playbook.estimatedMinutes,

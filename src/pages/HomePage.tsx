@@ -76,12 +76,14 @@ export function HomePage() {
     >
       <section className="home-hero">
         <div className="home-hero-main">
-          <p className="home-brand-kicker">{BRAND.descriptor}</p>
-          <p className="home-hero-summary">{BRAND.valuePromise}</p>
+          <p className="home-brand-kicker">{t('tmux 실습 학습')}</p>
+          <p className="home-hero-summary">
+            {t('학습이 끝나면 로컬과 원격 터미널에서 tmux를 자연스럽게 운영하는 개발자가 됩니다.')}
+          </p>
           <ul className="home-pillar-list">
-            {BRAND.valuePillars.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
+            <li>{t('시뮬레이터를 먼저 만나고, 필요한 설명은 바로 옆에서 확인')}</li>
+            <li>{t('초급 코어 루틴을 먼저 완성하고, 이후 심화로 확장')}</li>
+            <li>{t('복잡한 선택보다 짧은 실행 루프를 반복')}</li>
           </ul>
           <div className="inline-actions">
             <Link to="/practice?lesson=hello-tmux" className="primary-btn">

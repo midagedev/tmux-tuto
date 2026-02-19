@@ -77,9 +77,9 @@ export function CheatsheetPage() {
           <div className="reference-grid">
             {featuredReferences.map((item) => (
               <article key={item.id} className="reference-card">
-                <p className="reference-type">{item.contentType}</p>
-                <h3>{item.title}</h3>
-                <p className="muted">{item.description}</p>
+                <p className="reference-type">{t(item.contentType)}</p>
+                <h3>{t(item.title)}</h3>
+                <p className="muted">{t(item.description)}</p>
                 <div className="inline-actions">
                   {item.contentType === 'playbook' && item.playbookSlug ? (
                     <Link to={`/playbooks/${item.playbookSlug}`} className="secondary-btn">
@@ -91,8 +91,8 @@ export function CheatsheetPage() {
                     </Link>
                   )}
                 </div>
-                {item.command ? <code className="playbook-command">{item.command}</code> : null}
-                {item.shortcut ? <code className="playbook-command">{item.shortcut}</code> : null}
+                {item.command ? <code className="playbook-command">{t(item.command)}</code> : null}
+                {item.shortcut ? <code className="playbook-command">{t(item.shortcut)}</code> : null}
               </article>
             ))}
           </div>
@@ -107,8 +107,8 @@ export function CheatsheetPage() {
           <div className="reference-playbook-grid">
             {playbooks.slice(0, 6).map((playbook) => (
               <article key={playbook.slug} className="reference-playbook-card">
-                <p className="reference-type">{playbook.category}</p>
-                <h3>{playbook.title}</h3>
+                <p className="reference-type">{t(playbook.category)}</p>
+                <h3>{t(playbook.title)}</h3>
                 <p className="muted">
                   {t('{{minutes}}분 · 단계 {{count}}개', {
                     minutes: playbook.estimatedMinutes,
