@@ -615,24 +615,6 @@ function formatLayout(layout: string | null) {
   return `${layout.slice(0, 28)}...`;
 }
 
-function formatSessionDateTime(iso: string | null) {
-  if (!iso) {
-    return '-';
-  }
-
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) {
-    return '-';
-  }
-
-  return date.toLocaleString('ko-KR', {
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
-
 function getLessonStatusLabel(status: LessonCompletionStatus) {
   switch (status) {
     case 'completed':
@@ -702,7 +684,6 @@ export function PracticeVmPocPage() {
   const level = useProgressStore((store) => store.level);
   const xp = useProgressStore((store) => store.xp);
   const unlockedAchievements = useProgressStore((store) => store.unlockedAchievements);
-  const missionSessions = useProgressStore((store) => store.missionSessions);
   const recordMissionPass = useProgressStore((store) => store.recordMissionPass);
   const recordTmuxActivity = useProgressStore((store) => store.recordTmuxActivity);
   const startMissionSession = useProgressStore((store) => store.startMissionSession);
@@ -875,21 +856,6 @@ export function PracticeVmPocPage() {
     }
     return completedMissionSlugs.includes(selectedMission.slug);
   }, [completedMissionSlugs, selectedMission]);
-  const selectedMissionSession = useMemo(() => {
-    if (!selectedMission) {
-      return null;
-    }
-
-    for (let index = missionSessions.length - 1; index >= 0; index -= 1) {
-      const session = missionSessions[index];
-      if (session.missionSlug === selectedMission.slug) {
-        return session;
-      }
-    }
-
-    return null;
-  }, [missionSessions, selectedMission]);
-
   const firstIncompleteMissionInLesson = useMemo(() => {
     return lessonMissions.find((mission) => !completedMissionSlugs.includes(mission.slug)) ?? null;
   }, [completedMissionSlugs, lessonMissions]);
