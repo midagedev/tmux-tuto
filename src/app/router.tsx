@@ -15,8 +15,8 @@ const LessonPage = lazy(() =>
 const PracticePage = lazy(() =>
   import('../pages/Practice/PracticePage').then((module) => ({ default: module.PracticePage })),
 );
-const PracticeVmPocPage = lazy(() =>
-  import('../pages/Practice/PracticeVmPocPage').then((module) => ({ default: module.PracticeVmPocPage })),
+const PracticeVmPage = lazy(() =>
+  import('../pages/Practice/PracticeVmPage').then((module) => ({ default: module.PracticeVmPage })),
 );
 const CheatsheetPage = lazy(() =>
   import('../pages/Cheatsheet/CheatsheetPage').then((module) => ({ default: module.CheatsheetPage })),
@@ -99,7 +99,7 @@ export function createAppRouter() {
           { path: 'learn', element: renderLazyPage(LearnIndexPage) },
           { path: 'learn/:trackSlug/:chapterSlug/:lessonSlug', element: renderLazyPage(LessonPage) },
           { path: 'practice', element: renderLazyPage(PracticePage) },
-          { path: 'practice/vm-poc', element: renderLazyPage(PracticeVmPocPage) },
+          { path: 'practice/vm', element: renderLazyPage(PracticeVmPage) },
           { path: 'cheatsheet', element: renderLazyPage(CheatsheetPage) },
           { path: 'playbooks', element: renderLazyPage(PlaybookIndexPage) },
           { path: 'playbooks/:playbookSlug', element: renderLazyPage(PlaybookDetailPage) },

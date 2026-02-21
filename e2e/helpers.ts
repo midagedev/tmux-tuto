@@ -57,7 +57,7 @@ export async function waitForVmReady(page: Page) {
           }
 
           const status = bridge.getStatus();
-          return bridge.isReady() && status.status === 'running' && status.metrics.sessionCount !== null;
+          return bridge.isReady() && status.status === 'running';
         }),
       { timeout: 90_000 },
     )

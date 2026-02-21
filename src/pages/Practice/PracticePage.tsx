@@ -1,1 +1,1 @@
-export { PracticeVmPocPage as PracticePage } from './PracticeVmPocPage';
+export { PracticeVmPage as PracticePage } from './PracticeVmPage';

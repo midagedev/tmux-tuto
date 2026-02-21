@@ -2,7 +2,7 @@
 
 - 기준 이슈: #6
 - 작성일: 2026-02-18
-- 적용 대상: `src/pages/Practice/PracticeVmPocPage.tsx` 및 공통 UI 컴포넌트
+- 적용 대상: `src/pages/Practice/PracticeVmPage.tsx` 및 공통 UI 컴포넌트
 
 ## 1) 목표
 

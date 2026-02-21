@@ -40,6 +40,67 @@
   }
 }
 
+@keyframes vm-metric-item-highlight {
+  0% {
+    background: #f0f9ff;
+    border-color: #bae6fd;
+    transform: translateY(0);
+  }
+
+  38% {
+    background: #dbeafe;
+    border-color: #60a5fa;
+    transform: translateY(-1px);
+  }
+
+  100% {
+    background: #f8fafc;
+    border-color: #dbe2ea;
+    transform: translateY(0);
+  }
+}
+
+@keyframes vm-terminal-gradient-sweep {
+  0% {
+    opacity: 0;
+    transform: translate3d(-1px, 0, 0);
+  }
+
+  18% {
+    opacity: 0.2;
+  }
+
+  34% {
+    opacity: 0.08;
+    transform: translate3d(1px, 0, 0);
+  }
+
+  58% {
+    opacity: 0.18;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes vm-terminal-sparkle-burst {
+  0% {
+    opacity: 0;
+    transform: translateX(-6%);
+  }
+
+  38% {
+    opacity: 0.22;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(8%);
+  }
+}
+
 body {
   margin: 0;
   font-family: 'IBM Plex Sans KR', 'Noto Sans KR', sans-serif;
@@ -1351,7 +1412,7 @@ a {
   }
 }
 
-.vm-poc-panel {
+.vm-practice-panel {
   display: grid;
   gap: 8px;
 }
@@ -1372,23 +1433,23 @@ a {
   font-weight: 700;
 }
 
-.vm-poc-note {
+.vm-practice-note {
   border: 1px solid #bae6fd;
   border-radius: 10px;
   background: #f0f9ff;
   padding: 12px;
 }
 
-.vm-poc-note summary {
+.vm-practice-note summary {
   cursor: pointer;
   font-weight: 700;
 }
 
-.vm-poc-note[open] summary {
+.vm-practice-note[open] summary {
   margin-bottom: 8px;
 }
 
-.vm-poc-note p {
+.vm-practice-note p {
   margin: 0 0 8px;
   line-height: 1.5;
 }
@@ -2184,7 +2245,15 @@ a {
   line-height: 1.4;
 }
 
-.vm-poc-controls {
+@media (prefers-reduced-motion: reduce) {
+  .vm-practice-status-item.is-highlighted,
+  .vm-terminal-shell.is-probe-flash .vm-terminal-probe-flash,
+  .vm-terminal-shell.is-probe-flash .vm-terminal-probe-flash::after {
+    animation: none !important;
+  }
+}
+
+.vm-practice-controls {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 10px;
@@ -2197,12 +2266,12 @@ a {
   max-width: 100%;
 }
 
-.vm-poc-controls .inline-actions {
+.vm-practice-controls .inline-actions {
   width: 100%;
   min-width: 0;
 }
 
-.vm-poc-image-picker {
+.vm-practice-image-picker {
   display: grid;
   gap: 8px;
   border: 1px solid #dbeafe;
@@ -2211,7 +2280,7 @@ a {
   padding: 10px;
 }
 
-.vm-poc-image-option {
+.vm-practice-image-option {
   display: flex;
   align-items: flex-start;
   gap: 8px;
@@ -2219,11 +2288,11 @@ a {
   line-height: 1.45;
 }
 
-.vm-poc-image-option input[type='radio'] {
+.vm-practice-image-option input[type='radio'] {
   margin-top: 2px;
 }
 
-.vm-poc-check {
+.vm-practice-check {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -2231,7 +2300,7 @@ a {
   color: var(--text-secondary);
 }
 
-.vm-poc-quick {
+.vm-practice-quick {
   display: flex;
   flex-wrap: nowrap;
   gap: 8px;
@@ -2239,34 +2308,69 @@ a {
   padding-bottom: 4px;
 }
 
-.vm-poc-quick .secondary-btn {
+.vm-practice-quick .secondary-btn {
   flex: 0 0 auto;
 }
 
-.vm-poc-quick-wrap {
+.vm-practice-quick-wrap {
   border: 1px solid #dbe2ea;
   border-radius: 8px;
   background: #f8fafc;
   padding: 6px 8px;
 }
 
-.vm-poc-quick-wrap summary {
+.vm-practice-quick-wrap summary {
   cursor: pointer;
   font-size: 0.84rem;
   color: var(--text-secondary);
 }
 
-.vm-poc-quick-wrap[open] summary {
+.vm-practice-quick-wrap[open] summary {
   margin-bottom: 8px;
 }
 
-.vm-poc-status {
+.vm-practice-status {
   margin: 0;
   color: var(--text-secondary);
   font-size: 0.82rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #dbe2ea;
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 7px 8px;
 }
 
-.vm-poc-command-form {
+.vm-practice-status-prefix {
+  font-weight: 700;
+  color: #475569;
+  margin-right: 2px;
+}
+
+.vm-practice-status-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  border: 1px solid #dbe2ea;
+  border-radius: 999px;
+  background: #f8fafc;
+  padding: 2px 8px;
+  white-space: nowrap;
+  transition: border-color 120ms ease, background-color 120ms ease, transform 120ms ease;
+}
+
+.vm-practice-status-item strong {
+  color: #0f172a;
+  font-size: 0.78rem;
+}
+
+.vm-practice-status-item.is-highlighted {
+  animation: vm-metric-item-highlight 680ms ease-out;
+}
+
+.vm-practice-command-form {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -2274,7 +2378,7 @@ a {
   width: 100%;
 }
 
-.vm-poc-command-input {
+.vm-practice-command-input {
   min-width: 0;
   flex: 1 1 300px;
   border: 1px solid var(--border);
@@ -2285,6 +2389,7 @@ a {
 }
 
 .vm-terminal-shell {
+  position: relative;
   border: 1px solid #0f172a;
   border-radius: 10px;
   background: #020617;
@@ -2296,13 +2401,57 @@ a {
   overflow: hidden;
 }
 
+.vm-terminal-shell.is-probe-flash {
+  box-shadow:
+    0 0 0 1px rgba(125, 211, 252, 0.22),
+    0 0 10px rgba(56, 189, 248, 0.12);
+}
+
+.vm-terminal-probe-flash {
+  pointer-events: none;
+  position: absolute;
+  inset: -6px;
+  z-index: 3;
+  opacity: 0;
+}
+
+.vm-terminal-shell.is-probe-flash .vm-terminal-probe-flash {
+  background:
+    linear-gradient(92deg, rgba(56, 189, 248, 0) 0%, rgba(56, 189, 248, 0.12) 48%, rgba(16, 185, 129, 0.08) 72%, rgba(16, 185, 129, 0) 100%),
+    repeating-linear-gradient(
+      180deg,
+      rgba(148, 163, 184, 0.06) 0,
+      rgba(148, 163, 184, 0.06) 1px,
+      rgba(2, 6, 23, 0) 1px,
+      rgba(2, 6, 23, 0) 5px
+    );
+  animation: vm-terminal-gradient-sweep 340ms ease-out forwards;
+}
+
+.vm-terminal-probe-flash::after {
+  content: '';
+  position: absolute;
+  inset: 10% 0;
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, rgba(191, 219, 254, 0) 0%, rgba(191, 219, 254, 0.2) 48%, rgba(191, 219, 254, 0) 100%);
+  mix-blend-mode: screen;
+  opacity: 0;
+}
+
+.vm-terminal-shell.is-probe-flash .vm-terminal-probe-flash::after {
+  animation: vm-terminal-sparkle-burst 340ms ease-out forwards;
+}
+
 .vm-terminal-host {
+  position: relative;
+  z-index: 1;
   min-height: 340px;
   min-width: 0;
   width: 100%;
 }
 
-.vm-poc-debug {
+.vm-practice-debug {
   border: 1px solid #dbeafe;
   border-radius: 10px;
   padding: 8px 10px;
@@ -2311,13 +2460,13 @@ a {
   width: 100%;
 }
 
-.vm-poc-debug summary {
+.vm-practice-debug summary {
   cursor: pointer;
   font-size: 0.86rem;
   color: var(--text-secondary);
 }
 
-.vm-poc-debug-text {
+.vm-practice-debug-text {
   margin: 8px 0 0;
   max-height: 220px;
   overflow: auto;
@@ -2360,7 +2509,7 @@ a {
     display: flex;
   }
 
-  .vm-poc-command-form {
+  .vm-practice-command-form {
     width: 100%;
     flex-direction: column;
   }
@@ -2384,7 +2533,7 @@ a {
     padding-right: 0;
   }
 
-  .vm-poc-command-input {
+  .vm-practice-command-input {
     width: 100%;
     flex-basis: auto;
   }
@@ -2393,7 +2542,7 @@ a {
     width: 100%;
   }
 
-  .vm-poc-quick {
+  .vm-practice-quick {
     flex-wrap: wrap;
     overflow-x: visible;
   }
