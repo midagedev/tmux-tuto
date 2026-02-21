@@ -76,6 +76,13 @@
       "slug": "command-mode-workflow",
       "title": "Command Mode Workflow",
       "order": 2
+    },
+    {
+      "id": "chapter-c-03",
+      "trackSlug": "track-c-deepwork",
+      "slug": "ops-troubleshooting",
+      "title": "Ops Troubleshooting",
+      "order": 3
     }
   ],
   "lessons": [
@@ -486,6 +493,167 @@
         "단축키 재현 기록이 없어 키 기반 루틴 전환이 검증되지 않음",
         "command-prompt/choose-tree 실행 기록이 없어 명령 기반 운영 진입이 부족함"
       ]
+    },
+    {
+      "id": "lesson-c-03",
+      "trackSlug": "track-c-deepwork",
+      "chapterSlug": "ops-troubleshooting",
+      "slug": "key-input-guide",
+      "title": "키 입력 충돌 점검 가이드",
+      "practiceType": "guide",
+      "estimatedMinutes": 8,
+      "objectives": [
+        "prefix 충돌 지점 확인",
+        "escape-time 지연 원인 확인",
+        "nested tmux 전달 경로 점검"
+      ],
+      "overview": "키가 먹지 않거나 지연되는 상황에서 터미널, tmux, 애플리케이션 경계를 분리해 점검하는 실습형 가이드입니다.",
+      "goal": "입력 문제가 생겼을 때 prefix/escape-time/send-prefix를 순서대로 확인해 원인을 빠르게 좁히는 루틴을 만듭니다.",
+      "successCriteria": [
+        "현재 prefix 값을 확인하고 기록",
+        "escape-time 조정 전후 체감 차이 확인",
+        "nested 환경에서 send-prefix 동작 확인"
+      ],
+      "failureStates": [
+        "입력 지연 원인을 추정만 하고 확인 명령 없이 진행",
+        "nested 전달 경로를 확인하지 않아 오진 가능성이 남음"
+      ],
+      "guide": {
+        "symptoms": [
+          "단축키가 간헐적으로 무시됨",
+          "Esc 계열 입력 뒤 반응이 늦음",
+          "SSH 내부 tmux에서 prefix가 상위 세션에 먹힘"
+        ],
+        "checks": [
+          "현재 prefix 값을 확인한다.",
+          "escape-time 값을 확인해 과도한 지연 여부를 본다.",
+          "send-prefix 바인딩 존재 여부를 확인한다."
+        ],
+        "workarounds": [
+          "prefix를 충돌이 적은 키로 임시 변경해 재현 여부를 비교한다.",
+          "escape-time을 낮춰 체감 지연을 먼저 제거한다.",
+          "nested 환경에서는 send-prefix 경로를 명시적으로 사용한다."
+        ],
+        "checklist": [
+          "입력 문제를 재현한 뒤 확인 명령 결과를 저장했다.",
+          "조정 후 동일 입력을 다시 실행해 개선 여부를 확인했다.",
+          "원복 명령 또는 기준 설정값을 기록했다."
+        ],
+        "commands": [
+          "tmux show -g prefix",
+          "tmux show -sg escape-time",
+          "tmux list-keys | grep send-prefix",
+          "tmux set -sg escape-time 10"
+        ]
+      }
+    },
+    {
+      "id": "lesson-c-04",
+      "trackSlug": "track-c-deepwork",
+      "chapterSlug": "ops-troubleshooting",
+      "slug": "clipboard-osc52-guide",
+      "title": "클립보드 연동 점검 가이드",
+      "practiceType": "guide",
+      "estimatedMinutes": 9,
+      "objectives": [
+        "copy-mode 검색 결과를 복사 경로와 연결",
+        "set-clipboard/OSC52 경로 확인",
+        "환경별 대안 복사 루틴 확보"
+      ],
+      "overview": "copy-mode에서 찾은 내용을 시스템 클립보드로 보내는 경로를 점검하는 실습형 가이드입니다.",
+      "goal": "검색 결과를 복사한 뒤 로컬 클립보드까지 전달되는 경로를 확인하고, 실패 시 우회 명령으로 즉시 복구합니다.",
+      "successCriteria": [
+        "history-limit과 set-clipboard 값을 확인",
+        "기본 복사 경로 실패 시 대안 명령으로 복사 완료",
+        "환경별(pbcopy/wl-copy/xclip) 대안 중 하나를 확정"
+      ],
+      "failureStates": [
+        "copy-mode 검색만 수행하고 클립보드 전달 경로를 확인하지 않음",
+        "환경별 대안 명령을 준비하지 않아 운영 중 재시도 시간이 길어짐"
+      ],
+      "guide": {
+        "symptoms": [
+          "검색은 되지만 시스템 클립보드에 내용이 없음",
+          "원격 SSH 환경에서 복사 결과가 로컬에 전달되지 않음",
+          "로그가 길어 필요한 구간이 버퍼에서 잘림"
+        ],
+        "checks": [
+          "history-limit이 충분한지 확인한다.",
+          "set-clipboard 설정이 의도한 값인지 확인한다.",
+          "복사 결과가 현재 OS 클립보드 명령으로 읽히는지 확인한다."
+        ],
+        "workarounds": [
+          "OSC52 전달이 불안정하면 save-buffer 경로로 우회한다.",
+          "macOS/Linux 환경별 클립보드 명령을 명시적으로 선택한다.",
+          "버퍼 길이를 늘린 뒤 다시 검색/복사 루틴을 반복한다."
+        ],
+        "checklist": [
+          "copy-mode 검색에서 대상 텍스트를 찾았다.",
+          "기본 경로 또는 우회 경로로 클립보드 전달을 확인했다.",
+          "현재 환경에서 사용할 기본 복사 명령을 기록했다."
+        ],
+        "commands": [
+          "tmux show -g history-limit",
+          "tmux show -g set-clipboard",
+          "tmux save-buffer - | pbcopy",
+          "tmux save-buffer - | wl-copy",
+          "tmux save-buffer - | xclip -selection clipboard"
+        ]
+      }
+    },
+    {
+      "id": "lesson-c-05",
+      "trackSlug": "track-c-deepwork",
+      "chapterSlug": "ops-troubleshooting",
+      "slug": "terminal-render-guide",
+      "title": "터미널 렌더링 점검 가이드",
+      "practiceType": "guide",
+      "estimatedMinutes": 8,
+      "objectives": [
+        "TERM/terminal client 경계 확인",
+        "스타일 옵션 최소화로 원인 분리",
+        "refresh-client로 상태 재초기화"
+      ],
+      "overview": "색상/커서/statusline 깨짐이 생겼을 때 렌더링 원인을 단계적으로 분리하는 실습형 가이드입니다.",
+      "goal": "렌더링 문제가 생겼을 때 TERM 확인, 옵션 최소화, refresh 순서로 빠르게 복구하는 루틴을 만듭니다.",
+      "successCriteria": [
+        "외부 TERM과 tmux client termname을 모두 확인",
+        "옵션 최소화 전후 렌더링 차이를 비교",
+        "refresh-client 실행 후 상태 복구 여부 확인"
+      ],
+      "failureStates": [
+        "터미널/ tmux 경계를 확인하지 않아 원인 위치를 잘못 판단",
+        "옵션 최소화 없이 설정을 무작위로 변경해 재현성이 사라짐"
+      ],
+      "guide": {
+        "symptoms": [
+          "statusline이 깨지거나 줄바꿈 위치가 비정상",
+          "색상이 흐리거나 truecolor가 적용되지 않음",
+          "커서/레이아웃이 꼬여 화면이 갱신되지 않음"
+        ],
+        "checks": [
+          "현재 셸의 TERM 값을 확인한다.",
+          "tmux가 인식한 client termname을 확인한다.",
+          "문제 구간에서 스타일 옵션을 최소화해 차이를 본다."
+        ],
+        "workarounds": [
+          "status/pane-border-status를 끄고 최소 상태로 재검증한다.",
+          "refresh-client로 화면 상태를 재초기화한다.",
+          "터미널 앱 변경 없이 tmux 옵션만 단계적으로 되돌린다."
+        ],
+        "checklist": [
+          "TERM과 client termname 결과를 기록했다.",
+          "최소화 테스트로 문제 재현 범위를 줄였다.",
+          "복구 후 다시 원래 설정을 단계적으로 복원했다."
+        ],
+        "commands": [
+          "echo $TERM",
+          "tmux display-message -p \"#{client_termname}\"",
+          "tmux set -g status off",
+          "tmux set -g pane-border-status off",
+          "tmux refresh-client -S"
+        ]
+      }
     }
   ],
   "missions": [
@@ -2372,7 +2540,10 @@
       "copy-search",
       "copy-search-shortcuts",
       "command-subset",
-      "command-subset-shortcuts"
+      "command-subset-shortcuts",
+      "key-input-guide",
+      "clipboard-osc52-guide",
+      "terminal-render-guide"
     ]
   },
   "termGlossary": [
