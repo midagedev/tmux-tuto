@@ -35,10 +35,16 @@ export function HomePage() {
       to: '/practice?lesson=hello-tmux',
     },
     {
-      title: t('레퍼런스 허브'),
-      description: t('명령/단축키/플레이북을 한 메뉴에서 검색하고 바로 실습으로 연결합니다.'),
-      cta: t('검색 시작'),
+      title: t('기본·명령 가이드'),
+      description: t('기본 사용법과 자주 쓰는 명령/단축키를 빠르게 찾아 바로 실습으로 연결합니다.'),
+      cta: t('명령 찾기'),
       to: '/cheatsheet',
+    },
+    {
+      title: t('유즈케이스 가이드'),
+      description: t('원격 작업 유지, 로그 조사, 복구 절차 같은 상황별 운영 루틴을 확인합니다.'),
+      cta: t('시나리오 보기'),
+      to: '/playbooks',
     },
     {
       title: t('진행도'),
@@ -66,6 +72,15 @@ export function HomePage() {
     },
   ] as const;
   const changelogItems = [
+    {
+      date: '2026-02-21',
+      title: t('유즈케이스 가이드 대폭 확장'),
+      summary: t(
+        '원격 운영, 로그 조사, 입력/렌더링 트러블슈팅, 코딩에이전트 CLI 연동 시나리오를 추가하고 유즈케이스 페이지 중심으로 구조를 정리했습니다.',
+      ),
+      to: '/playbooks',
+      actionLabel: t('유즈케이스 확인'),
+    },
     {
       date: '2026-02-19',
       title: t('레이아웃/워크스페이스 병합 레슨 추가'),

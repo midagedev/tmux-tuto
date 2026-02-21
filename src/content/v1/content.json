@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "generatedAt": "2026-02-18T00:00:00.000Z",
+  "generatedAt": "2026-02-21T00:00:00.000Z",
   "tracks": [
     {
       "id": "track-a-foundations",
@@ -1995,6 +1995,357 @@
         {
           "issue": "원격에서 tmux 명령이 없거나 세션이 없음",
           "resolution": "원격 호스트에 tmux를 설치하고 `tailscale ssh user@host 'tmux new -As work'`로 기준 세션을 다시 생성하세요."
+        }
+      ]
+    },
+    {
+      "id": "playbook-code-log-3pane-loop",
+      "slug": "code-log-3pane-loop",
+      "title": "코드·테스트·로그 3패인 운영",
+      "category": "workflow",
+      "estimatedMinutes": 8,
+      "prerequisites": [
+        "track-b-workflow"
+      ],
+      "steps": [
+        {
+          "id": "p1",
+          "title": "기준 윈도우 준비",
+          "description": "작업 윈도우를 하나 정하고 시작합니다.",
+          "command": "tmux rename-window dev"
+        },
+        {
+          "id": "p2",
+          "title": "패인 3개 구성",
+          "description": "코드/테스트/로그 영역을 고정합니다.",
+          "command": "tmux split-window -h; tmux split-window -v"
+        },
+        {
+          "id": "p3",
+          "title": "레이아웃 균등 정렬",
+          "description": "시야 균형을 먼저 맞춥니다.",
+          "command": "tmux select-layout tiled"
+        },
+        {
+          "id": "p4",
+          "title": "포커스 이동 루틴 고정",
+          "description": "패인 전환 키를 고정해 이동 손실을 줄입니다.",
+          "command": "tmux list-keys | grep select-pane"
+        }
+      ],
+      "verification": [
+        "패인 3개 이상이 보임",
+        "레이아웃이 tiled로 정렬됨",
+        "포커스 이동 시 작업 위치를 잃지 않음"
+      ],
+      "troubleshooting": [
+        {
+          "issue": "분할이 한쪽으로만 치우침",
+          "resolution": "`tmux select-layout tiled`를 다시 실행하세요."
+        },
+        {
+          "issue": "현재 패인이 헷갈림",
+          "resolution": "`tmux display-message -p \"#S:#I.#P\"`로 현재 위치를 확인하세요."
+        }
+      ]
+    },
+    {
+      "id": "playbook-scrollback-clipboard-osc52",
+      "slug": "scrollback-clipboard-osc52",
+      "title": "로그 검색 후 클립보드 복사",
+      "category": "workflow",
+      "estimatedMinutes": 9,
+      "prerequisites": [
+        "track-c-deepwork"
+      ],
+      "steps": [
+        {
+          "id": "p1",
+          "title": "히스토리 길이 확인",
+          "description": "검색 범위를 먼저 확인합니다.",
+          "command": "tmux show -g history-limit"
+        },
+        {
+          "id": "p2",
+          "title": "copy-mode에서 문자열 검색",
+          "description": "스크롤 대신 검색으로 이동합니다.",
+          "command": "Ctrl+b [  이후 /ERROR"
+        },
+        {
+          "id": "p3",
+          "title": "클립보드 전달 옵션 확인",
+          "description": "터미널로 클립보드 전달이 가능한지 점검합니다.",
+          "command": "tmux show -g set-clipboard"
+        },
+        {
+          "id": "p4",
+          "title": "버퍼 직접 추출(대안)",
+          "description": "환경이 맞지 않으면 버퍼를 직접 추출합니다.",
+          "command": "tmux save-buffer - | pbcopy"
+        }
+      ],
+      "verification": [
+        "검색 문자열로 즉시 이동됨",
+        "복사한 문자열이 로컬 클립보드에 들어감"
+      ],
+      "troubleshooting": [
+        {
+          "issue": "검색은 되지만 복사가 안 됨",
+          "resolution": "`tmux show -g set-clipboard` 값을 확인하고 필요 시 `set -g set-clipboard on`을 적용하세요."
+        },
+        {
+          "issue": "pbcopy를 찾을 수 없음",
+          "resolution": "macOS가 아니면 xclip/xsel/OSC52 루트를 사용하세요."
+        }
+      ]
+    },
+    {
+      "id": "playbook-key-input-troubleshooting",
+      "slug": "key-input-troubleshooting",
+      "title": "키 입력 지연/충돌 점검",
+      "category": "troubleshooting",
+      "estimatedMinutes": 7,
+      "prerequisites": [
+        "track-a-foundations"
+      ],
+      "steps": [
+        {
+          "id": "p1",
+          "title": "현재 prefix 확인",
+          "description": "예상과 실제가 같은지 먼저 확인합니다.",
+          "command": "tmux show -g prefix"
+        },
+        {
+          "id": "p2",
+          "title": "escape-time 확인",
+          "description": "입력 지연 원인으로 자주 등장하는 항목입니다.",
+          "command": "tmux show -sg escape-time"
+        },
+        {
+          "id": "p3",
+          "title": "지연 완화 값 적용",
+          "description": "실무에서 자주 쓰는 값으로 맞춥니다.",
+          "command": "tmux set -sg escape-time 10"
+        },
+        {
+          "id": "p4",
+          "title": "중첩 tmux 전달 확인",
+          "description": "중첩 세션에서는 prefix 전달 키를 분리합니다.",
+          "command": "tmux list-keys | grep send-prefix"
+        }
+      ],
+      "verification": [
+        "prefix 이후 키 반응 지연이 줄어듦",
+        "중첩 세션에서 키 전달이 가능함"
+      ],
+      "troubleshooting": [
+        {
+          "issue": "변경 후에도 지연이 유지됨",
+          "resolution": "터미널 자체 키 반복 설정과 shell plugin 충돌을 함께 점검하세요."
+        },
+        {
+          "issue": "중첩 세션에서 여전히 바깥 tmux가 반응함",
+          "resolution": "안쪽 세션 prefix를 다른 키로 분리해 충돌을 줄이세요."
+        }
+      ]
+    },
+    {
+      "id": "playbook-terminal-render-troubleshooting",
+      "slug": "terminal-render-troubleshooting",
+      "title": "터미널 렌더/색상 깨짐 점검",
+      "category": "troubleshooting",
+      "estimatedMinutes": 8,
+      "prerequisites": [
+        "track-a-foundations"
+      ],
+      "steps": [
+        {
+          "id": "p1",
+          "title": "TERM 확인",
+          "description": "가장 먼저 확인할 변수입니다.",
+          "command": "echo $TERM"
+        },
+        {
+          "id": "p2",
+          "title": "tmux 내부 TERM 확인",
+          "description": "외부/내부 값 불일치를 확인합니다.",
+          "command": "tmux display-message -p \"#{client_termname}\""
+        },
+        {
+          "id": "p3",
+          "title": "색상 옵션 최소화 테스트",
+          "description": "문제 분리를 위해 장식 옵션을 잠시 끕니다.",
+          "command": "tmux set -g status off; tmux set -g pane-border-status off"
+        },
+        {
+          "id": "p4",
+          "title": "레이아웃/커서 재초기화",
+          "description": "렌더 꼬임을 빠르게 초기화합니다.",
+          "command": "tmux refresh-client -S"
+        }
+      ],
+      "verification": [
+        "문자 깨짐/세로 렌더가 재현되지 않음",
+        "상태줄/패인 경계가 정상 표시됨"
+      ],
+      "troubleshooting": [
+        {
+          "issue": "특정 터미널에서만 문제 발생",
+          "resolution": "다른 터미널 프로파일에서 동일 설정으로 교차 확인해 원인을 분리하세요."
+        },
+        {
+          "issue": "상태줄 옵션을 켜면 다시 깨짐",
+          "resolution": "커스텀 status-format을 단계별로 복원하며 문제 라인을 찾으세요."
+        }
+      ]
+    },
+    {
+      "id": "playbook-claude-worktree-sessions",
+      "slug": "claude-worktree-sessions",
+      "title": "Claude Code 병렬 작업: worktree + tmux",
+      "category": "agent-cli",
+      "estimatedMinutes": 11,
+      "prerequisites": [
+        "track-b-workflow"
+      ],
+      "steps": [
+        {
+          "id": "p1",
+          "title": "작업 디렉터리 분리",
+          "description": "에이전트마다 worktree를 분리합니다.",
+          "command": "git worktree add ../repo-auth feature/auth"
+        },
+        {
+          "id": "p2",
+          "title": "세션 1:1 매핑",
+          "description": "worktree마다 tmux 세션을 고정합니다.",
+          "command": "tmux new -s agent-auth -c ../repo-auth"
+        },
+        {
+          "id": "p3",
+          "title": "세션 목록으로 상태 확인",
+          "description": "활성 세션을 한 번에 확인합니다.",
+          "command": "tmux ls"
+        },
+        {
+          "id": "p4",
+          "title": "결과 통합 전 차이 확인",
+          "description": "merge 전에 작업 차이를 먼저 검토합니다.",
+          "command": "git -C ../repo-auth status -sb"
+        }
+      ],
+      "verification": [
+        "에이전트마다 다른 경로에서 동작함",
+        "동일 파일 동시 수정 충돌이 줄어듦"
+      ],
+      "troubleshooting": [
+        {
+          "issue": "여전히 같은 경로를 참조함",
+          "resolution": "세션 생성 시 `-c` 경로를 다시 확인하고 새 세션으로 재생성하세요."
+        },
+        {
+          "issue": "브랜치가 섞여 보임",
+          "resolution": "`git -C <path> rev-parse --abbrev-ref HEAD`로 세션별 브랜치를 점검하세요."
+        }
+      ]
+    },
+    {
+      "id": "playbook-claude-dev-server-split",
+      "slug": "claude-dev-server-split",
+      "title": "Claude Code: 대화 세션과 dev 서버 분리",
+      "category": "agent-cli",
+      "estimatedMinutes": 9,
+      "prerequisites": [
+        "track-c-deepwork"
+      ],
+      "steps": [
+        {
+          "id": "p1",
+          "title": "서버 세션을 detached로 시작",
+          "description": "대화 세션을 블로킹하지 않게 분리합니다.",
+          "command": "tmux new-session -d -s dev-server 'pnpm dev'"
+        },
+        {
+          "id": "p2",
+          "title": "출력만 추출",
+          "description": "필요한 로그만 확인합니다.",
+          "command": "tmux capture-pane -t dev-server -p | tail -50"
+        },
+        {
+          "id": "p3",
+          "title": "필요 시만 attach",
+          "description": "실시간 디버깅이 필요할 때만 붙습니다.",
+          "command": "tmux attach -t dev-server"
+        },
+        {
+          "id": "p4",
+          "title": "작업 종료 시 세션 정리",
+          "description": "사용하지 않는 세션을 정리합니다.",
+          "command": "tmux kill-session -t dev-server"
+        }
+      ],
+      "verification": [
+        "대화 세션이 block되지 않음",
+        "서버 로그를 필요 시점에만 확인 가능"
+      ],
+      "troubleshooting": [
+        {
+          "issue": "capture-pane 결과가 비어 있음",
+          "resolution": "세션 이름과 타깃 패인이 맞는지 `tmux list-panes -a`로 확인하세요."
+        },
+        {
+          "issue": "세션이 바로 종료됨",
+          "resolution": "실행 명령 자체 실패 가능성이 높으니 detached 없이 1회 직접 실행해 원인을 확인하세요."
+        }
+      ]
+    },
+    {
+      "id": "playbook-agent-teams-tmux-mode",
+      "slug": "agent-teams-tmux-mode",
+      "title": "Agent Teams tmux 모드 점검",
+      "category": "agent-cli",
+      "estimatedMinutes": 10,
+      "prerequisites": [
+        "track-b-workflow"
+      ],
+      "steps": [
+        {
+          "id": "p1",
+          "title": "tmux 환경 변수 확인",
+          "description": "현재 세션이 tmux 내부인지 먼저 확인합니다.",
+          "command": "echo $TMUX"
+        },
+        {
+          "id": "p2",
+          "title": "패인 생성 가능 상태 확인",
+          "description": "분할 동작이 정상인지 사전 확인합니다.",
+          "command": "tmux split-window -h; tmux kill-pane"
+        },
+        {
+          "id": "p3",
+          "title": "팀 실행 후 패인 상태 점검",
+          "description": "실제로 분할 실행되는지 확인합니다.",
+          "command": "tmux list-panes -a -F \"#S:#I.#P #{pane_current_command}\""
+        },
+        {
+          "id": "p4",
+          "title": "send-keys 지연 이슈 점검",
+          "description": "초기 셸 로딩 경합이 있는지 확인합니다.",
+          "command": "tmux show -sg escape-time"
+        }
+      ],
+      "verification": [
+        "팀 실행 시 패인이 분리되어 관찰 가능",
+        "패인 목록에서 실행 중 명령이 식별됨"
+      ],
+      "troubleshooting": [
+        {
+          "issue": "in-process로만 실행됨",
+          "resolution": "tmux 내부에서 실행 중인지(`$TMUX`)와 터미널 TTY 환경을 먼저 확인하세요."
+        },
+        {
+          "issue": "패인은 생기지만 명령이 비정상 실행됨",
+          "resolution": "셸 초기화 스크립트를 최소화해 race를 줄이고 재시도하세요."
         }
       ]
     }
