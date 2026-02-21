@@ -43,15 +43,24 @@ describe('parseProbeMetricFromLine', () => {
       value: 'bb2d,237x63,0,0,0',
     });
   });
+
+  it('parses window name probe metrics', () => {
+    expect(parseProbeMetricFromLine('[[TMUXWEB_PROBE:windowName:dev]]')).toEqual({
+      key: 'windowName',
+      value: 'dev',
+    });
+  });
 });
 
 describe('parseTmuxActionsFromCommand', () => {
   it('extracts advanced tmux actions', () => {
     const actions = parseTmuxActionsFromCommand(
-      'tmux join-pane -hb -s :.3 -t :.0; tmux select-layout even-horizontal; tmux resize-pane -Z; tmux set-window-option synchronize-panes on',
+      'tmux join-pane -hb -s :.3 -t :.0; tmux rename-window dev; tmux rename-session -t main work; tmux select-layout even-horizontal; tmux resize-pane -Z; tmux set-window-option synchronize-panes on',
     );
 
     expect(actions).toContain('sim.pane.join');
+    expect(actions).toContain('sim.window.rename');
+    expect(actions).toContain('sim.session.rename');
     expect(actions).toContain('sim.layout.select');
     expect(actions).toContain('sim.pane.resize');
     expect(actions).toContain('sim.pane.zoom.toggle');
@@ -79,6 +88,7 @@ describe('evaluateMissionWithVmSnapshot', () => {
         paneCount: 1,
         modeIs: null,
         sessionName: 'main',
+        windowName: '1',
         activeWindowIndex: 0,
         windowLayout: null,
         windowZoomed: false,
@@ -113,6 +123,7 @@ describe('evaluateMissionWithVmSnapshot', () => {
         paneCount: 1,
         modeIs: 'NORMAL',
         sessionName: 'main',
+        windowName: '1',
         activeWindowIndex: 0,
         windowLayout: null,
         windowZoomed: false,

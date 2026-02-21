@@ -74,6 +74,15 @@ export function HomePage() {
   const changelogItems = [
     {
       date: '2026-02-21',
+      title: t('실습형 트러블슈팅 레슨 3종 추가'),
+      summary: t(
+        '키 입력 충돌, 클립보드(OSC52) 연동, 터미널 렌더링 점검을 미션 없는 실습형 레슨으로 추가했습니다.',
+      ),
+      to: '/practice?lesson=key-input-guide',
+      actionLabel: t('새 레슨 열기'),
+    },
+    {
+      date: '2026-02-21',
       title: t('유즈케이스 가이드 대폭 확장'),
       summary: t(
         '원격 운영, 로그 조사, 입력/렌더링 트러블슈팅, 코딩에이전트 CLI 연동 시나리오를 추가하고 유즈케이스 페이지 중심으로 구조를 정리했습니다.',

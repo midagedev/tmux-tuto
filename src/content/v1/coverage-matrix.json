@@ -41,10 +41,13 @@
       "track": "A",
       "scenarioPresetId": "single-pane",
       "capabilities": [
-        "window.create"
+        "window.create",
+        "window.rename"
       ],
       "requiredRuleKinds": [
-        "windowCount"
+        "windowCount",
+        "actionHistoryText",
+        "windowName"
       ]
     },
     {
@@ -94,11 +97,13 @@
       "track": "A",
       "scenarioPresetId": "single-pane",
       "capabilities": [
+        "session.rename",
         "session.detach",
         "session.attach"
       ],
       "requiredRuleKinds": [
-        "shellHistoryText"
+        "shellHistoryText",
+        "sessionName"
       ]
     },
     {
@@ -345,11 +350,13 @@
       "scenarioPresetId": "single-pane",
       "capabilities": [
         "window.create",
+        "window.rename",
         "shortcut.practice"
       ],
       "requiredRuleKinds": [
         "windowCount",
-        "actionHistoryText"
+        "actionHistoryText",
+        "windowName"
       ]
     },
     {
@@ -405,12 +412,14 @@
       "track": "A",
       "scenarioPresetId": "single-pane",
       "capabilities": [
+        "session.rename",
         "session.detach",
         "session.attach",
         "shortcut.practice"
       ],
       "requiredRuleKinds": [
         "shellHistoryText",
+        "sessionName",
         "actionHistoryText"
       ]
     },
