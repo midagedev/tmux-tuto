@@ -105,6 +105,54 @@ describe('vmMetrics', () => {
     expect(activeWindowResult.nextMetrics.activeWindowIndex).toBeNull();
   });
 
+  it('keeps existing names when empty text probes arrive while counts are active', () => {
+    const seeded = {
+      ...createInitialMetrics(),
+      sessionCount: 1,
+      windowCount: 2,
+      sessionName: 'lesson',
+      windowName: 'dev',
+    };
+
+    const sessionNameResult = applyProbeMetricToVmMetrics(seeded, {
+      key: 'sessionName',
+      value: '   ',
+    });
+    expect(sessionNameResult.changed).toBe(false);
+    expect(sessionNameResult.nextMetrics.sessionName).toBe('lesson');
+
+    const windowNameResult = applyProbeMetricToVmMetrics(seeded, {
+      key: 'windowName',
+      value: '   ',
+    });
+    expect(windowNameResult.changed).toBe(false);
+    expect(windowNameResult.nextMetrics.windowName).toBe('dev');
+  });
+
+  it('clears names when corresponding counts are zero', () => {
+    const seeded = {
+      ...createInitialMetrics(),
+      sessionCount: 0,
+      windowCount: 0,
+      sessionName: 'lesson',
+      windowName: 'dev',
+    };
+
+    const sessionNameResult = applyProbeMetricToVmMetrics(seeded, {
+      key: 'sessionName',
+      value: '   ',
+    });
+    expect(sessionNameResult.changed).toBe(true);
+    expect(sessionNameResult.nextMetrics.sessionName).toBeNull();
+
+    const windowNameResult = applyProbeMetricToVmMetrics(seeded, {
+      key: 'windowName',
+      value: '   ',
+    });
+    expect(windowNameResult.changed).toBe(true);
+    expect(windowNameResult.nextMetrics.windowName).toBeNull();
+  });
+
   it('maps mode/sync/search probes to booleans and nullable mode', () => {
     let current = createInitialMetrics();
 

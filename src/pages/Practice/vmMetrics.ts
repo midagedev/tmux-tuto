@@ -141,6 +141,30 @@ function resolveProbeMetricUpdate(metric: VmProbeMetric): VmMetricProbeUpdate | 
   }
 }
 
+function stabilizeTextMetricUpdate(previous: VmMetricState, metricUpdate: VmMetricProbeUpdate): VmMetricProbeUpdate {
+  if (metricUpdate.value !== null) {
+    return metricUpdate;
+  }
+
+  if (
+    metricUpdate.key === 'sessionName' &&
+    previous.sessionName !== null &&
+    (previous.sessionCount === null || previous.sessionCount > 0)
+  ) {
+    return { ...metricUpdate, value: previous.sessionName };
+  }
+
+  if (
+    metricUpdate.key === 'windowName' &&
+    previous.windowName !== null &&
+    (previous.windowCount === null || previous.windowCount > 0)
+  ) {
+    return { ...metricUpdate, value: previous.windowName };
+  }
+
+  return metricUpdate;
+}
+
 export function applyProbeMetricToVmMetrics(previous: VmMetricState, metric: VmProbeMetric) {
   const metricUpdate = resolveProbeMetricUpdate(metric);
   if (!metricUpdate) {
@@ -151,21 +175,22 @@ export function applyProbeMetricToVmMetrics(previous: VmMetricState, metric: VmP
     };
   }
 
-  const previousValue = previous[metricUpdate.key];
-  if (previousValue === metricUpdate.value) {
+  const stabilizedMetricUpdate = stabilizeTextMetricUpdate(previous, metricUpdate);
+  const previousValue = previous[stabilizedMetricUpdate.key];
+  if (previousValue === stabilizedMetricUpdate.value) {
     return {
       nextMetrics: previous,
       changed: false,
-      metricKey: metricUpdate.key,
+      metricKey: stabilizedMetricUpdate.key,
     };
   }
 
   return {
     nextMetrics: {
       ...previous,
-      [metricUpdate.key]: metricUpdate.value,
+      [stabilizedMetricUpdate.key]: stabilizedMetricUpdate.value,
     } as VmMetricState,
     changed: true,
-    metricKey: metricUpdate.key,
+    metricKey: stabilizedMetricUpdate.key,
   };
 }

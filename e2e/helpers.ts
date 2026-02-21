@@ -17,6 +17,7 @@ export type VmBridgeStatus = {
     paneCount: number | null;
     modeIs: string | null;
     sessionName: string | null;
+    windowName: string | null;
     activeWindowIndex: number | null;
     windowLayout: string | null;
     windowZoomed: boolean | null;

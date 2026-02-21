@@ -1,4 +1,10 @@
-export const BASE_PROBE_TRIGGER_COMMAND = '/usr/bin/tmux-tuto-probe >/dev/ttyS1 2>/dev/null';
+export const BASE_PROBE_TRIGGER_COMMAND = [
+  '/usr/bin/tmux-tuto-probe >/dev/ttyS1 2>/dev/null',
+  'TMUXWEB_WINDOW_NAME="$(tmux display-message -p \'#W\' 2>/dev/null | tr -d \'\\n\\r\')"',
+  'TMUXWEB_SESSION_NAME="$(tmux list-sessions -F \'#{session_name}\' 2>/dev/null | head -n 1 | tr -d \'\\n\\r\')"',
+  'if [ -z "${TMUXWEB_WINDOW_NAME:-}" ] && [ -n "${TMUXWEB_SESSION_NAME:-}" ]; then TMUXWEB_WINDOW_NAME="$(tmux display-message -p -t "${TMUXWEB_SESSION_NAME}" \'#{window_name}\' 2>/dev/null | tr -d \'\\n\\r\')"; fi',
+  'printf "[[TMUXWEB_PROBE:windowName:%s]]\\n" "${TMUXWEB_WINDOW_NAME:-}" >/dev/ttyS1',
+].join('; ');
 
 const SEARCH_PROBE_TRIGGER_LINES = [
   'TMUXWEB_SEARCH_COUNT="$(tmux display-message -p \'#{search_count}\' 2>/dev/null | tr -d \' \')"',

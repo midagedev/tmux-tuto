@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
+import type { TFunction } from 'i18next';
 import type { AppContent, AppMission } from '../../features/curriculum/contentSchema';
 import {
   buildMetricStatusItems,
   buildMissionCommandSuggestions,
+  buildMissionPreconditionItems,
   computeCompletedTrackSlugs,
   formatLayout,
   getMetricBadgeClass,
@@ -123,5 +125,57 @@ describe('practiceVmHelpers', () => {
       { key: 'searchExecuted', label: 'search', value: 'yes' },
       { key: 'searchMatchFound', label: 'match', value: '-' },
     ]);
+  });
+
+  it('builds precondition items for sessionName/windowName rules with measured values', () => {
+    const mission: AppMission = {
+      id: 'm2',
+      lessonSlug: 'basics',
+      slug: 'basics-window-open',
+      title: 'Window name mission',
+      type: 'state-check',
+      difficulty: 'beginner',
+      initialScenario: 'single-pane',
+      passRules: [
+        { kind: 'sessionName', operator: 'equals', value: 'lesson' },
+        { kind: 'windowName', operator: 'equals', value: 'dev' },
+      ],
+      hints: [],
+    };
+
+    const snapshot = {
+      sessionCount: 1,
+      windowCount: 2,
+      paneCount: 1,
+      modeIs: null,
+      sessionName: 'lesson',
+      windowName: 'dev',
+      activeWindowIndex: 1,
+      windowLayout: null,
+      windowZoomed: false,
+      paneSynchronized: false,
+      searchExecuted: false,
+      searchMatchFound: false,
+      actionHistory: [],
+      commandHistory: [],
+    };
+
+    const t = ((key: string, params?: Record<string, unknown>) => {
+      if (!params) {
+        return key;
+      }
+      return key.replace(/{{(\w+)}}/g, (_, token) => String(params[token] ?? ''));
+    }) as unknown as TFunction;
+
+    const items = buildMissionPreconditionItems(t, mission, snapshot);
+    const sessionItem = items.find((item) => item.key === 'sessionName-0');
+    const windowItem = items.find((item) => item.key === 'windowName-1');
+
+    expect(sessionItem?.current).toContain('lesson');
+    expect(sessionItem?.current).not.toBe('현재 상태 측정값 없음');
+    expect(sessionItem?.satisfied).toBe(true);
+    expect(windowItem?.current).toContain('dev');
+    expect(windowItem?.current).not.toBe('현재 상태 측정값 없음');
+    expect(windowItem?.satisfied).toBe(true);
   });
 });

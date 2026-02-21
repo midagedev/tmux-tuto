@@ -151,6 +151,8 @@ function getRuleMetricValue(snapshot: VmBridgeSnapshot, kind: string): unknown {
       return snapshot.modeIs;
     case 'sessionName':
       return snapshot.sessionName;
+    case 'windowName':
+      return snapshot.windowName;
     case 'activeWindowIndex':
       return snapshot.activeWindowIndex;
     case 'windowLayout':
@@ -210,6 +212,13 @@ function getRulePreconditionLabel(t: TFunction, rule: AppMission['passRules'][nu
       return rule.value === 'COPY_MODE'
         ? t('Copy Mode에 진입해야 함')
         : t('mode 값이 {{operator}} {{value}} 이어야 함', { operator: rule.operator, value: String(rule.value) });
+    case 'sessionName':
+      return t('세션 이름이 {{operator}} {{value}} 이어야 함', { operator: rule.operator, value: String(rule.value) });
+    case 'windowName':
+      return t('윈도우 이름이 {{operator}} {{value}} 이어야 함', {
+        operator: rule.operator,
+        value: String(rule.value),
+      });
     case 'searchExecuted':
       return t('Copy Mode에서 검색을 실행해야 함');
     case 'searchMatchFound':
@@ -239,6 +248,10 @@ function getRuleCurrentStateText(t: TFunction, rule: AppMission['passRules'][num
       return t('현재 activeWindow: {{value}}', { value: snapshot.activeWindowIndex ?? '-' });
     case 'modeIs':
       return t('현재 mode: {{value}}', { value: snapshot.modeIs ?? '-' });
+    case 'sessionName':
+      return t('현재 sessionName: {{value}}', { value: snapshot.sessionName ?? '-' });
+    case 'windowName':
+      return t('현재 windowName: {{value}}', { value: snapshot.windowName ?? '-' });
     case 'searchExecuted':
       return t('현재 searchExecuted: {{value}}', {
         value: snapshot.searchExecuted === null ? '-' : snapshot.searchExecuted ? 'yes' : 'no',

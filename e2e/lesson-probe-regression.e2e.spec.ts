@@ -33,7 +33,8 @@ type LessonPlan = Lesson & {
 
 const RULE_TIMEOUT_MS = 7_000;
 const TEST_TIMEOUT_MS = 120_000;
-const PROBE_TRIGGER_COMMAND = '/usr/bin/tmux-tuto-probe >/dev/ttyS1 2>/dev/null';
+const PROBE_TRIGGER_COMMAND =
+  '/usr/bin/tmux-tuto-probe >/dev/ttyS1 2>/dev/null; TMUXWEB_WINDOW_NAME="$(tmux list-windows -a -F \'#{window_name}\' 2>/dev/null | head -n 1 | tr -d \'\\n\\r\')"; echo "[[TMUXWEB_PROBE:windowName:$TMUXWEB_WINDOW_NAME]]" >/dev/ttyS1';
 
 const SEARCH_MATCHED_COMMAND =
   'tmux has-session -t lesson 2>/dev/null || tmux new-session -d -s lesson; tmux copy-mode -t lesson:0.0 2>/dev/null || tmux copy-mode 2>/dev/null || true; tmux send-keys -t lesson:0.0 -X search-backward "bin" 2>/dev/null || true; printf "[[TMUXWEB_PROBE:search:1]]\\n[[TMUXWEB_PROBE:searchMatched:1]]\\n" >/dev/ttyS1';
@@ -223,6 +224,30 @@ async function ensureActiveWindowIndexAtLeast(page: Page, minIndex: number) {
     .toBeGreaterThanOrEqual(minIndex);
 }
 
+function toSingleQuotedShellArg(value: string) {
+  return "'" + value.replace(/'/g, `'"'"'`) + "'";
+}
+
+async function ensureWindowNameEquals(page: Page, expectedName: string) {
+  const currentName = ((await getVmBridgeStatus(page)).metrics.windowName ?? '').trim();
+  if (currentName === expectedName) {
+    return;
+  }
+
+  await ensureSessionCountAtLeast(page, 1);
+  const quotedName = toSingleQuotedShellArg(expectedName);
+  await runCommandAndProbe(
+    page,
+    `tmux rename-window -t lesson:0 ${quotedName} 2>/dev/null || tmux rename-window ${quotedName} 2>/dev/null || true`,
+  );
+
+  await expect
+    .poll(async () => ((await getVmBridgeStatus(page)).metrics.windowName ?? '').trim(), {
+      timeout: RULE_TIMEOUT_MS,
+    })
+    .toBe(expectedName);
+}
+
 async function ensureShortcutAction(page: Page) {
   const status = await getVmBridgeStatus(page);
   if (status.actionHistory.includes('sim.shortcut.execute')) {
@@ -278,6 +303,12 @@ async function ensureActionHistoryContains(page: Page, action: string) {
       break;
     case 'sim.choose.tree':
       await runCommandAndProbe(page, 'tmux choose-tree -Z 2>/dev/null || true');
+      break;
+    case 'sim.window.rename':
+      await runCommandAndProbe(
+        page,
+        'tmux has-session -t lesson 2>/dev/null || tmux new-session -d -s lesson; tmux rename-window -t lesson:0 dev 2>/dev/null || tmux rename-window dev 2>/dev/null || true',
+      );
       break;
     default:
       break;
@@ -371,6 +402,10 @@ async function satisfyMission(page: Page, mission: Mission) {
     }
     if (rule.kind === 'activeWindowIndex' && rule.operator === '>=' && typeof rule.value === 'number') {
       await ensureActiveWindowIndexAtLeast(page, rule.value);
+      continue;
+    }
+    if (rule.kind === 'windowName' && rule.operator === 'equals' && typeof rule.value === 'string') {
+      await ensureWindowNameEquals(page, rule.value);
       continue;
     }
     if (rule.kind === 'shellHistoryText' && rule.operator === 'contains' && typeof rule.value === 'string') {
