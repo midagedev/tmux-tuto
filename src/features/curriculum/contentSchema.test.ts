@@ -33,6 +33,13 @@ describe('content schema', () => {
           slug: 'lesson-guide-1',
           title: 'Guide Lesson',
           practiceType: 'guide',
+          guide: {
+            symptoms: ['symptom'],
+            checks: ['check'],
+            workarounds: ['workaround'],
+            checklist: ['checklist'],
+            commands: ['tmux ls'],
+          },
           estimatedMinutes: 8,
           objectives: ['objective'],
         },
@@ -42,6 +49,7 @@ describe('content schema', () => {
     });
 
     expect(parsed.lessons[0].practiceType).toBe('guide');
+    expect(parsed.lessons[0].guide?.commands).toEqual(['tmux ls']);
     expect(parsed.missions).toHaveLength(0);
   });
 });

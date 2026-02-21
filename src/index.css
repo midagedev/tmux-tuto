@@ -1200,6 +1200,37 @@ a {
   color: var(--text-primary);
 }
 
+.curriculum-lesson-title-row {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.lesson-type-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #1e293b;
+}
+
+.lesson-type-badge.is-guide {
+  border-color: #c7eadf;
+  background: #ecfdf5;
+  color: #166534;
+}
+
+.lesson-type-badge.is-mission {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
 .curriculum-lesson-link span {
   color: var(--text-secondary);
   font-size: 0.85rem;
@@ -1241,6 +1272,11 @@ a {
   font-size: 0.79rem;
   font-weight: 600;
   padding: 3px 9px;
+}
+
+.lesson-pill.is-guide {
+  border-color: #c7eadf;
+  color: #166534;
 }
 
 .lesson-brief {
@@ -1785,6 +1821,13 @@ a {
   padding-right: 4px;
 }
 
+.vm-mission-list-empty {
+  border: 1px dashed #dbe2ea;
+  border-radius: 10px;
+  background: #f8fafc;
+  padding: 10px;
+}
+
 .vm-mission-row {
   width: 100%;
   border: 1px solid #dbe2ea;
@@ -1859,6 +1902,11 @@ a {
 .vm-mission-priority-card {
   border-color: #7dd3fc;
   background: linear-gradient(165deg, #f8fdff 0%, #f0f9ff 100%);
+}
+
+.vm-guide-card {
+  border-color: #86efac;
+  background: linear-gradient(165deg, #f7fff9 0%, #f0fdf4 100%);
 }
 
 .vm-mission-priority-eyebrow {
@@ -1984,6 +2032,24 @@ a {
 
 .vm-mission-status p {
   margin: 0;
+}
+
+.vm-guide-grid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.vm-guide-block {
+  border: 1px dashed #dbe2ea;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 8px 10px;
+}
+
+.vm-guide-block h3 {
+  margin: 0 0 6px;
+  font-size: 0.86rem;
 }
 
 .vm-mission-hints-more {
@@ -2368,6 +2434,26 @@ a {
   display: grid;
   gap: 10px;
   grid-template-columns: 1fr;
+}
+
+.lesson-guide-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.lesson-guide-card {
+  border: 1px solid #dbe2ea;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.lesson-guide-card h4 {
+  margin: 0;
+  font-size: 0.92rem;
 }
 
 .lesson-mission-card {

@@ -10,6 +10,7 @@ import {
   loadAppContent,
 } from '../../features/curriculum/contentLoader';
 import type { AppChapter, AppContent, AppLesson, AppMission, AppTrack } from '../../features/curriculum/contentSchema';
+import { resolveLessonPracticeType } from '../../features/curriculum/lessonPracticeType';
 import { resolveLessonTerms } from '../../features/curriculum/lessonTerms';
 import { renderTextWithShortcutTooltip } from '../../features/curriculum/shortcutTooltip';
 
@@ -123,6 +124,12 @@ export function LessonPage() {
 
   const { track, chapter, lesson, missions, termGlossary } = pageState;
   const lessonTerms = resolveLessonTerms(lesson, missions, termGlossary ?? null);
+  const isGuideLesson = resolveLessonPracticeType(lesson) === 'guide';
+  const guideSymptoms = lesson.guide?.symptoms ?? lesson.failureStates ?? [];
+  const guideChecks = lesson.guide?.checks ?? [];
+  const guideWorkarounds = lesson.guide?.workarounds ?? [];
+  const guideChecklist = lesson.guide?.checklist ?? lesson.successCriteria ?? [];
+  const guideCommands = lesson.guide?.commands ?? [];
 
   return (
     <PagePlaceholder
@@ -134,7 +141,9 @@ export function LessonPage() {
         <ul className="lesson-pill-row">
           <li className="lesson-pill">{t('예상 {{minutes}}분', { minutes: lesson.estimatedMinutes })}</li>
           <li className="lesson-pill">{t('학습 목표 {{count}}개', { count: lesson.objectives.length })}</li>
-          <li className="lesson-pill">{t('미션 {{count}}개', { count: missions.length })}</li>
+          <li className={`lesson-pill ${isGuideLesson ? 'is-guide' : 'is-mission'}`}>
+            {isGuideLesson ? t('실습형 레슨') : t('미션 {{count}}개', { count: missions.length })}
+          </li>
         </ul>
         <div className="inline-actions">
           <Link className="primary-btn" to={`/practice?lesson=${lesson.slug}`}>
@@ -204,10 +213,75 @@ export function LessonPage() {
           </>
         ) : null}
 
-        <h3>{t('미션 실행 순서 ({{count}})', { count: missions.length })}</h3>
-        {missions.length === 0 ? (
-          <p className="muted">{t('등록된 미션이 없습니다.')}</p>
+        {isGuideLesson ? (
+          <>
+            <h3>{t('실습 진행 순서')}</h3>
+            <div className="lesson-guide-grid">
+              <article className="lesson-guide-card">
+                <h4>{t('증상')}</h4>
+                {guideSymptoms.length === 0 ? (
+                  <p className="muted">{t('등록된 항목이 없습니다.')}</p>
+                ) : (
+                  <ul className="link-list">
+                    {guideSymptoms.map((item, index) => (
+                      <li key={`guide-symptom-${index}`}>{renderTextWithShortcutTooltip(t(item), `guide-symptom-${index}`)}</li>
+                    ))}
+                  </ul>
+                )}
+              </article>
+              <article className="lesson-guide-card">
+                <h4>{t('확인 명령')}</h4>
+                {guideChecks.length === 0 && guideCommands.length === 0 ? (
+                  <p className="muted">{t('등록된 항목이 없습니다.')}</p>
+                ) : (
+                  <ul className="link-list">
+                    {guideChecks.map((item, index) => (
+                      <li key={`guide-check-${index}`}>{renderTextWithShortcutTooltip(t(item), `guide-check-${index}`)}</li>
+                    ))}
+                    {guideCommands.map((command, index) => (
+                      <li key={`guide-command-${index}`}>
+                        <code>{command}</code>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </article>
+              <article className="lesson-guide-card">
+                <h4>{t('우회책')}</h4>
+                {guideWorkarounds.length === 0 ? (
+                  <p className="muted">{t('등록된 항목이 없습니다.')}</p>
+                ) : (
+                  <ul className="link-list">
+                    {guideWorkarounds.map((item, index) => (
+                      <li key={`guide-workaround-${index}`}>
+                        {renderTextWithShortcutTooltip(t(item), `guide-workaround-${index}`)}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </article>
+              <article className="lesson-guide-card">
+                <h4>{t('체크리스트')}</h4>
+                {guideChecklist.length === 0 ? (
+                  <p className="muted">{t('등록된 항목이 없습니다.')}</p>
+                ) : (
+                  <ul className="link-list">
+                    {guideChecklist.map((item, index) => (
+                      <li key={`guide-checklist-${index}`}>
+                        {renderTextWithShortcutTooltip(t(item), `guide-checklist-${index}`)}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </article>
+            </div>
+          </>
         ) : (
+          <>
+            <h3>{t('미션 실행 순서 ({{count}})', { count: missions.length })}</h3>
+            {missions.length === 0 ? (
+              <p className="muted">{t('등록된 미션이 없습니다.')}</p>
+            ) : (
           <div className="lesson-mission-grid">
             {missions.map((mission) => {
               const previewHints = mission.hints.slice(0, 2);
@@ -249,6 +323,8 @@ export function LessonPage() {
               );
             })}
           </div>
+            )}
+          </>
         )}
       </section>
     </PagePlaceholder>

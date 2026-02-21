@@ -10,6 +10,7 @@ import { PagePlaceholder } from '../../components/system/PagePlaceholder';
 import { setClarityTag, trackClarityEvent } from '../../features/analytics';
 import { loadAppContent } from '../../features/curriculum/contentLoader';
 import type { AppContent, AppMission } from '../../features/curriculum/contentSchema';
+import { resolveLessonPracticeType } from '../../features/curriculum/lessonPracticeType';
 import { resolveLessonTerms } from '../../features/curriculum/lessonTerms';
 import { renderTextWithShortcutTooltip } from '../../features/curriculum/shortcutTooltip';
 import { getAchievementDefinition } from '../../features/progress';
@@ -806,6 +807,13 @@ export function PracticeVmPocPage() {
 
     return content.lessons.find((lesson) => lesson.slug === selectedLessonSlug) ?? null;
   }, [content, selectedLessonSlug]);
+  const selectedLessonPracticeType = selectedLesson ? resolveLessonPracticeType(selectedLesson) : 'mission';
+  const selectedLessonIsGuide = selectedLessonPracticeType === 'guide';
+  const selectedGuideSymptoms = selectedLesson?.guide?.symptoms ?? selectedLesson?.failureStates ?? [];
+  const selectedGuideChecks = selectedLesson?.guide?.checks ?? [];
+  const selectedGuideWorkarounds = selectedLesson?.guide?.workarounds ?? [];
+  const selectedGuideChecklist = selectedLesson?.guide?.checklist ?? selectedLesson?.successCriteria ?? [];
+  const selectedGuideCommands = selectedLesson?.guide?.commands ?? [];
 
   const selectedLessonTrack = useMemo(() => {
     if (!content || !selectedLesson) {
@@ -2130,11 +2138,16 @@ export function PracticeVmPocPage() {
               </span>
               <h2 className="vm-lesson-banner-title">{t(selectedLesson.title)}</h2>
               <span className="vm-lesson-banner-meta">
-                {t('{{minutes}}분 · 목표 {{objectiveCount}} · 미션 {{missionCount}}', {
-                  minutes: selectedLesson.estimatedMinutes,
-                  objectiveCount: selectedLesson.objectives.length,
-                  missionCount: lessonMissions.length,
-                })}
+                {selectedLessonIsGuide
+                  ? t('{{minutes}}분 · 목표 {{objectiveCount}} · 실습형 레슨', {
+                      minutes: selectedLesson.estimatedMinutes,
+                      objectiveCount: selectedLesson.objectives.length,
+                    })
+                  : t('{{minutes}}분 · 목표 {{objectiveCount}} · 미션 {{missionCount}}', {
+                      minutes: selectedLesson.estimatedMinutes,
+                      objectiveCount: selectedLesson.objectives.length,
+                      missionCount: lessonMissions.length,
+                    })}
               </span>
             </div>
             <div className="vm-lesson-banner-body">
@@ -2200,7 +2213,112 @@ export function PracticeVmPocPage() {
 
         <section className={`vm-workbench vm-workbench-view-${mobileWorkbenchView}`}>
           <aside className="vm-study-panel">
-            {selectedMission ? (
+            {selectedLessonIsGuide && selectedLesson ? (
+              <article className="vm-mission-card vm-guide-card">
+                <p className="vm-mission-priority-eyebrow">Guide</p>
+                <h2>{t('실습 가이드')}</h2>
+                <p className="muted">{t('이 레슨은 미션 판정 없이 체크리스트 기반으로 진행합니다.')}</p>
+
+                <section className="vm-learning-nav-card">
+                  <div className="vm-learning-nav-group">
+                    <p className="vm-learning-nav-label">{t('레슨 이동')}</p>
+                    <div className="inline-actions">
+                      <button
+                        type="button"
+                        className="secondary-btn"
+                        disabled={!previousLesson}
+                        onClick={selectPreviousLessonForAction}
+                      >
+                        {t('이전 레슨')}
+                      </button>
+                      <button type="button" className="secondary-btn" disabled={!nextLesson} onClick={selectNextLessonForAction}>
+                        {t('다음 레슨')}
+                      </button>
+                    </div>
+                  </div>
+                </section>
+
+                <section className="vm-mission-command-block">
+                  <h3>{t('확인 명령')}</h3>
+                  {selectedGuideCommands.length > 0 ? (
+                    <div className="vm-mission-command-list">
+                      {selectedGuideCommands.map((command) => (
+                        <button
+                          key={command}
+                          type="button"
+                          className="vm-mission-command-chip"
+                          onClick={() => {
+                            setCommandInput(command);
+                            setMobileWorkbenchView('terminal');
+                          }}
+                        >
+                          <code>{command}</code>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="muted">{t('등록된 명령이 없습니다.')}</p>
+                  )}
+                </section>
+
+                <div className="vm-guide-grid">
+                  <section className="vm-guide-block">
+                    <h3>{t('증상')}</h3>
+                    {selectedGuideSymptoms.length === 0 ? (
+                      <p className="muted">{t('등록된 항목이 없습니다.')}</p>
+                    ) : (
+                      <ul className="link-list">
+                        {selectedGuideSymptoms.map((item, index) => (
+                          <li key={`vm-guide-symptom-${index}`}>{renderTextWithShortcutTooltip(t(item), `vm-guide-symptom-${index}`)}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </section>
+                  <section className="vm-guide-block">
+                    <h3>{t('확인 항목')}</h3>
+                    {selectedGuideChecks.length === 0 ? (
+                      <p className="muted">{t('등록된 항목이 없습니다.')}</p>
+                    ) : (
+                      <ul className="link-list">
+                        {selectedGuideChecks.map((item, index) => (
+                          <li key={`vm-guide-check-${index}`}>{renderTextWithShortcutTooltip(t(item), `vm-guide-check-${index}`)}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </section>
+                  <section className="vm-guide-block">
+                    <h3>{t('우회책')}</h3>
+                    {selectedGuideWorkarounds.length === 0 ? (
+                      <p className="muted">{t('등록된 항목이 없습니다.')}</p>
+                    ) : (
+                      <ul className="link-list">
+                        {selectedGuideWorkarounds.map((item, index) => (
+                          <li key={`vm-guide-workaround-${index}`}>
+                            {renderTextWithShortcutTooltip(t(item), `vm-guide-workaround-${index}`)}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </section>
+                  <section className="vm-guide-block">
+                    <h3>{t('체크리스트')}</h3>
+                    {selectedGuideChecklist.length === 0 ? (
+                      <p className="muted">{t('등록된 항목이 없습니다.')}</p>
+                    ) : (
+                      <ul className="link-list">
+                        {selectedGuideChecklist.map((item, index) => (
+                          <li key={`vm-guide-checklist-${index}`}>
+                            {renderTextWithShortcutTooltip(t(item), `vm-guide-checklist-${index}`)}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </section>
+                </div>
+              </article>
+            ) : null}
+
+            {!selectedLessonIsGuide && selectedMission ? (
               <article className="vm-mission-card vm-mission-priority-card">
                 <p className="vm-mission-priority-eyebrow">Priority 1</p>
                 <h2>
@@ -2404,51 +2522,73 @@ export function PracticeVmPocPage() {
 
             <section className="vm-mission-list-card">
               <div className="vm-mission-list-header">
-                <h2>{t('미션 {{completed}}/{{total}}', { completed: lessonCompletedMissionCount, total: lessonMissions.length })}</h2>
+                <h2>
+                  {selectedLessonIsGuide
+                    ? t('실습 체크리스트')
+                    : t('미션 {{completed}}/{{total}}', { completed: lessonCompletedMissionCount, total: lessonMissions.length })}
+                </h2>
               </div>
-              {selectedMissionStatus ? (
+              {selectedLessonIsGuide ? (
+                <p className="vm-mission-list-status">{t('이 레슨은 자동 판정 없이 체크리스트 기준으로 진행합니다.')}</p>
+              ) : selectedMissionStatus ? (
                 <p className="vm-mission-list-status">
                   {t('판정:')} {selectedMissionStatus.status} · {t(selectedMissionStatus.reason)}
                 </p>
               ) : null}
-              <div className="vm-mission-list">
-                {lessonMissions.map((mission, index) => {
-                  const missionStatus = missionStatusMap.get(mission.slug);
-                  const isSelected = mission.slug === selectedMissionSlug;
-                  const isCompleted = completedMissionSlugs.includes(mission.slug);
+              {selectedLessonIsGuide ? (
+                <div className="vm-mission-list-empty">
+                  {selectedGuideChecklist.length === 0 ? (
+                    <p className="muted">{t('등록된 항목이 없습니다.')}</p>
+                  ) : (
+                    <ul className="link-list">
+                      {selectedGuideChecklist.map((item, index) => (
+                        <li key={`guide-list-check-${index}`}>
+                          {renderTextWithShortcutTooltip(t(item), `guide-list-check-${index}`)}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ) : (
+                <div className="vm-mission-list">
+                  {lessonMissions.map((mission, index) => {
+                    const missionStatus = missionStatusMap.get(mission.slug);
+                    const isSelected = mission.slug === selectedMissionSlug;
+                    const isCompleted = completedMissionSlugs.includes(mission.slug);
 
-                  let badgeClass = 'is-pending';
-                  let badgeLabel = t('대기');
+                    let badgeClass = 'is-pending';
+                    let badgeLabel = t('대기');
 
-                  if (isCompleted) {
-                    badgeClass = 'is-complete';
-                    badgeLabel = t('완료');
-                  } else if (missionStatus?.status === 'complete') {
-                    badgeClass = 'is-live-complete';
-                    badgeLabel = t('실시간 통과');
-                  } else if (missionStatus?.status === 'manual') {
-                    badgeClass = 'is-manual';
-                    badgeLabel = t('수동');
-                  }
+                    if (isCompleted) {
+                      badgeClass = 'is-complete';
+                      badgeLabel = t('완료');
+                    } else if (missionStatus?.status === 'complete') {
+                      badgeClass = 'is-live-complete';
+                      badgeLabel = t('실시간 통과');
+                    } else if (missionStatus?.status === 'manual') {
+                      badgeClass = 'is-manual';
+                      badgeLabel = t('수동');
+                    }
 
-                  return (
-                    <button
-                      key={mission.id}
-                      type="button"
-                      className={`vm-mission-row ${isSelected ? 'is-active' : ''}`}
-                      onClick={() => selectMissionForAction(mission.slug)}
-                    >
-                      <span className="vm-mission-row-main">
-                        <strong>
-                          {index + 1}. {t(mission.title)}
-                        </strong>
-                        <small>{t('난이도')} {getDifficultyLabel(t, mission.difficulty)}</small>
-                      </span>
-                      <span className={`vm-mission-row-badge ${badgeClass}`}>{badgeLabel}</span>
-                    </button>
-                  );
-                })}
-              </div>
+                    return (
+                      <button
+                        key={mission.id}
+                        type="button"
+                        className={`vm-mission-row ${isSelected ? 'is-active' : ''}`}
+                        onClick={() => selectMissionForAction(mission.slug)}
+                      >
+                        <span className="vm-mission-row-main">
+                          <strong>
+                            {index + 1}. {t(mission.title)}
+                          </strong>
+                          <small>{t('난이도')} {getDifficultyLabel(t, mission.difficulty)}</small>
+                        </span>
+                        <span className={`vm-mission-row-badge ${badgeClass}`}>{badgeLabel}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </section>
 
             <section className="vm-curriculum-panel vm-curriculum-row-layout">
@@ -2510,10 +2650,18 @@ export function PracticeVmPocPage() {
                 )}
               </section>
               <div className="vm-lesson-progress">
-                <p>
-                  <strong>{t('Lesson 진행:')}</strong> {lessonCompletedMissionCount}/{lessonMissions.length}
-                </p>
-                <p className="muted">{t('manual 판정 미션: {{count}}', { count: manualMissionCandidates.length })}</p>
+                {selectedLessonIsGuide ? (
+                  <p>
+                    <strong>{t('Lesson 유형:')}</strong> {t('실습형 (미션 판정 없음)')}
+                  </p>
+                ) : (
+                  <>
+                    <p>
+                      <strong>{t('Lesson 진행:')}</strong> {lessonCompletedMissionCount}/{lessonMissions.length}
+                    </p>
+                    <p className="muted">{t('manual 판정 미션: {{count}}', { count: manualMissionCandidates.length })}</p>
+                  </>
+                )}
               </div>
               <div className={`vm-runtime-badge ${getMetricBadgeClass(vmStatus)}`}>
                 <span>{t('VM 상태: {{vmStatus}}', { vmStatus })}</span>
