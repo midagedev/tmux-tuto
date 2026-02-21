@@ -2118,7 +2118,7 @@ export function PracticeVmPocPage() {
             className={`secondary-btn ${mobileWorkbenchView === 'mission' ? 'is-active' : ''}`}
             onClick={() => setMobileWorkbenchView('mission')}
           >
-            {t('미션')}
+            {selectedLessonIsGuide ? t('가이드') : t('미션')}
           </button>
           <button
             type="button"
