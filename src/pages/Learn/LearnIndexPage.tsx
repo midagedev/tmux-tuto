@@ -33,6 +33,9 @@ const LEARNING_PATH_ORDER = [
   'copy-search-shortcuts',
   'command-subset',
   'command-subset-shortcuts',
+  'key-input-guide',
+  'clipboard-osc52-guide',
+  'terminal-render-guide',
 ] as const;
 
 function buildMissionCountMap(missions: AppMission[]) {
