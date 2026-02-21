@@ -24,6 +24,15 @@ const lessonSchema = z.object({
   slug: z.string(),
   title: z.string(),
   practiceType: z.enum(['mission', 'guide']).optional(),
+  guide: z
+    .object({
+      symptoms: z.array(z.string()).optional(),
+      checks: z.array(z.string()).optional(),
+      workarounds: z.array(z.string()).optional(),
+      checklist: z.array(z.string()).optional(),
+      commands: z.array(z.string()).optional(),
+    })
+    .optional(),
   estimatedMinutes: z.number().int(),
   objectives: z.array(z.string()),
   overview: z.string().optional(),

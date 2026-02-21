@@ -6,6 +6,7 @@ import { PagePlaceholder } from '../../components/system/PagePlaceholder';
 import { BRAND } from '../../app/brand';
 import { loadAppContent } from '../../features/curriculum/contentLoader';
 import type { AppContent, AppLesson, AppMission } from '../../features/curriculum/contentSchema';
+import { resolveLessonPracticeType } from '../../features/curriculum/lessonPracticeType';
 
 type LearnPageData = {
   lessons: AppLesson[];
@@ -148,25 +149,38 @@ export function LearnIndexPage() {
               ) : null}
             </header>
             <div className="curriculum-lesson-list">
-              {orderedLessons.map((lesson) => (
-                <div key={lesson.id} className="curriculum-lesson-row">
-                  <Link
-                    className="curriculum-lesson-link"
-                    to={`/learn/${lesson.trackSlug}/${lesson.chapterSlug}/${lesson.slug}`}
-                  >
-                    <strong>{t(lesson.title)}</strong>
-                    <span>
-                      {t('{{minutes}}분 · 미션 {{count}}개', {
-                        minutes: lesson.estimatedMinutes,
-                        count: pageData.missionCounts[lesson.slug] ?? 0,
-                      })}
-                    </span>
-                  </Link>
-                  <Link className="secondary-btn" to={`/practice?lesson=${lesson.slug}`}>
-                    {t('실습')}
-                  </Link>
-                </div>
-              ))}
+              {orderedLessons.map((lesson) => {
+                const isGuide = resolveLessonPracticeType(lesson) === 'guide';
+
+                return (
+                  <div key={lesson.id} className="curriculum-lesson-row">
+                    <Link
+                      className="curriculum-lesson-link"
+                      to={`/learn/${lesson.trackSlug}/${lesson.chapterSlug}/${lesson.slug}`}
+                    >
+                      <strong className="curriculum-lesson-title-row">
+                        <span>{t(lesson.title)}</span>
+                        <span className={`lesson-type-badge ${isGuide ? 'is-guide' : 'is-mission'}`}>
+                          {isGuide ? t('실습형') : t('미션형')}
+                        </span>
+                      </strong>
+                      <span>
+                        {isGuide
+                          ? t('{{minutes}}분 · 실습 체크리스트', {
+                              minutes: lesson.estimatedMinutes,
+                            })
+                          : t('{{minutes}}분 · 미션 {{count}}개', {
+                              minutes: lesson.estimatedMinutes,
+                              count: pageData.missionCounts[lesson.slug] ?? 0,
+                            })}
+                      </span>
+                    </Link>
+                    <Link className="secondary-btn" to={`/practice?lesson=${lesson.slug}`}>
+                      {t('실습')}
+                    </Link>
+                  </div>
+                );
+              })}
             </div>
           </section>
         </div>
