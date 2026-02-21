@@ -15,6 +15,7 @@ describe('vmMetrics', () => {
       paneCount: null,
       modeIs: null,
       sessionName: null,
+      windowName: null,
       activeWindowIndex: null,
       windowLayout: null,
       windowZoomed: null,
@@ -29,6 +30,7 @@ describe('vmMetrics', () => {
       paneCount: false,
       modeIs: false,
       sessionName: false,
+      windowName: false,
       activeWindowIndex: false,
       windowLayout: false,
       windowZoomed: false,
@@ -41,6 +43,7 @@ describe('vmMetrics', () => {
   it('maps probe metric keys to vm metric keys', () => {
     expect(mapProbeMetricToVmMetricKey('session')).toBe('sessionCount');
     expect(mapProbeMetricToVmMetricKey('layout')).toBe('windowLayout');
+    expect(mapProbeMetricToVmMetricKey('windowName')).toBe('windowName');
     expect(mapProbeMetricToVmMetricKey('searchMatched')).toBe('searchMatchFound');
     expect(mapProbeMetricToVmMetricKey('tmux')).toBeNull();
   });
@@ -72,6 +75,7 @@ describe('vmMetrics', () => {
     const seeded = {
       ...createInitialMetrics(),
       sessionName: 'lesson',
+      windowName: 'win',
       windowLayout: 'old-layout',
       activeWindowIndex: 2,
     };
@@ -87,6 +91,12 @@ describe('vmMetrics', () => {
       value: '  bb2d,237x63,0,0,0  ',
     });
     expect(layoutResult.nextMetrics.windowLayout).toBe('bb2d,237x63,0,0,0');
+
+    const windowNameResult = applyProbeMetricToVmMetrics(seeded, {
+      key: 'windowName',
+      value: '  main  ',
+    });
+    expect(windowNameResult.nextMetrics.windowName).toBe('main');
 
     const activeWindowResult = applyProbeMetricToVmMetrics(seeded, {
       key: 'activeWindow',

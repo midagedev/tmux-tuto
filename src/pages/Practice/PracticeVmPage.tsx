@@ -134,6 +134,7 @@ export function PracticeVmPage() {
       paneCount: metrics.paneCount,
       modeIs: metrics.modeIs,
       sessionName: metrics.sessionName,
+      windowName: metrics.windowName,
       activeWindowIndex: metrics.activeWindowIndex,
       windowLayout: metrics.windowLayout,
       windowZoomed: metrics.windowZoomed,

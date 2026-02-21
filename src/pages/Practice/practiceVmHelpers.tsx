@@ -363,6 +363,7 @@ export function buildMetricStatusItems(metrics: VmMetricState): VmMetricStatusIt
   return [
     { key: 'sessionCount', label: 'sessions', value: metrics.sessionCount ?? '-' },
     { key: 'sessionName', label: 'sessionName', value: metrics.sessionName ?? '-' },
+    { key: 'windowName', label: 'windowName', value: metrics.windowName ?? '-' },
     { key: 'windowCount', label: 'windows', value: metrics.windowCount ?? '-' },
     { key: 'paneCount', label: 'panes', value: metrics.paneCount ?? '-' },
     { key: 'activeWindowIndex', label: 'activeWindow', value: metrics.activeWindowIndex ?? '-' },

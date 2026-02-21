@@ -100,6 +100,7 @@ describe('practiceVmHelpers', () => {
       paneCount: 3,
       modeIs: 'COPY_MODE',
       sessionName: 'lesson',
+      windowName: 'dev',
       activeWindowIndex: 0,
       windowLayout: '123456789012345678901234567890',
       windowZoomed: true,
@@ -111,6 +112,7 @@ describe('practiceVmHelpers', () => {
     expect(metricStatusItems).toEqual([
       { key: 'sessionCount', label: 'sessions', value: 1 },
       { key: 'sessionName', label: 'sessionName', value: 'lesson' },
+      { key: 'windowName', label: 'windowName', value: 'dev' },
       { key: 'windowCount', label: 'windows', value: 2 },
       { key: 'paneCount', label: 'panes', value: 3 },
       { key: 'activeWindowIndex', label: 'activeWindow', value: 0 },
