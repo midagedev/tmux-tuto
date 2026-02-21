@@ -6,6 +6,7 @@ export type VmBridgeSnapshot = {
   paneCount: number | null;
   modeIs: string | null;
   sessionName: string | null;
+  windowName: string | null;
   activeWindowIndex: number | null;
   windowLayout: string | null;
   windowZoomed: boolean | null;
@@ -40,6 +41,7 @@ const INTERNAL_PROBE_COMMAND_PATTERNS = [
   'TMUXWEB_PANE=',
   'TMUXWEB_MODE=',
   'TMUXWEB_SESSION_NAME=',
+  'TMUXWEB_WINDOW_NAME=',
   'TMUXWEB_ACTIVE_WINDOW=',
   'TMUXWEB_LAYOUT=',
   'TMUXWEB_ZOOMED=',
@@ -89,6 +91,8 @@ function getMetricFromSnapshot(snapshot: VmBridgeSnapshot, kind: string): unknow
       return snapshot.modeIs;
     case 'sessionName':
       return snapshot.sessionName;
+    case 'windowName':
+      return snapshot.windowName;
     case 'activeWindowIndex':
       return snapshot.activeWindowIndex;
     case 'windowLayout':
@@ -199,6 +203,14 @@ export function parseTmuxActionsFromCommand(command: string) {
     actions.add('sim.window.new');
   }
 
+  if (/\btmux\s+(rename-window|renamew)\b/.test(normalized)) {
+    actions.add('sim.window.rename');
+  }
+
+  if (/\btmux\s+rename-session\b/.test(normalized)) {
+    actions.add('sim.session.rename');
+  }
+
   if (/\btmux\s+(split-window|splitw)\b/.test(normalized)) {
     actions.add('sim.pane.split');
   }
@@ -273,7 +285,7 @@ type VmProbeNumericKey =
   | 'zoomed'
   | 'sync';
 
-type VmProbeTextKey = 'sessionName' | 'layout';
+type VmProbeTextKey = 'sessionName' | 'windowName' | 'layout';
 
 export type VmProbeMetric =
   | {
@@ -287,12 +299,14 @@ export type VmProbeMetric =
 
 export function parseProbeMetricFromLine(line: string): VmProbeMetric | null {
   const cleaned = stripAnsi(line).replace(/\r/g, '');
-  const match = cleaned.match(/\[\[TMUXWEB_PROBE:(session|window|pane|tmux|mode|search|searchMatched|activeWindow|zoomed|sync|sessionName|layout):([^\]]*)\]\]/);
+  const match = cleaned.match(
+    /\[\[TMUXWEB_PROBE:(session|window|pane|tmux|mode|search|searchMatched|activeWindow|zoomed|sync|sessionName|windowName|layout):([^\]]*)\]\]/,
+  );
   if (!match) {
     return null;
   }
 
-  if (match[1] === 'sessionName' || match[1] === 'layout') {
+  if (match[1] === 'sessionName' || match[1] === 'windowName' || match[1] === 'layout') {
     return {
       key: match[1] as VmProbeTextKey,
       value: match[2].trim(),

@@ -51,6 +51,7 @@ type VmMetricState = {
   paneCount: number | null;
   modeIs: string | null;
   sessionName: string | null;
+  windowName: string | null;
   activeWindowIndex: number | null;
   windowLayout: string | null;
   windowZoomed: boolean | null;
@@ -282,6 +283,8 @@ type MissionPreconditionItem = {
 const ACTION_HISTORY_COMMAND_SUGGESTIONS: Record<string, string> = {
   'sim.pane.resize': 'tmux resize-pane -R 5',
   'sim.pane.join': 'tmux join-pane -hb -s :.3 -t :.0',
+  'sim.window.rename': 'tmux rename-window dev',
+  'sim.session.rename': 'tmux rename-session -t main work',
   'sim.command.prompt': 'tmux command-prompt -p "cmd"',
   'sim.choose.tree': 'tmux choose-tree -Z',
 };
@@ -390,6 +393,10 @@ function getRuleCommandSuggestions(rule: AppMission['passRules'][number]) {
       return ['tmux split-window'];
     case 'activeWindowIndex':
       return ['tmux next-window'];
+    case 'sessionName':
+      return ['tmux rename-session -t main work'];
+    case 'windowName':
+      return ['tmux rename-window dev'];
     case 'modeIs':
       return rule.value === 'COPY_MODE' ? ['tmux copy-mode'] : [];
     case 'searchExecuted':
@@ -425,6 +432,8 @@ function getRuleMetricValue(snapshot: VmBridgeSnapshot, kind: string): unknown {
       return snapshot.modeIs;
     case 'sessionName':
       return snapshot.sessionName;
+    case 'windowName':
+      return snapshot.windowName;
     case 'activeWindowIndex':
       return snapshot.activeWindowIndex;
     case 'windowLayout':
@@ -480,6 +489,10 @@ function getRulePreconditionLabel(t: TFunction, rule: AppMission['passRules'][nu
         operator: rule.operator,
         value: String(rule.value),
       });
+    case 'sessionName':
+      return t('세션 이름이 {{operator}} {{value}} 이어야 함', { operator: rule.operator, value: String(rule.value) });
+    case 'windowName':
+      return t('윈도우 이름이 {{operator}} {{value}} 이어야 함', { operator: rule.operator, value: String(rule.value) });
     case 'modeIs':
       return rule.value === 'COPY_MODE'
         ? t('Copy Mode에 진입해야 함')
@@ -511,6 +524,10 @@ function getRuleCurrentStateText(t: TFunction, rule: AppMission['passRules'][num
       return t('현재 pane: {{value}}', { value: snapshot.paneCount ?? '-' });
     case 'activeWindowIndex':
       return t('현재 activeWindow: {{value}}', { value: snapshot.activeWindowIndex ?? '-' });
+    case 'sessionName':
+      return t('현재 sessionName: {{value}}', { value: snapshot.sessionName ?? '-' });
+    case 'windowName':
+      return t('현재 windowName: {{value}}', { value: snapshot.windowName ?? '-' });
     case 'modeIs':
       return t('현재 mode: {{value}}', { value: snapshot.modeIs ?? '-' });
     case 'searchExecuted':
@@ -611,6 +628,7 @@ function createInitialMetrics(): VmMetricState {
     paneCount: null,
     modeIs: null,
     sessionName: null,
+    windowName: null,
     activeWindowIndex: null,
     windowLayout: null,
     windowZoomed: null,
@@ -780,6 +798,7 @@ export function PracticeVmPocPage() {
       paneCount: metrics.paneCount,
       modeIs: metrics.modeIs,
       sessionName: metrics.sessionName,
+      windowName: metrics.windowName,
       activeWindowIndex: metrics.activeWindowIndex,
       windowLayout: metrics.windowLayout,
       windowZoomed: metrics.windowZoomed,
@@ -1315,6 +1334,11 @@ export function PracticeVmPocPage() {
             return {
               ...previous,
               sessionName: metric.value.trim() || null,
+            };
+          case 'windowName':
+            return {
+              ...previous,
+              windowName: metric.value.trim() || null,
             };
           case 'activeWindow':
             return {
@@ -2737,7 +2761,7 @@ export function PracticeVmPocPage() {
 
               <p className="vm-poc-status">
                 metrics · sessions {metrics.sessionCount ?? '-'} / sessionName {metrics.sessionName ?? '-'} / windows{' '}
-                {metrics.windowCount ?? '-'} / panes {metrics.paneCount ?? '-'} / activeWindow{' '}
+                {metrics.windowCount ?? '-'} / windowName {metrics.windowName ?? '-'} / panes {metrics.paneCount ?? '-'} / activeWindow{' '}
                 {metrics.activeWindowIndex ?? '-'} / zoom{' '}
                 {metrics.windowZoomed === null ? '-' : metrics.windowZoomed ? 'yes' : 'no'} / sync{' '}
                 {metrics.paneSynchronized === null ? '-' : metrics.paneSynchronized ? 'yes' : 'no'} / layout{' '}

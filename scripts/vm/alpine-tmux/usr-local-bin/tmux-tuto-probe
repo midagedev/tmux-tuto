@@ -10,6 +10,7 @@ TMUXWEB_WINDOW=-1
 TMUXWEB_PANE=-1
 TMUXWEB_MODE=0
 TMUXWEB_SESSION_NAME=""
+TMUXWEB_WINDOW_NAME=""
 TMUXWEB_ACTIVE_WINDOW=-1
 TMUXWEB_LAYOUT=""
 TMUXWEB_ZOOMED=0
@@ -21,6 +22,7 @@ if [ "$TMUXWEB_TMUX" -eq 1 ]; then
   TMUXWEB_PANE="$(tmux list-panes 2>/dev/null | wc -l | tr -d ' ')"
   TMUXWEB_MODE="$(tmux display-message -p '#{?pane_in_mode,1,0}' 2>/dev/null || echo 0)"
   TMUXWEB_SESSION_NAME="$(tmux display-message -p '#S' 2>/dev/null | tr -d '\n\r')"
+  TMUXWEB_WINDOW_NAME="$(tmux display-message -p '#W' 2>/dev/null | tr -d '\n\r')"
   TMUXWEB_ACTIVE_WINDOW="$(tmux display-message -p '#{window_index}' 2>/dev/null | tr -d ' ')"
   if [ -z "$TMUXWEB_ACTIVE_WINDOW" ]; then
     TMUXWEB_ACTIVE_WINDOW=-1
@@ -44,6 +46,7 @@ echo "[[TMUXWEB_PROBE:window:${TMUXWEB_WINDOW}]]"
 echo "[[TMUXWEB_PROBE:pane:${TMUXWEB_PANE}]]"
 echo "[[TMUXWEB_PROBE:mode:${TMUXWEB_MODE}]]"
 echo "[[TMUXWEB_PROBE:sessionName:${TMUXWEB_SESSION_NAME}]]"
+echo "[[TMUXWEB_PROBE:windowName:${TMUXWEB_WINDOW_NAME}]]"
 echo "[[TMUXWEB_PROBE:activeWindow:${TMUXWEB_ACTIVE_WINDOW}]]"
 echo "[[TMUXWEB_PROBE:layout:${TMUXWEB_LAYOUT}]]"
 echo "[[TMUXWEB_PROBE:zoomed:${TMUXWEB_ZOOMED}]]"

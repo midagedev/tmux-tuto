@@ -119,7 +119,7 @@
       "estimatedMinutes": 10,
       "objectives": [
         "session 생성",
-        "window 생성/전환",
+        "window 생성/이름 변경",
         "기본 workspace 체크포인트 루틴 반복"
       ],
       "overview": "Session/Window/Pane의 역할을 실습으로 익혀 \"작업 공간을 어떻게 쪼개고 유지할지\"를 결정할 수 있게 만듭니다. 실무에서 서비스별 창 분리에 바로 연결됩니다.",
@@ -127,11 +127,11 @@
       "successCriteria": [
         "새 session 생성",
         "window 2개 이상 운영",
-        "`tmux list-windows`로 현재 workspace 상태를 점검"
+        "`tmux rename-window`와 `tmux list-windows`로 작업 윈도우 식별"
       ],
       "failureStates": [
         "session/window 중 한 축만 수행해 기본 작업 공간 구성이 불완전함",
-        "workspace 점검 루틴이 없어 다음 작업 전환 시 위치를 잃기 쉬움"
+        "window 이름을 정하지 않아 전환 시 작업 맥락 식별이 어려움"
       ]
     },
     {
@@ -143,7 +143,7 @@
       "estimatedMinutes": 9,
       "objectives": [
         "session 생성",
-        "window 생성/전환",
+        "window 생성/이름 변경",
         "동일 동작을 prefix 단축키로 1회 이상 재현"
       ],
       "overview": "Session/Window/Pane의 역할을 실습으로 익혀 \"작업 공간을 어떻게 쪼개고 유지할지\"를 결정할 수 있게 만듭니다. 실무에서 서비스별 창 분리에 바로 연결됩니다. 이 레슨은 동일 작업을 단축키로 반복해 손에 익히는 단계입니다.",
@@ -151,11 +151,11 @@
       "successCriteria": [
         "명령 경로 1회 수행 후 동일 동작을 단축키로 1회 재현",
         "새 session 생성",
-        "window 2개 이상 운영"
+        "window 이름 변경 후 목록으로 식별"
       ],
       "failureStates": [
         "단축키 재현 기록이 없어 키 기반 루틴 전환이 검증되지 않음",
-        "session/window 중 한 축만 수행해 기본 작업 공간 구성이 불완전함"
+        "window 이름을 정하지 않아 전환 시 작업 맥락 식별이 어려움"
       ]
     },
     {
@@ -167,7 +167,7 @@
       "estimatedMinutes": 10,
       "objectives": [
         "detach/attach 루틴 실행",
-        "세션 목록 확인",
+        "세션 목록/이름 확인",
         "복수 세션 재접속 루틴"
       ],
       "overview": "tmux를 쓰는 가장 큰 이유인 \"작업 복구\"를 다룹니다. 네트워크 단절이나 터미널 종료 상황에서도 세션을 잃지 않는 운영 습관을 만듭니다.",
@@ -175,11 +175,11 @@
       "successCriteria": [
         "window 2개 이상 상태에서 세션 운영",
         "session 2개 이상 관리",
-        "detach 후 attach로 같은 상태 복귀"
+        "`tmux rename-session` 후 detach/attach로 같은 상태 복귀"
       ],
       "failureStates": [
         "복수 session 운영 기록이 없어 작업 복구 루틴이 검증되지 않음",
-        "detach 후 재접속 흐름이 없어 실전 장애 상황 대응력이 부족함"
+        "세션 이름 식별 없이 재접속해 대상 혼선이 발생함"
       ]
     },
     {
@@ -191,7 +191,7 @@
       "estimatedMinutes": 9,
       "objectives": [
         "detach/attach 루틴 실행",
-        "세션 목록 확인",
+        "세션 목록/이름 확인",
         "동일 동작을 prefix 단축키로 1회 이상 재현"
       ],
       "overview": "tmux를 쓰는 가장 큰 이유인 \"작업 복구\"를 다룹니다. 네트워크 단절이나 터미널 종료 상황에서도 세션을 잃지 않는 운영 습관을 만듭니다. 이 레슨은 동일 작업을 단축키로 반복해 손에 익히는 단계입니다.",
@@ -199,11 +199,11 @@
       "successCriteria": [
         "명령 경로 1회 수행 후 동일 동작을 단축키로 1회 재현",
         "window 2개 이상 상태에서 세션 운영",
-        "session 2개 이상 관리"
+        "세션 이름 변경 후 재접속 대상 식별"
       ],
       "failureStates": [
         "단축키 재현 기록이 없어 키 기반 루틴 전환이 검증되지 않음",
-        "복수 session 운영 기록이 없어 작업 복구 루틴이 검증되지 않음"
+        "세션 이름 식별 없이 재접속해 대상 혼선이 발생함"
       ]
     },
     {
@@ -748,28 +748,7 @@
       "id": "mission-a-01b",
       "lessonSlug": "basics",
       "slug": "basics-window-open",
-      "title": "윈도우 2개 만들기",
-      "type": "state-check",
-      "difficulty": "beginner",
-      "initialScenario": "single-pane",
-      "passRules": [
-        {
-          "kind": "windowCount",
-          "operator": ">=",
-          "value": 2
-        }
-      ],
-      "hints": [
-        "`tmux new-window -n work`로 새 윈도우를 만들어 보세요.",
-        "이미 세션이 있다면 `tmux new-window`만으로도 조건을 채울 수 있습니다.",
-        "단축키로 하려면 `Ctrl`을 누른 채 `b`를 입력하고 손을 뗀 다음 `c`를 누르세요. (`Ctrl+b` 후 `c`)"
-      ]
-    },
-    {
-      "id": "mission-a-01b-s",
-      "lessonSlug": "basics-shortcuts",
-      "slug": "basics-window-open-shortcuts",
-      "title": "윈도우 2개 만들기 (단축키)",
+      "title": "윈도우 2개 만들고 이름 변경",
       "type": "state-check",
       "difficulty": "beginner",
       "initialScenario": "single-pane",
@@ -782,15 +761,54 @@
         {
           "kind": "actionHistoryText",
           "operator": "contains",
+          "value": "sim.window.rename"
+        },
+        {
+          "kind": "windowName",
+          "operator": "equals",
+          "value": "dev"
+        }
+      ],
+      "hints": [
+        "`tmux new-window -n work`로 윈도우를 하나 더 만든 뒤 현재 윈도우를 선택하세요.",
+        "`tmux rename-window dev`로 이름을 변경하세요.",
+        "`tmux list-windows`에서 `dev` 이름이 보이는지 확인하세요."
+      ]
+    },
+    {
+      "id": "mission-a-01b-s",
+      "lessonSlug": "basics-shortcuts",
+      "slug": "basics-window-open-shortcuts",
+      "title": "윈도우 2개 만들고 이름 변경 (단축키)",
+      "type": "state-check",
+      "difficulty": "beginner",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "windowCount",
+          "operator": ">=",
+          "value": 2
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.window.rename"
+        },
+        {
+          "kind": "windowName",
+          "operator": "equals",
+          "value": "dev"
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
           "value": "sim.shortcut.execute"
         }
       ],
       "hints": [
         "먼저 같은 작업을 명령어로 1회 수행해 기준 상태를 만드세요.",
-        "동일 작업을 `Ctrl+b` 후 `c`로 1회 더 실행해 window를 추가하세요.",
-        "`tmux new-window -n work`로 새 윈도우를 만들어 보세요.",
-        "이미 세션이 있다면 `tmux new-window`만으로도 조건을 채울 수 있습니다.",
-        "단축키로 하려면 `Ctrl`을 누른 채 `b`를 입력하고 손을 뗀 다음 `c`를 누르세요. (`Ctrl+b` 후 `c`)"
+        "`tmux rename-window dev`를 실행해 이름 변경을 먼저 통과시키세요.",
+        "`Ctrl+b` 후 `c` 또는 `Ctrl+b` 후 `w`를 1회 실행해 단축키 경로를 함께 남기세요."
       ]
     },
     {
@@ -968,11 +986,16 @@
       "id": "mission-a-02c",
       "lessonSlug": "attach-detach",
       "slug": "session-attach-reconnect",
-      "title": "attach 명령으로 재접속",
+      "title": "세션 이름 변경 후 재접속",
       "type": "state-check",
       "difficulty": "daily",
       "initialScenario": "single-pane",
       "passRules": [
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "tmux rename-session"
+        },
         {
           "kind": "shellHistoryText",
           "operator": "contains",
@@ -981,23 +1004,34 @@
         {
           "kind": "shellHistoryText",
           "operator": "contains",
-          "value": "tmux attach"
+          "value": "tmux attach -t work"
+        },
+        {
+          "kind": "sessionName",
+          "operator": "equals",
+          "value": "work"
         }
       ],
       "hints": [
-        "`tmux detach-client`로 분리한 뒤 `tmux attach -t main`으로 다시 붙어 보세요.",
-        "단축키로는 `Ctrl+b` 후 `d`로 detach 후 `tmux attach -t <세션명>`으로 복귀할 수 있습니다."
+        "`tmux rename-session -t main work`로 세션 이름을 바꾸세요.",
+        "`tmux detach-client` 후 `tmux attach -t work`로 다시 붙으세요.",
+        "재접속 후 `tmux display-message -p \"#S\"`로 현재 세션명이 `work`인지 확인하세요."
       ]
     },
     {
       "id": "mission-a-02c-s",
       "lessonSlug": "attach-detach-shortcuts",
       "slug": "session-attach-reconnect-shortcuts",
-      "title": "attach 명령으로 재접속 (단축키)",
+      "title": "세션 이름 변경 후 재접속 (단축키)",
       "type": "state-check",
       "difficulty": "daily",
       "initialScenario": "single-pane",
       "passRules": [
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "tmux rename-session"
+        },
         {
           "kind": "shellHistoryText",
           "operator": "contains",
@@ -1006,7 +1040,12 @@
         {
           "kind": "shellHistoryText",
           "operator": "contains",
-          "value": "tmux attach"
+          "value": "tmux attach -t work"
+        },
+        {
+          "kind": "sessionName",
+          "operator": "equals",
+          "value": "work"
         },
         {
           "kind": "actionHistoryText",
@@ -1016,9 +1055,8 @@
       ],
       "hints": [
         "먼저 같은 작업을 명령어로 1회 수행해 기준 상태를 만드세요.",
-        "`tmux detach-client` 경로를 `Ctrl+b` 후 `d`로도 1회 수행한 다음 attach를 이어서 실행하세요.",
-        "`tmux detach-client`로 분리한 뒤 `tmux attach -t main`으로 다시 붙어 보세요.",
-        "단축키로는 `Ctrl+b` 후 `d`로 detach 후 `tmux attach -t <세션명>`으로 복귀할 수 있습니다."
+        "`tmux rename-session -t main work`를 실행한 뒤 `Ctrl+b` 후 `d`로 detach를 1회 수행하세요.",
+        "`tmux attach -t work`로 재접속해 이름 변경 세션으로 복귀하세요."
       ]
     },
     {
