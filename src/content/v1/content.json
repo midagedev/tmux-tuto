@@ -2554,6 +2554,142 @@
           "resolution": "셸 초기화 스크립트를 최소화해 race를 줄이고 재시도하세요."
         }
       ]
+    },
+    {
+      "id": "playbook-claude-ghostty-profile",
+      "slug": "claude-ghostty-profile",
+      "title": "Claude Code + Ghostty tmux 프로파일",
+      "category": "agent-cli",
+      "estimatedMinutes": 13,
+      "prerequisites": [
+        "track-a-foundations"
+      ],
+      "steps": [
+        {
+          "id": "p1",
+          "title": "현재 prefix 확인",
+          "description": "예상과 실제가 같은지 먼저 확인합니다.",
+          "command": "tmux show -g prefix"
+        },
+        {
+          "id": "p2",
+          "title": "Ghostty/Claude 오버레이 파일 생성",
+          "description": "충돌 가능 옵션을 기본 파일에서 분리해 터미널별로 제어합니다.",
+          "command": "printf '%s\\n' 'unbind C-b' 'set -g prefix C-a' 'bind C-a send-prefix' 'set -g prefix2 C-b' 'set -g focus-events on' 'set -g mouse on' 'set -sg escape-time 10' 'set -s set-clipboard external' 'set -as terminal-features \",*:RGB\"' 'set -as terminal-features \",*:extkeys\"' 'set -as terminal-features \",*:focus\"' 'set -as terminal-features \",*:hyperlinks\"' 'set -g pane-border-style \"fg=colour238\"' 'set -g pane-active-border-style \"fg=colour45\"' 'set -g window-style \"fg=colour248\"' 'set -g window-active-style \"fg=default\"' > ~/.tmux.claude-ghostty.conf"
+        },
+        {
+          "id": "p3",
+          "title": "Ghostty 조건부 include 추가",
+          "description": "Ghostty에서만 오버레이가 로드되도록 분기합니다.",
+          "command": "printf '%s\\n' 'if -F \"#{==:#{client_termname},xterm-ghostty}\" \"source-file ~/.tmux.claude-ghostty.conf\"' >> ~/.tmux.conf"
+        },
+        {
+          "id": "p4",
+          "title": "실행 중 세션에 반영",
+          "description": "재시작 없이 현재 세션에 설정을 적용합니다.",
+          "command": "tmux source-file ~/.tmux.conf"
+        },
+        {
+          "id": "p5",
+          "title": "옵션 값 검증",
+          "description": "prefix/focus/events/clipboard 값을 순서대로 확인합니다.",
+          "command": "tmux show -g prefix; tmux show -g prefix2; tmux show -g focus-events; tmux show -s set-clipboard; echo $TERM"
+        },
+        {
+          "id": "p6",
+          "title": "Claude Code 단축키 충돌 확인",
+          "description": "Ctrl+b는 Claude Code, tmux prefix는 Ctrl+a로 분리 동작하는지 확인합니다."
+        }
+      ],
+      "verification": [
+        "`tmux show -g prefix` 결과가 `prefix C-a`",
+        "`tmux show -g prefix2` 결과가 `prefix2 C-b`",
+        "`tmux show -g focus-events` 결과가 `focus-events on`",
+        "`tmux show -s set-clipboard` 결과가 `set-clipboard external`",
+        "Ctrl+b(Claude Code)와 Ctrl+a(tmux prefix)가 각각 충돌 없이 동작"
+      ],
+      "troubleshooting": [
+        {
+          "issue": "원격 호스트에서 xterm-ghostty terminfo를 찾지 못함",
+          "resolution": "Ghostty `shell-integration-features`에서 `ssh-terminfo`/`ssh-env`를 활성화하거나, 원격 호스트에 xterm-ghostty terminfo를 설치하세요."
+        },
+        {
+          "issue": "Ctrl+b 입력이 여전히 tmux로 먼저 잡힘",
+          "resolution": "`tmux show -g prefix`와 `tmux show -g prefix2`를 확인하고, 기존 `bind C-b` 계열 라인을 정리한 뒤 다시 로드하세요."
+        },
+        {
+          "issue": "클립보드 전달이 불안정함",
+          "resolution": "`set -s set-clipboard external`로 고정하고, 필요 시 OS별 도구(pbcopy/xclip/wl-copy) 경로를 점검하세요."
+        }
+      ]
+    },
+    {
+      "id": "playbook-terminal-app-profile-matrix",
+      "slug": "terminal-app-profile-matrix",
+      "title": "터미널 앱별 tmux 옵션 매트릭스",
+      "category": "config",
+      "estimatedMinutes": 10,
+      "prerequisites": [
+        "track-a-foundations"
+      ],
+      "steps": [
+        {
+          "id": "p1",
+          "title": "TERM 확인",
+          "description": "가장 먼저 확인할 변수입니다.",
+          "command": "echo $TERM; tmux display-message -p \"#{client_termname}\""
+        },
+        {
+          "id": "p2",
+          "title": "공통 베이스 적용",
+          "description": "마우스/focus/clipboard 공통값으로 시작합니다.",
+          "command": "printf '%s\\n' 'set -g default-terminal \"tmux-256color\"' 'set -g mouse on' 'set -g focus-events on' 'set -s set-clipboard external' >> ~/.tmux.conf"
+        },
+        {
+          "id": "p3",
+          "title": "terminal-features 오버레이 적용",
+          "description": "RGB/extkeys/focus/hyperlinks 협상을 명시합니다.",
+          "command": "printf '%s\\n' 'set -as terminal-features \",*:RGB\"' 'set -as terminal-features \",*:extkeys\"' 'set -as terminal-features \",*:focus\"' 'set -as terminal-features \",*:hyperlinks\"' >> ~/.tmux.conf"
+        },
+        {
+          "id": "p4",
+          "title": "포커스 강조/언포커스 뮤트 적용",
+          "description": "활성 pane과 비활성 pane의 대비를 고정합니다.",
+          "command": "printf '%s\\n' 'set -g pane-border-style \"fg=colour238\"' 'set -g pane-active-border-style \"fg=colour45\"' 'set -g window-style \"fg=colour248\"' 'set -g window-active-style \"fg=default\"' >> ~/.tmux.conf"
+        },
+        {
+          "id": "p5",
+          "title": "알림 정책 고정",
+          "description": "activity/bell/silence 알림을 운영 기준으로 맞춥니다.",
+          "command": "printf '%s\\n' 'setw -g monitor-activity on' 'setw -g monitor-bell on' 'setw -g monitor-silence 300' 'set -g activity-action other' 'set -g bell-action other' 'set -g silence-action other' 'set -g visual-activity both' 'set -g visual-bell both' 'set -g visual-silence on' >> ~/.tmux.conf"
+        },
+        {
+          "id": "p6",
+          "title": "실행 중 세션에 반영",
+          "description": "재시작 없이 현재 세션에 설정을 적용합니다.",
+          "command": "tmux source-file ~/.tmux.conf; tmux show -g mouse; tmux show -g focus-events; tmux show -s set-clipboard"
+        }
+      ],
+      "verification": [
+        "`tmux show -g mouse` 결과가 `mouse on`",
+        "`tmux show -g focus-events` 결과가 `focus-events on`",
+        "`tmux show -s set-clipboard` 결과가 `set-clipboard external`",
+        "활성 pane 경계가 비활성 pane보다 또렷하게 보임"
+      ],
+      "troubleshooting": [
+        {
+          "issue": "특정 터미널에서 키/색상 동작이 다름",
+          "resolution": "`tmux info|grep -E 'RGB|extkeys|focus|hyperlinks'`로 협상 상태를 확인하고 앱별 오버레이를 분리하세요."
+        },
+        {
+          "issue": "포커스 강조가 적용되지 않음",
+          "resolution": "`window-style`/`window-active-style`와 테마 플러그인 override를 함께 점검하세요."
+        },
+        {
+          "issue": "알림이 너무 자주 발생함",
+          "resolution": "`monitor-silence` 시간을 늘리거나 `activity-action`/`bell-action` 값을 낮춰 빈도를 조절하세요."
+        }
+      ]
     }
   ],
   "learningPath": {
