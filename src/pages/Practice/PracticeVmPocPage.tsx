@@ -878,25 +878,6 @@ export function PracticeVmPocPage() {
 
   const selectedMissionOrder = selectedMissionIndex >= 0 ? selectedMissionIndex + 1 : null;
 
-  const previousMissionInLesson = selectedMissionIndex > 0 ? lessonMissions[selectedMissionIndex - 1] : null;
-  const nextMissionInLesson =
-    selectedMissionIndex >= 0 && selectedMissionIndex < lessonMissions.length - 1
-      ? lessonMissions[selectedMissionIndex + 1]
-      : null;
-
-  const previousLesson = useMemo(() => {
-    if (!content || !selectedLesson) {
-      return null;
-    }
-
-    const index = content.lessons.findIndex((lesson) => lesson.slug === selectedLesson.slug);
-    if (index <= 0) {
-      return null;
-    }
-
-    return content.lessons[index - 1] ?? null;
-  }, [content, selectedLesson]);
-
   const nextLesson = useMemo(() => {
     if (!content || !selectedLesson) {
       return null;
@@ -1006,25 +987,6 @@ export function PracticeVmPocPage() {
     setMobileWorkbenchView('mission');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [completedMissionSlugs, content, nextLesson, startMissionSession]);
-
-  const selectPreviousLessonForAction = useCallback(() => {
-    if (!content || !previousLesson) {
-      return;
-    }
-
-    setSelectedLessonSlug(previousLesson.slug);
-    const previousLessonMissions = content.missions.filter((mission) => mission.lessonSlug === previousLesson.slug);
-    const nextMissionSlug = resolveDefaultMissionSlugForLesson(previousLessonMissions, completedMissionSlugs);
-    setSelectedMissionSlug(nextMissionSlug);
-    if (nextMissionSlug) {
-      startMissionSession({
-        missionSlug: nextMissionSlug,
-        lessonSlug: previousLesson.slug,
-      });
-    }
-    setMobileWorkbenchView('mission');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [completedMissionSlugs, content, previousLesson, startMissionSession]);
 
   const markAchievementFeedAsRead = useCallback(() => {
     setAchievementUnreadCount(0);
@@ -2243,25 +2205,6 @@ export function PracticeVmPocPage() {
                 <h2>{t('실습 가이드')}</h2>
                 <p className="muted">{t('이 레슨은 미션 판정 없이 체크리스트 기반으로 진행합니다.')}</p>
 
-                <section className="vm-learning-nav-card">
-                  <div className="vm-learning-nav-group">
-                    <p className="vm-learning-nav-label">{t('레슨 이동')}</p>
-                    <div className="inline-actions">
-                      <button
-                        type="button"
-                        className="secondary-btn"
-                        disabled={!previousLesson}
-                        onClick={selectPreviousLessonForAction}
-                      >
-                        {t('이전 레슨')}
-                      </button>
-                      <button type="button" className="secondary-btn" disabled={!nextLesson} onClick={selectNextLessonForAction}>
-                        {t('다음 레슨')}
-                      </button>
-                    </div>
-                  </div>
-                </section>
-
                 <section className="vm-mission-command-block">
                   <h3>{t('확인 명령')}</h3>
                   {selectedGuideCommands.length > 0 ? (
@@ -2357,54 +2300,6 @@ export function PracticeVmPocPage() {
                     {missionCompletionMessage}
                   </p>
                 ) : null}
-
-                <section className="vm-learning-nav-card">
-                  <div className="vm-learning-nav-group">
-                    <p className="vm-learning-nav-label">{t('미션 이동')}</p>
-                    <div className="inline-actions">
-                      <button
-                        type="button"
-                        className="secondary-btn"
-                        disabled={!previousMissionInLesson}
-                        onClick={() => {
-                          if (previousMissionInLesson) {
-                            selectMissionForAction(previousMissionInLesson.slug);
-                          }
-                        }}
-                      >
-                        {t('이전 미션')}
-                      </button>
-                      <button
-                        type="button"
-                        className="secondary-btn"
-                        disabled={!nextMissionInLesson}
-                        onClick={() => {
-                          if (nextMissionInLesson) {
-                            selectMissionForAction(nextMissionInLesson.slug);
-                          }
-                        }}
-                      >
-                        {t('다음 미션')}
-                      </button>
-                    </div>
-                  </div>
-                  <div className="vm-learning-nav-group">
-                    <p className="vm-learning-nav-label">{t('레슨 이동')}</p>
-                    <div className="inline-actions">
-                      <button
-                        type="button"
-                        className="secondary-btn"
-                        disabled={!previousLesson}
-                        onClick={selectPreviousLessonForAction}
-                      >
-                        {t('이전 레슨')}
-                      </button>
-                      <button type="button" className="secondary-btn" disabled={!nextLesson} onClick={selectNextLessonForAction}>
-                        {t('다음 레슨')}
-                      </button>
-                    </div>
-                  </div>
-                </section>
 
                 <section className="vm-mission-command-block">
                   <h3>{t('이 미션에서 입력할 명령')}</h3>
