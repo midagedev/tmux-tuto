@@ -14,6 +14,42 @@ const LANGUAGE_LABELS: Record<SupportedLanguageCode, string> = {
   ja: 'JA',
   zh: 'ZH',
 };
+const SITE_ORIGIN = 'https://tmux.midagedev.com';
+const SITE_NAME = 'tmux-tuto';
+
+function setMetaTag(attribute: 'name' | 'property', key: string, content: string) {
+  let tag = document.head.querySelector<HTMLMetaElement>(`meta[${attribute}="${key}"]`);
+  if (!tag) {
+    tag = document.createElement('meta');
+    tag.setAttribute(attribute, key);
+    document.head.appendChild(tag);
+  }
+  tag.setAttribute('content', content);
+}
+
+function setCanonicalLink(url: string) {
+  let canonical = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+  if (!canonical) {
+    canonical = document.createElement('link');
+    canonical.setAttribute('rel', 'canonical');
+    document.head.appendChild(canonical);
+  }
+  canonical.setAttribute('href', url);
+}
+
+function applyRouteSeo(pathname: string, title: string, description: string) {
+  const canonicalUrl = new URL(pathname, SITE_ORIGIN).toString();
+  const pageTitle = `${title} | ${SITE_NAME}`;
+
+  document.title = pageTitle;
+  setMetaTag('name', 'description', description);
+  setMetaTag('property', 'og:title', pageTitle);
+  setMetaTag('property', 'og:description', description);
+  setMetaTag('property', 'og:url', canonicalUrl);
+  setMetaTag('name', 'twitter:title', pageTitle);
+  setMetaTag('name', 'twitter:description', description);
+  setCanonicalLink(canonicalUrl);
+}
 
 export function AppShell() {
   const { t, i18n } = useTranslation();
@@ -26,7 +62,8 @@ export function AppShell() {
   const mainLinks = [
     { to: '/learn', label: t('학습 경로') },
     { to: '/practice', label: t('실습') },
-    { to: '/cheatsheet', label: t('레퍼런스') },
+    { to: '/cheatsheet', label: t('기본·명령 가이드') },
+    { to: '/playbooks', label: t('유즈케이스 가이드') },
   ];
 
   useEffect(() => {
@@ -64,6 +101,33 @@ export function AppShell() {
     }
     setClarityTag('language', normalized);
   }, [i18n.language]);
+
+  useEffect(() => {
+    let routeTitle = t('tmux를 실전 운영 루틴으로 익히는 가장 빠른 학습 플로우');
+    let routeDescription = t('설치 없이 브라우저에서 실제 Linux VM으로 tmux를 실습하세요. 세션, 윈도우, 패인, copy-mode까지 단계별 미션 제공.');
+
+    if (location.pathname.startsWith('/learn')) {
+      routeTitle = t('학습 경로');
+      routeDescription = t('tmux 레슨 경로를 순서대로 따라가며 기본 동작부터 운영 루틴까지 학습합니다.');
+    } else if (location.pathname.startsWith('/practice')) {
+      routeTitle = t('실습 워크벤치');
+      routeDescription = t('브라우저 VM에서 tmux 명령을 바로 실행하고 미션으로 검증합니다.');
+    } else if (location.pathname === '/cheatsheet') {
+      routeTitle = t('기본·명령 가이드');
+      routeDescription = t('tmux 기본 사용법과 자주 쓰는 명령/단축키를 빠르게 찾아 바로 실습으로 연결합니다.');
+    } else if (location.pathname === '/playbooks') {
+      routeTitle = t('유즈케이스 가이드');
+      routeDescription = t('실무 상황별 tmux 운영 루틴과 코딩에이전트 CLI 연동 패턴을 짧게 확인합니다.');
+    } else if (location.pathname.startsWith('/playbooks/')) {
+      routeTitle = t('유즈케이스 상세 가이드');
+      routeDescription = t('선택한 tmux 유즈케이스를 단계별로 실행하고 문제 상황별 대응 방법을 확인합니다.');
+    } else if (location.pathname.startsWith('/progress')) {
+      routeTitle = t('학습 진행도');
+      routeDescription = t('레슨 완료, 미션 통과, 업적 진행 상태를 한 화면에서 확인합니다.');
+    }
+
+    applyRouteSeo(location.pathname, routeTitle, routeDescription);
+  }, [location.pathname, t]);
 
   const handleLanguageChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const next = event.target.value as SupportedLanguageCode;

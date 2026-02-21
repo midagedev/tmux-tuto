@@ -12,7 +12,7 @@ describe('curriculum content design', () => {
     });
   });
 
-  it('keeps lesson missions in 2-3 range for progressive practice', async () => {
+  it('keeps mission lessons in 2-3 missions and allows guide lessons with zero missions', async () => {
     const content = await loadAppContent();
     const missionCountByLesson = new Map<string, number>();
 
@@ -24,6 +24,13 @@ describe('curriculum content design', () => {
 
     content.lessons.forEach((lesson) => {
       const missionCount = missionCountByLesson.get(lesson.slug) ?? 0;
+      const practiceType = lesson.practiceType ?? 'mission';
+
+      if (practiceType === 'guide') {
+        expect(missionCount).toBe(0);
+        return;
+      }
+
       expect(missionCount).toBeGreaterThanOrEqual(2);
       expect(missionCount).toBeLessThanOrEqual(3);
     });

@@ -603,6 +603,62 @@ a {
   font-size: 0.95rem;
 }
 
+.reference-guide-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.reference-guide-card {
+  border: 1px solid #d8e3f3;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.reference-guide-card h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.reference-command-block {
+  white-space: pre-wrap;
+  font-family: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  border: 1px solid #d8e3f3;
+  border-radius: 8px;
+  background: #f8fbff;
+  padding: 8px 10px;
+}
+
+.reference-link-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.reference-usecase-playbook-block {
+  border-top: 1px dashed #d8e3f3;
+  padding-top: 8px;
+  display: grid;
+  gap: 6px;
+}
+
+.reference-usecase-playbook-list {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+}
+
+.reference-usecase-playbook-list li {
+  display: grid;
+  gap: 2px;
+}
+
 .bookmark-dashboard {
   display: grid;
   gap: 10px;
@@ -2658,6 +2714,7 @@ a {
   .home-stage-grid,
   .home-surface-grid,
   .home-changelog-list,
+  .reference-guide-grid,
   .reference-grid,
   .reference-playbook-grid {
     grid-template-columns: 1fr;

@@ -49,6 +49,36 @@ export const QUICK_PRESETS: Record<string, QuickPresetDefinition> = {
     description: 'Simulate tmux new -As main',
     actions: [{ type: 'NEW_SESSION' }, { type: 'ADD_MESSAGE', payload: 'Practice preset: tmux new -As main' }],
   },
+  'cs-detach': {
+    id: 'cs-detach',
+    description: 'Simulate detaching a session',
+    actions: [{ type: 'ADD_MESSAGE', payload: 'Practice preset: detached from session (simulated)' }],
+  },
+  'cs-attach-main': {
+    id: 'cs-attach-main',
+    description: 'Simulate attaching to main session',
+    actions: [{ type: 'NEW_SESSION' }, { type: 'ADD_MESSAGE', payload: 'Practice preset: tmux attach -t main' }],
+  },
+  'cs-layout-tiled': {
+    id: 'cs-layout-tiled',
+    description: 'Simulate tiled layout reset',
+    actions: [{ type: 'EXECUTE_COMMAND', payload: 'tmux select-layout tiled' }],
+  },
+  'cs-list-panes': {
+    id: 'cs-list-panes',
+    description: 'Simulate listing panes',
+    actions: [{ type: 'EXECUTE_COMMAND', payload: "tmux list-panes -a -F '#S:#I.#P #{pane_current_command}'" }],
+  },
+  'cs-capture-pane-tail': {
+    id: 'cs-capture-pane-tail',
+    description: 'Simulate capture-pane tail check',
+    actions: [{ type: 'EXECUTE_COMMAND', payload: 'tmux capture-pane -t dev-server -p | tail -50' }],
+  },
+  'cs-escape-time': {
+    id: 'cs-escape-time',
+    description: 'Simulate escape-time tuning',
+    actions: [{ type: 'EXECUTE_COMMAND', payload: 'tmux set -sg escape-time 10' }],
+  },
   'cs-recommended-config': {
     id: 'cs-recommended-config',
     description: 'Apply recommended tmux.conf subset',
@@ -79,6 +109,69 @@ export const QUICK_PRESETS: Record<string, QuickPresetDefinition> = {
       { type: 'EXECUTE_COMMAND', payload: 'echo tailscale ssh connected' },
       { type: 'NEW_SESSION' },
       { type: 'ADD_MESSAGE', payload: 'Practice preset: tailscale ssh workflow simulated' },
+    ],
+  },
+  'cs-code-log-3pane-loop': {
+    id: 'cs-code-log-3pane-loop',
+    description: 'Simulate code/test/log 3-pane workflow',
+    actions: [
+      { type: 'SPLIT_PANE', payload: 'vertical' },
+      { type: 'SPLIT_PANE', payload: 'horizontal' },
+      { type: 'ADD_MESSAGE', payload: 'Practice preset: 3-pane workflow simulated' },
+    ],
+  },
+  'cs-scrollback-clipboard-osc52': {
+    id: 'cs-scrollback-clipboard-osc52',
+    description: 'Simulate copy-mode search and clipboard flow',
+    actions: [
+      { type: 'ENTER_COPY_MODE' },
+      { type: 'RUN_COPY_SEARCH', payload: 'ERROR' },
+      { type: 'ADD_MESSAGE', payload: 'Practice preset: copy/search/clipboard workflow simulated' },
+    ],
+  },
+  'cs-key-input-troubleshooting': {
+    id: 'cs-key-input-troubleshooting',
+    description: 'Simulate key latency troubleshooting',
+    actions: [
+      { type: 'EXECUTE_COMMAND', payload: 'tmux show -sg escape-time' },
+      { type: 'EXECUTE_COMMAND', payload: 'tmux set -sg escape-time 10' },
+      { type: 'ADD_MESSAGE', payload: 'Practice preset: key troubleshooting workflow simulated' },
+    ],
+  },
+  'cs-terminal-render-troubleshooting': {
+    id: 'cs-terminal-render-troubleshooting',
+    description: 'Simulate terminal rendering troubleshooting',
+    actions: [
+      { type: 'EXECUTE_COMMAND', payload: 'echo $TERM' },
+      { type: 'EXECUTE_COMMAND', payload: 'tmux refresh-client -S' },
+      { type: 'ADD_MESSAGE', payload: 'Practice preset: terminal troubleshooting workflow simulated' },
+    ],
+  },
+  'cs-claude-worktree-sessions': {
+    id: 'cs-claude-worktree-sessions',
+    description: 'Simulate Claude Code parallel worktree sessions',
+    actions: [
+      { type: 'NEW_SESSION' },
+      { type: 'NEW_WINDOW' },
+      { type: 'ADD_MESSAGE', payload: 'Practice preset: worktree + tmux session mapping simulated' },
+    ],
+  },
+  'cs-claude-dev-server-split': {
+    id: 'cs-claude-dev-server-split',
+    description: 'Simulate detached dev server workflow',
+    actions: [
+      { type: 'EXECUTE_COMMAND', payload: "tmux new-session -d -s dev-server 'pnpm dev'" },
+      { type: 'EXECUTE_COMMAND', payload: 'tmux capture-pane -t dev-server -p | tail -50' },
+      { type: 'ADD_MESSAGE', payload: 'Practice preset: detached dev server workflow simulated' },
+    ],
+  },
+  'cs-agent-teams-tmux-mode': {
+    id: 'cs-agent-teams-tmux-mode',
+    description: 'Simulate agent teams tmux mode checks',
+    actions: [
+      { type: 'SPLIT_PANE', payload: 'vertical' },
+      { type: 'EXECUTE_COMMAND', payload: "tmux list-panes -a -F '#S:#I.#P #{pane_current_command}'" },
+      { type: 'ADD_MESSAGE', payload: 'Practice preset: agent teams tmux checks simulated' },
     ],
   },
 };
