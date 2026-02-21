@@ -23,6 +23,7 @@ const lessonSchema = z.object({
   chapterSlug: z.string(),
   slug: z.string(),
   title: z.string(),
+  practiceType: z.enum(['mission', 'guide']).optional(),
   estimatedMinutes: z.number().int(),
   objectives: z.array(z.string()),
   overview: z.string().optional(),
