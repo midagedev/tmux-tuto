@@ -60,6 +60,7 @@ type UsePracticeVmInteractionResult = {
   updateMetricByProbe: (metric: VmProbeMetric) => void;
   updateMetricsByProbeState: (snapshot: VmProbeStateSnapshot) => void;
   requestManualProbe: () => void;
+  requestBootstrapProbe: () => void;
   sendInternalCommand: (command: string) => void;
   requestSearchProbe: () => void;
   registerCommand: (command: string, options?: RegisterCommandOptions) => void;
@@ -463,6 +464,10 @@ export function usePracticeVmInteraction({
     void requestProbe('manual');
   }, [requestProbe]);
 
+  const requestBootstrapProbe = useCallback(() => {
+    void requestProbe('bootstrap');
+  }, [requestProbe]);
+
   useEffect(() => {
     if (vmStatus === 'running') {
       return;
@@ -485,6 +490,7 @@ export function usePracticeVmInteraction({
     updateMetricByProbe,
     updateMetricsByProbeState,
     requestManualProbe,
+    requestBootstrapProbe,
     sendInternalCommand,
     requestSearchProbe,
     registerCommand,
