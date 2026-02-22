@@ -30,6 +30,8 @@ function mapPrefixTokenToCommand(token: string): TmuxShortcutSyntheticCommand | 
       return { command: 'tmux split-window -v', shortcutAction: 'sim.shortcut.pane.split.horizontal' };
     case 'c':
       return { command: 'tmux new-window', shortcutAction: 'sim.shortcut.window.new' };
+    case ',':
+      return { command: 'tmux rename-window', shortcutAction: 'sim.shortcut.window.rename' };
     case 'n':
       return { command: 'tmux next-window', shortcutAction: 'sim.shortcut.window.next' };
     case 'p':

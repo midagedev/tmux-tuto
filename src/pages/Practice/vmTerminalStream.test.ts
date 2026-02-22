@@ -17,6 +17,8 @@ describe('vmTerminalStream', () => {
     expect(second.nextState).toEqual({
       lineBuffer: '',
       inEscapeSequence: false,
+      tmuxPrefixPending: false,
+      tmuxPrefixEscapeBuffer: null,
     });
   });
 
@@ -26,6 +28,8 @@ describe('vmTerminalStream', () => {
     expect(withEscape.nextState).toEqual({
       lineBuffer: 'abcA',
       inEscapeSequence: false,
+      tmuxPrefixPending: false,
+      tmuxPrefixEscapeBuffer: null,
     });
 
     const withBackspace = consumeTerminalInputData('de\b\n', withEscape.nextState);
@@ -33,6 +37,36 @@ describe('vmTerminalStream', () => {
 
     const withReset = consumeTerminalInputData('hello\u0015tmux ls\n', createInitialTerminalInputCaptureState());
     expect(withReset.commands).toEqual(['tmux ls']);
+  });
+
+  it('ignores tmux prefix shortcuts before capturing a shell command', () => {
+    const initial = createInitialTerminalInputCaptureState();
+    const withShortcut = consumeTerminalInputData('\u0002c', initial);
+    expect(withShortcut.commands).toEqual([]);
+    expect(withShortcut.nextState).toEqual({
+      lineBuffer: '',
+      inEscapeSequence: false,
+      tmuxPrefixPending: false,
+      tmuxPrefixEscapeBuffer: null,
+    });
+
+    const withCommand = consumeTerminalInputData('tmux rename-window dev\n', withShortcut.nextState);
+    expect(withCommand.commands).toEqual(['tmux rename-window dev']);
+  });
+
+  it('keeps tmux prefix escape sequences out of shell command capture', () => {
+    const initial = createInitialTerminalInputCaptureState();
+    const first = consumeTerminalInputData('\u0002\u001b', initial);
+    expect(first.nextState.tmuxPrefixPending).toBe(true);
+    expect(first.nextState.tmuxPrefixEscapeBuffer).toBe('\u001b');
+
+    const second = consumeTerminalInputData('[A', first.nextState);
+    expect(second.nextState.tmuxPrefixPending).toBe(false);
+    expect(second.nextState.tmuxPrefixEscapeBuffer).toBeNull();
+    expect(second.nextState.lineBuffer).toBe('');
+
+    const withCommand = consumeTerminalInputData('tmux list-windows\n', second.nextState);
+    expect(withCommand.commands).toEqual(['tmux list-windows']);
   });
 
   it('captures completed lines from terminal output and preserves existing escape handling', () => {

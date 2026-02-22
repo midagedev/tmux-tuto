@@ -18,7 +18,12 @@ import {
   loadVmInitialState,
   type VmBootConfig,
 } from '../vmBoot';
-import { consumeProbeOutputByte, consumeTerminalInputData, consumeTerminalOutputByte } from '../vmTerminalStream';
+import {
+  consumeProbeOutputByte,
+  consumeTerminalInputData,
+  consumeTerminalOutputByte,
+  createInitialTerminalInputCaptureState,
+} from '../vmTerminalStream';
 
 type VmStatus = 'idle' | 'booting' | 'running' | 'stopped' | 'error';
 
@@ -89,8 +94,7 @@ export function usePracticeVmBootstrap({
   terminalGeometrySyncCommand,
   bootConfig,
 }: UsePracticeVmBootstrapArgs) {
-  const inputLineBufferRef = useRef('');
-  const inputEscapeSequenceRef = useRef(false);
+  const inputCaptureStateRef = useRef(createInitialTerminalInputCaptureState());
   const outputEscapeSequenceRef = useRef(false);
   const lineBufferRef = useRef('');
   const probeLineBufferRef = useRef('');
@@ -124,8 +128,7 @@ export function usePracticeVmBootstrap({
     setActionHistory([]);
     setCommandHistory([]);
     setDebugLines([]);
-    inputLineBufferRef.current = '';
-    inputEscapeSequenceRef.current = false;
+    inputCaptureStateRef.current = createInitialTerminalInputCaptureState();
     outputEscapeSequenceRef.current = false;
     lineBufferRef.current = '';
     probeLineBufferRef.current = '';
@@ -177,11 +180,12 @@ export function usePracticeVmBootstrap({
         requestSearchProbe();
       }
       const inputCaptureResult = consumeTerminalInputData(data, {
-        lineBuffer: inputLineBufferRef.current,
-        inEscapeSequence: inputEscapeSequenceRef.current,
+        lineBuffer: inputCaptureStateRef.current.lineBuffer,
+        inEscapeSequence: inputCaptureStateRef.current.inEscapeSequence,
+        tmuxPrefixPending: inputCaptureStateRef.current.tmuxPrefixPending,
+        tmuxPrefixEscapeBuffer: inputCaptureStateRef.current.tmuxPrefixEscapeBuffer,
       });
-      inputLineBufferRef.current = inputCaptureResult.nextState.lineBuffer;
-      inputEscapeSequenceRef.current = inputCaptureResult.nextState.inEscapeSequence;
+      inputCaptureStateRef.current = inputCaptureResult.nextState;
       inputCaptureResult.commands.forEach((command) => {
         registerCommand(command, { source: 'shell' });
       });
@@ -363,8 +367,7 @@ export function usePracticeVmBootstrap({
     return () => {
       isMounted = false;
 
-      inputLineBufferRef.current = '';
-      inputEscapeSequenceRef.current = false;
+      inputCaptureStateRef.current = createInitialTerminalInputCaptureState();
       outputEscapeSequenceRef.current = false;
       probeLineBufferRef.current = '';
       shortcutTelemetryStateRef.current = createTmuxShortcutTelemetryState();
@@ -409,8 +412,7 @@ export function usePracticeVmBootstrap({
     contentReady,
     disableWarmStart,
     emulatorRef,
-    inputEscapeSequenceRef,
-    inputLineBufferRef,
+    inputCaptureStateRef,
     lastEmulatorOptionsRef,
     lineBufferRef,
     metricsRef,
