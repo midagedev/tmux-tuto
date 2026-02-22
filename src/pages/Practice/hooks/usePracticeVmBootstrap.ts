@@ -188,6 +188,19 @@ export function usePracticeVmBootstrap({
       emulatorRef.current.serial0_send(data);
     });
 
+    const markBridgeReadyIfNeeded = () => {
+      if (vmInternalBridgeReadyRef.current || !emulatorRef.current) {
+        return;
+      }
+      vmInternalBridgeReadyRef.current = true;
+      if (vmWarmBannerPendingRef.current) {
+        emulatorRef.current.serial0_send(`${BANNER_TRIGGER_COMMAND}\n`);
+        vmWarmBannerPendingRef.current = false;
+      }
+      sendInternalCommand(terminalGeometrySyncCommand);
+      requestBootstrapProbe();
+    };
+
     const writeByte = (value: number) => {
       terminal.write(Uint8Array.of(value & 0xff));
       const outputCaptureResult = consumeTerminalOutputByte(value, {
@@ -196,6 +209,16 @@ export function usePracticeVmBootstrap({
       });
       lineBufferRef.current = outputCaptureResult.nextState.lineBuffer;
       outputEscapeSequenceRef.current = outputCaptureResult.nextState.inEscapeSequence;
+
+      // Shell prompts are usually rendered without a trailing newline.
+      // Detect prompt state from the in-progress line buffer so internal probes can start.
+      const promptLine = stripAnsi(outputCaptureResult.nextState.lineBuffer).replace(/\r/g, '');
+      const hasPromptInBuffer = /[#$]\s*$/.test(promptLine.trimEnd());
+      if (hasPromptInBuffer) {
+        setVmStatusText(t('부팅 완료, 명령 입력 가능'));
+        setVmStatus('running');
+        markBridgeReadyIfNeeded();
+      }
 
       if (outputCaptureResult.completedLine === null) {
         return;
@@ -218,14 +241,8 @@ export function usePracticeVmBootstrap({
         setVmStatus('running');
       }
 
-      if (hasShellPrompt && !vmInternalBridgeReadyRef.current && emulatorRef.current) {
-        vmInternalBridgeReadyRef.current = true;
-        if (vmWarmBannerPendingRef.current) {
-          emulatorRef.current.serial0_send(`${BANNER_TRIGGER_COMMAND}\n`);
-          vmWarmBannerPendingRef.current = false;
-        }
-        sendInternalCommand(terminalGeometrySyncCommand);
-        requestBootstrapProbe();
+      if (hasShellPrompt) {
+        markBridgeReadyIfNeeded();
       }
     };
 

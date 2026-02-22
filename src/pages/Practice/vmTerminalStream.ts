@@ -8,6 +8,10 @@ export type TerminalOutputCaptureState = {
   inEscapeSequence: boolean;
 };
 
+function isPrintableOrTab(char: string) {
+  return char >= ' ' || char === '\t';
+}
+
 export function createInitialTerminalInputCaptureState(): TerminalInputCaptureState {
   return {
     lineBuffer: '',
@@ -132,7 +136,7 @@ export function consumeTerminalOutputByte(value: number, state: TerminalOutputCa
     };
   }
 
-  if (char >= ' ') {
+  if (isPrintableOrTab(char)) {
     lineBuffer += char;
   }
 
@@ -161,7 +165,7 @@ export function consumeProbeOutputByte(value: number, lineBuffer: string) {
     };
   }
 
-  if (char >= ' ') {
+  if (isPrintableOrTab(char)) {
     return {
       nextLineBuffer: `${lineBuffer}${char}`,
       completedLine: null as string | null,

@@ -19,11 +19,8 @@ describe('probeCommands', () => {
   it('keeps periodic probe command short and stable', () => {
     expect(PROBE_TRIGGER_COMMAND).toBe(BASE_PROBE_TRIGGER_COMMAND);
     expect(PROBE_LOOP_START_COMMAND).toContain(BASE_PROBE_TRIGGER_COMMAND);
-    expect(PROBE_TRIGGER_COMMAND).toContain(PROBE_STATE_MARKER);
-    expect(PROBE_TRIGGER_COMMAND).toContain('tmux list-sessions -F');
-    expect(PROBE_TRIGGER_COMMAND).toContain('tmux list-windows -a -F');
-    expect(PROBE_TRIGGER_COMMAND).toContain('tmux list-panes -a -F');
-    expect(PROBE_TRIGGER_COMMAND).toContain('TMUXWEB_SEARCH_COUNT');
+    expect(PROBE_TRIGGER_COMMAND).toContain('/usr/bin/tmux-tuto-probe');
+    expect(PROBE_TRIGGER_COMMAND).not.toContain(PROBE_STATE_MARKER);
     expectValidShellSyntax(PROBE_TRIGGER_COMMAND);
   });
 

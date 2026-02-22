@@ -210,6 +210,8 @@ async function ensureActiveWindowIndexAtLeast(page: Page, minIndex: number) {
 }
 
 async function ensureWindowNameEquals(page: Page, expectedName: string) {
+  await ensureWindowCountAtLeast(page, 1);
+
   const currentName = ((await getVmBridgeStatus(page)).metrics.windowName ?? '').trim();
   if (currentName === expectedName) {
     return;
@@ -225,6 +227,8 @@ async function ensureWindowNameEquals(page: Page, expectedName: string) {
 }
 
 async function ensureSessionNameEquals(page: Page, expectedName: string) {
+  await ensureSessionCountAtLeast(page, 1);
+
   const currentName = ((await getVmBridgeStatus(page)).metrics.sessionName ?? '').trim();
   if (currentName === expectedName) {
     return;

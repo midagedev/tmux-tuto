@@ -61,4 +61,13 @@ describe('vmTerminalStream', () => {
     expect(d.completedLine).toBe('xy');
     expect(d.nextLineBuffer).toBe('');
   });
+
+  it('preserves tab delimiters from probe output snapshots', () => {
+    const a = consumeProbeOutputByte('1'.charCodeAt(0), '');
+    const b = consumeProbeOutputByte('\t'.charCodeAt(0), a.nextLineBuffer);
+    const c = consumeProbeOutputByte('2'.charCodeAt(0), b.nextLineBuffer);
+    const d = consumeProbeOutputByte('\n'.charCodeAt(0), c.nextLineBuffer);
+
+    expect(d.completedLine).toBe('1\t2');
+  });
 });
