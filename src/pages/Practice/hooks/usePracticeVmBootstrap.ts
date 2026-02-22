@@ -9,7 +9,6 @@ import {
   createTmuxShortcutTelemetryState,
   parseTmuxShortcutTelemetry,
 } from '../../../features/vm/tmuxShortcutTelemetry';
-import { PROBE_TRIGGER_COMMAND } from '../probeCommands';
 import { createInitialMetrics, type VmMetricState } from '../vmMetrics';
 import {
   BANNER_TRIGGER_COMMAND,
@@ -53,6 +52,7 @@ type UsePracticeVmBootstrapArgs = {
       extraActions?: string[];
     },
   ) => void;
+  requestBootstrapProbe: () => void;
   requestSearchProbe: () => void;
   sendInternalCommand: (command: string) => void;
   terminalGeometrySyncCommand: string;
@@ -83,6 +83,7 @@ export function usePracticeVmBootstrap({
   pushDebugLine,
   updateMetricsByProbeState,
   registerCommand,
+  requestBootstrapProbe,
   requestSearchProbe,
   sendInternalCommand,
   terminalGeometrySyncCommand,
@@ -224,7 +225,7 @@ export function usePracticeVmBootstrap({
           vmWarmBannerPendingRef.current = false;
         }
         sendInternalCommand(terminalGeometrySyncCommand);
-        sendInternalCommand(PROBE_TRIGGER_COMMAND);
+        requestBootstrapProbe();
       }
     };
 
@@ -330,7 +331,7 @@ export function usePracticeVmBootstrap({
               }
               emulatorRef.current.serial0_send(`${BANNER_TRIGGER_COMMAND}\n`);
               sendInternalCommand(terminalGeometrySyncCommand);
-              sendInternalCommand(PROBE_TRIGGER_COMMAND);
+              requestBootstrapProbe();
               vmInternalBridgeReadyRef.current = true;
               vmWarmBannerPendingRef.current = false;
             }, 180);
@@ -399,6 +400,7 @@ export function usePracticeVmBootstrap({
     outputEscapeSequenceRef,
     probeLineBufferRef,
     pushDebugLine,
+    requestBootstrapProbe,
     registerCommand,
     requestSearchProbe,
     searchProbeTimerRef,

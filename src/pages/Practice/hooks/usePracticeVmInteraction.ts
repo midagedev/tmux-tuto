@@ -8,10 +8,19 @@ import {
   type VmProbeMetric,
   type VmProbeStateSnapshot,
 } from '../../../features/vm/missionBridge';
-import { PROBE_TRIGGER_COMMAND, SEARCH_PROBE_TRIGGER_COMMAND } from '../probeCommands';
+import { PROBE_TRIGGER_COMMAND } from '../probeCommands';
 import { applyProbeMetricToVmMetrics, applyProbeStateSnapshotToVmMetrics, type VmMetricState, type VmMetricKey } from '../vmMetrics';
 import type { useProgressStore } from '../../../features/progress/progressStore';
 import type { VmBootConfig } from '../vmBoot';
+import {
+  PROBE_AUTO_MIN_INTERVAL_MS,
+  captureProbeSchedulerState,
+  consumePendingProbeReason,
+  createProbeSchedulerState,
+  markProbeSnapshotReceived,
+  tryStartProbe,
+  type ProbeTriggerReason,
+} from '../probeScheduler';
 
 type VmStatus = 'idle' | 'booting' | 'running' | 'stopped' | 'error';
 
@@ -50,6 +59,8 @@ type UsePracticeVmInteractionResult = {
   pushDebugLine: (line: string) => void;
   updateMetricByProbe: (metric: VmProbeMetric) => void;
   updateMetricsByProbeState: (snapshot: VmProbeStateSnapshot) => void;
+  requestManualProbe: () => void;
+  requestBootstrapProbe: () => void;
   sendInternalCommand: (command: string) => void;
   requestSearchProbe: () => void;
   registerCommand: (command: string, options?: RegisterCommandOptions) => void;
@@ -115,6 +126,7 @@ export function usePracticeVmInteraction({
   bootConfig,
 }: UsePracticeVmInteractionArgs): UsePracticeVmInteractionResult {
   const postCommandProbeTimerRef = useRef<number | null>(null);
+  const probeSchedulerRef = useRef(createProbeSchedulerState());
 
   const recordTmuxSurfaceMetrics = useCallback(
     (nextMetrics: VmMetricState, changedMetricKeys: VmMetricKey[]) => {
@@ -150,8 +162,52 @@ export function usePracticeVmInteraction({
     [setDebugLines],
   );
 
+  const sendInternalCommand = useCallback(
+    (command: string) => {
+      const normalized = command.trim();
+      if (!normalized || !emulatorRef.current) {
+        return;
+      }
+
+      const payload = new TextEncoder().encode(`${normalized}\n`);
+      emulatorRef.current.serial_send_bytes(2, payload);
+    },
+    [emulatorRef],
+  );
+
+  const requestProbe = useCallback(
+    (reason: ProbeTriggerReason, options?: { minIntervalMs?: number }) => {
+      if (!emulatorRef.current || !vmInternalBridgeReadyRef.current) {
+        return false;
+      }
+
+      const startResult = tryStartProbe(probeSchedulerRef.current, {
+        reason,
+        now: Date.now(),
+        minIntervalMs: options?.minIntervalMs ?? 0,
+      });
+      if (!startResult.shouldDispatch) {
+        return false;
+      }
+
+      sendInternalCommand(PROBE_TRIGGER_COMMAND);
+      return true;
+    },
+    [emulatorRef, sendInternalCommand, vmInternalBridgeReadyRef],
+  );
+
+  const flushPendingProbe = useCallback(() => {
+    const pendingReason = consumePendingProbeReason(probeSchedulerRef.current);
+    if (!pendingReason) {
+      return;
+    }
+    void requestProbe(pendingReason);
+  }, [requestProbe]);
+
   const updateMetricByProbe = useCallback(
     (metric: VmProbeMetric) => {
+      markProbeSnapshotReceived(probeSchedulerRef.current, Date.now());
+      flushPendingProbe();
       setVmStatus('running');
       setVmStatusText(t('부팅 완료, 명령 입력 가능'));
       const currentUpdateResult = applyProbeMetricToVmMetrics(metricsRef.current, metric);
@@ -166,6 +222,7 @@ export function usePracticeVmInteraction({
       }
     },
     [
+      flushPendingProbe,
       metricsRef,
       recordTmuxSurfaceMetrics,
       setMetrics,
@@ -178,6 +235,8 @@ export function usePracticeVmInteraction({
 
   const updateMetricsByProbeState = useCallback(
     (snapshot: VmProbeStateSnapshot) => {
+      markProbeSnapshotReceived(probeSchedulerRef.current, Date.now());
+      flushPendingProbe();
       setVmStatus('running');
       setVmStatusText(t('부팅 완료, 명령 입력 가능'));
       const currentUpdateResult = applyProbeStateSnapshotToVmMetrics(metricsRef.current, snapshot);
@@ -191,20 +250,16 @@ export function usePracticeVmInteraction({
         recordTmuxSurfaceMetrics(currentUpdateResult.nextMetrics, currentUpdateResult.changedMetricKeys);
       }
     },
-    [metricsRef, recordTmuxSurfaceMetrics, setMetrics, setVmStatus, setVmStatusText, t, triggerMetricVisualEffect],
-  );
-
-  const sendInternalCommand = useCallback(
-    (command: string) => {
-      const normalized = command.trim();
-      if (!normalized || !emulatorRef.current) {
-        return;
-      }
-
-      const payload = new TextEncoder().encode(`${normalized}\n`);
-      emulatorRef.current.serial_send_bytes(2, payload);
-    },
-    [emulatorRef],
+    [
+      flushPendingProbe,
+      metricsRef,
+      recordTmuxSurfaceMetrics,
+      setMetrics,
+      setVmStatus,
+      setVmStatusText,
+      t,
+      triggerMetricVisualEffect,
+    ],
   );
 
   const requestSearchProbe = useCallback(() => {
@@ -218,9 +273,9 @@ export function usePracticeVmInteraction({
 
     searchProbeTimerRef.current = window.setTimeout(() => {
       searchProbeTimerRef.current = null;
-      sendInternalCommand(SEARCH_PROBE_TRIGGER_COMMAND);
+      void requestProbe('search');
     }, 140);
-  }, [emulatorRef, searchProbeTimerRef, sendInternalCommand, vmInternalBridgeReadyRef]);
+  }, [emulatorRef, requestProbe, searchProbeTimerRef, vmInternalBridgeReadyRef]);
 
   const scheduleProbeSoon = useCallback(() => {
     if (!emulatorRef.current || !vmInternalBridgeReadyRef.current) {
@@ -233,9 +288,9 @@ export function usePracticeVmInteraction({
 
     postCommandProbeTimerRef.current = window.setTimeout(() => {
       postCommandProbeTimerRef.current = null;
-      sendInternalCommand(PROBE_TRIGGER_COMMAND);
+      void requestProbe('command');
     }, POST_COMMAND_PROBE_DELAY_MS);
-  }, [emulatorRef, sendInternalCommand, vmInternalBridgeReadyRef]);
+  }, [emulatorRef, requestProbe, vmInternalBridgeReadyRef]);
 
   const registerCommand = useCallback(
     (command: string, options?: RegisterCommandOptions) => {
@@ -330,6 +385,7 @@ export function usePracticeVmInteraction({
         commandHistory,
         debugLineCount: debugLines.length,
         lastDebugLine: debugLines.length > 0 ? debugLines[debugLines.length - 1] : null,
+        probeScheduler: captureProbeSchedulerState(probeSchedulerRef.current),
       }),
       saveState: async () => {
         const emulator = emulatorRef.current as (V86 & { save_state?: () => Promise<ArrayBuffer> | ArrayBuffer }) | null;
@@ -341,7 +397,7 @@ export function usePracticeVmInteraction({
         return state instanceof ArrayBuffer ? state : null;
       },
       sendProbe: () => {
-        sendInternalCommand(PROBE_TRIGGER_COMMAND);
+        void requestProbe('manual');
       },
       sendCommand: (command: string) => {
         sendCommand(command);
@@ -373,6 +429,7 @@ export function usePracticeVmInteraction({
     emulatorRef,
     lastEmulatorOptionsRef,
     metrics,
+    requestProbe,
     sendCommand,
     sendInternalCommand,
     registerCommand,
@@ -393,7 +450,7 @@ export function usePracticeVmInteraction({
         return;
       }
 
-      sendInternalCommand(PROBE_TRIGGER_COMMAND);
+      void requestProbe('auto', { minIntervalMs: PROBE_AUTO_MIN_INTERVAL_MS });
     };
 
     triggerProbe();
@@ -401,7 +458,23 @@ export function usePracticeVmInteraction({
     return () => {
       window.clearInterval(timer);
     };
-  }, [autoProbe, emulatorRef, sendInternalCommand, vmInternalBridgeReadyRef, vmStatus]);
+  }, [autoProbe, emulatorRef, requestProbe, vmInternalBridgeReadyRef, vmStatus]);
+
+  const requestManualProbe = useCallback(() => {
+    void requestProbe('manual');
+  }, [requestProbe]);
+
+  const requestBootstrapProbe = useCallback(() => {
+    void requestProbe('bootstrap');
+  }, [requestProbe]);
+
+  useEffect(() => {
+    if (vmStatus === 'running') {
+      return;
+    }
+
+    probeSchedulerRef.current = createProbeSchedulerState();
+  }, [vmStatus]);
 
   useEffect(() => {
     return () => {
@@ -416,6 +489,8 @@ export function usePracticeVmInteraction({
     pushDebugLine,
     updateMetricByProbe,
     updateMetricsByProbeState,
+    requestManualProbe,
+    requestBootstrapProbe,
     sendInternalCommand,
     requestSearchProbe,
     registerCommand,
