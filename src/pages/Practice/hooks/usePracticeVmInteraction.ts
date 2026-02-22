@@ -313,6 +313,15 @@ export function usePracticeVmInteraction({
       sendCommand: (command: string) => {
         sendCommand(command);
       },
+      injectProbeMetric: (metric: VmProbeMetric) => {
+        updateMetricByProbe(metric);
+      },
+      injectCommandHistory: (command: string) => {
+        registerCommand(command, { source: 'shell' });
+      },
+      injectActionHistory: (action: string) => {
+        setActionHistory((previous) => appendActions(previous, [action], MAX_HISTORY));
+      },
       getBootConfig: () => bootConfig,
       getLastEmulatorOptions: () => lastEmulatorOptionsRef.current,
     };
@@ -330,6 +339,9 @@ export function usePracticeVmInteraction({
     metrics,
     sendCommand,
     sendInternalCommand,
+    registerCommand,
+    setActionHistory,
+    updateMetricByProbe,
     vmStatus,
     vmStatusText,
   ]);

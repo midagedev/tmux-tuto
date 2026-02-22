@@ -8,7 +8,7 @@ import type { V86Options } from 'v86';
 import { PagePlaceholder } from '../../components/system/PagePlaceholder';
 import { resolveLessonTerms } from '../../features/curriculum/lessonTerms';
 import { useProgressStore } from '../../features/progress/progressStore';
-import { evaluateMissionWithVmSnapshot } from '../../features/vm/missionBridge';
+import { evaluateMissionWithVmSnapshot, type VmProbeMetric } from '../../features/vm/missionBridge';
 import { PROBE_TRIGGER_COMMAND } from './probeCommands';
 import {
   buildMetricStatusItems,
@@ -49,6 +49,9 @@ declare global {
       saveState: () => Promise<ArrayBuffer | null>;
       sendProbe: () => void;
       sendCommand: (command: string) => void;
+      injectProbeMetric: (metric: VmProbeMetric) => void;
+      injectCommandHistory: (command: string) => void;
+      injectActionHistory: (action: string) => void;
       getBootConfig: () => typeof VM_BOOT_CONFIG;
       getLastEmulatorOptions: () => V86Options | null;
     };

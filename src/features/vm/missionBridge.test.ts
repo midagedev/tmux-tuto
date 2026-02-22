@@ -50,6 +50,45 @@ describe('parseProbeMetricFromLine', () => {
       value: 'dev',
     });
   });
+
+  it('ignores embedded probe markers inside shell command echoes', () => {
+    const echoedLine =
+      'tuto@tmux-tuto:~$ echo "[[TMUXWEB_PROBE:windowName:$TMUXWEB_WINDOW_NAME]]" >/dev/ttyS1';
+    expect(parseProbeMetricFromLine(echoedLine)).toBeNull();
+  });
+
+  it('parses probe markers even when escape residue prefixes the line', () => {
+    expect(parseProbeMetricFromLine('6n[[TMUXWEB_PROBE:session:1]]')).toEqual({
+      key: 'session',
+      value: 1,
+    });
+  });
+
+  it('parses probe markers even when prompt residue trails the line', () => {
+    expect(parseProbeMetricFromLine('[[TMUXWEB_PROBE:session:2]]tuto@tmux-tuto:~$')).toEqual({
+      key: 'session',
+      value: 2,
+    });
+  });
+
+  it('parses probe markers when shell prompt residue prefixes the line', () => {
+    expect(parseProbeMetricFromLine('tuto@tmux-tuto:~$ [[TMUXWEB_PROBE:session:3]]')).toEqual({
+      key: 'session',
+      value: 3,
+    });
+  });
+
+  it('parses probe markers embedded in printf command echoes when value is concrete', () => {
+    expect(parseProbeMetricFromLine('tuto@tmux-tuto:~$ printf "[[TMUXWEB_PROBE:session:4]]\\n" >/dev/ttyS1')).toEqual({
+      key: 'session',
+      value: 4,
+    });
+  });
+
+  it('ignores text probe markers with unresolved placeholders', () => {
+    expect(parseProbeMetricFromLine('[[TMUXWEB_PROBE:windowName:%s]]')).toBeNull();
+    expect(parseProbeMetricFromLine('[[TMUXWEB_PROBE:windowName:$TMUXWEB_WINDOW_NAME]]')).toBeNull();
+  });
 });
 
 describe('parseTmuxActionsFromCommand', () => {

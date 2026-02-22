@@ -298,7 +298,18 @@ export type VmProbeMetric =
     };
 
 export function parseProbeMetricFromLine(line: string): VmProbeMetric | null {
-  const cleaned = stripAnsi(line).replace(/\r/g, '');
+  const cleaned = stripAnsi(line).replace(/\r/g, '').replace(/[\u0000-\u001f\u007f]/g, '');
+  const markerToken = '[[TMUXWEB_PROBE:';
+  const markerIndex = cleaned.indexOf(markerToken);
+  if (markerIndex < 0) {
+    return null;
+  }
+
+  const prefix = cleaned.slice(0, markerIndex);
+  if (/\becho\b/i.test(prefix) || /\b__tmuxweb_probe\b/i.test(prefix)) {
+    return null;
+  }
+
   const match = cleaned.match(
     /\[\[TMUXWEB_PROBE:(session|window|pane|tmux|mode|search|searchMatched|activeWindow|zoomed|sync|sessionName|windowName|layout):([^\]]*)\]\]/,
   );
@@ -307,9 +318,14 @@ export function parseProbeMetricFromLine(line: string): VmProbeMetric | null {
   }
 
   if (match[1] === 'sessionName' || match[1] === 'windowName' || match[1] === 'layout') {
+    const textValue = match[2].trim();
+    if (!textValue || textValue.includes('%') || textValue.includes('$')) {
+      return null;
+    }
+
     return {
       key: match[1] as VmProbeTextKey,
-      value: match[2].trim(),
+      value: textValue,
     };
   }
 

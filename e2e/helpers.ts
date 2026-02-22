@@ -1,6 +1,16 @@
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
+export type VmProbeMetricInput =
+  | {
+      key: 'session' | 'window' | 'pane' | 'tmux' | 'mode' | 'search' | 'searchMatched' | 'activeWindow' | 'zoomed' | 'sync';
+      value: number;
+    }
+  | {
+      key: 'sessionName' | 'windowName' | 'layout';
+      value: string;
+    };
+
 export async function dismissAnalyticsBanner(page: Page) {
   const decline = page.getByRole('button', { name: '동의하지 않음' });
   if (await decline.isVisible().catch(() => false)) {
@@ -42,7 +52,8 @@ export async function getVmBridgeStatus(page: Page): Promise<VmBridgeStatus> {
   });
 }
 
-export async function waitForVmReady(page: Page) {
+export async function waitForVmReady(page: Page, options?: { timeout?: number }) {
+  const timeout = options?.timeout ?? 90_000;
   await expect
     .poll(
       async () =>
@@ -60,7 +71,7 @@ export async function waitForVmReady(page: Page) {
           const status = bridge.getStatus();
           return bridge.isReady() && status.status === 'running';
         }),
-      { timeout: 90_000 },
+      { timeout },
     )
     .toBe(true);
 }
@@ -77,6 +88,48 @@ export async function sendVmCommand(page: Page, command: string) {
     }
     bridge.sendCommand(payload);
   }, command);
+}
+
+export async function injectVmProbeMetric(page: Page, metric: VmProbeMetricInput) {
+  await page.evaluate((payload) => {
+    const bridge = (window as Window & {
+      __tmuxwebVmBridge?: {
+        injectProbeMetric: (metric: VmProbeMetricInput) => void;
+      };
+    }).__tmuxwebVmBridge;
+    if (!bridge) {
+      throw new Error('VM bridge is not installed');
+    }
+    bridge.injectProbeMetric(payload);
+  }, metric);
+}
+
+export async function injectVmCommandHistory(page: Page, command: string) {
+  await page.evaluate((payload) => {
+    const bridge = (window as Window & {
+      __tmuxwebVmBridge?: {
+        injectCommandHistory: (command: string) => void;
+      };
+    }).__tmuxwebVmBridge;
+    if (!bridge) {
+      throw new Error('VM bridge is not installed');
+    }
+    bridge.injectCommandHistory(payload);
+  }, command);
+}
+
+export async function injectVmActionHistory(page: Page, action: string) {
+  await page.evaluate((payload) => {
+    const bridge = (window as Window & {
+      __tmuxwebVmBridge?: {
+        injectActionHistory: (action: string) => void;
+      };
+    }).__tmuxwebVmBridge;
+    if (!bridge) {
+      throw new Error('VM bridge is not installed');
+    }
+    bridge.injectActionHistory(payload);
+  }, action);
 }
 
 export async function sendVmProbe(page: Page) {
