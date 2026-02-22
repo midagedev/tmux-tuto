@@ -11,6 +11,22 @@ export type VmProbeMetricInput =
       value: string;
     };
 
+export type VmProbeStateInput = {
+  tmux: number;
+  session: number;
+  window: number;
+  pane: number;
+  mode: number;
+  sessionName: string;
+  windowName: string;
+  activeWindow: number;
+  layout: string;
+  zoomed: number;
+  sync: number;
+  search: number;
+  searchMatched: number;
+};
+
 export async function dismissAnalyticsBanner(page: Page) {
   const decline = page.getByRole('button', { name: '동의하지 않음' });
   if (await decline.isVisible().catch(() => false)) {
@@ -114,6 +130,20 @@ export async function injectVmProbeMetric(page: Page, metric: VmProbeMetricInput
     }
     bridge.injectProbeMetric(payload);
   }, metric);
+}
+
+export async function injectVmProbeState(page: Page, snapshot: VmProbeStateInput) {
+  await page.evaluate((payload) => {
+    const bridge = (window as Window & {
+      __tmuxwebVmBridge?: {
+        injectProbeState: (snapshot: VmProbeStateInput) => void;
+      };
+    }).__tmuxwebVmBridge;
+    if (!bridge) {
+      throw new Error('VM bridge is not installed');
+    }
+    bridge.injectProbeState(payload);
+  }, snapshot);
 }
 
 export async function injectVmCommandHistory(page: Page, command: string) {
