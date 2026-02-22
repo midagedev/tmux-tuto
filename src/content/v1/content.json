@@ -2033,7 +2033,7 @@
       "slug": "recommended-config",
       "title": "권장 tmux.conf 베이스",
       "category": "config",
-      "estimatedMinutes": 12,
+      "estimatedMinutes": 18,
       "prerequisites": [
         "track-a-foundations"
       ],
@@ -2048,7 +2048,7 @@
           "id": "p2",
           "title": "공통 베이스 적용",
           "description": "마우스/focus/clipboard 공통값으로 시작합니다.",
-          "command": "cat <<'EOF' >> ~/.tmux.conf\n##### Baseline\nset -g default-terminal \"tmux-256color\"\nset -as terminal-features \",xterm*:RGB\"\nset -s set-clipboard external\n\n##### Mouse + Focus\nset -g mouse on\nset -g focus-events on\nset -g focus-follows-mouse on\n\n##### Compatibility defaults\nset -g base-index 1\nsetw -g pane-base-index 1\nset -g history-limit 100000\nsetw -g mode-keys vi\nEOF"
+          "command": "cat <<'EOF' >> ~/.tmux.conf\n##### Baseline\nset -g default-terminal \"tmux-256color\"\nset -as terminal-features \",xterm*:RGB\"\nset -as terminal-features \",xterm*:extkeys\"\nset -as terminal-features \",xterm*:focus\"\nset -as terminal-features \",xterm*:hyperlinks\"\nset -s set-clipboard external\n\n##### Mouse + Focus\nset -g mouse on\nset -g focus-events on\nset -g focus-follows-mouse on\n\n##### Compatibility defaults\nset -g base-index 1\nsetw -g pane-base-index 1\nEOF"
         },
         {
           "id": "p3",
@@ -2064,26 +2064,44 @@
         },
         {
           "id": "p5",
-          "title": "재로딩/패인 이동 바인딩 추가",
-          "description": "리로드 단축키와 h/j/k/l 패인 이동 단축키를 추가합니다.",
-          "command": "printf '%s\\n' 'bind r source-file ~/.tmux.conf \\; display-message \"tmux.conf reloaded\"' 'bind -r h select-pane -L' 'bind -r j select-pane -D' 'bind -r k select-pane -U' 'bind -r l select-pane -R' >> ~/.tmux.conf"
+          "title": "copy-mode/클립보드 파이프라인",
+          "description": "vi 키체계와 y 복사를 OS별 클립보드 명령으로 통합합니다.",
+          "command": "cat <<'EOF' >> ~/.tmux.conf\n##### Copy-mode + Clipboard pipeline\nsetw -g mode-keys vi\nbind -T copy-mode-vi v send -X begin-selection\nbind -T copy-mode-vi y send -X copy-pipe-and-cancel \"sh -c 'if command -v pbcopy >/dev/null 2>&1; then pbcopy; elif command -v wl-copy >/dev/null 2>&1; then wl-copy; elif command -v xclip >/dev/null 2>&1; then xclip -selection clipboard -in; elif command -v xsel >/dev/null 2>&1; then xsel --clipboard --input; else cat >/dev/null; fi'\"\nEOF"
         },
         {
           "id": "p6",
+          "title": "반응성/안정성 옵션 추가",
+          "description": "입력 지연, 반복 키, 자동 리네임 등 운영 안정성 옵션을 고정합니다.",
+          "command": "cat <<'EOF' >> ~/.tmux.conf\n##### Reliability + Responsiveness\nset -sg escape-time 10\nset -g repeat-time 600\nset -g history-limit 100000\nset -g renumber-windows on\nset -g allow-rename off\nset -g detach-on-destroy off\nset -g status-interval 5\nEOF"
+        },
+        {
+          "id": "p7",
+          "title": "운영 바인딩 확장",
+          "description": "리로드/패인 이동/현재 경로 split/동기화 토글/팝업 바인딩을 추가합니다.",
+          "command": "cat <<'EOF' >> ~/.tmux.conf\n##### Workflow binds\nbind r source-file ~/.tmux.conf \\; display-message \"tmux.conf reloaded\"\nbind -r h select-pane -L\nbind -r j select-pane -D\nbind -r k select-pane -U\nbind -r l select-pane -R\nbind | split-window -h -c \"#{pane_current_path}\"\nbind - split-window -v -c \"#{pane_current_path}\"\nbind z resize-pane -Z\nbind S set-window-option synchronize-panes \\; display-message \"synchronize-panes: #{?pane_synchronized,on,off}\"\nbind C-l refresh-client -S\nbind f command-prompt -p \"find-window:\" \"find-window '%%'\"\nbind P display-popup -E -w 90% -h 80% \"tmux capture-pane -pS -200 | less\"\nEOF"
+        },
+        {
+          "id": "p8",
           "title": "실행 중 세션에 반영",
           "description": "재시작 없이 현재 세션에 설정을 적용합니다.",
           "command": "tmux source-file ~/.tmux.conf"
         },
         {
-          "id": "p7",
+          "id": "p9",
           "title": "옵션 값 검증",
           "description": "핵심 옵션이 의도한 값인지 직접 확인합니다.",
-          "command": "tmux show -g default-terminal; tmux show -g mouse; tmux show -g focus-events; tmux show -s set-clipboard; tmux show -g base-index; tmux show -gw pane-base-index; tmux show -gw mode-keys"
+          "command": "tmux show -g default-terminal; tmux show -g mouse; tmux show -g focus-events; tmux show -s set-clipboard; tmux show -g base-index; tmux show -gw pane-base-index; tmux show -gw mode-keys; tmux show -sg escape-time; tmux show -g repeat-time; tmux show -g renumber-windows"
         },
         {
-          "id": "p8",
+          "id": "p10",
+          "title": "바인딩/클립보드 검증",
+          "description": "추가 바인딩과 copy-mode 파이프라인이 등록됐는지 확인합니다.",
+          "command": "tmux list-keys -T copy-mode-vi | grep copy-pipe-and-cancel; tmux list-keys | grep -E 'bind-key +r source-file|bind-key +-r +h|bind-key +S set-window-option synchronize-panes|bind-key +P display-popup'"
+        },
+        {
+          "id": "p11",
           "title": "운영 동작 검증",
-          "description": "`prefix + r` 리로드와 `prefix + h/j/k/l` 이동이 실제로 동작하는지 확인합니다."
+          "description": "`prefix + r` 리로드, `prefix + S` 동기화 토글, `prefix + P` 팝업이 실제로 동작하는지 확인합니다."
         }
       ],
       "verification": [
@@ -2092,7 +2110,13 @@
         "`tmux show -s set-clipboard` 결과가 `set-clipboard external`",
         "`tmux show -g base-index` 결과가 `base-index 1`",
         "`tmux show -gw pane-base-index` 결과가 `pane-base-index 1`",
-        "`prefix + r` 입력 시 `tmux.conf reloaded` 메시지 표시"
+        "`tmux show -gw mode-keys` 결과가 `mode-keys vi`",
+        "`tmux show -sg escape-time` 결과가 `escape-time 10`",
+        "`tmux show -g repeat-time` 결과가 `repeat-time 600`",
+        "`tmux show -g renumber-windows` 결과가 `renumber-windows on`",
+        "`tmux list-keys -T copy-mode-vi` 출력에 `copy-pipe-and-cancel` 포함",
+        "`prefix + r` 입력 시 `tmux.conf reloaded` 메시지 표시",
+        "`prefix + S` 토글 시 `synchronize-panes: on/off` 메시지 표시"
       ],
       "troubleshooting": [
         {
@@ -2106,6 +2130,14 @@
         {
           "issue": "패인 이동 단축키가 동작하지 않음",
           "resolution": "현재 prefix를 `tmux show -g prefix`로 확인하고, tmux 버전이 낮다면 `bind -r` 대신 `bind`로 교체해 적용하세요."
+        },
+        {
+          "issue": "copy-mode 복사가 로컬 클립보드로 전달되지 않음",
+          "resolution": "`pbcopy`/`wl-copy`/`xclip`/`xsel` 중 하나가 설치돼 있는지 확인하고, 없으면 설치 후 `tmux source-file ~/.tmux.conf`로 다시 로드하세요."
+        },
+        {
+          "issue": "prefix + P 팝업이 동작하지 않음",
+          "resolution": "tmux 3.2 미만이면 `display-popup`이 없습니다. `tmux -V`를 확인하고, 구버전에서는 `tmux capture-pane -pS -200 | less`를 직접 실행하세요."
         }
       ]
     },

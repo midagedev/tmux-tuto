@@ -22,8 +22,9 @@ const TMUX_USE_CASES: UseCaseCard[] = [
     label: 'config',
     title: '권장 tmux.conf 베이스',
     problem: '기본 사용 루틴',
-    action: '마우스, 인덱스(1 시작), 히스토리, copy-mode 키 체계를 기본 운영값으로 넣습니다.',
-    command: 'tmux show -g default-terminal\ntmux show -g mouse\ntmux show -g focus-events',
+    action: '마우스, 포커스 하이라이트, 알림, copy-mode 클립보드, 반응성 옵션까지 한 번에 고정합니다.',
+    command:
+      'tmux show -g default-terminal\ntmux show -g mouse\ntmux show -sg escape-time\ntmux list-keys -T copy-mode-vi | grep copy-pipe-and-cancel',
     lessonSlugs: ['key-input-guide', 'terminal-render-guide'],
     playbookSlugs: ['recommended-config'],
   },
