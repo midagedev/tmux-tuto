@@ -2046,36 +2046,50 @@
         },
         {
           "id": "p2",
-          "title": "핵심 옵션 적용",
-          "description": "마우스, 인덱스(1 시작), 히스토리, copy-mode 키 체계를 기본 운영값으로 넣습니다.",
-          "command": "cat <<'EOF' >> ~/.tmux.conf\n##### Baseline\nset -g default-terminal \"tmux-256color\"\nset -as terminal-features \",xterm*:RGB\"\nset -s set-clipboard external\n\n##### Mouse + Focus\nset -g mouse on\nset -g focus-events on\nset -g focus-follows-mouse on\n\n##### Focused pane highlight + unfocused mute\nset -g pane-border-style \"fg=colour238\"\nset -g pane-active-border-style \"fg=colour45\"\nset -g pane-border-indicators both\nset -g pane-border-status top\nset -g pane-border-format \"#{?pane_active,#[fg=colour45]●,#[fg=colour240]○} #P #{pane_current_command}\"\nset -g window-style \"fg=colour250\"\nset -g window-active-style \"fg=default\"\n\n##### Alerts\nsetw -g monitor-activity on\nsetw -g monitor-bell on\nsetw -g monitor-silence 300\nset -g activity-action other\nset -g bell-action other\nset -g silence-action other\nset -g visual-activity both\nset -g visual-bell both\nset -g visual-silence on\nset -g window-status-activity-style \"fg=black,bg=yellow\"\nset -g window-status-bell-style \"fg=black,bg=red\"\n\n##### Status hint\nset -g status-right '#{?client_prefix,#[fg=black,bg=yellow] PREFIX #[default],} %Y-%m-%d %H:%M A:#{session_alerts}'\n\n##### Compatibility defaults\nset -g base-index 1\nsetw -g pane-base-index 1\nset -g history-limit 100000\nsetw -g mode-keys vi\nEOF"
+          "title": "공통 베이스 적용",
+          "description": "마우스/focus/clipboard 공통값으로 시작합니다.",
+          "command": "cat <<'EOF' >> ~/.tmux.conf\n##### Baseline\nset -g default-terminal \"tmux-256color\"\nset -as terminal-features \",xterm*:RGB\"\nset -s set-clipboard external\n\n##### Mouse + Focus\nset -g mouse on\nset -g focus-events on\nset -g focus-follows-mouse on\n\n##### Compatibility defaults\nset -g base-index 1\nsetw -g pane-base-index 1\nset -g history-limit 100000\nsetw -g mode-keys vi\nEOF"
         },
         {
           "id": "p3",
+          "title": "포커스 강조/언포커스 뮤트 적용",
+          "description": "활성 pane과 비활성 pane의 대비를 고정합니다.",
+          "command": "cat <<'EOF' >> ~/.tmux.conf\n##### Focused pane highlight + unfocused mute\nset -g pane-border-style \"fg=colour238\"\nset -g pane-active-border-style \"fg=colour45\"\nset -g pane-border-indicators both\nset -g pane-border-status top\nset -g pane-border-format \"#{?pane_active,#[fg=colour45]●,#[fg=colour240]○} #P #{pane_current_command}\"\nset -g window-style \"fg=colour250\"\nset -g window-active-style \"fg=default\"\nEOF"
+        },
+        {
+          "id": "p4",
+          "title": "알림 정책 고정",
+          "description": "activity/bell/silence 알림을 운영 기준으로 맞춥니다.",
+          "command": "cat <<'EOF' >> ~/.tmux.conf\n##### Alerts\nsetw -g monitor-activity on\nsetw -g monitor-bell on\nsetw -g monitor-silence 300\nset -g activity-action other\nset -g bell-action other\nset -g silence-action other\nset -g visual-activity both\nset -g visual-bell both\nset -g visual-silence on\nset -g window-status-activity-style \"fg=black,bg=yellow\"\nset -g window-status-bell-style \"fg=black,bg=red\"\n\n##### Status hint\nset -g status-right '#{?client_prefix,#[fg=black,bg=yellow] PREFIX #[default],} %Y-%m-%d %H:%M A:#{session_alerts}'\nEOF"
+        },
+        {
+          "id": "p5",
           "title": "재로딩/패인 이동 바인딩 추가",
           "description": "리로드 단축키와 h/j/k/l 패인 이동 단축키를 추가합니다.",
           "command": "printf '%s\\n' 'bind r source-file ~/.tmux.conf \\; display-message \"tmux.conf reloaded\"' 'bind -r h select-pane -L' 'bind -r j select-pane -D' 'bind -r k select-pane -U' 'bind -r l select-pane -R' >> ~/.tmux.conf"
         },
         {
-          "id": "p4",
+          "id": "p6",
           "title": "실행 중 세션에 반영",
           "description": "재시작 없이 현재 세션에 설정을 적용합니다.",
           "command": "tmux source-file ~/.tmux.conf"
         },
         {
-          "id": "p5",
+          "id": "p7",
           "title": "옵션 값 검증",
           "description": "핵심 옵션이 의도한 값인지 직접 확인합니다.",
           "command": "tmux show -g default-terminal; tmux show -g mouse; tmux show -g focus-events; tmux show -s set-clipboard; tmux show -g base-index; tmux show -gw pane-base-index; tmux show -gw mode-keys"
         },
         {
-          "id": "p6",
+          "id": "p8",
           "title": "운영 동작 검증",
           "description": "`prefix + r` 리로드와 `prefix + h/j/k/l` 이동이 실제로 동작하는지 확인합니다."
         }
       ],
       "verification": [
         "`tmux show -g mouse` 결과가 `mouse on`",
+        "`tmux show -g focus-events` 결과가 `focus-events on`",
+        "`tmux show -s set-clipboard` 결과가 `set-clipboard external`",
         "`tmux show -g base-index` 결과가 `base-index 1`",
         "`tmux show -gw pane-base-index` 결과가 `pane-base-index 1`",
         "`prefix + r` 입력 시 `tmux.conf reloaded` 메시지 표시"
