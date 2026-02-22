@@ -2048,7 +2048,7 @@
           "id": "p2",
           "title": "핵심 옵션 적용",
           "description": "마우스, 인덱스(1 시작), 히스토리, copy-mode 키 체계를 기본 운영값으로 넣습니다.",
-          "command": "printf '%s\\n' 'set -g mouse on' 'set -g base-index 1' 'setw -g pane-base-index 1' 'set -g history-limit 100000' 'setw -g mode-keys vi' >> ~/.tmux.conf"
+          "command": "cat <<'EOF' >> ~/.tmux.conf\n##### Baseline\nset -g default-terminal \"tmux-256color\"\nset -as terminal-features \",xterm*:RGB\"\nset -s set-clipboard external\n\n##### Mouse + Focus\nset -g mouse on\nset -g focus-events on\nset -g focus-follows-mouse on\n\n##### Focused pane highlight + unfocused mute\nset -g pane-border-style \"fg=colour238\"\nset -g pane-active-border-style \"fg=colour45\"\nset -g pane-border-indicators both\nset -g pane-border-status top\nset -g pane-border-format \"#{?pane_active,#[fg=colour45]●,#[fg=colour240]○} #P #{pane_current_command}\"\nset -g window-style \"fg=colour250\"\nset -g window-active-style \"fg=default\"\n\n##### Alerts\nsetw -g monitor-activity on\nsetw -g monitor-bell on\nsetw -g monitor-silence 300\nset -g activity-action other\nset -g bell-action other\nset -g silence-action other\nset -g visual-activity both\nset -g visual-bell both\nset -g visual-silence on\nset -g window-status-activity-style \"fg=black,bg=yellow\"\nset -g window-status-bell-style \"fg=black,bg=red\"\n\n##### Status hint\nset -g status-right '#{?client_prefix,#[fg=black,bg=yellow] PREFIX #[default],} %Y-%m-%d %H:%M A:#{session_alerts}'\n\n##### Compatibility defaults\nset -g base-index 1\nsetw -g pane-base-index 1\nset -g history-limit 100000\nsetw -g mode-keys vi\nEOF"
         },
         {
           "id": "p3",
@@ -2066,7 +2066,7 @@
           "id": "p5",
           "title": "옵션 값 검증",
           "description": "핵심 옵션이 의도한 값인지 직접 확인합니다.",
-          "command": "tmux show -g mouse; tmux show -g base-index; tmux show -gw pane-base-index; tmux show -gw mode-keys"
+          "command": "tmux show -g default-terminal; tmux show -g mouse; tmux show -g focus-events; tmux show -s set-clipboard; tmux show -g base-index; tmux show -gw pane-base-index; tmux show -gw mode-keys"
         },
         {
           "id": "p6",

@@ -18,6 +18,16 @@ type UseCaseCard = {
 
 const TMUX_USE_CASES: UseCaseCard[] = [
   {
+    id: 'uc-recommended-conf',
+    label: 'config',
+    title: '권장 tmux.conf 베이스',
+    problem: '기본 사용 루틴',
+    action: '마우스, 인덱스(1 시작), 히스토리, copy-mode 키 체계를 기본 운영값으로 넣습니다.',
+    command: 'tmux show -g default-terminal\ntmux show -g mouse\ntmux show -g focus-events',
+    lessonSlugs: ['key-input-guide', 'terminal-render-guide'],
+    playbookSlugs: ['recommended-config'],
+  },
+  {
     id: 'uc-session-recover',
     label: 'session',
     title: '다시 붙었을 때 이전 상태 복구',
