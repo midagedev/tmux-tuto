@@ -3,9 +3,13 @@ import type { Dispatch, MutableRefObject, SetStateAction } from 'react';
 import type { TFunction } from 'i18next';
 import type V86 from 'v86';
 import type { V86Options } from 'v86';
-import { parseTmuxActionsFromCommand, type VmProbeMetric } from '../../../features/vm/missionBridge';
+import {
+  parseTmuxActionsFromCommand,
+  type VmProbeMetric,
+  type VmProbeStateSnapshot,
+} from '../../../features/vm/missionBridge';
 import { PROBE_TRIGGER_COMMAND, SEARCH_PROBE_TRIGGER_COMMAND } from '../probeCommands';
-import { applyProbeMetricToVmMetrics, type VmMetricState, type VmMetricKey } from '../vmMetrics';
+import { applyProbeMetricToVmMetrics, applyProbeStateSnapshotToVmMetrics, type VmMetricState, type VmMetricKey } from '../vmMetrics';
 import type { useProgressStore } from '../../../features/progress/progressStore';
 import type { VmBootConfig } from '../vmBoot';
 
@@ -45,6 +49,7 @@ type UsePracticeVmInteractionArgs = {
 type UsePracticeVmInteractionResult = {
   pushDebugLine: (line: string) => void;
   updateMetricByProbe: (metric: VmProbeMetric) => void;
+  updateMetricsByProbeState: (snapshot: VmProbeStateSnapshot) => void;
   sendInternalCommand: (command: string) => void;
   requestSearchProbe: () => void;
   registerCommand: (command: string, options?: RegisterCommandOptions) => void;
@@ -111,6 +116,28 @@ export function usePracticeVmInteraction({
 }: UsePracticeVmInteractionArgs): UsePracticeVmInteractionResult {
   const postCommandProbeTimerRef = useRef<number | null>(null);
 
+  const recordTmuxSurfaceMetrics = useCallback(
+    (nextMetrics: VmMetricState, changedMetricKeys: VmMetricKey[]) => {
+      const includesPane = changedMetricKeys.includes('paneCount');
+      const includesLayout = changedMetricKeys.includes('windowLayout');
+      const includesZoomed = changedMetricKeys.includes('windowZoomed');
+      const includesSync = changedMetricKeys.includes('paneSynchronized');
+      if (!includesPane && !includesLayout && !includesZoomed && !includesSync) {
+        return;
+      }
+
+      recordTmuxActivityRef.current({
+        actions: [],
+        paneCount: includesPane ? nextMetrics.paneCount : undefined,
+        windowLayout: includesLayout ? nextMetrics.windowLayout : undefined,
+        windowZoomed: includesZoomed ? nextMetrics.windowZoomed : undefined,
+        paneSynchronized: includesSync ? nextMetrics.paneSynchronized : undefined,
+        lessonSlug: selectedLessonSlugRef.current,
+      });
+    },
+    [recordTmuxActivityRef, selectedLessonSlugRef],
+  );
+
   const pushDebugLine = useCallback(
     (line: string) => {
       const normalized = line.trimEnd();
@@ -134,31 +161,37 @@ export function usePracticeVmInteraction({
         triggerMetricVisualEffect(currentUpdateResult.metricKey);
       }
 
-      if (metric.key === 'pane' || metric.key === 'layout' || metric.key === 'zoomed' || metric.key === 'sync') {
-        const nextPaneCount = metric.key === 'pane' ? (metric.value >= 0 ? metric.value : null) : undefined;
-        const nextLayout = metric.key === 'layout' ? metric.value.trim() || null : undefined;
-        const nextZoomed = metric.key === 'zoomed' ? metric.value === 1 : undefined;
-        const nextSynchronized = metric.key === 'sync' ? metric.value === 1 : undefined;
-        recordTmuxActivityRef.current({
-          actions: [],
-          paneCount: nextPaneCount,
-          windowLayout: nextLayout,
-          windowZoomed: nextZoomed,
-          paneSynchronized: nextSynchronized,
-          lessonSlug: selectedLessonSlugRef.current,
-        });
+      if (currentUpdateResult.changed && currentUpdateResult.metricKey) {
+        recordTmuxSurfaceMetrics(currentUpdateResult.nextMetrics, [currentUpdateResult.metricKey]);
       }
     },
     [
       metricsRef,
-      recordTmuxActivityRef,
-      selectedLessonSlugRef,
+      recordTmuxSurfaceMetrics,
       setMetrics,
       setVmStatus,
       setVmStatusText,
       t,
       triggerMetricVisualEffect,
     ],
+  );
+
+  const updateMetricsByProbeState = useCallback(
+    (snapshot: VmProbeStateSnapshot) => {
+      setVmStatus('running');
+      setVmStatusText(t('부팅 완료, 명령 입력 가능'));
+      const currentUpdateResult = applyProbeStateSnapshotToVmMetrics(metricsRef.current, snapshot);
+
+      setMetrics((previous) => applyProbeStateSnapshotToVmMetrics(previous, snapshot).nextMetrics);
+      currentUpdateResult.changedMetricKeys.forEach((metricKey) => {
+        triggerMetricVisualEffect(metricKey);
+      });
+
+      if (currentUpdateResult.changed) {
+        recordTmuxSurfaceMetrics(currentUpdateResult.nextMetrics, currentUpdateResult.changedMetricKeys);
+      }
+    },
+    [metricsRef, recordTmuxSurfaceMetrics, setMetrics, setVmStatus, setVmStatusText, t, triggerMetricVisualEffect],
   );
 
   const sendInternalCommand = useCallback(
@@ -316,6 +349,9 @@ export function usePracticeVmInteraction({
       injectProbeMetric: (metric: VmProbeMetric) => {
         updateMetricByProbe(metric);
       },
+      injectProbeState: (snapshot: VmProbeStateSnapshot) => {
+        updateMetricsByProbeState(snapshot);
+      },
       injectCommandHistory: (command: string) => {
         registerCommand(command, { source: 'shell' });
       },
@@ -342,6 +378,7 @@ export function usePracticeVmInteraction({
     registerCommand,
     setActionHistory,
     updateMetricByProbe,
+    updateMetricsByProbeState,
     vmStatus,
     vmStatusText,
   ]);
@@ -378,6 +415,7 @@ export function usePracticeVmInteraction({
   return {
     pushDebugLine,
     updateMetricByProbe,
+    updateMetricsByProbeState,
     sendInternalCommand,
     requestSearchProbe,
     registerCommand,

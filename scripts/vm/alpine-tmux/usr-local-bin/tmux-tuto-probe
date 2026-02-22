@@ -15,19 +15,21 @@ TMUXWEB_ACTIVE_WINDOW=-1
 TMUXWEB_LAYOUT=""
 TMUXWEB_ZOOMED=0
 TMUXWEB_SYNC=0
+TMUXWEB_SEARCH=0
+TMUXWEB_SEARCH_MATCHED=0
 
 if [ "$TMUXWEB_TMUX" -eq 1 ]; then
   TMUXWEB_SESSION="$(tmux list-sessions 2>/dev/null | wc -l | tr -d ' ')"
-  TMUXWEB_WINDOW="$(tmux list-windows 2>/dev/null | wc -l | tr -d ' ')"
-  TMUXWEB_PANE="$(tmux list-panes 2>/dev/null | wc -l | tr -d ' ')"
+  TMUXWEB_WINDOW="$(tmux list-windows -a 2>/dev/null | wc -l | tr -d ' ')"
+  TMUXWEB_PANE="$(tmux list-panes -a 2>/dev/null | wc -l | tr -d ' ')"
   TMUXWEB_MODE="$(tmux display-message -p '#{?pane_in_mode,1,0}' 2>/dev/null || echo 0)"
-  TMUXWEB_SESSION_NAME="$(tmux display-message -p '#S' 2>/dev/null | tr -d '\n\r')"
-  TMUXWEB_WINDOW_NAME="$(tmux display-message -p '#W' 2>/dev/null | tr -d '\n\r')"
+  TMUXWEB_SESSION_NAME="$(tmux display-message -p '#S' 2>/dev/null | tr '\t\n\r' '   ')"
+  TMUXWEB_WINDOW_NAME="$(tmux display-message -p '#W' 2>/dev/null | tr '\t\n\r' '   ')"
   TMUXWEB_ACTIVE_WINDOW="$(tmux display-message -p '#{window_index}' 2>/dev/null | tr -d ' ')"
   if [ -z "$TMUXWEB_ACTIVE_WINDOW" ]; then
     TMUXWEB_ACTIVE_WINDOW=-1
   fi
-  TMUXWEB_LAYOUT="$(tmux display-message -p '#{window_layout}' 2>/dev/null | tr -d '\n\r')"
+  TMUXWEB_LAYOUT="$(tmux display-message -p '#{window_layout}' 2>/dev/null | tr '\t\n\r' '   ')"
   TMUXWEB_ZOOMED="$(tmux display-message -p '#{window_zoomed_flag}' 2>/dev/null | tr -d ' ')"
   if [ -z "$TMUXWEB_ZOOMED" ]; then
     TMUXWEB_ZOOMED=0
@@ -38,16 +40,27 @@ if [ "$TMUXWEB_TMUX" -eq 1 ]; then
   else
     TMUXWEB_SYNC=0
   fi
+
+  if [ "$TMUXWEB_MODE" -eq 1 ]; then
+    TMUXWEB_SEARCH=1
+    TMUXWEB_SEARCH_MATCHED="$(tmux display-message -p '#{?search_present,1,0}' 2>/dev/null | tr -d ' ')"
+    if [ -z "$TMUXWEB_SEARCH_MATCHED" ]; then
+      TMUXWEB_SEARCH_MATCHED=0
+    fi
+  fi
 fi
 
-echo "[[TMUXWEB_PROBE:tmux:${TMUXWEB_TMUX}]]"
-echo "[[TMUXWEB_PROBE:session:${TMUXWEB_SESSION}]]"
-echo "[[TMUXWEB_PROBE:window:${TMUXWEB_WINDOW}]]"
-echo "[[TMUXWEB_PROBE:pane:${TMUXWEB_PANE}]]"
-echo "[[TMUXWEB_PROBE:mode:${TMUXWEB_MODE}]]"
-echo "[[TMUXWEB_PROBE:sessionName:${TMUXWEB_SESSION_NAME}]]"
-echo "[[TMUXWEB_PROBE:windowName:${TMUXWEB_WINDOW_NAME}]]"
-echo "[[TMUXWEB_PROBE:activeWindow:${TMUXWEB_ACTIVE_WINDOW}]]"
-echo "[[TMUXWEB_PROBE:layout:${TMUXWEB_LAYOUT}]]"
-echo "[[TMUXWEB_PROBE:zoomed:${TMUXWEB_ZOOMED}]]"
-echo "[[TMUXWEB_PROBE:sync:${TMUXWEB_SYNC}]]"
+printf '[[TMUXWEB_STATE_V2:%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s]]\n' \
+  "$TMUXWEB_TMUX" \
+  "$TMUXWEB_SESSION" \
+  "$TMUXWEB_WINDOW" \
+  "$TMUXWEB_PANE" \
+  "$TMUXWEB_MODE" \
+  "$TMUXWEB_SESSION_NAME" \
+  "$TMUXWEB_WINDOW_NAME" \
+  "$TMUXWEB_ACTIVE_WINDOW" \
+  "$TMUXWEB_LAYOUT" \
+  "$TMUXWEB_ZOOMED" \
+  "$TMUXWEB_SYNC" \
+  "$TMUXWEB_SEARCH" \
+  "$TMUXWEB_SEARCH_MATCHED"

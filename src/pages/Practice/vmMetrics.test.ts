@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import type { VmProbeMetric } from '../../features/vm/missionBridge';
+import type { VmProbeMetric, VmProbeStateSnapshot } from '../../features/vm/missionBridge';
 import {
   applyProbeMetricToVmMetrics,
+  applyProbeStateSnapshotToVmMetrics,
   createInitialMetricHighlightState,
   createInitialMetrics,
   mapProbeMetricToVmMetricKey,
@@ -178,6 +179,125 @@ describe('vmMetrics', () => {
 
     expect(result.changed).toBe(false);
     expect(result.metricKey).toBeNull();
+    expect(result.nextMetrics).toBe(previous);
+  });
+
+  it('applies probe state snapshot in one pass and reports changed keys', () => {
+    const previous = createInitialMetrics();
+    const snapshot: VmProbeStateSnapshot = {
+      tmux: 1,
+      session: 2,
+      window: 3,
+      pane: 4,
+      mode: 1,
+      sessionName: ' lesson ',
+      windowName: ' main ',
+      activeWindow: 2,
+      layout: ' bb2d,120x40,0,0,0 ',
+      zoomed: 1,
+      sync: 0,
+      search: 1,
+      searchMatched: 1,
+    };
+
+    const result = applyProbeStateSnapshotToVmMetrics(previous, snapshot);
+    expect(result.changed).toBe(true);
+    expect(result.nextMetrics).toEqual({
+      sessionCount: 2,
+      windowCount: 3,
+      paneCount: 4,
+      modeIs: 'COPY_MODE',
+      sessionName: 'lesson',
+      windowName: 'main',
+      activeWindowIndex: 2,
+      windowLayout: 'bb2d,120x40,0,0,0',
+      windowZoomed: true,
+      paneSynchronized: false,
+      searchExecuted: true,
+      searchMatchFound: true,
+    });
+    expect(result.changedMetricKeys).toEqual(
+      expect.arrayContaining([
+        'sessionCount',
+        'windowCount',
+        'paneCount',
+        'modeIs',
+        'sessionName',
+        'windowName',
+        'activeWindowIndex',
+        'windowLayout',
+        'windowZoomed',
+        'paneSynchronized',
+        'searchExecuted',
+        'searchMatchFound',
+      ]),
+    );
+  });
+
+  it('stabilizes empty names in snapshot while counts remain active', () => {
+    const previous = {
+      ...createInitialMetrics(),
+      sessionCount: 1,
+      windowCount: 1,
+      sessionName: 'lesson',
+      windowName: 'dev',
+    };
+    const snapshot: VmProbeStateSnapshot = {
+      tmux: 1,
+      session: 1,
+      window: 1,
+      pane: 1,
+      mode: 0,
+      sessionName: '   ',
+      windowName: '   ',
+      activeWindow: 0,
+      layout: 'layout',
+      zoomed: 0,
+      sync: 0,
+      search: 0,
+      searchMatched: 0,
+    };
+
+    const result = applyProbeStateSnapshotToVmMetrics(previous, snapshot);
+    expect(result.nextMetrics.sessionName).toBe('lesson');
+    expect(result.nextMetrics.windowName).toBe('dev');
+  });
+
+  it('returns previous object when snapshot does not change metrics', () => {
+    const previous = {
+      ...createInitialMetrics(),
+      sessionCount: 1,
+      windowCount: 1,
+      paneCount: 1,
+      modeIs: null,
+      sessionName: 'lesson',
+      windowName: 'dev',
+      activeWindowIndex: 0,
+      windowLayout: 'layout',
+      windowZoomed: false,
+      paneSynchronized: false,
+      searchExecuted: false,
+      searchMatchFound: false,
+    };
+    const snapshot: VmProbeStateSnapshot = {
+      tmux: 1,
+      session: 1,
+      window: 1,
+      pane: 1,
+      mode: 0,
+      sessionName: 'lesson',
+      windowName: 'dev',
+      activeWindow: 0,
+      layout: 'layout',
+      zoomed: 0,
+      sync: 0,
+      search: 0,
+      searchMatched: 0,
+    };
+
+    const result = applyProbeStateSnapshotToVmMetrics(previous, snapshot);
+    expect(result.changed).toBe(false);
+    expect(result.changedMetricKeys).toEqual([]);
     expect(result.nextMetrics).toBe(previous);
   });
 });

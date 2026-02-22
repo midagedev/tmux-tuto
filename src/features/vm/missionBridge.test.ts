@@ -3,7 +3,7 @@ import {
   evaluateMissionWithVmSnapshot,
   extractCommandFromPromptLine,
   isInternalProbeLine,
-  parseProbeMetricFromLine,
+  parseProbeStateFromLine,
   parseTmuxActionsFromCommand,
 } from './missionBridge';
 
@@ -20,8 +20,8 @@ describe('extractCommandFromPromptLine', () => {
 });
 
 describe('isInternalProbeLine', () => {
-  it('detects probe metric markers', () => {
-    expect(isInternalProbeLine('[[TMUXWEB_PROBE:session:1]]')).toBe(true);
+  it('detects probe state marker lines', () => {
+    expect(isInternalProbeLine('[[TMUXWEB_STATE_V2:1\t1\t1\t1\t0\tmain\t1\t0\tlayout\t0\t0\t0\t0]]')).toBe(true);
   });
 
   it('does not treat normal tmux command as internal probe', () => {
@@ -29,65 +29,55 @@ describe('isInternalProbeLine', () => {
   });
 });
 
-describe('parseProbeMetricFromLine', () => {
-  it('parses numeric probe metrics', () => {
-    expect(parseProbeMetricFromLine('[[TMUXWEB_PROBE:zoomed:1]]')).toEqual({
-      key: 'zoomed',
-      value: 1,
+describe('parseProbeStateFromLine', () => {
+  it('parses full probe state snapshot', () => {
+    expect(parseProbeStateFromLine('[[TMUXWEB_STATE_V2:1\t2\t3\t4\t1\twork\tdev\t1\tbb2d,237x63,0,0,0\t1\t0\t1\t1]]')).toEqual({
+      tmux: 1,
+      session: 2,
+      window: 3,
+      pane: 4,
+      mode: 1,
+      sessionName: 'work',
+      windowName: 'dev',
+      activeWindow: 1,
+      layout: 'bb2d,237x63,0,0,0',
+      zoomed: 1,
+      sync: 0,
+      search: 1,
+      searchMatched: 1,
     });
   });
 
-  it('parses text probe metrics', () => {
-    expect(parseProbeMetricFromLine('[[TMUXWEB_PROBE:layout:bb2d,237x63,0,0,0]]')).toEqual({
-      key: 'layout',
-      value: 'bb2d,237x63,0,0,0',
+  it('parses snapshot when prompt residue prefixes the line', () => {
+    expect(parseProbeStateFromLine('tuto@tmux-tuto:~$ [[TMUXWEB_STATE_V2:1\t1\t1\t1\t0\tmain\t1\t0\tlayout\t0\t0\t0\t0]]')).toEqual({
+      tmux: 1,
+      session: 1,
+      window: 1,
+      pane: 1,
+      mode: 0,
+      sessionName: 'main',
+      windowName: '1',
+      activeWindow: 0,
+      layout: 'layout',
+      zoomed: 0,
+      sync: 0,
+      search: 0,
+      searchMatched: 0,
     });
   });
 
-  it('parses window name probe metrics', () => {
-    expect(parseProbeMetricFromLine('[[TMUXWEB_PROBE:windowName:dev]]')).toEqual({
-      key: 'windowName',
-      value: 'dev',
-    });
-  });
-
-  it('ignores embedded probe markers inside shell command echoes', () => {
+  it('ignores embedded echoed state marker command lines', () => {
     const echoedLine =
-      'tuto@tmux-tuto:~$ echo "[[TMUXWEB_PROBE:windowName:$TMUXWEB_WINDOW_NAME]]" >/dev/ttyS1';
-    expect(parseProbeMetricFromLine(echoedLine)).toBeNull();
+      'tuto@tmux-tuto:~$ printf "[[TMUXWEB_STATE_V2:%s\\t%s\\t%s]]\\n" "$TMUXWEB_TMUX" "$TMUXWEB_SESSION"';
+    expect(parseProbeStateFromLine(echoedLine)).toBeNull();
   });
 
-  it('parses probe markers even when escape residue prefixes the line', () => {
-    expect(parseProbeMetricFromLine('6n[[TMUXWEB_PROBE:session:1]]')).toEqual({
-      key: 'session',
-      value: 1,
-    });
+  it('rejects invalid field counts', () => {
+    expect(parseProbeStateFromLine('[[TMUXWEB_STATE_V2:1\t2\t3]]')).toBeNull();
   });
 
-  it('parses probe markers even when prompt residue trails the line', () => {
-    expect(parseProbeMetricFromLine('[[TMUXWEB_PROBE:session:2]]tuto@tmux-tuto:~$')).toEqual({
-      key: 'session',
-      value: 2,
-    });
-  });
-
-  it('parses probe markers when shell prompt residue prefixes the line', () => {
-    expect(parseProbeMetricFromLine('tuto@tmux-tuto:~$ [[TMUXWEB_PROBE:session:3]]')).toEqual({
-      key: 'session',
-      value: 3,
-    });
-  });
-
-  it('parses probe markers embedded in printf command echoes when value is concrete', () => {
-    expect(parseProbeMetricFromLine('tuto@tmux-tuto:~$ printf "[[TMUXWEB_PROBE:session:4]]\\n" >/dev/ttyS1')).toEqual({
-      key: 'session',
-      value: 4,
-    });
-  });
-
-  it('ignores text probe markers with unresolved placeholders', () => {
-    expect(parseProbeMetricFromLine('[[TMUXWEB_PROBE:windowName:%s]]')).toBeNull();
-    expect(parseProbeMetricFromLine('[[TMUXWEB_PROBE:windowName:$TMUXWEB_WINDOW_NAME]]')).toBeNull();
+  it('rejects non-numeric numeric fields', () => {
+    expect(parseProbeStateFromLine('[[TMUXWEB_STATE_V2:x\t2\t3\t4\t1\twork\tdev\t1\tlayout\t1\t0\t1\t1]]')).toBeNull();
   });
 });
 

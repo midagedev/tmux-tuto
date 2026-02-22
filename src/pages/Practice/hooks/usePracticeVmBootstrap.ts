@@ -4,7 +4,7 @@ import type V86 from 'v86';
 import type { V86Options } from 'v86';
 import type { Dispatch, MutableRefObject, SetStateAction } from 'react';
 import type { TFunction } from 'i18next';
-import { parseProbeMetricFromLine, stripAnsi, type VmProbeMetric } from '../../../features/vm/missionBridge';
+import { parseProbeStateFromLine, stripAnsi, type VmProbeStateSnapshot } from '../../../features/vm/missionBridge';
 import {
   createTmuxShortcutTelemetryState,
   parseTmuxShortcutTelemetry,
@@ -45,7 +45,7 @@ type UsePracticeVmBootstrapArgs = {
   clearMetricVisualEffects: () => void;
   clearMetricVisualState: () => void;
   pushDebugLine: (line: string) => void;
-  updateMetricByProbe: (metric: VmProbeMetric) => void;
+  updateMetricsByProbeState: (snapshot: VmProbeStateSnapshot) => void;
   registerCommand: (
     command: string,
     options?: {
@@ -81,7 +81,7 @@ export function usePracticeVmBootstrap({
   clearMetricVisualEffects,
   clearMetricVisualState,
   pushDebugLine,
-  updateMetricByProbe,
+  updateMetricsByProbeState,
   registerCommand,
   requestSearchProbe,
   sendInternalCommand,
@@ -201,9 +201,9 @@ export function usePracticeVmBootstrap({
       }
 
       const completedLine = outputCaptureResult.completedLine;
-      const probeMetric = parseProbeMetricFromLine(completedLine);
-      if (probeMetric) {
-        updateMetricByProbe(probeMetric);
+      const probeState = parseProbeStateFromLine(completedLine);
+      if (probeState) {
+        updateMetricsByProbeState(probeState);
         return;
       }
 
@@ -234,9 +234,9 @@ export function usePracticeVmBootstrap({
       if (probeCaptureResult.completedLine === null) {
         return;
       }
-      const probeMetric = parseProbeMetricFromLine(probeCaptureResult.completedLine);
-      if (probeMetric) {
-        updateMetricByProbe(probeMetric);
+      const probeState = parseProbeStateFromLine(probeCaptureResult.completedLine);
+      if (probeState) {
+        updateMetricsByProbeState(probeState);
       }
     };
 
@@ -413,7 +413,7 @@ export function usePracticeVmBootstrap({
     terminalGeometrySyncCommand,
     terminalHostRef,
     terminalRef,
-    updateMetricByProbe,
+    updateMetricsByProbeState,
     vmEpoch,
     vmInternalBridgeReadyRef,
     vmWarmBannerPendingRef,

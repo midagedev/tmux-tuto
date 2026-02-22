@@ -1,4 +1,4 @@
-import type { VmProbeMetric } from '../../features/vm/missionBridge';
+import type { VmProbeMetric, VmProbeStateSnapshot } from '../../features/vm/missionBridge';
 
 export type VmMetricState = {
   sessionCount: number | null;
@@ -17,6 +17,11 @@ export type VmMetricState = {
 
 export type VmMetricKey = keyof VmMetricState;
 export type VmMetricHighlightState = Record<VmMetricKey, boolean>;
+export type VmMetricApplyResult = {
+  nextMetrics: VmMetricState;
+  changed: boolean;
+  changedMetricKeys: VmMetricKey[];
+};
 
 export const VM_METRIC_KEYS: VmMetricKey[] = [
   'sessionCount',
@@ -165,6 +170,24 @@ function stabilizeTextMetricUpdate(previous: VmMetricState, metricUpdate: VmMetr
   return metricUpdate;
 }
 
+function stabilizeSnapshotTextMetric(
+  previousValue: string | null,
+  nextValue: string | null,
+  nextCount: number | null,
+) {
+  if (nextValue !== null) {
+    return nextValue;
+  }
+  if (previousValue !== null && (nextCount === null || nextCount > 0)) {
+    return previousValue;
+  }
+  return null;
+}
+
+function collectChangedMetricKeys(previous: VmMetricState, nextMetrics: VmMetricState) {
+  return VM_METRIC_KEYS.filter((key) => previous[key] !== nextMetrics[key]);
+}
+
 export function applyProbeMetricToVmMetrics(previous: VmMetricState, metric: VmProbeMetric) {
   const metricUpdate = resolveProbeMetricUpdate(metric);
   if (!metricUpdate) {
@@ -192,5 +215,52 @@ export function applyProbeMetricToVmMetrics(previous: VmMetricState, metric: VmP
     } as VmMetricState,
     changed: true,
     metricKey: stabilizedMetricUpdate.key,
+  };
+}
+
+export function applyProbeStateSnapshotToVmMetrics(
+  previous: VmMetricState,
+  snapshot: VmProbeStateSnapshot,
+): VmMetricApplyResult {
+  const nextSessionCount = snapshot.session >= 0 ? snapshot.session : null;
+  const nextWindowCount = snapshot.window >= 0 ? snapshot.window : null;
+  const nextSessionName = stabilizeSnapshotTextMetric(
+    previous.sessionName,
+    snapshot.sessionName.trim() || null,
+    nextSessionCount,
+  );
+  const nextWindowName = stabilizeSnapshotTextMetric(
+    previous.windowName,
+    snapshot.windowName.trim() || null,
+    nextWindowCount,
+  );
+  const nextMetrics: VmMetricState = {
+    sessionCount: nextSessionCount,
+    windowCount: nextWindowCount,
+    paneCount: snapshot.pane >= 0 ? snapshot.pane : null,
+    modeIs: snapshot.mode === 1 ? 'COPY_MODE' : null,
+    sessionName: nextSessionName,
+    windowName: nextWindowName,
+    activeWindowIndex: snapshot.activeWindow >= 0 ? snapshot.activeWindow : null,
+    windowLayout: snapshot.layout.trim() || null,
+    windowZoomed: snapshot.zoomed === 1,
+    paneSynchronized: snapshot.sync === 1,
+    searchExecuted: snapshot.search === 1,
+    searchMatchFound: snapshot.searchMatched === 1,
+  };
+
+  const changedMetricKeys = collectChangedMetricKeys(previous, nextMetrics);
+  if (changedMetricKeys.length === 0) {
+    return {
+      nextMetrics: previous,
+      changed: false,
+      changedMetricKeys,
+    };
+  }
+
+  return {
+    nextMetrics,
+    changed: true,
+    changedMetricKeys,
   };
 }

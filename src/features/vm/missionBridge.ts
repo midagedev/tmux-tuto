@@ -46,8 +46,10 @@ const INTERNAL_PROBE_COMMAND_PATTERNS = [
   'TMUXWEB_LAYOUT=',
   'TMUXWEB_ZOOMED=',
   'TMUXWEB_SYNC=',
-  'TMUXWEB_PROBE',
+  'TMUXWEB_STATE_V2',
 ];
+
+export const PROBE_STATE_MARKER = 'TMUXWEB_STATE_V2';
 
 export function isInternalProbeLine(line: string) {
   const normalized = stripAnsi(line).replace(/\r/g, '').trim();
@@ -297,9 +299,37 @@ export type VmProbeMetric =
       value: string;
     };
 
-export function parseProbeMetricFromLine(line: string): VmProbeMetric | null {
-  const cleaned = stripAnsi(line).replace(/\r/g, '').replace(/[\u0000-\u001f\u007f]/g, '');
-  const markerToken = '[[TMUXWEB_PROBE:';
+export type VmProbeStateSnapshot = {
+  tmux: number;
+  session: number;
+  window: number;
+  pane: number;
+  mode: number;
+  sessionName: string;
+  windowName: string;
+  activeWindow: number;
+  layout: string;
+  zoomed: number;
+  sync: number;
+  search: number;
+  searchMatched: number;
+};
+
+function parseProbeStateNumber(value: string) {
+  const parsed = Number.parseInt(value, 10);
+  return Number.isNaN(parsed) ? null : parsed;
+}
+
+export function parseProbeStateFromLine(line: string): VmProbeStateSnapshot | null {
+  const cleaned = stripAnsi(line)
+    .replace(/\r/g, '')
+    .split('')
+    .filter((character) => {
+      const code = character.charCodeAt(0);
+      return code === 9 || (code >= 32 && code !== 127);
+    })
+    .join('');
+  const markerToken = `[[${PROBE_STATE_MARKER}:`;
   const markerIndex = cleaned.indexOf(markerToken);
   if (markerIndex < 0) {
     return null;
@@ -310,32 +340,62 @@ export function parseProbeMetricFromLine(line: string): VmProbeMetric | null {
     return null;
   }
 
-  const match = cleaned.match(
-    /\[\[TMUXWEB_PROBE:(session|window|pane|tmux|mode|search|searchMatched|activeWindow|zoomed|sync|sessionName|windowName|layout):([^\]]*)\]\]/,
-  );
+  const match = cleaned.match(/\[\[TMUXWEB_STATE_V2:([^\]]*)\]\]/);
   if (!match) {
     return null;
   }
 
-  if (match[1] === 'sessionName' || match[1] === 'windowName' || match[1] === 'layout') {
-    const textValue = match[2].trim();
-    if (!textValue || textValue.includes('%') || textValue.includes('$')) {
-      return null;
-    }
-
-    return {
-      key: match[1] as VmProbeTextKey,
-      value: textValue,
-    };
+  const fields = match[1].split('\t');
+  if (fields.length !== 13) {
+    return null;
   }
 
-  const value = Number.parseInt(match[2], 10);
-  if (Number.isNaN(value)) {
+  const tmux = parseProbeStateNumber(fields[0]);
+  const session = parseProbeStateNumber(fields[1]);
+  const window = parseProbeStateNumber(fields[2]);
+  const pane = parseProbeStateNumber(fields[3]);
+  const mode = parseProbeStateNumber(fields[4]);
+  const sessionName = fields[5].trim();
+  const windowName = fields[6].trim();
+  const activeWindow = parseProbeStateNumber(fields[7]);
+  const layout = fields[8].trim();
+  const zoomed = parseProbeStateNumber(fields[9]);
+  const sync = parseProbeStateNumber(fields[10]);
+  const search = parseProbeStateNumber(fields[11]);
+  const searchMatched = parseProbeStateNumber(fields[12]);
+
+  if (
+    tmux === null ||
+    session === null ||
+    window === null ||
+    pane === null ||
+    mode === null ||
+    activeWindow === null ||
+    zoomed === null ||
+    sync === null ||
+    search === null ||
+    searchMatched === null
+  ) {
+    return null;
+  }
+
+  if (sessionName.includes('%s') || windowName.includes('%s') || layout.includes('%s')) {
     return null;
   }
 
   return {
-    key: match[1] as VmProbeNumericKey,
-    value,
+    tmux,
+    session,
+    window,
+    pane,
+    mode,
+    sessionName,
+    windowName,
+    activeWindow,
+    layout,
+    zoomed,
+    sync,
+    search,
+    searchMatched,
   };
 }
