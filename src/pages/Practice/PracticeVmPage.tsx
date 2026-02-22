@@ -49,7 +49,9 @@ declare global {
       };
       saveState: () => Promise<ArrayBuffer | null>;
       sendProbe: () => void;
+      setAutoProbe: (enabled: boolean) => void;
       sendCommand: (command: string) => void;
+      sendInput: (data: string) => void;
       injectProbeMetric: (metric: VmProbeMetric) => void;
       injectProbeState: (snapshot: VmProbeStateSnapshot) => void;
       injectCommandHistory: (command: string) => void;
@@ -69,6 +71,7 @@ export function PracticeVmPage() {
   const [debugLines, setDebugLines] = useState<string[]>([]);
   const [actionHistory, setActionHistory] = useState<string[]>([]);
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
+  const [autoProbeEnabled, setAutoProbeEnabled] = useState(true);
   const [metrics, setMetrics] = useState<VmMetricState>(createInitialMetrics());
   const [mobileWorkbenchView, setMobileWorkbenchView] = useState<'mission' | 'terminal'>('terminal');
 
@@ -115,6 +118,7 @@ export function PracticeVmPage() {
   const lastEmulatorOptionsRef = useRef<V86Options | null>(null);
   const vmInternalBridgeReadyRef = useRef(false);
   const vmWarmBannerPendingRef = useRef(false);
+  const terminalInputBridgeRef = useRef<((data: string) => void) | null>(null);
   const selectedLessonSlugRef = useRef(selectedLessonSlug);
   const recordTmuxActivityRef = useRef(recordTmuxActivity);
   const metricsRef = useRef<VmMetricState>(createInitialMetrics());
@@ -233,7 +237,8 @@ export function PracticeVmPage() {
     sendCommand,
   } = usePracticeVmInteraction({
     t,
-    autoProbe: true,
+    autoProbe: autoProbeEnabled,
+    setAutoProbe: setAutoProbeEnabled,
     vmStatus,
     vmStatusText,
     metrics,
@@ -254,6 +259,7 @@ export function PracticeVmPage() {
     lastEmulatorOptionsRef,
     recordTmuxActivityRef,
     triggerMetricVisualEffect,
+    terminalInputBridgeRef,
     bootConfig: VM_BOOT_CONFIG,
   });
 
@@ -284,6 +290,7 @@ export function PracticeVmPage() {
     requestSearchProbe,
     requestBootstrapProbe,
     sendInternalCommand,
+    terminalInputBridgeRef,
     terminalGeometrySyncCommand: TERMINAL_GEOMETRY_SYNC_COMMAND,
     bootConfig: VM_BOOT_CONFIG,
   });

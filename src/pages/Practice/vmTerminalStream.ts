@@ -1,6 +1,8 @@
 export type TerminalInputCaptureState = {
   lineBuffer: string;
   inEscapeSequence: boolean;
+  tmuxPrefixPending: boolean;
+  tmuxPrefixEscapeBuffer: string | null;
 };
 
 export type TerminalOutputCaptureState = {
@@ -12,10 +14,20 @@ function isPrintableOrTab(char: string) {
   return char >= ' ' || char === '\t';
 }
 
+function isTmuxPrefixTriggerKey(char: string) {
+  return char === '\u0001' || char === '\u0002';
+}
+
+function isEscapeSequenceTerminator(char: string) {
+  return char >= '@' && char <= '~';
+}
+
 export function createInitialTerminalInputCaptureState(): TerminalInputCaptureState {
   return {
     lineBuffer: '',
     inEscapeSequence: false,
+    tmuxPrefixPending: false,
+    tmuxPrefixEscapeBuffer: null,
   };
 }
 
@@ -30,8 +42,38 @@ export function consumeTerminalInputData(data: string, state: TerminalInputCaptu
   const commands: string[] = [];
   let lineBuffer = state.lineBuffer;
   let inEscapeSequence = state.inEscapeSequence;
+  let tmuxPrefixPending = state.tmuxPrefixPending;
+  let tmuxPrefixEscapeBuffer = state.tmuxPrefixEscapeBuffer;
 
   for (const char of data) {
+    if (tmuxPrefixEscapeBuffer !== null) {
+      tmuxPrefixEscapeBuffer += char;
+      const shouldFinalizePrefixEscape =
+        isEscapeSequenceTerminator(char) &&
+        tmuxPrefixEscapeBuffer !== '\u001b[' &&
+        tmuxPrefixEscapeBuffer !== '\u001bO';
+      if (shouldFinalizePrefixEscape) {
+        tmuxPrefixPending = false;
+        tmuxPrefixEscapeBuffer = null;
+      }
+      continue;
+    }
+
+    if (tmuxPrefixPending) {
+      if (char === '\u001b') {
+        tmuxPrefixEscapeBuffer = '\u001b';
+        continue;
+      }
+
+      tmuxPrefixPending = false;
+      continue;
+    }
+
+    if (isTmuxPrefixTriggerKey(char)) {
+      tmuxPrefixPending = true;
+      continue;
+    }
+
     if (inEscapeSequence) {
       if (char >= '@' && char <= '~') {
         inEscapeSequence = false;
@@ -72,6 +114,8 @@ export function consumeTerminalInputData(data: string, state: TerminalInputCaptu
     nextState: {
       lineBuffer,
       inEscapeSequence,
+      tmuxPrefixPending,
+      tmuxPrefixEscapeBuffer,
     },
     commands,
   };

@@ -36,6 +36,15 @@ describe('parseTmuxShortcutTelemetry', () => {
     ]);
   });
 
+  it('maps prefix + comma to rename-window command', () => {
+    const state = createTmuxShortcutTelemetryState();
+    const result = parseTmuxShortcutTelemetry('\u0002,', state, { inCopyMode: false });
+
+    expect(result.syntheticCommands).toEqual([
+      { command: 'tmux rename-window', shortcutAction: 'sim.shortcut.window.rename' },
+    ]);
+  });
+
   it('requests search probe when copy-mode search query is submitted', () => {
     const state = createTmuxShortcutTelemetryState();
     const start = parseTmuxShortcutTelemetry('/', state, { inCopyMode: true });

@@ -5,6 +5,7 @@ import type V86 from 'v86';
 import type { V86Options } from 'v86';
 import {
   parseTmuxActionsFromCommand,
+  stripAnsi,
   type VmProbeMetric,
   type VmProbeStateSnapshot,
 } from '../../../features/vm/missionBridge';
@@ -32,6 +33,7 @@ type RegisterCommandOptions = {
 type UsePracticeVmInteractionArgs = {
   t: TFunction;
   autoProbe: boolean;
+  setAutoProbe: Dispatch<SetStateAction<boolean>>;
   vmStatus: VmStatus;
   vmStatusText: string;
   metrics: VmMetricState;
@@ -52,6 +54,7 @@ type UsePracticeVmInteractionArgs = {
   lastEmulatorOptionsRef: MutableRefObject<V86Options | null>;
   recordTmuxActivityRef: MutableRefObject<ReturnType<typeof useProgressStore.getState>['recordTmuxActivity']>;
   triggerMetricVisualEffect: (metricKey: VmMetricKey | null) => void;
+  terminalInputBridgeRef: MutableRefObject<((data: string) => void) | null>;
   bootConfig: VmBootConfig;
 };
 
@@ -100,9 +103,56 @@ function appendActions(history: string[], actions: string[], max: number) {
   return trimHistory([...history, ...actions], max);
 }
 
+function extractSearchQuery(command: string) {
+  const trimmed = command.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  const slashIndex = trimmed.lastIndexOf('/');
+  if (slashIndex >= 0 && slashIndex < trimmed.length - 1) {
+    const query = trimmed.slice(slashIndex + 1).trim();
+    return query.length > 0 ? query : null;
+  }
+
+  const quoted = trimmed.match(/\bsearch-(?:forward|backward)\s+(?:"([^"]+)"|'([^']+)'|([^\s;]+))/i);
+  if (!quoted) {
+    return null;
+  }
+
+  const query = quoted[1] ?? quoted[2] ?? quoted[3] ?? '';
+  const normalized = query.trim();
+  return normalized.length > 0 ? normalized : null;
+}
+
+function outputContainsSearchQuery(debugLines: string[], query: string) {
+  const normalizedQuery = query.trim();
+  if (!normalizedQuery) {
+    return false;
+  }
+
+  return debugLines.some((line) => {
+    const plainLine = stripAnsi(line).replace(/\r/g, '').trim();
+    if (!plainLine) {
+      return false;
+    }
+
+    if (/^[^#$\n]*[#$]\s+/.test(plainLine)) {
+      return false;
+    }
+
+    if (plainLine.startsWith('/')) {
+      return false;
+    }
+
+    return plainLine.includes(normalizedQuery);
+  });
+}
+
 export function usePracticeVmInteraction({
   t,
   autoProbe,
+  setAutoProbe,
   vmStatus,
   vmStatusText,
   metrics,
@@ -123,10 +173,17 @@ export function usePracticeVmInteraction({
   lastEmulatorOptionsRef,
   recordTmuxActivityRef,
   triggerMetricVisualEffect,
+  terminalInputBridgeRef,
   bootConfig,
 }: UsePracticeVmInteractionArgs): UsePracticeVmInteractionResult {
   const postCommandProbeTimerRef = useRef<number | null>(null);
   const probeSchedulerRef = useRef(createProbeSchedulerState());
+  const lastSearchMatchHintRef = useRef<boolean | null>(null);
+  const debugLinesRef = useRef(debugLines);
+
+  useEffect(() => {
+    debugLinesRef.current = debugLines;
+  }, [debugLines]);
 
   const recordTmuxSurfaceMetrics = useCallback(
     (nextMetrics: VmMetricState, changedMetricKeys: VmMetricKey[]) => {
@@ -239,9 +296,38 @@ export function usePracticeVmInteraction({
       flushPendingProbe();
       setVmStatus('running');
       setVmStatusText(t('부팅 완료, 명령 입력 가능'));
-      const currentUpdateResult = applyProbeStateSnapshotToVmMetrics(metricsRef.current, snapshot);
+      const applySnapshot = (previous: VmMetricState) => {
+        const updateResult = applyProbeStateSnapshotToVmMetrics(previous, snapshot);
+        if (snapshot.search === 0) {
+          lastSearchMatchHintRef.current = null;
+          return updateResult;
+        }
 
-      setMetrics((previous) => applyProbeStateSnapshotToVmMetrics(previous, snapshot).nextMetrics);
+        const hintedMatch = lastSearchMatchHintRef.current;
+        if (snapshot.search === 1 && snapshot.searchMatched === 0 && hintedMatch !== null) {
+          if (updateResult.nextMetrics.searchMatchFound === hintedMatch) {
+            return updateResult;
+          }
+
+          const changedMetricKeys: VmMetricKey[] = updateResult.changedMetricKeys.includes('searchMatchFound')
+            ? updateResult.changedMetricKeys
+            : [...updateResult.changedMetricKeys, 'searchMatchFound'];
+
+          return {
+            nextMetrics: {
+              ...updateResult.nextMetrics,
+              searchMatchFound: hintedMatch,
+            },
+            changed: true,
+            changedMetricKeys,
+          };
+        }
+
+        return updateResult;
+      };
+
+      const currentUpdateResult = applySnapshot(metricsRef.current);
+      setMetrics((previous) => applySnapshot(previous).nextMetrics);
       currentUpdateResult.changedMetricKeys.forEach((metricKey) => {
         triggerMetricVisualEffect(metricKey);
       });
@@ -329,12 +415,22 @@ export function usePracticeVmInteraction({
         }));
       }
 
-      if (/(search-forward|search-backward|search -)/.test(lower) || /send-keys\s+.*-x\s+search/.test(lower)) {
+      const searchQuery = extractSearchQuery(normalizedCommand);
+      if (/(search-forward|search-backward|search -)/.test(lower) || /send-keys\s+.*-x\s+search/.test(lower) || searchQuery !== null) {
+        const queryMatchHint = searchQuery ? outputContainsSearchQuery(debugLinesRef.current, searchQuery) : null;
+        if (queryMatchHint !== null) {
+          lastSearchMatchHintRef.current = queryMatchHint;
+        }
+
         setMetrics((previous) => ({
           ...previous,
           searchExecuted: true,
+          ...(queryMatchHint !== null ? { searchMatchFound: queryMatchHint } : {}),
         }));
-        requestSearchProbe();
+
+        if (queryMatchHint === null) {
+          requestSearchProbe();
+        }
       }
 
       if (normalizedCommand.includes('tmux')) {
@@ -344,6 +440,7 @@ export function usePracticeVmInteraction({
     [
       recordTmuxActivityRef,
       requestSearchProbe,
+      debugLinesRef,
       scheduleProbeSoon,
       selectedLessonSlugRef,
       setActionHistory,
@@ -399,8 +496,18 @@ export function usePracticeVmInteraction({
       sendProbe: () => {
         void requestProbe('manual');
       },
+      setAutoProbe: (enabled: boolean) => {
+        setAutoProbe(Boolean(enabled));
+      },
       sendCommand: (command: string) => {
         sendCommand(command);
+      },
+      sendInput: (data: string) => {
+        const forwardInput = terminalInputBridgeRef.current;
+        if (!forwardInput) {
+          return;
+        }
+        forwardInput(data);
       },
       injectProbeMetric: (metric: VmProbeMetric) => {
         updateMetricByProbe(metric);
@@ -430,8 +537,10 @@ export function usePracticeVmInteraction({
     lastEmulatorOptionsRef,
     metrics,
     requestProbe,
+    setAutoProbe,
     sendCommand,
     sendInternalCommand,
+    terminalInputBridgeRef,
     registerCommand,
     setActionHistory,
     updateMetricByProbe,

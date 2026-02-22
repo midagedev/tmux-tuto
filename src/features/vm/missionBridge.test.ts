@@ -95,6 +95,11 @@ describe('parseTmuxActionsFromCommand', () => {
     expect(actions).toContain('sim.pane.zoom.toggle');
     expect(actions).toContain('sim.panes.sync.toggle');
   });
+
+  it('extracts rename action even when rename-window has no explicit name argument', () => {
+    const actions = parseTmuxActionsFromCommand('tmux rename-window');
+    expect(actions).toContain('sim.window.rename');
+  });
 });
 
 describe('evaluateMissionWithVmSnapshot', () => {

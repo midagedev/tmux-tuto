@@ -118,6 +118,20 @@ export async function sendVmCommand(page: Page, command: string) {
   }, command);
 }
 
+export async function sendVmInput(page: Page, data: string) {
+  await page.evaluate((payload) => {
+    const bridge = (window as Window & {
+      __tmuxwebVmBridge?: {
+        sendInput: (data: string) => void;
+      };
+    }).__tmuxwebVmBridge;
+    if (!bridge) {
+      throw new Error('VM bridge is not installed');
+    }
+    bridge.sendInput(payload);
+  }, data);
+}
+
 export async function injectVmProbeMetric(page: Page, metric: VmProbeMetricInput) {
   await page.evaluate((payload) => {
     const bridge = (window as Window & {
@@ -186,4 +200,15 @@ export async function sendVmProbe(page: Page) {
     }
     bridge.sendProbe();
   });
+}
+
+export async function setVmAutoProbe(page: Page, enabled: boolean) {
+  await page.evaluate((payload) => {
+    const bridge = (window as Window & {
+      __tmuxwebVmBridge?: {
+        setAutoProbe?: (enabled: boolean) => void;
+      };
+    }).__tmuxwebVmBridge;
+    bridge?.setAutoProbe?.(payload);
+  }, enabled);
 }

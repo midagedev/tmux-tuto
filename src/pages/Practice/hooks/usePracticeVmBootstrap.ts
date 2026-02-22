@@ -18,7 +18,12 @@ import {
   loadVmInitialState,
   type VmBootConfig,
 } from '../vmBoot';
-import { consumeProbeOutputByte, consumeTerminalInputData, consumeTerminalOutputByte } from '../vmTerminalStream';
+import {
+  consumeProbeOutputByte,
+  consumeTerminalInputData,
+  consumeTerminalOutputByte,
+  createInitialTerminalInputCaptureState,
+} from '../vmTerminalStream';
 
 type VmStatus = 'idle' | 'booting' | 'running' | 'stopped' | 'error';
 
@@ -55,6 +60,7 @@ type UsePracticeVmBootstrapArgs = {
   requestBootstrapProbe: () => void;
   requestSearchProbe: () => void;
   sendInternalCommand: (command: string) => void;
+  terminalInputBridgeRef: MutableRefObject<((data: string) => void) | null>;
   terminalGeometrySyncCommand: string;
   bootConfig: VmBootConfig;
 };
@@ -86,11 +92,11 @@ export function usePracticeVmBootstrap({
   requestBootstrapProbe,
   requestSearchProbe,
   sendInternalCommand,
+  terminalInputBridgeRef,
   terminalGeometrySyncCommand,
   bootConfig,
 }: UsePracticeVmBootstrapArgs) {
-  const inputLineBufferRef = useRef('');
-  const inputEscapeSequenceRef = useRef(false);
+  const inputCaptureStateRef = useRef(createInitialTerminalInputCaptureState());
   const outputEscapeSequenceRef = useRef(false);
   const lineBufferRef = useRef('');
   const probeLineBufferRef = useRef('');
@@ -124,13 +130,13 @@ export function usePracticeVmBootstrap({
     setActionHistory([]);
     setCommandHistory([]);
     setDebugLines([]);
-    inputLineBufferRef.current = '';
-    inputEscapeSequenceRef.current = false;
+    inputCaptureStateRef.current = createInitialTerminalInputCaptureState();
     outputEscapeSequenceRef.current = false;
     lineBufferRef.current = '';
     probeLineBufferRef.current = '';
     vmInternalBridgeReadyRef.current = false;
     vmWarmBannerPendingRef.current = false;
+    terminalInputBridgeRef.current = null;
     shortcutTelemetryStateRef.current = createTmuxShortcutTelemetryState();
     if (searchProbeTimerRef.current !== null) {
       window.clearTimeout(searchProbeTimerRef.current);
@@ -155,7 +161,7 @@ export function usePracticeVmBootstrap({
 
     terminalRef.current = terminal;
 
-    const dataDisposable = terminal.onData((data) => {
+    const forwardTerminalInput = (data: string) => {
       if (!emulatorRef.current) {
         return;
       }
@@ -177,15 +183,21 @@ export function usePracticeVmBootstrap({
         requestSearchProbe();
       }
       const inputCaptureResult = consumeTerminalInputData(data, {
-        lineBuffer: inputLineBufferRef.current,
-        inEscapeSequence: inputEscapeSequenceRef.current,
+        lineBuffer: inputCaptureStateRef.current.lineBuffer,
+        inEscapeSequence: inputCaptureStateRef.current.inEscapeSequence,
+        tmuxPrefixPending: inputCaptureStateRef.current.tmuxPrefixPending,
+        tmuxPrefixEscapeBuffer: inputCaptureStateRef.current.tmuxPrefixEscapeBuffer,
       });
-      inputLineBufferRef.current = inputCaptureResult.nextState.lineBuffer;
-      inputEscapeSequenceRef.current = inputCaptureResult.nextState.inEscapeSequence;
+      inputCaptureStateRef.current = inputCaptureResult.nextState;
       inputCaptureResult.commands.forEach((command) => {
         registerCommand(command, { source: 'shell' });
       });
       emulatorRef.current.serial0_send(data);
+    };
+
+    terminalInputBridgeRef.current = forwardTerminalInput;
+    const dataDisposable = terminal.onData((data) => {
+      forwardTerminalInput(data);
     });
 
     const markBridgeReadyIfNeeded = () => {
@@ -363,10 +375,10 @@ export function usePracticeVmBootstrap({
     return () => {
       isMounted = false;
 
-      inputLineBufferRef.current = '';
-      inputEscapeSequenceRef.current = false;
+      inputCaptureStateRef.current = createInitialTerminalInputCaptureState();
       outputEscapeSequenceRef.current = false;
       probeLineBufferRef.current = '';
+      terminalInputBridgeRef.current = null;
       shortcutTelemetryStateRef.current = createTmuxShortcutTelemetryState();
       if (searchProbeTimerRef.current !== null) {
         window.clearTimeout(searchProbeTimerRef.current);
@@ -409,8 +421,7 @@ export function usePracticeVmBootstrap({
     contentReady,
     disableWarmStart,
     emulatorRef,
-    inputEscapeSequenceRef,
-    inputLineBufferRef,
+    inputCaptureStateRef,
     lastEmulatorOptionsRef,
     lineBufferRef,
     metricsRef,
@@ -430,6 +441,7 @@ export function usePracticeVmBootstrap({
     setVmStatusText,
     t,
     terminalGeometrySyncCommand,
+    terminalInputBridgeRef,
     terminalHostRef,
     terminalRef,
     updateMetricsByProbeState,
