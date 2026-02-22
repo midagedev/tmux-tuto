@@ -120,21 +120,34 @@ async function resetProgress(page: Page) {
   });
 }
 
-async function selectLessonByTitle(page: Page, title: string) {
+async function selectLessonByTitle(page: Page, title: string, lessonSlug: string) {
   const row = page.locator('.vm-lesson-row').filter({ hasText: title }).first();
   await expect(row).toBeVisible({ timeout: RULE_TIMEOUT_MS });
   await row.click();
   await expect(row).toHaveClass(/is-active/, { timeout: RULE_TIMEOUT_MS });
+  await expect
+    .poll(async () => {
+      const params = new URLSearchParams(await page.evaluate(() => window.location.search));
+      return params.get('lesson');
+    })
+    .toBe(lessonSlug);
 }
 
-async function selectMissionByIndex(page: Page, missionIndex: number) {
-  const row = page.locator('.vm-mission-list .vm-mission-row').nth(missionIndex);
-  await expect(row).toBeVisible({ timeout: RULE_TIMEOUT_MS });
-  const classes = (await row.getAttribute('class')) ?? '';
-  if (!classes.includes('is-active')) {
-    await row.click({ force: true });
-  }
-  await page.waitForTimeout(60);
+async function selectMissionByIndex(page: Page, missionIndex: number, missionSlug: string) {
+  await page.evaluate((index) => {
+    const rows = document.querySelectorAll<HTMLButtonElement>('.vm-mission-list .vm-mission-row');
+    const row = rows.item(index);
+    if (row) {
+      row.click();
+    }
+  }, missionIndex);
+
+  await expect
+    .poll(async () => {
+      const params = new URLSearchParams(await page.evaluate(() => window.location.search));
+      return params.get('mission');
+    })
+    .toBe(missionSlug);
 }
 
 async function isMissionCompleted(page: Page, missionSlug: string) {
@@ -340,14 +353,14 @@ test.describe('lesson probe regression e2e', () => {
 
     for (const lesson of LESSON_PLANS) {
       await test.step(`lesson:${lesson.slug}`, async () => {
-        await selectLessonByTitle(page, lesson.title);
+        await selectLessonByTitle(page, lesson.title, lesson.slug);
 
         for (const [missionIndex, mission] of lesson.missions.entries()) {
           if (await isMissionCompleted(page, mission.slug)) {
             continue;
           }
 
-          await selectMissionByIndex(page, missionIndex);
+          await selectMissionByIndex(page, missionIndex, mission.slug);
           await satisfyMission(page, mission);
           try {
             await expect
