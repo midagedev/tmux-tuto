@@ -9,7 +9,6 @@ import { PagePlaceholder } from '../../components/system/PagePlaceholder';
 import { resolveLessonTerms } from '../../features/curriculum/lessonTerms';
 import { useProgressStore } from '../../features/progress/progressStore';
 import { evaluateMissionWithVmSnapshot, type VmProbeMetric, type VmProbeStateSnapshot } from '../../features/vm/missionBridge';
-import { PROBE_TRIGGER_COMMAND } from './probeCommands';
 import {
   buildMetricStatusItems,
   buildMissionCommandSuggestions,
@@ -29,6 +28,7 @@ import { usePracticeLessonSelection } from './hooks/usePracticeLessonSelection';
 import { usePracticeMissionCompletion } from './hooks/usePracticeMissionCompletion';
 import { usePracticeVmInteraction } from './hooks/usePracticeVmInteraction';
 import { usePracticeVmBootstrap } from './hooks/usePracticeVmBootstrap';
+import type { ProbeSchedulerState } from './probeScheduler';
 import { TERMINAL_GEOMETRY_SYNC_COMMAND, VM_BOOT_CONFIG } from './vmBoot';
 
 type VmStatus = 'idle' | 'booting' | 'running' | 'stopped' | 'error';
@@ -45,6 +45,7 @@ declare global {
         commandHistory: string[];
         debugLineCount: number;
         lastDebugLine: string | null;
+        probeScheduler: ProbeSchedulerState;
       };
       saveState: () => Promise<ArrayBuffer | null>;
       sendProbe: () => void;
@@ -221,6 +222,7 @@ export function PracticeVmPage() {
   const {
     pushDebugLine,
     updateMetricsByProbeState,
+    requestManualProbe,
     sendInternalCommand,
     requestSearchProbe,
     registerCommand,
@@ -434,7 +436,7 @@ export function PracticeVmPage() {
             }}
             onAutoProbeChange={setAutoProbe}
             onProbeNow={() => {
-              sendInternalCommand(PROBE_TRIGGER_COMMAND);
+              requestManualProbe();
             }}
             onSubmitCommand={() => {
               sendCommand(commandInput);

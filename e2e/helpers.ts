@@ -39,6 +39,18 @@ export type VmBridgeStatus = {
   commandHistory: string[];
   debugLineCount: number;
   lastDebugLine: string | null;
+  probeScheduler: {
+    inFlight: boolean;
+    pending: boolean;
+    pendingReason: 'auto' | 'command' | 'search' | 'manual' | 'bootstrap' | 'pending' | null;
+    lastDispatchedAt: number | null;
+    lastReceivedAt: number | null;
+    dispatchSeq: number;
+    ackSeq: number;
+    skippedTicks: number;
+    staleRecoveries: number;
+    lastReason: 'auto' | 'command' | 'search' | 'manual' | 'bootstrap' | 'pending' | null;
+  };
 };
 
 export async function getVmBridgeStatus(page: Page): Promise<VmBridgeStatus> {
