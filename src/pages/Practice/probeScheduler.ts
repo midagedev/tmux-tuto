@@ -19,7 +19,7 @@ export type TryStartProbeResult = {
   recoveredStale: boolean;
 };
 
-export const PROBE_STALE_TIMEOUT_MS = 1_200;
+export const PROBE_STALE_TIMEOUT_MS = 4_000;
 export const PROBE_AUTO_MIN_INTERVAL_MS = 120;
 
 export function createProbeSchedulerState(): ProbeSchedulerState {

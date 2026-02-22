@@ -78,6 +78,19 @@ async function waitForVmReadyWithRetry(page: Page) {
 async function setAutoProbeEnabled(page: Page, enabled: boolean) {
   const toggle = page.locator('#auto-probe-toggle');
   if (!(await toggle.isVisible().catch(() => false))) {
+    await page.evaluate((nextEnabled) => {
+      const bridge = (window as Window & {
+        __tmuxwebVmBridge?: {
+          setAutoProbe?: (enabled: boolean) => void;
+        };
+      }).__tmuxwebVmBridge;
+
+      if (!bridge?.setAutoProbe) {
+        return;
+      }
+
+      bridge.setAutoProbe(nextEnabled);
+    }, enabled);
     return;
   }
   if (enabled) {
