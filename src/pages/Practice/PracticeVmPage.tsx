@@ -8,7 +8,7 @@ import type { V86Options } from 'v86';
 import { PagePlaceholder } from '../../components/system/PagePlaceholder';
 import { resolveLessonTerms } from '../../features/curriculum/lessonTerms';
 import { useProgressStore } from '../../features/progress/progressStore';
-import { evaluateMissionWithVmSnapshot, type VmProbeMetric } from '../../features/vm/missionBridge';
+import { evaluateMissionWithVmSnapshot, type VmProbeMetric, type VmProbeStateSnapshot } from '../../features/vm/missionBridge';
 import { PROBE_TRIGGER_COMMAND } from './probeCommands';
 import {
   buildMetricStatusItems,
@@ -50,6 +50,7 @@ declare global {
       sendProbe: () => void;
       sendCommand: (command: string) => void;
       injectProbeMetric: (metric: VmProbeMetric) => void;
+      injectProbeState: (snapshot: VmProbeStateSnapshot) => void;
       injectCommandHistory: (command: string) => void;
       injectActionHistory: (action: string) => void;
       getBootConfig: () => typeof VM_BOOT_CONFIG;
@@ -219,7 +220,7 @@ export function PracticeVmPage() {
   });
   const {
     pushDebugLine,
-    updateMetricByProbe,
+    updateMetricsByProbeState,
     sendInternalCommand,
     requestSearchProbe,
     registerCommand,
@@ -272,7 +273,7 @@ export function PracticeVmPage() {
     clearMetricVisualEffects,
     clearMetricVisualState,
     pushDebugLine,
-    updateMetricByProbe,
+    updateMetricsByProbeState,
     registerCommand,
     requestSearchProbe,
     sendInternalCommand,
