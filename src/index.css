@@ -392,6 +392,127 @@ a {
   margin-top: 8px;
 }
 
+.plain-doc {
+  display: grid;
+  gap: 16px;
+}
+
+.plain-section {
+  display: grid;
+  gap: 10px;
+}
+
+.plain-section + .plain-section {
+  border-top: 1px solid #e2e8f3;
+  padding-top: 14px;
+}
+
+.plain-section h2 {
+  margin: 0;
+  font-size: 1.02rem;
+}
+
+.plain-list {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 10px;
+}
+
+.plain-list-numbered {
+  list-style: decimal;
+}
+
+.plain-item {
+  display: grid;
+  gap: 6px;
+}
+
+.plain-card-grid {
+  padding-left: 0;
+  list-style: none;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.plain-list > .plain-item {
+  padding: 10px 0 12px;
+  border-bottom: 1px solid #e2e8f3;
+}
+
+.plain-list > .plain-item:first-child {
+  padding-top: 2px;
+}
+
+.plain-list > .plain-item:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.plain-card-grid > .plain-item {
+  padding: 10px;
+  border: 1px solid #d8e3f3;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.plain-card-grid > .plain-item:first-child,
+.plain-card-grid > .plain-item:last-child {
+  padding: 10px;
+  border-bottom: 1px solid #d8e3f3;
+}
+
+.plain-item strong {
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.plain-inline-meta {
+  margin: 0;
+  display: inline-flex;
+  width: fit-content;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #38527d;
+  font-weight: 700;
+}
+
+.plain-command {
+  white-space: pre-wrap;
+  font-family: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+  font-size: 0.79rem;
+  line-height: 1.5;
+  border: 1px solid #d8e3f3;
+  border-radius: 8px;
+  background: #f8fbff;
+  padding: 8px 10px;
+}
+
+.plain-link-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.plain-related {
+  display: grid;
+  gap: 6px;
+}
+
+.plain-sublist {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+}
+
+.plain-sublist li {
+  display: grid;
+  gap: 2px;
+}
+
 .home-hero {
   border: 1px solid #c5dfd8;
   border-radius: 16px;
@@ -1265,9 +1386,9 @@ a {
 }
 
 .learning-journey-card {
-  border: 1px solid #bfdbfe;
+  border: 1px solid var(--border);
   border-radius: 12px;
-  background: linear-gradient(165deg, #eff6ff 0%, #f8fafc 100%);
+  background: #ffffff;
   padding: 14px;
   display: grid;
   gap: 10px;
@@ -1291,7 +1412,7 @@ a {
 .curriculum-track-card {
   border: 1px solid var(--border);
   border-radius: 12px;
-  background: #f8fafc;
+  background: #ffffff;
   padding: 12px;
   display: grid;
   gap: 10px;
@@ -1336,63 +1457,56 @@ a {
 }
 
 .curriculum-lesson-row {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border);
   border-radius: 10px;
-  background: #f8fafc;
-  padding: 8px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  justify-content: space-between;
-  flex-wrap: wrap;
-}
-
-.curriculum-lesson-link {
+  background: #ffffff;
+  padding: 10px 12px;
   display: grid;
-  gap: 2px;
-  color: var(--text-primary);
-}
-
-.curriculum-lesson-title-row {
-  display: inline-flex;
-  align-items: center;
-  flex-wrap: wrap;
   gap: 6px;
 }
 
-.lesson-type-badge {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 999px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  padding: 2px 8px;
-  border: 1px solid #cbd5e1;
-  background: #f8fafc;
-  color: #1e293b;
+.curriculum-lesson-title {
+  margin: 0;
+  font-size: 0.97rem;
+  line-height: 1.4;
 }
 
-.lesson-type-badge.is-guide {
-  border-color: #c7eadf;
-  background: #ecfdf5;
-  color: #166534;
+.curriculum-lesson-title-link {
+  color: var(--text-primary);
+  text-decoration: none;
 }
 
-.lesson-type-badge.is-mission {
-  border-color: #bfdbfe;
-  background: #eff6ff;
-  color: #1d4ed8;
+.curriculum-lesson-title-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
-.curriculum-lesson-link span {
+.curriculum-lesson-meta {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   color: var(--text-secondary);
-  font-size: 0.85rem;
+  font-size: 0.83rem;
+}
+
+.curriculum-lesson-meta span + span::before {
+  content: '·';
+  margin-right: 8px;
+  color: #9aa5b5;
+}
+
+.curriculum-lesson-overview {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  line-height: 1.5;
 }
 
 .lesson-section {
-  border: 1px solid #dde6f3;
+  border: 1px solid var(--border);
   border-radius: 12px;
-  background: #fbfdff;
+  background: #ffffff;
   padding: 14px;
 }
 
@@ -1402,8 +1516,8 @@ a {
 }
 
 .lesson-action-panel {
-  background: linear-gradient(150deg, #f2f8ff 0%, #f4fbf8 100%);
-  border-color: #c7d8ee;
+  background: #ffffff;
+  border-color: var(--border);
   display: grid;
   gap: 12px;
 }
@@ -1418,23 +1532,23 @@ a {
 }
 
 .lesson-pill {
-  border: 1px solid #bdd1ea;
+  border: 1px solid var(--border);
   border-radius: 999px;
-  background: #ffffff;
-  color: #1f3f66;
+  background: #f8fafc;
+  color: #334155;
   font-size: 0.79rem;
   font-weight: 600;
   padding: 3px 9px;
 }
 
 .lesson-pill.is-guide {
-  border-color: #c7eadf;
-  color: #166534;
+  border-color: var(--border);
+  color: #334155;
 }
 
 .lesson-brief {
-  background: #f4fbf7;
-  border-color: #c7eadf;
+  background: #ffffff;
+  border-color: var(--border);
 }
 
 .lesson-summary {
@@ -1449,9 +1563,9 @@ a {
 
 .lesson-detail-group {
   margin-top: 10px;
-  border: 1px dashed #cad7ea;
+  border: 1px solid var(--border);
   border-radius: 10px;
-  background: #ffffff;
+  background: #f8fafc;
   padding: 8px 10px;
 }
 
@@ -1472,9 +1586,9 @@ a {
 .shortcut-token {
   display: inline-flex;
   align-items: center;
-  border: 1px solid #cfe0f6;
+  border: 1px solid #d3dce8;
   border-radius: 6px;
-  background: #f3f7ff;
+  background: #f8fafc;
   padding: 0 4px;
   margin: 0 1px;
   font-family: 'JetBrains Mono', monospace;
@@ -1483,7 +1597,7 @@ a {
 
 .shortcut-token-tooltip {
   cursor: help;
-  text-decoration: underline dotted #6b7f9d;
+  text-decoration: underline dotted #7b8798;
   text-underline-offset: 2px;
 }
 
@@ -2992,6 +3106,10 @@ a {
   .home-hero {
     grid-template-columns: 1fr;
   }
+
+  .plain-card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 760px) {
@@ -3019,6 +3137,7 @@ a {
   .home-surface-grid,
   .home-start-grid,
   .home-changelog-list,
+  .plain-card-grid,
   .reference-guide-grid,
   .reference-grid,
   .reference-playbook-grid {

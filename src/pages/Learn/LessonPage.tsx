@@ -141,9 +141,6 @@ export function LessonPage() {
         <ul className="lesson-pill-row">
           <li className="lesson-pill">{t('예상 {{minutes}}분', { minutes: lesson.estimatedMinutes })}</li>
           <li className="lesson-pill">{t('학습 목표 {{count}}개', { count: lesson.objectives.length })}</li>
-          <li className={`lesson-pill ${isGuideLesson ? 'is-guide' : 'is-mission'}`}>
-            {isGuideLesson ? t('실습형 레슨') : t('미션 {{count}}개', { count: missions.length })}
-          </li>
         </ul>
         <div className="inline-actions">
           <Link className="primary-btn" to={`/practice?lesson=${lesson.slug}`}>

@@ -507,7 +507,7 @@
         "escape-time 지연 원인 확인",
         "nested tmux 전달 경로 점검"
       ],
-      "overview": "키가 먹지 않거나 지연되는 상황에서 터미널, tmux, 애플리케이션 경계를 분리해 점검하는 실습형 가이드입니다.",
+      "overview": "키가 먹지 않거나 지연되는 상황에서 터미널, tmux, 애플리케이션 경계를 분리해 점검하는 가이드입니다.",
       "goal": "입력 문제가 생겼을 때 prefix/escape-time/send-prefix를 순서대로 확인해 원인을 빠르게 좁히는 루틴을 만듭니다.",
       "successCriteria": [
         "현재 prefix 값을 확인하고 기록",
@@ -560,7 +560,7 @@
         "set-clipboard/OSC52 경로 확인",
         "환경별 대안 복사 루틴 확보"
       ],
-      "overview": "copy-mode에서 찾은 내용을 시스템 클립보드로 보내는 경로를 점검하는 실습형 가이드입니다.",
+      "overview": "copy-mode에서 찾은 내용을 시스템 클립보드로 보내는 경로를 점검하는 가이드입니다.",
       "goal": "검색 결과를 복사한 뒤 로컬 클립보드까지 전달되는 경로를 확인하고, 실패 시 우회 명령으로 즉시 복구합니다.",
       "successCriteria": [
         "history-limit과 set-clipboard 값을 확인",
@@ -614,7 +614,7 @@
         "스타일 옵션 최소화로 원인 분리",
         "refresh-client로 상태 재초기화"
       ],
-      "overview": "색상/커서/statusline 깨짐이 생겼을 때 렌더링 원인을 단계적으로 분리하는 실습형 가이드입니다.",
+      "overview": "색상/커서/statusline 깨짐이 생겼을 때 렌더링 원인을 단계적으로 분리하는 가이드입니다.",
       "goal": "렌더링 문제가 생겼을 때 TERM 확인, 옵션 최소화, refresh 순서로 빠르게 복구하는 루틴을 만듭니다.",
       "successCriteria": [
         "외부 TERM과 tmux client termname을 모두 확인",

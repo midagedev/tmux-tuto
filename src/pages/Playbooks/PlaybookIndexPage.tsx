@@ -191,20 +191,20 @@ export function PlaybookIndexPage() {
     return new Map(playbooks.map((playbook) => [playbook.slug, playbook]));
   }, [playbooks]);
 
-  const renderUseCaseCard = (useCase: UseCaseCard) => {
+  const renderUseCaseItem = (useCase: UseCaseCard) => {
     const linkedPlaybooks = (useCase.playbookSlugs ?? [])
       .map((playbookSlug) => playbookMap.get(playbookSlug))
       .filter((playbook): playbook is AppPlaybook => Boolean(playbook));
 
     return (
-      <article key={useCase.id} className="reference-guide-card">
-        <p className="reference-type">{useCase.label}</p>
-        <h3>{t(useCase.title)}</h3>
+      <li key={useCase.id} className="plain-item">
+        <p className="plain-inline-meta">{useCase.label}</p>
+        <strong>{t(useCase.title)}</strong>
         <p className="muted">{t(useCase.problem)}</p>
         <p className="muted">{t(useCase.action)}</p>
-        {useCase.command ? <code className="reference-command-block">{useCase.command}</code> : null}
+        {useCase.command ? <code className="plain-command">{useCase.command}</code> : null}
 
-        <div className="reference-link-row">
+        <div className="plain-link-row">
           {useCase.lessonSlugs.map((lessonSlug) => (
             <Link key={`${useCase.id}-${lessonSlug}`} to={buildPracticePath(lessonSlug)} className="text-link">
               {t(lessonTitleMap.get(lessonSlug) ?? lessonSlug)}
@@ -213,9 +213,9 @@ export function PlaybookIndexPage() {
         </div>
 
         {linkedPlaybooks.length > 0 ? (
-          <div className="reference-usecase-playbook-block">
+          <div className="plain-related">
             <p className="muted">{t('관련 유즈케이스 가이드')}</p>
-            <ul className="reference-usecase-playbook-list">
+            <ul className="plain-sublist">
               {linkedPlaybooks.map((playbook) => (
                 <li key={`${useCase.id}-${playbook.slug}`}>
                   <Link to={`/playbooks/${playbook.slug}`} className="text-link">
@@ -233,17 +233,17 @@ export function PlaybookIndexPage() {
           </div>
         ) : null}
 
-        <div className="inline-actions">
-          <Link to={firstLessonPath(useCase.lessonSlugs)} className="secondary-btn">
+        <div className="plain-link-row">
+          <Link to={firstLessonPath(useCase.lessonSlugs)} className="text-link">
             {t('관련 레슨 열기')}
           </Link>
           {linkedPlaybooks[0] ? (
-            <Link to={`/playbooks/${linkedPlaybooks[0].slug}`} className="secondary-btn">
+            <Link to={`/playbooks/${linkedPlaybooks[0].slug}`} className="text-link">
               {t('관련 가이드 열기')}
             </Link>
           ) : null}
         </div>
-      </article>
+      </li>
     );
   };
 
@@ -253,32 +253,34 @@ export function PlaybookIndexPage() {
       title={t('유즈케이스 가이드')}
       description={t('유즈케이스별 실행 루틴을 모았습니다. 필요한 카드만 선택해서 진행하면 됩니다.')}
     >
-      <section className="home-stage-grid">
-        <article className="home-stage-card">
+      <article className="plain-doc">
+        <section className="plain-section">
           <h2>{t('권장 사용 흐름')}</h2>
-          <p>{t('1) 기본·명령 가이드에서 동작 확인')}</p>
-          <p>{t('2) 유즈케이스 카드에서 상황 선택')}</p>
-          <p>{t('3) 관련 레슨과 가이드로 실행')}</p>
-          <div className="inline-actions">
-            <Link to="/cheatsheet" className="secondary-btn">
+          <ol className="plain-list plain-list-numbered">
+            <li>{t('1) 기본·명령 가이드에서 동작 확인')}</li>
+            <li>{t('2) 유즈케이스 카드에서 상황 선택')}</li>
+            <li>{t('3) 관련 레슨과 가이드로 실행')}</li>
+          </ol>
+          <div className="plain-link-row">
+            <Link to="/cheatsheet" className="text-link">
               {t('기본·명령 가이드로 이동')}
             </Link>
-            <Link to="/practice?lesson=hello-tmux" className="secondary-btn">
+            <Link to="/practice?lesson=hello-tmux" className="text-link">
               {t('실습 바로 열기')}
             </Link>
           </div>
-        </article>
-      </section>
+        </section>
 
-      <section className="reference-section">
-        <h2>{t('핵심 tmux 유즈케이스')}</h2>
-        <div className="reference-guide-grid">{TMUX_USE_CASES.map(renderUseCaseCard)}</div>
-      </section>
+        <section className="plain-section">
+          <h2>{t('핵심 tmux 유즈케이스')}</h2>
+          <ul className="plain-list plain-card-grid">{TMUX_USE_CASES.map(renderUseCaseItem)}</ul>
+        </section>
 
-      <section className="reference-section">
-        <h2>{t('코딩에이전트 CLI + tmux')}</h2>
-        <div className="reference-guide-grid">{CLI_TMUX_USE_CASES.map(renderUseCaseCard)}</div>
-      </section>
+        <section className="plain-section">
+          <h2>{t('코딩에이전트 CLI + tmux')}</h2>
+          <ul className="plain-list plain-card-grid">{CLI_TMUX_USE_CASES.map(renderUseCaseItem)}</ul>
+        </section>
+      </article>
     </PagePlaceholder>
   );
 }
