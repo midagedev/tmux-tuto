@@ -4,6 +4,7 @@ import {
   BASE_PROBE_TRIGGER_COMMAND,
   PROBE_STATE_MARKER,
   PROBE_LOOP_START_COMMAND,
+  PROBE_LOOP_STOP_COMMAND,
   PROBE_TRIGGER_COMMAND,
   SEARCH_PROBE_TRIGGER_COMMAND,
   buildTerminalGeometrySyncCommand,
@@ -29,6 +30,12 @@ describe('probeCommands', () => {
   it('uses the same snapshot command for search probe trigger', () => {
     expect(SEARCH_PROBE_TRIGGER_COMMAND).toBe(BASE_PROBE_TRIGGER_COMMAND);
     expectValidShellSyntax(SEARCH_PROBE_TRIGGER_COMMAND);
+  });
+
+  it('keeps loop start/stop probe commands shell-safe', () => {
+    expect(PROBE_LOOP_START_COMMAND).toContain(PROBE_TRIGGER_COMMAND);
+    expectValidShellSyntax(PROBE_LOOP_START_COMMAND);
+    expectValidShellSyntax(PROBE_LOOP_STOP_COMMAND);
   });
 
   it('builds geometry sync command with valid shell syntax', () => {
