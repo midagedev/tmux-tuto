@@ -42,7 +42,7 @@ type LessonPlan = Lesson & {
 const PROBE_POLL_INTERVAL_MS = 1_050;
 const PROBE_SETTLE_TIMEOUT_MS = 18_000;
 const MISSION_TIMEOUT_MS = 40_000;
-const SUITE_TIMEOUT_MS = 720_000;
+const SUITE_TIMEOUT_MS = 900_000;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -239,6 +239,14 @@ function commandsForMetricRule(rule: MissionRule): string[] {
     ];
   }
 
+  if (rule.kind === 'scrollPosition' && rule.operator === '>=' && typeof rule.value === 'number') {
+    const stepCount = Math.max(1, Math.ceil(rule.value));
+    return [
+      'tmux copy-mode 2>/dev/null || true',
+      `i=0; while [ "$i" -lt ${stepCount} ]; do tmux send-keys -X page-up 2>/dev/null || true; i=$((i+1)); done`,
+    ];
+  }
+
   if (rule.kind === 'activeWindowIndex' && rule.operator === '>=' && typeof rule.value === 'number') {
     return [
       'tmux has-session -t main 2>/dev/null || tmux new-session -d -s main',
@@ -279,10 +287,17 @@ function buildSearchPrepCommands(expectMatch: boolean) {
   return ['printf "TMUXWEB_E2E_MATCH_TOKEN\\n"'];
 }
 
-async function runCopyModeSearchFlow(page: Page, expectMatch: boolean) {
+function buildCopyModePageUpCommand(steps: number) {
+  const normalizedSteps = Math.max(1, Math.floor(steps));
+  return `tmux copy-mode 2>/dev/null || true; i=0; while [ "$i" -lt ${normalizedSteps} ]; do tmux send-keys -X page-up 2>/dev/null || true; i=$((i+1)); done`;
+}
+
+async function runCopyModeSearchFlow(page: Page, expectMatch: boolean, options?: { enterCopyMode?: boolean }) {
   const query = expectMatch ? 'TMUXWEB_E2E_MATCH_TOKEN' : 'TMUXWEB_E2E_NEVER_MATCH_TOKEN';
-  await sendVmInput(page, '\u0002[');
-  await page.waitForTimeout(120);
+  if (options?.enterCopyMode ?? true) {
+    await sendVmInput(page, '\u0002[');
+    await page.waitForTimeout(120);
+  }
   await sendVmInput(page, `/${query}\r`);
   await page.waitForTimeout(140);
 }
@@ -290,7 +305,12 @@ async function runCopyModeSearchFlow(page: Page, expectMatch: boolean) {
 async function satisfyMission(page: Page, mission: Mission) {
   const queuedCommands = new Set<string>();
   let needsShortcutAction = false;
-
+  const scrollSteps = mission.passRules.reduce((accumulator, rule) => {
+    if (rule.kind !== 'scrollPosition' || rule.operator !== '>=' || typeof rule.value !== 'number') {
+      return accumulator;
+    }
+    return Math.max(accumulator, Math.ceil(rule.value));
+  }, 0);
   const searchMatchRule = mission.passRules.find(
     (rule) => rule.kind === 'searchMatchFound' && rule.operator === 'equals' && typeof rule.value === 'boolean',
   );
@@ -304,7 +324,18 @@ async function satisfyMission(page: Page, mission: Mission) {
       continue;
     }
 
+    if (rule.kind === 'scrollPosition') {
+      continue;
+    }
+
+    if (scrollSteps > 0 && rule.kind === 'modeIs' && rule.operator === 'equals' && rule.value === 'COPY_MODE') {
+      continue;
+    }
+
     if (rule.kind === 'shellHistoryText' && rule.operator === 'contains' && typeof rule.value === 'string') {
+      if (scrollSteps > 0 && rule.value.includes('tmux copy-mode')) {
+        continue;
+      }
       commandsForShellHistoryRule(rule.value).forEach((command) => queuedCommands.add(command));
       continue;
     }
@@ -321,12 +352,25 @@ async function satisfyMission(page: Page, mission: Mission) {
     commandsForMetricRule(rule).forEach((command) => queuedCommands.add(command));
   }
 
+  if (scrollSteps > 0) {
+    await runCommand(
+      page,
+      'i=1; while [ "$i" -le 80 ]; do printf "TMUXWEB_E2E_MATCH_TOKEN_%03d\\n" "$i"; i=$((i+1)); done',
+    );
+  }
+
   for (const command of queuedCommands) {
     await runCommand(page, command);
   }
 
+  if (scrollSteps > 0) {
+    await runCommand(page, buildCopyModePageUpCommand(scrollSteps));
+  }
+
   if (searchMatchRule) {
-    await runCopyModeSearchFlow(page, searchMatchRule.value);
+    await runCopyModeSearchFlow(page, searchMatchRule.value, {
+      enterCopyMode: scrollSteps === 0,
+    });
   }
 
   if (needsShortcutAction) {
@@ -369,14 +413,14 @@ test.describe('lesson user clearability e2e', () => {
   test('all lessons can be completed through command/shortcut flow', async ({ page }) => {
     test.setTimeout(SUITE_TIMEOUT_MS);
 
-    await page.goto('/practice/hello-tmux?lang=ko');
+    await page.goto('/practice/hello-tmux?lang=ko&warm=0');
     await dismissAnalyticsBanner(page);
     await waitForVmReady(page, { timeout: 120_000 });
     await setVmAutoProbe(page, false);
     await resetProgress(page);
     await waitForInitialProbeSnapshot(page);
 
-    expect(LESSON_PLANS).toHaveLength(20);
+    expect(LESSON_PLANS).toHaveLength(24);
 
     for (const lesson of LESSON_PLANS) {
       await test.step(`lesson:${lesson.slug}`, async () => {

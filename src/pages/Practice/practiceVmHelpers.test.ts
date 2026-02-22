@@ -100,6 +100,7 @@ describe('practiceVmHelpers', () => {
       sessionCount: 1,
       windowCount: 2,
       paneCount: 3,
+      scrollPosition: 4,
       modeIs: 'COPY_MODE',
       sessionName: 'lesson',
       windowName: 'dev',
@@ -117,6 +118,7 @@ describe('practiceVmHelpers', () => {
       { key: 'windowName', label: 'windowName', value: 'dev' },
       { key: 'windowCount', label: 'windows', value: 2 },
       { key: 'paneCount', label: 'panes', value: 3 },
+      { key: 'scrollPosition', label: 'scroll', value: 4 },
       { key: 'activeWindowIndex', label: 'activeWindow', value: 0 },
       { key: 'windowZoomed', label: 'zoom', value: 'yes' },
       { key: 'paneSynchronized', label: 'sync', value: 'no' },
@@ -139,6 +141,7 @@ describe('practiceVmHelpers', () => {
       passRules: [
         { kind: 'sessionName', operator: 'equals', value: 'lesson' },
         { kind: 'windowName', operator: 'equals', value: 'dev' },
+        { kind: 'scrollPosition', operator: '>=', value: 1 },
       ],
       hints: [],
     };
@@ -147,6 +150,7 @@ describe('practiceVmHelpers', () => {
       sessionCount: 1,
       windowCount: 2,
       paneCount: 1,
+      scrollPosition: 2,
       modeIs: null,
       sessionName: 'lesson',
       windowName: 'dev',
@@ -170,6 +174,7 @@ describe('practiceVmHelpers', () => {
     const items = buildMissionPreconditionItems(t, mission, snapshot);
     const sessionItem = items.find((item) => item.key === 'sessionName-0');
     const windowItem = items.find((item) => item.key === 'windowName-1');
+    const scrollItem = items.find((item) => item.key === 'scrollPosition-2');
 
     expect(sessionItem?.current).toContain('lesson');
     expect(sessionItem?.current).not.toBe('현재 상태 측정값 없음');
@@ -177,5 +182,7 @@ describe('practiceVmHelpers', () => {
     expect(windowItem?.current).toContain('dev');
     expect(windowItem?.current).not.toBe('현재 상태 측정값 없음');
     expect(windowItem?.satisfied).toBe(true);
+    expect(scrollItem?.current).toContain('2');
+    expect(scrollItem?.satisfied).toBe(true);
   });
 });

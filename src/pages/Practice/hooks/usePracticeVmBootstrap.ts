@@ -4,7 +4,13 @@ import type V86 from 'v86';
 import type { V86Options } from 'v86';
 import type { Dispatch, MutableRefObject, SetStateAction } from 'react';
 import type { TFunction } from 'i18next';
-import { parseProbeStateFromLine, stripAnsi, type VmProbeStateSnapshot } from '../../../features/vm/missionBridge';
+import {
+  parseProbeMetricFromLine,
+  parseProbeStateFromLine,
+  stripAnsi,
+  type VmProbeMetric,
+  type VmProbeStateSnapshot,
+} from '../../../features/vm/missionBridge';
 import {
   createTmuxShortcutTelemetryState,
   parseTmuxShortcutTelemetry,
@@ -49,6 +55,7 @@ type UsePracticeVmBootstrapArgs = {
   clearMetricVisualEffects: () => void;
   clearMetricVisualState: () => void;
   pushDebugLine: (line: string) => void;
+  updateMetricByProbe: (metric: VmProbeMetric) => void;
   updateMetricsByProbeState: (snapshot: VmProbeStateSnapshot) => void;
   registerCommand: (
     command: string,
@@ -87,6 +94,7 @@ export function usePracticeVmBootstrap({
   clearMetricVisualEffects,
   clearMetricVisualState,
   pushDebugLine,
+  updateMetricByProbe,
   updateMetricsByProbeState,
   registerCommand,
   requestBootstrapProbe,
@@ -243,6 +251,12 @@ export function usePracticeVmBootstrap({
         return;
       }
 
+      const probeMetric = parseProbeMetricFromLine(completedLine);
+      if (probeMetric) {
+        updateMetricByProbe(probeMetric);
+        return;
+      }
+
       pushDebugLine(completedLine);
 
       const plainLine = stripAnsi(completedLine).replace(/\r/g, '');
@@ -267,6 +281,12 @@ export function usePracticeVmBootstrap({
       const probeState = parseProbeStateFromLine(probeCaptureResult.completedLine);
       if (probeState) {
         updateMetricsByProbeState(probeState);
+        return;
+      }
+
+      const probeMetric = parseProbeMetricFromLine(probeCaptureResult.completedLine);
+      if (probeMetric) {
+        updateMetricByProbe(probeMetric);
       }
     };
 
@@ -444,6 +464,7 @@ export function usePracticeVmBootstrap({
     terminalInputBridgeRef,
     terminalHostRef,
     terminalRef,
+    updateMetricByProbe,
     updateMetricsByProbeState,
     vmEpoch,
     vmInternalBridgeReadyRef,

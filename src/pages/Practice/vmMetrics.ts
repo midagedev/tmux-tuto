@@ -4,6 +4,7 @@ export type VmMetricState = {
   sessionCount: number | null;
   windowCount: number | null;
   paneCount: number | null;
+  scrollPosition: number | null;
   modeIs: string | null;
   sessionName: string | null;
   windowName: string | null;
@@ -27,6 +28,7 @@ export const VM_METRIC_KEYS: VmMetricKey[] = [
   'sessionCount',
   'windowCount',
   'paneCount',
+  'scrollPosition',
   'modeIs',
   'sessionName',
   'windowName',
@@ -48,6 +50,7 @@ export function createInitialMetrics(): VmMetricState {
     sessionCount: null,
     windowCount: null,
     paneCount: null,
+    scrollPosition: null,
     modeIs: null,
     sessionName: null,
     windowName: null,
@@ -65,6 +68,7 @@ export function createInitialMetricHighlightState(): VmMetricHighlightState {
     sessionCount: false,
     windowCount: false,
     paneCount: false,
+    scrollPosition: false,
     modeIs: false,
     sessionName: false,
     windowName: false,
@@ -85,6 +89,8 @@ export function mapProbeMetricToVmMetricKey(probeMetricKey: VmProbeMetric['key']
       return 'windowCount';
     case 'pane':
       return 'paneCount';
+    case 'scrollPosition':
+      return 'scrollPosition';
     case 'mode':
       return 'modeIs';
     case 'sessionName':
@@ -122,6 +128,8 @@ function resolveProbeMetricUpdate(metric: VmProbeMetric): VmMetricProbeUpdate | 
       return { key: 'windowCount', value: metric.value >= 0 ? metric.value : null };
     case 'pane':
       return { key: 'paneCount', value: metric.value >= 0 ? metric.value : null };
+    case 'scrollPosition':
+      return { key: 'scrollPosition', value: metric.value >= 0 ? metric.value : null };
     case 'mode':
       return { key: 'modeIs', value: metric.value === 1 ? 'COPY_MODE' : null };
     case 'sessionName':
@@ -238,6 +246,12 @@ export function applyProbeStateSnapshotToVmMetrics(
     sessionCount: nextSessionCount,
     windowCount: nextWindowCount,
     paneCount: snapshot.pane >= 0 ? snapshot.pane : null,
+    scrollPosition:
+      typeof snapshot.scrollPosition === 'number'
+        ? snapshot.scrollPosition >= 0
+          ? snapshot.scrollPosition
+          : null
+        : previous.scrollPosition,
     modeIs: snapshot.mode === 1 ? 'COPY_MODE' : null,
     sessionName: nextSessionName,
     windowName: nextWindowName,

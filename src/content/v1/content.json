@@ -303,6 +303,30 @@
       ]
     },
     {
+      "id": "lesson-b-05",
+      "trackSlug": "track-b-workflow",
+      "chapterSlug": "split-and-move",
+      "slug": "workspace-cwd-flow",
+      "title": "작업 디렉터리 유지 루틴",
+      "estimatedMinutes": 10,
+      "objectives": [
+        "세션 기본 경로 지정",
+        "window 생성 시 경로 고정",
+        "활성 pane 경로 상속 분할"
+      ],
+      "overview": "세션/윈도우/패인을 만들 때 `-c`와 `#{pane_current_path}`를 사용해 프로젝트 경로를 유지하는 루틴을 학습합니다.",
+      "goal": "새 pane/window를 열어도 작업 디렉터리가 흔들리지 않게 유지해, 경로 실수 없이 명령을 이어서 실행합니다.",
+      "successCriteria": [
+        "`new-session -c`로 세션 기본 경로를 지정",
+        "`new-window -c`로 새 window 경로를 고정",
+        "`split-window -c '#{pane_current_path}'`로 현재 경로를 상속"
+      ],
+      "failureStates": [
+        "새 pane/window를 열 때 경로가 바뀌어 명령이 다른 디렉터리에서 실행됨",
+        "`-c` 또는 `#{pane_current_path}`를 사용하지 않아 작업 문맥이 끊김"
+      ]
+    },
+    {
       "id": "lesson-b-03",
       "trackSlug": "track-b-workflow",
       "chapterSlug": "pane-navigation",
@@ -447,6 +471,54 @@
       ]
     },
     {
+      "id": "lesson-c-06",
+      "trackSlug": "track-c-deepwork",
+      "chapterSlug": "copy-mode-search",
+      "slug": "scrollback-navigation",
+      "title": "Scrollback 탐색 루틴",
+      "estimatedMinutes": 10,
+      "objectives": [
+        "copy-mode 진입",
+        "검색 실행",
+        "성공/실패 케이스 반복 확인"
+      ],
+      "overview": "긴 출력에서 스크롤만 하지 않고 copy-mode 검색으로 바로 점프하는 탐색 루틴을 반복합니다.",
+      "goal": "로그가 길어져도 검색 중심으로 위치를 빠르게 찾고, 매치 유무를 즉시 판단합니다.",
+      "successCriteria": [
+        "copy mode 진입",
+        "키워드 검색 성공",
+        "검색 실패 케이스를 재현하고 원인 구분"
+      ],
+      "failureStates": [
+        "copy-mode에서 검색 실행/매치 여부 확인이 없어 로그 탐색 루틴이 미완성임",
+        "성공/실패 케이스 구분이 없어 디버깅 판단력이 부족함"
+      ]
+    },
+    {
+      "id": "lesson-c-08",
+      "trackSlug": "track-c-deepwork",
+      "chapterSlug": "copy-mode-search",
+      "slug": "scrollback-capture",
+      "title": "Scrollback 추출 루틴",
+      "estimatedMinutes": 9,
+      "objectives": [
+        "capture-pane로 출력 추출",
+        "save-buffer로 버퍼 내보내기",
+        "검색 결과를 후속 명령에 전달"
+      ],
+      "overview": "`capture-pane`와 `save-buffer`를 사용해 현재 스크롤백을 추출하고 후속 분석 명령으로 넘기는 기본 루틴을 학습합니다.",
+      "goal": "화면에 보이는 로그만 의존하지 않고, 필요한 구간을 안정적으로 추출해 공유/분석에 재사용합니다.",
+      "successCriteria": [
+        "`capture-pane -pS`로 과거 출력 범위를 추출",
+        "`save-buffer -`로 버퍼를 표준출력으로 전달",
+        "추출 명령을 shell history에 남겨 재현 가능하게 유지"
+      ],
+      "failureStates": [
+        "스크롤백 추출 없이 눈으로만 확인해 로그 근거를 재사용하지 못함",
+        "버퍼 전달 경로를 확인하지 않아 복사/공유 루틴이 끊김"
+      ]
+    },
+    {
       "id": "lesson-c-02",
       "trackSlug": "track-c-deepwork",
       "chapterSlug": "command-mode-workflow",
@@ -492,6 +564,30 @@
       "failureStates": [
         "단축키 재현 기록이 없어 키 기반 루틴 전환이 검증되지 않음",
         "command-prompt/choose-tree 실행 기록이 없어 명령 기반 운영 진입이 부족함"
+      ]
+    },
+    {
+      "id": "lesson-c-07",
+      "trackSlug": "track-c-deepwork",
+      "chapterSlug": "command-mode-workflow",
+      "slug": "jump-and-find",
+      "title": "Jump & Find 루틴",
+      "estimatedMinutes": 9,
+      "objectives": [
+        "choose-tree로 대상 탐색",
+        "find-window로 이름 검색",
+        "command-prompt와 함께 이동 루틴 구성"
+      ],
+      "overview": "세션/윈도우가 많을 때 `choose-tree`와 `find-window`를 조합해 원하는 대상을 빠르게 찾는 루틴을 학습합니다.",
+      "goal": "목록을 눈으로 훑는 시간을 줄이고, 명령 기반 검색으로 이동 대상을 즉시 찾습니다.",
+      "successCriteria": [
+        "choose-tree 실행 기록",
+        "find-window 검색 명령 실행",
+        "window 2개 이상에서 탐색/검색 루틴 재현"
+      ],
+      "failureStates": [
+        "대상 탐색 없이 next/prev만 반복해 원하는 window 도달이 느림",
+        "find-window를 사용하지 않아 이름 기반 탐색 루틴이 비어 있음"
       ]
     },
     {
@@ -1384,6 +1480,56 @@
       ]
     },
     {
+      "id": "mission-b-05",
+      "lessonSlug": "workspace-cwd-flow",
+      "slug": "workspace-session-cwd-bootstrap",
+      "title": "세션 시작 경로 지정",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "sessionCount",
+          "operator": ">=",
+          "value": 2
+        },
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "tmux new-session -d -s cwdlab -c /home/user/project"
+        }
+      ],
+      "hints": [
+        "`tmux new-session -d -s cwdlab -c /home/user/project`처럼 `-c`로 시작 경로를 지정해 세션을 만드세요.",
+        "`tmux list-sessions`로 세션이 생성됐는지 확인하면 조건 점검이 쉽습니다."
+      ]
+    },
+    {
+      "id": "mission-b-05b",
+      "lessonSlug": "workspace-cwd-flow",
+      "slug": "workspace-pane-cwd-split",
+      "title": "현재 경로를 유지한 pane 분할",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "paneCount",
+          "operator": ">=",
+          "value": 2
+        },
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "tmux split-window -c '#{pane_current_path}'"
+        }
+      ],
+      "hints": [
+        "`tmux new-window -c /home/user/project -n logs`로 보조 window를 만든 뒤 분할을 준비하세요.",
+        "`tmux split-window -c '#{pane_current_path}'`를 실행해 활성 pane 경로를 그대로 상속하세요."
+      ]
+    },
+    {
       "id": "mission-b-03",
       "lessonSlug": "layout-craft",
       "slug": "layout-preset-apply",
@@ -1876,6 +2022,131 @@
       ]
     },
     {
+      "id": "mission-c-06",
+      "lessonSlug": "scrollback-navigation",
+      "slug": "scrollback-search-hit",
+      "title": "매치가 있는 검색으로 점프",
+      "type": "state-check",
+      "difficulty": "advanced",
+      "initialScenario": "log-buffer",
+      "passRules": [
+        {
+          "kind": "modeIs",
+          "operator": "equals",
+          "value": "COPY_MODE"
+        },
+        {
+          "kind": "scrollPosition",
+          "operator": ">=",
+          "value": 1
+        },
+        {
+          "kind": "searchExecuted",
+          "operator": "equals",
+          "value": true
+        },
+        {
+          "kind": "searchMatchFound",
+          "operator": "equals",
+          "value": true
+        },
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "tmux copy-mode"
+        }
+      ],
+      "hints": [
+        "`tmux copy-mode`로 진입한 뒤 `/` 검색으로 매치가 있는 키워드를 찾으세요.",
+        "모드/검색/매치 조건이 모두 참이면 통과합니다."
+      ]
+    },
+    {
+      "id": "mission-c-06b",
+      "lessonSlug": "scrollback-navigation",
+      "slug": "scrollback-search-miss",
+      "title": "no-match 검색도 재현",
+      "type": "state-check",
+      "difficulty": "advanced",
+      "initialScenario": "log-buffer",
+      "passRules": [
+        {
+          "kind": "modeIs",
+          "operator": "equals",
+          "value": "COPY_MODE"
+        },
+        {
+          "kind": "searchExecuted",
+          "operator": "equals",
+          "value": true
+        },
+        {
+          "kind": "searchMatchFound",
+          "operator": "equals",
+          "value": false
+        },
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "tmux send-keys -X search-forward \"TMUXWEB_E2E_NEVER_MATCH_TOKEN\""
+        }
+      ],
+      "hints": [
+        "결과가 없는 키워드로 검색해 no-match 상황을 재현하세요.",
+        "`tmux send-keys -X search-forward \"TMUXWEB_E2E_NEVER_MATCH_TOKEN\"`처럼 명령 경로로도 검색을 남길 수 있습니다."
+      ]
+    },
+    {
+      "id": "mission-c-08",
+      "lessonSlug": "scrollback-capture",
+      "slug": "scrollback-capture-pane",
+      "title": "capture-pane로 스크롤백 추출",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "log-buffer",
+      "passRules": [
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "tmux copy-mode"
+        },
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "tmux capture-pane -pS -200 >/dev/null"
+        }
+      ],
+      "hints": [
+        "`tmux copy-mode`로 탐색 모드에 들어간 뒤 `tmux capture-pane -pS -200 >/dev/null`로 최근 출력 구간을 추출하세요.",
+        "출력이 길면 `-S` 값을 조정해 필요한 범위를 좁히세요."
+      ]
+    },
+    {
+      "id": "mission-c-08b",
+      "lessonSlug": "scrollback-capture",
+      "slug": "scrollback-save-buffer",
+      "title": "save-buffer로 추출 결과 전달",
+      "type": "state-check",
+      "difficulty": "daily",
+      "initialScenario": "log-buffer",
+      "passRules": [
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "tmux capture-pane -pS -50 >/dev/null"
+        },
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "tmux save-buffer - >/dev/null"
+        }
+      ],
+      "hints": [
+        "`tmux capture-pane -pS -50 >/dev/null`로 짧은 범위를 다시 추출해 보세요.",
+        "`tmux save-buffer - >/dev/null`을 실행해 버퍼를 표준출력 경로로 전달하세요."
+      ]
+    },
+    {
       "id": "mission-c-02",
       "lessonSlug": "command-subset",
       "slug": "command-mode-prompt-intro",
@@ -2024,6 +2295,61 @@
         "동일 동작을 `Ctrl+b` + `w`로 트리 탐색에 1회 더 진입해 반복하세요.",
         "`tmux choose-tree -Z`를 실행해 트리 탐색을 열어 보세요.",
         "세션/윈도우가 많아졌을 때 빠르게 이동할 대상 탐색에 유용합니다."
+      ]
+    },
+    {
+      "id": "mission-c-07",
+      "lessonSlug": "jump-and-find",
+      "slug": "jump-choose-tree-open",
+      "title": "choose-tree로 빠른 점프 시작",
+      "type": "state-check",
+      "difficulty": "scenario",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.choose.tree"
+        },
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "tmux choose-tree -Z"
+        }
+      ],
+      "hints": [
+        "`tmux choose-tree -Z`를 실행해 트리 탐색 화면을 열어 보세요.",
+        "세션/윈도우가 많을수록 choose-tree 진입 습관이 탐색 시간을 줄입니다."
+      ]
+    },
+    {
+      "id": "mission-c-07b",
+      "lessonSlug": "jump-and-find",
+      "slug": "jump-find-window-query",
+      "title": "find-window로 이름 기반 탐색",
+      "type": "state-check",
+      "difficulty": "scenario",
+      "initialScenario": "single-pane",
+      "passRules": [
+        {
+          "kind": "windowCount",
+          "operator": ">=",
+          "value": 2
+        },
+        {
+          "kind": "actionHistoryText",
+          "operator": "contains",
+          "value": "sim.command.prompt"
+        },
+        {
+          "kind": "shellHistoryText",
+          "operator": "contains",
+          "value": "tmux find-window work"
+        }
+      ],
+      "hints": [
+        "먼저 window를 2개 이상 만든 뒤 `tmux command-prompt -p \"find-window:\" \"find-window %%\"`를 실행하세요.",
+        "빠른 점검이 필요하면 `tmux find-window work`처럼 직접 검색 명령을 실행해도 됩니다."
       ]
     }
   ],
@@ -2751,6 +3077,7 @@
       "attach-detach-shortcuts",
       "split-resize",
       "split-resize-shortcuts",
+      "workspace-cwd-flow",
       "layout-craft",
       "layout-craft-shortcuts",
       "workspace-compose",
@@ -2759,8 +3086,11 @@
       "pane-focus-flow-shortcuts",
       "copy-search",
       "copy-search-shortcuts",
+      "scrollback-navigation",
+      "scrollback-capture",
       "command-subset",
       "command-subset-shortcuts",
+      "jump-and-find",
       "key-input-guide",
       "clipboard-osc52-guide",
       "terminal-render-guide"

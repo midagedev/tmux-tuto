@@ -182,6 +182,32 @@
       ]
     },
     {
+      "missionSlug": "workspace-session-cwd-bootstrap",
+      "track": "B",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "session.create",
+        "workspace.cwd.session"
+      ],
+      "requiredRuleKinds": [
+        "sessionCount",
+        "shellHistoryText"
+      ]
+    },
+    {
+      "missionSlug": "workspace-pane-cwd-split",
+      "track": "B",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "pane.split",
+        "workspace.cwd.inherit"
+      ],
+      "requiredRuleKinds": [
+        "paneCount",
+        "shellHistoryText"
+      ]
+    },
+    {
       "missionSlug": "layout-preset-apply",
       "track": "B",
       "scenarioPresetId": "single-pane",
@@ -291,6 +317,68 @@
         "modeIs",
         "searchExecuted",
         "searchMatchFound"
+      ]
+    },
+    {
+      "missionSlug": "scrollback-search-hit",
+      "track": "C",
+      "scenarioPresetId": "log-buffer",
+      "capabilities": [
+        "copy-mode.enter",
+        "copy-mode.scroll",
+        "copy-mode.search",
+        "copy-mode.match",
+        "shell.search.command"
+      ],
+      "requiredRuleKinds": [
+        "modeIs",
+        "scrollPosition",
+        "searchExecuted",
+        "searchMatchFound",
+        "shellHistoryText"
+      ]
+    },
+    {
+      "missionSlug": "scrollback-search-miss",
+      "track": "C",
+      "scenarioPresetId": "log-buffer",
+      "capabilities": [
+        "copy-mode.enter",
+        "copy-mode.search",
+        "copy-mode.no-match",
+        "shell.search.command"
+      ],
+      "requiredRuleKinds": [
+        "modeIs",
+        "searchExecuted",
+        "searchMatchFound",
+        "shellHistoryText"
+      ]
+    },
+    {
+      "missionSlug": "scrollback-capture-pane",
+      "track": "C",
+      "scenarioPresetId": "log-buffer",
+      "capabilities": [
+        "copy-mode.enter",
+        "pane.capture",
+        "scrollback.extract"
+      ],
+      "requiredRuleKinds": [
+        "shellHistoryText"
+      ]
+    },
+    {
+      "missionSlug": "scrollback-save-buffer",
+      "track": "C",
+      "scenarioPresetId": "log-buffer",
+      "capabilities": [
+        "pane.capture",
+        "buffer.save",
+        "scrollback.pipeline"
+      ],
+      "requiredRuleKinds": [
+        "shellHistoryText"
       ]
     },
     {
@@ -671,6 +759,34 @@
       ],
       "requiredRuleKinds": [
         "actionHistoryText"
+      ]
+    },
+    {
+      "missionSlug": "jump-choose-tree-open",
+      "track": "C",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "choose-tree.open",
+        "workspace.jump"
+      ],
+      "requiredRuleKinds": [
+        "actionHistoryText",
+        "shellHistoryText"
+      ]
+    },
+    {
+      "missionSlug": "jump-find-window-query",
+      "track": "C",
+      "scenarioPresetId": "single-pane",
+      "capabilities": [
+        "window.create",
+        "window.find",
+        "command-mode.execute"
+      ],
+      "requiredRuleKinds": [
+        "windowCount",
+        "actionHistoryText",
+        "shellHistoryText"
       ]
     }
   ]

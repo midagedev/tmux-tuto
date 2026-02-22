@@ -3,8 +3,10 @@ import {
   evaluateMissionWithVmSnapshot,
   extractCommandFromPromptLine,
   isInternalProbeLine,
+  parseProbeMetricFromLine,
   parseProbeStateFromLine,
   parseTmuxActionsFromCommand,
+  PROBE_SCROLL_MARKER,
 } from './missionBridge';
 
 describe('extractCommandFromPromptLine', () => {
@@ -30,6 +32,25 @@ describe('isInternalProbeLine', () => {
 });
 
 describe('parseProbeStateFromLine', () => {
+  it('parses full probe state snapshot with scroll position field', () => {
+    expect(parseProbeStateFromLine('[[TMUXWEB_STATE_V2:1\t2\t3\t4\t7\t1\twork\tdev\t1\tbb2d,237x63,0,0,0\t1\t0\t1\t1]]')).toEqual({
+      tmux: 1,
+      session: 2,
+      window: 3,
+      pane: 4,
+      scrollPosition: 7,
+      mode: 1,
+      sessionName: 'work',
+      windowName: 'dev',
+      activeWindow: 1,
+      layout: 'bb2d,237x63,0,0,0',
+      zoomed: 1,
+      sync: 0,
+      search: 1,
+      searchMatched: 1,
+    });
+  });
+
   it('parses full probe state snapshot', () => {
     expect(parseProbeStateFromLine('[[TMUXWEB_STATE_V2:1\t2\t3\t4\t1\twork\tdev\t1\tbb2d,237x63,0,0,0\t1\t0\t1\t1]]')).toEqual({
       tmux: 1,
@@ -81,6 +102,24 @@ describe('parseProbeStateFromLine', () => {
   });
 });
 
+describe('parseProbeMetricFromLine', () => {
+  it('parses scroll position metric line', () => {
+    expect(parseProbeMetricFromLine('[[TMUXWEB_SCROLL_V1:17]]')).toEqual({
+      key: 'scrollPosition',
+      value: 17,
+    });
+  });
+
+  it('ignores embedded echoed metric marker command lines', () => {
+    const echoedLine = `tuto@tmux-tuto:~$ printf '[[${PROBE_SCROLL_MARKER}:%s]]\\n' "$TMUXWEB_SCROLL"`;
+    expect(parseProbeMetricFromLine(echoedLine)).toBeNull();
+  });
+
+  it('rejects invalid scroll position metric payloads', () => {
+    expect(parseProbeMetricFromLine('[[TMUXWEB_SCROLL_V1:abc]]')).toBeNull();
+  });
+});
+
 describe('parseTmuxActionsFromCommand', () => {
   it('extracts advanced tmux actions', () => {
     const actions = parseTmuxActionsFromCommand(
@@ -125,6 +164,7 @@ describe('evaluateMissionWithVmSnapshot', () => {
         sessionCount: 1,
         windowCount: 1,
         paneCount: 1,
+        scrollPosition: 0,
         modeIs: null,
         sessionName: 'main',
         windowName: '1',
@@ -160,6 +200,7 @@ describe('evaluateMissionWithVmSnapshot', () => {
         sessionCount: 1,
         windowCount: 1,
         paneCount: 1,
+        scrollPosition: 0,
         modeIs: 'NORMAL',
         sessionName: 'main',
         windowName: '1',

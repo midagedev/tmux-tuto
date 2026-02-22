@@ -3,7 +3,18 @@ import { expect } from '@playwright/test';
 
 export type VmProbeMetricInput =
   | {
-      key: 'session' | 'window' | 'pane' | 'tmux' | 'mode' | 'search' | 'searchMatched' | 'activeWindow' | 'zoomed' | 'sync';
+      key:
+        | 'session'
+        | 'window'
+        | 'pane'
+        | 'scrollPosition'
+        | 'tmux'
+        | 'mode'
+        | 'search'
+        | 'searchMatched'
+        | 'activeWindow'
+        | 'zoomed'
+        | 'sync';
       value: number;
     }
   | {
@@ -16,6 +27,7 @@ export type VmProbeStateInput = {
   session: number;
   window: number;
   pane: number;
+  scrollPosition?: number;
   mode: number;
   sessionName: string;
   windowName: string;
@@ -41,6 +53,7 @@ export type VmBridgeStatus = {
     sessionCount: number | null;
     windowCount: number | null;
     paneCount: number | null;
+    scrollPosition: number | null;
     modeIs: string | null;
     sessionName: string | null;
     windowName: string | null;

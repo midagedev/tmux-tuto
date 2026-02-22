@@ -4,6 +4,7 @@ export type VmBridgeSnapshot = {
   sessionCount: number | null;
   windowCount: number | null;
   paneCount: number | null;
+  scrollPosition: number | null;
   modeIs: string | null;
   sessionName: string | null;
   windowName: string | null;
@@ -89,6 +90,8 @@ function getMetricFromSnapshot(snapshot: VmBridgeSnapshot, kind: string): unknow
       return snapshot.windowCount;
     case 'paneCount':
       return snapshot.paneCount;
+    case 'scrollPosition':
+      return snapshot.scrollPosition;
     case 'modeIs':
       return snapshot.modeIs;
     case 'sessionName':
@@ -291,6 +294,7 @@ type VmProbeNumericKey =
   | 'session'
   | 'window'
   | 'pane'
+  | 'scrollPosition'
   | 'tmux'
   | 'mode'
   | 'search'
@@ -316,6 +320,7 @@ export type VmProbeStateSnapshot = {
   session: number;
   window: number;
   pane: number;
+  scrollPosition?: number;
   mode: number;
   sessionName: string;
   windowName: string;
@@ -330,6 +335,44 @@ export type VmProbeStateSnapshot = {
 function parseProbeStateNumber(value: string) {
   const parsed = Number.parseInt(value, 10);
   return Number.isNaN(parsed) ? null : parsed;
+}
+
+export const PROBE_SCROLL_MARKER = 'TMUXWEB_SCROLL_V1';
+
+export function parseProbeMetricFromLine(line: string): VmProbeMetric | null {
+  const cleaned = stripAnsi(line)
+    .replace(/\r/g, '')
+    .split('')
+    .filter((character) => {
+      const code = character.charCodeAt(0);
+      return code === 9 || (code >= 32 && code !== 127);
+    })
+    .join('');
+  const markerToken = `[[${PROBE_SCROLL_MARKER}:`;
+  const markerIndex = cleaned.indexOf(markerToken);
+  if (markerIndex < 0) {
+    return null;
+  }
+
+  const prefix = cleaned.slice(0, markerIndex);
+  if (/\becho\b/i.test(prefix) || /\b__tmuxweb_probe\b/i.test(prefix)) {
+    return null;
+  }
+
+  const match = cleaned.match(/\[\[TMUXWEB_SCROLL_V1:([^\]]*)\]\]/);
+  if (!match) {
+    return null;
+  }
+
+  const value = parseProbeStateNumber(match[1].trim());
+  if (value === null) {
+    return null;
+  }
+
+  return {
+    key: 'scrollPosition',
+    value,
+  };
 }
 
 export function parseProbeStateFromLine(line: string): VmProbeStateSnapshot | null {
@@ -358,7 +401,7 @@ export function parseProbeStateFromLine(line: string): VmProbeStateSnapshot | nu
   }
 
   const fields = match[1].split('\t');
-  if (fields.length !== 13) {
+  if (fields.length !== 13 && fields.length !== 14) {
     return null;
   }
 
@@ -366,21 +409,24 @@ export function parseProbeStateFromLine(line: string): VmProbeStateSnapshot | nu
   const session = parseProbeStateNumber(fields[1]);
   const window = parseProbeStateNumber(fields[2]);
   const pane = parseProbeStateNumber(fields[3]);
-  const mode = parseProbeStateNumber(fields[4]);
-  const sessionName = fields[5].trim();
-  const windowName = fields[6].trim();
-  const activeWindow = parseProbeStateNumber(fields[7]);
-  const layout = fields[8].trim();
-  const zoomed = parseProbeStateNumber(fields[9]);
-  const sync = parseProbeStateNumber(fields[10]);
-  const search = parseProbeStateNumber(fields[11]);
-  const searchMatched = parseProbeStateNumber(fields[12]);
+  const hasScrollPositionField = fields.length === 14;
+  const scrollPosition = hasScrollPositionField ? parseProbeStateNumber(fields[4]) : null;
+  const mode = parseProbeStateNumber(fields[hasScrollPositionField ? 5 : 4]);
+  const sessionName = fields[hasScrollPositionField ? 6 : 5].trim();
+  const windowName = fields[hasScrollPositionField ? 7 : 6].trim();
+  const activeWindow = parseProbeStateNumber(fields[hasScrollPositionField ? 8 : 7]);
+  const layout = fields[hasScrollPositionField ? 9 : 8].trim();
+  const zoomed = parseProbeStateNumber(fields[hasScrollPositionField ? 10 : 9]);
+  const sync = parseProbeStateNumber(fields[hasScrollPositionField ? 11 : 10]);
+  const search = parseProbeStateNumber(fields[hasScrollPositionField ? 12 : 11]);
+  const searchMatched = parseProbeStateNumber(fields[hasScrollPositionField ? 13 : 12]);
 
   if (
     tmux === null ||
     session === null ||
     window === null ||
     pane === null ||
+    (hasScrollPositionField && scrollPosition === null) ||
     mode === null ||
     activeWindow === null ||
     zoomed === null ||
@@ -400,6 +446,7 @@ export function parseProbeStateFromLine(line: string): VmProbeStateSnapshot | nu
     session,
     window,
     pane,
+    ...(hasScrollPositionField ? { scrollPosition: scrollPosition as number } : {}),
     mode,
     sessionName,
     windowName,

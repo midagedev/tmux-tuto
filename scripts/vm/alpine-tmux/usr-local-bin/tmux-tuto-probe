@@ -8,6 +8,7 @@ fi
 TMUXWEB_SESSION=-1
 TMUXWEB_WINDOW=-1
 TMUXWEB_PANE=-1
+TMUXWEB_SCROLL=0
 TMUXWEB_MODE=0
 TMUXWEB_SESSION_NAME=""
 TMUXWEB_WINDOW_NAME=""
@@ -23,6 +24,12 @@ if [ "$TMUXWEB_TMUX" -eq 1 ]; then
   TMUXWEB_WINDOW="$(tmux list-windows -a 2>/dev/null | wc -l | tr -d ' ')"
   TMUXWEB_PANE="$(tmux list-panes -a 2>/dev/null | wc -l | tr -d ' ')"
   TMUXWEB_MODE="$(tmux display-message -p '#{?pane_in_mode,1,0}' 2>/dev/null || echo 0)"
+  TMUXWEB_SCROLL="$(tmux display-message -p '#{?pane_in_mode,#{scroll_position},0}' 2>/dev/null | tr -d ' ')"
+  case "$TMUXWEB_SCROLL" in
+    ""|*[!0-9-]*)
+      TMUXWEB_SCROLL=0
+      ;;
+  esac
   TMUXWEB_SESSION_NAME="$(tmux display-message -p '#S' 2>/dev/null | tr '\t\n\r' '   ')"
   TMUXWEB_WINDOW_NAME="$(tmux display-message -p '#W' 2>/dev/null | tr '\t\n\r' '   ')"
   TMUXWEB_ACTIVE_WINDOW="$(tmux display-message -p '#{window_index}' 2>/dev/null | tr -d ' ')"
@@ -42,6 +49,37 @@ if [ "$TMUXWEB_TMUX" -eq 1 ]; then
   fi
 
   if [ "$TMUXWEB_MODE" -eq 1 ]; then
+    TMUXWEB_CURSOR_Y="$(tmux display-message -p '#{cursor_y}' 2>/dev/null | tr -d ' ')"
+    TMUXWEB_PANE_HEIGHT="$(tmux display-message -p '#{pane_height}' 2>/dev/null | tr -d ' ')"
+    case "$TMUXWEB_CURSOR_Y" in
+      ""|*[!0-9-]*)
+        TMUXWEB_CURSOR_Y=-1
+        ;;
+    esac
+    case "$TMUXWEB_PANE_HEIGHT" in
+      ""|*[!0-9-]*)
+        TMUXWEB_PANE_HEIGHT=0
+        ;;
+    esac
+    if [ "$TMUXWEB_CURSOR_Y" -ge 0 ] && [ "$TMUXWEB_PANE_HEIGHT" -gt 0 ]; then
+      TMUXWEB_SCROLL_DERIVED=$((TMUXWEB_PANE_HEIGHT - 1 - TMUXWEB_CURSOR_Y))
+      if [ "$TMUXWEB_SCROLL_DERIVED" -gt "$TMUXWEB_SCROLL" ]; then
+        TMUXWEB_SCROLL=$TMUXWEB_SCROLL_DERIVED
+      fi
+    fi
+
+    if [ "$TMUXWEB_SCROLL" -eq 0 ]; then
+      TMUXWEB_HISTORY_SIZE="$(tmux display-message -p '#{history_size}' 2>/dev/null | tr -d ' ')"
+      case "$TMUXWEB_HISTORY_SIZE" in
+        ""|*[!0-9-]*)
+          TMUXWEB_HISTORY_SIZE=0
+          ;;
+      esac
+      if [ "$TMUXWEB_HISTORY_SIZE" -gt 0 ]; then
+        TMUXWEB_SCROLL=1
+      fi
+    fi
+
     TMUXWEB_SEARCH=1
     TMUXWEB_SEARCH_MATCHED="$(tmux display-message -p '#{?search_present,1,0}' 2>/dev/null | tr -d ' ')"
     if [ -z "$TMUXWEB_SEARCH_MATCHED" ]; then
@@ -50,11 +88,12 @@ if [ "$TMUXWEB_TMUX" -eq 1 ]; then
   fi
 fi
 
-printf '[[TMUXWEB_STATE_V2:%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s]]\n' \
+printf '[[TMUXWEB_STATE_V2:%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s]]\n' \
   "$TMUXWEB_TMUX" \
   "$TMUXWEB_SESSION" \
   "$TMUXWEB_WINDOW" \
   "$TMUXWEB_PANE" \
+  "$TMUXWEB_SCROLL" \
   "$TMUXWEB_MODE" \
   "$TMUXWEB_SESSION_NAME" \
   "$TMUXWEB_WINDOW_NAME" \

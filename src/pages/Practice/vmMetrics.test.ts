@@ -14,6 +14,7 @@ describe('vmMetrics', () => {
       sessionCount: null,
       windowCount: null,
       paneCount: null,
+      scrollPosition: null,
       modeIs: null,
       sessionName: null,
       windowName: null,
@@ -29,6 +30,7 @@ describe('vmMetrics', () => {
       sessionCount: false,
       windowCount: false,
       paneCount: false,
+      scrollPosition: false,
       modeIs: false,
       sessionName: false,
       windowName: false,
@@ -43,6 +45,7 @@ describe('vmMetrics', () => {
 
   it('maps probe metric keys to vm metric keys', () => {
     expect(mapProbeMetricToVmMetricKey('session')).toBe('sessionCount');
+    expect(mapProbeMetricToVmMetricKey('scrollPosition')).toBe('scrollPosition');
     expect(mapProbeMetricToVmMetricKey('layout')).toBe('windowLayout');
     expect(mapProbeMetricToVmMetricKey('windowName')).toBe('windowName');
     expect(mapProbeMetricToVmMetricKey('searchMatched')).toBe('searchMatchFound');
@@ -57,6 +60,24 @@ describe('vmMetrics', () => {
     expect(result.changed).toBe(true);
     expect(result.metricKey).toBe('sessionCount');
     expect(result.nextMetrics.sessionCount).toBe(2);
+  });
+
+  it('applies scroll position probe metric and normalizes negatives', () => {
+    const previous = createInitialMetrics();
+
+    const scrollResult = applyProbeMetricToVmMetrics(previous, {
+      key: 'scrollPosition',
+      value: 5,
+    });
+    expect(scrollResult.changed).toBe(true);
+    expect(scrollResult.metricKey).toBe('scrollPosition');
+    expect(scrollResult.nextMetrics.scrollPosition).toBe(5);
+
+    const normalizedResult = applyProbeMetricToVmMetrics(scrollResult.nextMetrics, {
+      key: 'scrollPosition',
+      value: -1,
+    });
+    expect(normalizedResult.nextMetrics.scrollPosition).toBeNull();
   });
 
   it('does not report change when probe value is unchanged', () => {
@@ -189,6 +210,7 @@ describe('vmMetrics', () => {
       session: 2,
       window: 3,
       pane: 4,
+      scrollPosition: 6,
       mode: 1,
       sessionName: ' lesson ',
       windowName: ' main ',
@@ -206,6 +228,7 @@ describe('vmMetrics', () => {
       sessionCount: 2,
       windowCount: 3,
       paneCount: 4,
+      scrollPosition: 6,
       modeIs: 'COPY_MODE',
       sessionName: 'lesson',
       windowName: 'main',
@@ -221,6 +244,7 @@ describe('vmMetrics', () => {
         'sessionCount',
         'windowCount',
         'paneCount',
+        'scrollPosition',
         'modeIs',
         'sessionName',
         'windowName',
@@ -269,6 +293,7 @@ describe('vmMetrics', () => {
       sessionCount: 1,
       windowCount: 1,
       paneCount: 1,
+      scrollPosition: 2,
       modeIs: null,
       sessionName: 'lesson',
       windowName: 'dev',
@@ -299,5 +324,30 @@ describe('vmMetrics', () => {
     expect(result.changed).toBe(false);
     expect(result.changedMetricKeys).toEqual([]);
     expect(result.nextMetrics).toBe(previous);
+  });
+
+  it('keeps previous scroll position when snapshot has no scroll field', () => {
+    const previous = {
+      ...createInitialMetrics(),
+      scrollPosition: 3,
+    };
+    const snapshot: VmProbeStateSnapshot = {
+      tmux: 1,
+      session: 1,
+      window: 1,
+      pane: 1,
+      mode: 0,
+      sessionName: 'main',
+      windowName: '1',
+      activeWindow: 0,
+      layout: 'layout',
+      zoomed: 0,
+      sync: 0,
+      search: 0,
+      searchMatched: 0,
+    };
+
+    const result = applyProbeStateSnapshotToVmMetrics(previous, snapshot);
+    expect(result.nextMetrics.scrollPosition).toBe(3);
   });
 });

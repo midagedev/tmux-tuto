@@ -114,6 +114,8 @@ function getRuleCommandSuggestions(rule: AppMission['passRules'][number]) {
       return ['tmux new-window -n work'];
     case 'paneCount':
       return ['tmux split-window'];
+    case 'scrollPosition':
+      return ['tmux copy-mode', 'tmux send-keys -X page-up'];
     case 'activeWindowIndex':
       return ['tmux next-window'];
     case 'modeIs':
@@ -147,6 +149,8 @@ function getRuleMetricValue(snapshot: VmBridgeSnapshot, kind: string): unknown {
       return snapshot.windowCount;
     case 'paneCount':
       return snapshot.paneCount;
+    case 'scrollPosition':
+      return snapshot.scrollPosition;
     case 'modeIs':
       return snapshot.modeIs;
     case 'sessionName':
@@ -203,6 +207,11 @@ function getRulePreconditionLabel(t: TFunction, rule: AppMission['passRules'][nu
       return t('윈도우 수가 {{operator}} {{value}} 이어야 함', { operator: rule.operator, value: String(rule.value) });
     case 'paneCount':
       return t('패인 수가 {{operator}} {{value}} 이어야 함', { operator: rule.operator, value: String(rule.value) });
+    case 'scrollPosition':
+      return t('스크롤 위치가 {{operator}} {{value}} 이어야 함', {
+        operator: rule.operator,
+        value: String(rule.value),
+      });
     case 'activeWindowIndex':
       return t('활성 윈도우 인덱스가 {{operator}} {{value}} 이어야 함', {
         operator: rule.operator,
@@ -244,6 +253,8 @@ function getRuleCurrentStateText(t: TFunction, rule: AppMission['passRules'][num
       return t('현재 window: {{value}}', { value: snapshot.windowCount ?? '-' });
     case 'paneCount':
       return t('현재 pane: {{value}}', { value: snapshot.paneCount ?? '-' });
+    case 'scrollPosition':
+      return t('현재 scrollPosition: {{value}}', { value: snapshot.scrollPosition ?? '-' });
     case 'activeWindowIndex':
       return t('현재 activeWindow: {{value}}', { value: snapshot.activeWindowIndex ?? '-' });
     case 'modeIs':
@@ -379,6 +390,7 @@ export function buildMetricStatusItems(metrics: VmMetricState): VmMetricStatusIt
     { key: 'windowName', label: 'windowName', value: metrics.windowName ?? '-' },
     { key: 'windowCount', label: 'windows', value: metrics.windowCount ?? '-' },
     { key: 'paneCount', label: 'panes', value: metrics.paneCount ?? '-' },
+    { key: 'scrollPosition', label: 'scroll', value: metrics.scrollPosition ?? '-' },
     { key: 'activeWindowIndex', label: 'activeWindow', value: metrics.activeWindowIndex ?? '-' },
     { key: 'windowZoomed', label: 'zoom', value: metrics.windowZoomed === null ? '-' : metrics.windowZoomed ? 'yes' : 'no' },
     {

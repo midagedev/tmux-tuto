@@ -145,6 +145,7 @@ export function PracticeVmPage() {
       sessionCount: metrics.sessionCount,
       windowCount: metrics.windowCount,
       paneCount: metrics.paneCount,
+      scrollPosition: metrics.scrollPosition,
       modeIs: metrics.modeIs,
       sessionName: metrics.sessionName,
       windowName: metrics.windowName,
@@ -234,6 +235,7 @@ export function PracticeVmPage() {
   });
   const {
     pushDebugLine,
+    updateMetricByProbe,
     updateMetricsByProbeState,
     requestBootstrapProbe,
     sendInternalCommand,
@@ -290,6 +292,7 @@ export function PracticeVmPage() {
     clearMetricVisualEffects,
     clearMetricVisualState,
     pushDebugLine,
+    updateMetricByProbe,
     updateMetricsByProbeState,
     registerCommand,
     requestSearchProbe,
