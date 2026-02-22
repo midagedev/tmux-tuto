@@ -100,6 +100,11 @@ describe('parseTmuxActionsFromCommand', () => {
     const actions = parseTmuxActionsFromCommand('tmux rename-window');
     expect(actions).toContain('sim.window.rename');
   });
+
+  it('extracts actions from bare tmux subcommands entered in command-prompt', () => {
+    const actions = parseTmuxActionsFromCommand('rename-window dev');
+    expect(actions).toContain('sim.window.rename');
+  });
 });
 
 describe('evaluateMissionWithVmSnapshot', () => {

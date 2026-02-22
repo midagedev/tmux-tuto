@@ -109,10 +109,12 @@ function extractSearchQuery(command: string) {
     return null;
   }
 
-  const slashIndex = trimmed.lastIndexOf('/');
-  if (slashIndex >= 0 && slashIndex < trimmed.length - 1) {
-    const query = trimmed.slice(slashIndex + 1).trim();
-    return query.length > 0 ? query : null;
+  if (!/\s/.test(trimmed) && trimmed.includes('/')) {
+    const slashIndex = trimmed.lastIndexOf('/');
+    if (slashIndex >= 0 && slashIndex < trimmed.length - 1) {
+      const query = trimmed.slice(slashIndex + 1).trim();
+      return query.length > 0 ? query : null;
+    }
   }
 
   const quoted = trimmed.match(/\bsearch-(?:forward|backward)\s+(?:"([^"]+)"|'([^']+)'|([^\s;]+))/i);

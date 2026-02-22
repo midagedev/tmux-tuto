@@ -185,7 +185,19 @@ export function extractCommandFromPromptLine(line: string) {
 }
 
 export function parseTmuxActionsFromCommand(command: string) {
-  const normalized = command.trim().toLowerCase();
+  const normalizedCommand = command.trim().toLowerCase();
+  if (!normalizedCommand) {
+    return [];
+  }
+
+  const bareTmuxSubcommandPattern =
+    /^(new-session|new-window|neww|rename-window|renamew|rename-session|split-window|splitw|select-pane|selectp|last-pane|resize-pane|resizep|swap-pane|swapp|join-pane|joinp|move-pane|movep|rotate-window|rotatew|select-layout|selectl|next-window|nextw|previous-window|prevw|copy-mode|kill-pane|set-window-option|setw|command-prompt|commandp|choose-tree)\b/;
+  const normalized = normalizedCommand.includes('tmux')
+    ? normalizedCommand
+    : bareTmuxSubcommandPattern.test(normalizedCommand)
+      ? `tmux ${normalizedCommand}`
+      : normalizedCommand;
+
   if (!normalized.includes('tmux')) {
     return [];
   }
