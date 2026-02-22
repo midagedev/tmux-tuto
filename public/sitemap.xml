@@ -1,78 +1,454 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://tmux.midagedev.com/</loc>
+    <loc>https://tmux.midagedev.com/?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/?lang=ko" />
   </url>
   <url>
-    <loc>https://tmux.midagedev.com/learn</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://tmux.midagedev.com/practice</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://tmux.midagedev.com/cheatsheet</loc>
+    <loc>https://tmux.midagedev.com/cheatsheet?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/cheatsheet?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/cheatsheet?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/cheatsheet?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/cheatsheet?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/cheatsheet?lang=ko" />
   </url>
   <url>
-    <loc>https://tmux.midagedev.com/playbooks</loc>
+    <loc>https://tmux.midagedev.com/learn?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/learn?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/learn?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/learn?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/learn?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/learn?lang=ko" />
+  </url>
+  <url>
+    <loc>https://tmux.midagedev.com/learn/track-a-foundations/session-lifecycle/attach-detach?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/learn/track-a-foundations/session-lifecycle/attach-detach?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/learn/track-a-foundations/session-lifecycle/attach-detach?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/learn/track-a-foundations/session-lifecycle/attach-detach?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/learn/track-a-foundations/session-lifecycle/attach-detach?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/learn/track-a-foundations/session-lifecycle/attach-detach?lang=ko" />
+  </url>
+  <url>
+    <loc>https://tmux.midagedev.com/learn/track-a-foundations/session-lifecycle/attach-detach-shortcuts?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/learn/track-a-foundations/session-lifecycle/attach-detach-shortcuts?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/learn/track-a-foundations/session-lifecycle/attach-detach-shortcuts?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/learn/track-a-foundations/session-lifecycle/attach-detach-shortcuts?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/learn/track-a-foundations/session-lifecycle/attach-detach-shortcuts?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/learn/track-a-foundations/session-lifecycle/attach-detach-shortcuts?lang=ko" />
+  </url>
+  <url>
+    <loc>https://tmux.midagedev.com/learn/track-a-foundations/session-window-pane/basics?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/learn/track-a-foundations/session-window-pane/basics?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/learn/track-a-foundations/session-window-pane/basics?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/learn/track-a-foundations/session-window-pane/basics?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/learn/track-a-foundations/session-window-pane/basics?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/learn/track-a-foundations/session-window-pane/basics?lang=ko" />
+  </url>
+  <url>
+    <loc>https://tmux.midagedev.com/learn/track-a-foundations/session-window-pane/basics-shortcuts?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/learn/track-a-foundations/session-window-pane/basics-shortcuts?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/learn/track-a-foundations/session-window-pane/basics-shortcuts?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/learn/track-a-foundations/session-window-pane/basics-shortcuts?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/learn/track-a-foundations/session-window-pane/basics-shortcuts?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/learn/track-a-foundations/session-window-pane/basics-shortcuts?lang=ko" />
+  </url>
+  <url>
+    <loc>https://tmux.midagedev.com/learn/track-a-foundations/tmux-onramp/hello-tmux?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/learn/track-a-foundations/tmux-onramp/hello-tmux?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/learn/track-a-foundations/tmux-onramp/hello-tmux?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/learn/track-a-foundations/tmux-onramp/hello-tmux?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/learn/track-a-foundations/tmux-onramp/hello-tmux?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/learn/track-a-foundations/tmux-onramp/hello-tmux?lang=ko" />
+  </url>
+  <url>
+    <loc>https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/layout-craft?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/layout-craft?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/layout-craft?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/layout-craft?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/layout-craft?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/layout-craft?lang=ko" />
+  </url>
+  <url>
+    <loc>https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/layout-craft-shortcuts?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/layout-craft-shortcuts?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/layout-craft-shortcuts?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/layout-craft-shortcuts?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/layout-craft-shortcuts?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/layout-craft-shortcuts?lang=ko" />
+  </url>
+  <url>
+    <loc>https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/pane-focus-flow?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/pane-focus-flow?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/pane-focus-flow?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/pane-focus-flow?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/pane-focus-flow?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/pane-focus-flow?lang=ko" />
+  </url>
+  <url>
+    <loc>https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/pane-focus-flow-shortcuts?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/pane-focus-flow-shortcuts?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/pane-focus-flow-shortcuts?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/pane-focus-flow-shortcuts?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/pane-focus-flow-shortcuts?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/pane-focus-flow-shortcuts?lang=ko" />
+  </url>
+  <url>
+    <loc>https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/workspace-compose?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/workspace-compose?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/workspace-compose?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/workspace-compose?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/workspace-compose?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/workspace-compose?lang=ko" />
+  </url>
+  <url>
+    <loc>https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/workspace-compose-shortcuts?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/workspace-compose-shortcuts?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/workspace-compose-shortcuts?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/workspace-compose-shortcuts?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/workspace-compose-shortcuts?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/learn/track-b-workflow/pane-navigation/workspace-compose-shortcuts?lang=ko" />
+  </url>
+  <url>
+    <loc>https://tmux.midagedev.com/learn/track-b-workflow/split-and-move/split-resize?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/learn/track-b-workflow/split-and-move/split-resize?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/learn/track-b-workflow/split-and-move/split-resize?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/learn/track-b-workflow/split-and-move/split-resize?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/learn/track-b-workflow/split-and-move/split-resize?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/learn/track-b-workflow/split-and-move/split-resize?lang=ko" />
+  </url>
+  <url>
+    <loc>https://tmux.midagedev.com/learn/track-b-workflow/split-and-move/split-resize-shortcuts?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/learn/track-b-workflow/split-and-move/split-resize-shortcuts?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/learn/track-b-workflow/split-and-move/split-resize-shortcuts?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/learn/track-b-workflow/split-and-move/split-resize-shortcuts?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/learn/track-b-workflow/split-and-move/split-resize-shortcuts?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/learn/track-b-workflow/split-and-move/split-resize-shortcuts?lang=ko" />
+  </url>
+  <url>
+    <loc>https://tmux.midagedev.com/learn/track-b-workflow/split-and-move/workspace-cwd-flow?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/learn/track-b-workflow/split-and-move/workspace-cwd-flow?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/learn/track-b-workflow/split-and-move/workspace-cwd-flow?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/learn/track-b-workflow/split-and-move/workspace-cwd-flow?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/learn/track-b-workflow/split-and-move/workspace-cwd-flow?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/learn/track-b-workflow/split-and-move/workspace-cwd-flow?lang=ko" />
+  </url>
+  <url>
+    <loc>https://tmux.midagedev.com/learn/track-c-deepwork/command-mode-workflow/command-subset?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/learn/track-c-deepwork/command-mode-workflow/command-subset?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/learn/track-c-deepwork/command-mode-workflow/command-subset?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/learn/track-c-deepwork/command-mode-workflow/command-subset?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/learn/track-c-deepwork/command-mode-workflow/command-subset?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/learn/track-c-deepwork/command-mode-workflow/command-subset?lang=ko" />
+  </url>
+  <url>
+    <loc>https://tmux.midagedev.com/learn/track-c-deepwork/command-mode-workflow/command-subset-shortcuts?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/learn/track-c-deepwork/command-mode-workflow/command-subset-shortcuts?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/learn/track-c-deepwork/command-mode-workflow/command-subset-shortcuts?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/learn/track-c-deepwork/command-mode-workflow/command-subset-shortcuts?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/learn/track-c-deepwork/command-mode-workflow/command-subset-shortcuts?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/learn/track-c-deepwork/command-mode-workflow/command-subset-shortcuts?lang=ko" />
+  </url>
+  <url>
+    <loc>https://tmux.midagedev.com/learn/track-c-deepwork/command-mode-workflow/jump-and-find?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/learn/track-c-deepwork/command-mode-workflow/jump-and-find?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/learn/track-c-deepwork/command-mode-workflow/jump-and-find?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/learn/track-c-deepwork/command-mode-workflow/jump-and-find?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/learn/track-c-deepwork/command-mode-workflow/jump-and-find?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/learn/track-c-deepwork/command-mode-workflow/jump-and-find?lang=ko" />
+  </url>
+  <url>
+    <loc>https://tmux.midagedev.com/learn/track-c-deepwork/copy-mode-search/copy-search?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/learn/track-c-deepwork/copy-mode-search/copy-search?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/learn/track-c-deepwork/copy-mode-search/copy-search?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/learn/track-c-deepwork/copy-mode-search/copy-search?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/learn/track-c-deepwork/copy-mode-search/copy-search?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/learn/track-c-deepwork/copy-mode-search/copy-search?lang=ko" />
+  </url>
+  <url>
+    <loc>https://tmux.midagedev.com/learn/track-c-deepwork/copy-mode-search/copy-search-shortcuts?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/learn/track-c-deepwork/copy-mode-search/copy-search-shortcuts?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/learn/track-c-deepwork/copy-mode-search/copy-search-shortcuts?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/learn/track-c-deepwork/copy-mode-search/copy-search-shortcuts?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/learn/track-c-deepwork/copy-mode-search/copy-search-shortcuts?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/learn/track-c-deepwork/copy-mode-search/copy-search-shortcuts?lang=ko" />
+  </url>
+  <url>
+    <loc>https://tmux.midagedev.com/learn/track-c-deepwork/copy-mode-search/scrollback-capture?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/learn/track-c-deepwork/copy-mode-search/scrollback-capture?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/learn/track-c-deepwork/copy-mode-search/scrollback-capture?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/learn/track-c-deepwork/copy-mode-search/scrollback-capture?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/learn/track-c-deepwork/copy-mode-search/scrollback-capture?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/learn/track-c-deepwork/copy-mode-search/scrollback-capture?lang=ko" />
+  </url>
+  <url>
+    <loc>https://tmux.midagedev.com/learn/track-c-deepwork/copy-mode-search/scrollback-navigation?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/learn/track-c-deepwork/copy-mode-search/scrollback-navigation?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/learn/track-c-deepwork/copy-mode-search/scrollback-navigation?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/learn/track-c-deepwork/copy-mode-search/scrollback-navigation?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/learn/track-c-deepwork/copy-mode-search/scrollback-navigation?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/learn/track-c-deepwork/copy-mode-search/scrollback-navigation?lang=ko" />
+  </url>
+  <url>
+    <loc>https://tmux.midagedev.com/learn/track-c-deepwork/ops-troubleshooting/clipboard-osc52-guide?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/learn/track-c-deepwork/ops-troubleshooting/clipboard-osc52-guide?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/learn/track-c-deepwork/ops-troubleshooting/clipboard-osc52-guide?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/learn/track-c-deepwork/ops-troubleshooting/clipboard-osc52-guide?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/learn/track-c-deepwork/ops-troubleshooting/clipboard-osc52-guide?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/learn/track-c-deepwork/ops-troubleshooting/clipboard-osc52-guide?lang=ko" />
+  </url>
+  <url>
+    <loc>https://tmux.midagedev.com/learn/track-c-deepwork/ops-troubleshooting/key-input-guide?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/learn/track-c-deepwork/ops-troubleshooting/key-input-guide?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/learn/track-c-deepwork/ops-troubleshooting/key-input-guide?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/learn/track-c-deepwork/ops-troubleshooting/key-input-guide?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/learn/track-c-deepwork/ops-troubleshooting/key-input-guide?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/learn/track-c-deepwork/ops-troubleshooting/key-input-guide?lang=ko" />
+  </url>
+  <url>
+    <loc>https://tmux.midagedev.com/learn/track-c-deepwork/ops-troubleshooting/terminal-render-guide?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/learn/track-c-deepwork/ops-troubleshooting/terminal-render-guide?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/learn/track-c-deepwork/ops-troubleshooting/terminal-render-guide?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/learn/track-c-deepwork/ops-troubleshooting/terminal-render-guide?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/learn/track-c-deepwork/ops-troubleshooting/terminal-render-guide?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/learn/track-c-deepwork/ops-troubleshooting/terminal-render-guide?lang=ko" />
+  </url>
+  <url>
+    <loc>https://tmux.midagedev.com/playbooks?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/playbooks?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/playbooks?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/playbooks?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/playbooks?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/playbooks?lang=ko" />
   </url>
   <url>
-    <loc>https://tmux.midagedev.com/playbooks/recommended-config</loc>
+    <loc>https://tmux.midagedev.com/playbooks/agent-teams-tmux-mode?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/playbooks/agent-teams-tmux-mode?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/playbooks/agent-teams-tmux-mode?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/playbooks/agent-teams-tmux-mode?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/playbooks/agent-teams-tmux-mode?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/playbooks/agent-teams-tmux-mode?lang=ko" />
   </url>
   <url>
-    <loc>https://tmux.midagedev.com/playbooks/session-persistence</loc>
+    <loc>https://tmux.midagedev.com/playbooks/claude-dev-server-split?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/playbooks/claude-dev-server-split?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/playbooks/claude-dev-server-split?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/playbooks/claude-dev-server-split?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/playbooks/claude-dev-server-split?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/playbooks/claude-dev-server-split?lang=ko" />
   </url>
   <url>
-    <loc>https://tmux.midagedev.com/playbooks/code-log-3pane-loop</loc>
+    <loc>https://tmux.midagedev.com/playbooks/claude-ghostty-profile?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/playbooks/claude-ghostty-profile?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/playbooks/claude-ghostty-profile?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/playbooks/claude-ghostty-profile?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/playbooks/claude-ghostty-profile?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/playbooks/claude-ghostty-profile?lang=ko" />
   </url>
   <url>
-    <loc>https://tmux.midagedev.com/playbooks/scrollback-clipboard-osc52</loc>
+    <loc>https://tmux.midagedev.com/playbooks/claude-worktree-sessions?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/playbooks/claude-worktree-sessions?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/playbooks/claude-worktree-sessions?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/playbooks/claude-worktree-sessions?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/playbooks/claude-worktree-sessions?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/playbooks/claude-worktree-sessions?lang=ko" />
   </url>
   <url>
-    <loc>https://tmux.midagedev.com/playbooks/key-input-troubleshooting</loc>
+    <loc>https://tmux.midagedev.com/playbooks/code-log-3pane-loop?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/playbooks/code-log-3pane-loop?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/playbooks/code-log-3pane-loop?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/playbooks/code-log-3pane-loop?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/playbooks/code-log-3pane-loop?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/playbooks/code-log-3pane-loop?lang=ko" />
   </url>
   <url>
-    <loc>https://tmux.midagedev.com/playbooks/terminal-render-troubleshooting</loc>
+    <loc>https://tmux.midagedev.com/playbooks/key-input-troubleshooting?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/playbooks/key-input-troubleshooting?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/playbooks/key-input-troubleshooting?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/playbooks/key-input-troubleshooting?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/playbooks/key-input-troubleshooting?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/playbooks/key-input-troubleshooting?lang=ko" />
   </url>
   <url>
-    <loc>https://tmux.midagedev.com/playbooks/claude-worktree-sessions</loc>
+    <loc>https://tmux.midagedev.com/playbooks/recommended-config?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/playbooks/recommended-config?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/playbooks/recommended-config?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/playbooks/recommended-config?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/playbooks/recommended-config?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/playbooks/recommended-config?lang=ko" />
   </url>
   <url>
-    <loc>https://tmux.midagedev.com/playbooks/claude-dev-server-split</loc>
+    <loc>https://tmux.midagedev.com/playbooks/scrollback-clipboard-osc52?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/playbooks/scrollback-clipboard-osc52?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/playbooks/scrollback-clipboard-osc52?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/playbooks/scrollback-clipboard-osc52?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/playbooks/scrollback-clipboard-osc52?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/playbooks/scrollback-clipboard-osc52?lang=ko" />
   </url>
   <url>
-    <loc>https://tmux.midagedev.com/playbooks/agent-teams-tmux-mode</loc>
+    <loc>https://tmux.midagedev.com/playbooks/session-persistence?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/playbooks/session-persistence?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/playbooks/session-persistence?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/playbooks/session-persistence?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/playbooks/session-persistence?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/playbooks/session-persistence?lang=ko" />
   </url>
   <url>
-    <loc>https://tmux.midagedev.com/playbooks/tailscale-ssh-workflow</loc>
+    <loc>https://tmux.midagedev.com/playbooks/tailscale-ssh-workflow?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/playbooks/tailscale-ssh-workflow?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/playbooks/tailscale-ssh-workflow?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/playbooks/tailscale-ssh-workflow?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/playbooks/tailscale-ssh-workflow?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/playbooks/tailscale-ssh-workflow?lang=ko" />
+  </url>
+  <url>
+    <loc>https://tmux.midagedev.com/playbooks/terminal-app-profile-matrix?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/playbooks/terminal-app-profile-matrix?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/playbooks/terminal-app-profile-matrix?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/playbooks/terminal-app-profile-matrix?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/playbooks/terminal-app-profile-matrix?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/playbooks/terminal-app-profile-matrix?lang=ko" />
+  </url>
+  <url>
+    <loc>https://tmux.midagedev.com/playbooks/terminal-render-troubleshooting?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/playbooks/terminal-render-troubleshooting?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/playbooks/terminal-render-troubleshooting?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/playbooks/terminal-render-troubleshooting?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/playbooks/terminal-render-troubleshooting?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/playbooks/terminal-render-troubleshooting?lang=ko" />
+  </url>
+  <url>
+    <loc>https://tmux.midagedev.com/practice?lang=ko</loc>
+    <lastmod>2026-02-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://tmux.midagedev.com/practice?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tmux.midagedev.com/practice?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tmux.midagedev.com/practice?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tmux.midagedev.com/practice?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tmux.midagedev.com/practice?lang=ko" />
   </url>
 </urlset>
