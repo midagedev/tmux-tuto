@@ -55,6 +55,7 @@ export function AppShell() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
+  const isPracticeRoute = location.pathname.startsWith('/practice');
   const { consent, setGranted, setDenied } = useAnalyticsConsentState();
   useCloudflareAnalytics(consent);
   useMicrosoftClarity(consent);
@@ -143,7 +144,7 @@ export function AppShell() {
       <a className="skip-link" href="#main-content">
         {t('본문으로 건너뛰기')}
       </a>
-      <div className="app-shell">
+      <div className={`app-shell${isPracticeRoute ? ' app-shell-practice' : ''}`}>
         <header className="left-panel app-header" aria-label="Primary Navigation">
           <div className="app-header-brand-row">
             <NavLink to="/" className="brand">

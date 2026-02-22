@@ -14,7 +14,7 @@ import {
   buildMissionCommandSuggestions,
   buildMissionPreconditionItems,
 } from './practiceVmHelpers';
-import { LEARNING_PATH_ENTRY_LESSON, LESSON_FILTER_OPTIONS, QUICK_COMMANDS } from './practiceVmConstants';
+import { LEARNING_PATH_ENTRY_LESSON, LESSON_FILTER_OPTIONS } from './practiceVmConstants';
 import { PracticeLabPanel } from './components/PracticeLabPanel';
 import { PracticeLessonBanner } from './components/PracticeLessonBanner';
 import { PracticeLessonCatalogPanel } from './components/PracticeLessonCatalogPanel';
@@ -66,12 +66,10 @@ export function PracticeVmPage() {
   const [vmEpoch, setVmEpoch] = useState(0);
   const [vmStatus, setVmStatus] = useState<VmStatus>('idle');
   const [vmStatusText, setVmStatusText] = useState(t('대기 중'));
-  const [commandInput, setCommandInput] = useState('tmux list-sessions');
   const [debugLines, setDebugLines] = useState<string[]>([]);
   const [actionHistory, setActionHistory] = useState<string[]>([]);
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [metrics, setMetrics] = useState<VmMetricState>(createInitialMetrics());
-  const [autoProbe, setAutoProbe] = useState(true);
   const [mobileWorkbenchView, setMobileWorkbenchView] = useState<'mission' | 'terminal'>('terminal');
 
   const completedMissionSlugs = useProgressStore((store) => store.completedMissionSlugs);
@@ -111,6 +109,7 @@ export function PracticeVmPage() {
   });
 
   const terminalHostRef = useRef<HTMLDivElement | null>(null);
+  const studyPanelRef = useRef<HTMLElement | null>(null);
   const terminalRef = useRef<Terminal | null>(null);
   const emulatorRef = useRef<V86 | null>(null);
   const lastEmulatorOptionsRef = useRef<V86Options | null>(null);
@@ -174,29 +173,34 @@ export function PracticeVmPage() {
     return lessonMissions.filter((mission) => missionStatusMap.get(mission.slug)?.status === 'manual');
   }, [lessonMissions, missionStatusMap]);
 
+  const resetPracticeScrollPosition = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    studyPanelRef.current?.scrollTo({ top: 0, behavior: 'auto' });
+  }, []);
+
   const selectLessonForAction = useCallback(
     (lessonSlug: string, options?: { resetFilter?: boolean }) => {
       selectLessonForActionBase(lessonSlug, options);
       setMobileWorkbenchView('mission');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      resetPracticeScrollPosition();
     },
-    [selectLessonForActionBase],
+    [resetPracticeScrollPosition, selectLessonForActionBase],
   );
 
   const selectMissionForAction = useCallback(
     (missionSlug: string) => {
       selectMissionForActionBase(missionSlug);
       setMobileWorkbenchView('mission');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      resetPracticeScrollPosition();
     },
-    [selectMissionForActionBase],
+    [resetPracticeScrollPosition, selectMissionForActionBase],
   );
 
   const selectNextLessonForAction = useCallback(() => {
     selectNextLessonForActionBase();
     setMobileWorkbenchView('mission');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [selectNextLessonForActionBase]);
+    resetPracticeScrollPosition();
+  }, [resetPracticeScrollPosition, selectNextLessonForActionBase]);
 
   useEffect(() => {
     selectedLessonSlugRef.current = selectedLessonSlug;
@@ -222,7 +226,6 @@ export function PracticeVmPage() {
   const {
     pushDebugLine,
     updateMetricsByProbeState,
-    requestManualProbe,
     requestBootstrapProbe,
     sendInternalCommand,
     requestSearchProbe,
@@ -230,7 +233,7 @@ export function PracticeVmPage() {
     sendCommand,
   } = usePracticeVmInteraction({
     t,
-    autoProbe,
+    autoProbe: true,
     vmStatus,
     vmStatusText,
     metrics,
@@ -336,11 +339,7 @@ export function PracticeVmPage() {
   }
 
   return (
-    <PagePlaceholder
-      eyebrow="Practice"
-      title={t('tmux 실습')}
-      description=""
-    >
+    <section className="page-card practice-page-card" aria-label={t('tmux 실습')}>
       <p className="vm-mobile-hint">
         {t('원활한 실습을 위해 데스크톱 브라우저 사용을 권장합니다.')}
       </p>
@@ -362,19 +361,8 @@ export function PracticeVmPage() {
           </button>
         </div>
 
-        {selectedLesson ? (
-          <PracticeLessonBanner
-            t={t}
-            selectedLesson={selectedLesson}
-            selectedLessonTrack={selectedLessonTrack}
-            selectedLessonChapter={selectedLessonChapter}
-            lessonMissions={lessonMissions}
-            bannerLessonTerms={bannerLessonTerms}
-          />
-        ) : null}
-
         <section className={`vm-workbench vm-workbench-view-${mobileWorkbenchView}`}>
-          <aside className="vm-study-panel">
+          <aside ref={studyPanelRef} className="vm-mission-panel">
             <PracticeMissionPanel
               t={t}
               selectedMission={selectedMission}
@@ -391,16 +379,45 @@ export function PracticeVmPage() {
               nextLesson={nextLesson}
               lessonCompletedMissionCount={lessonCompletedMissionCount}
               missionStatusMap={missionStatusMap}
+              selectedLessonSlug={selectedLessonSlug}
               selectedMissionSlug={selectedMissionSlug}
               completedMissionSlugs={completedMissionSlugs}
               onCommandSelect={(command) => {
-                setCommandInput(command);
+                sendCommand(command);
                 setMobileWorkbenchView('terminal');
               }}
               onManualMissionComplete={handleManualMissionComplete}
               onSelectMission={selectMissionForAction}
               onSelectNextLesson={selectNextLessonForAction}
             />
+          </aside>
+
+          <section className="vm-content-panel">
+            {selectedLesson ? (
+              <PracticeLessonBanner
+                t={t}
+                selectedLesson={selectedLesson}
+                selectedLessonTrack={selectedLessonTrack}
+                selectedLessonChapter={selectedLessonChapter}
+                lessonMissions={lessonMissions}
+                bannerLessonTerms={bannerLessonTerms}
+              />
+            ) : null}
+
+            <PracticeLabPanel
+              t={t}
+              metricStatusItems={metricStatusItems}
+              metricHighlightState={metricHighlightState}
+              isTerminalFlashActive={isTerminalFlashActive}
+              terminalHostRef={terminalHostRef}
+              actionHistory={actionHistory}
+              commandHistory={commandHistory}
+              debugLines={debugLines}
+              onRestartVm={() => {
+                setVmEpoch((value) => value + 1);
+              }}
+            />
+
             <PracticeLessonCatalogPanel
               t={t}
               lessonFilter={lessonFilter}
@@ -418,36 +435,9 @@ export function PracticeVmPage() {
               onLessonFilterChange={setLessonFilter}
               onSelectLesson={selectLessonForAction}
             />
-          </aside>
-
-          <PracticeLabPanel
-            t={t}
-            autoProbe={autoProbe}
-            commandInput={commandInput}
-            vmStatus={vmStatus}
-            quickCommands={QUICK_COMMANDS}
-            metricStatusItems={metricStatusItems}
-            metricHighlightState={metricHighlightState}
-            isTerminalFlashActive={isTerminalFlashActive}
-            terminalHostRef={terminalHostRef}
-            actionHistory={actionHistory}
-            commandHistory={commandHistory}
-            debugLines={debugLines}
-            onRestartVm={() => {
-              setVmEpoch((value) => value + 1);
-            }}
-            onAutoProbeChange={setAutoProbe}
-            onProbeNow={() => {
-              requestManualProbe();
-            }}
-            onSubmitCommand={() => {
-              sendCommand(commandInput);
-            }}
-            onCommandInputChange={setCommandInput}
-            onSendCommand={sendCommand}
-          />
+          </section>
         </section>
       </div>
-    </PagePlaceholder>
+    </section>
   );
 }

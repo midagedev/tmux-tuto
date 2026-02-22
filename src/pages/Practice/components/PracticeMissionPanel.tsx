@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import type { TFunction } from 'i18next';
 import type { AppLesson, AppMission } from '../../../features/curriculum/contentSchema';
@@ -23,6 +24,7 @@ type PracticeMissionPanelProps = {
   nextLesson: AppLesson | null;
   lessonCompletedMissionCount: number;
   missionStatusMap: Map<string, MissionEvaluation>;
+  selectedLessonSlug: string;
   selectedMissionSlug: string;
   completedMissionSlugs: string[];
   onCommandSelect: (command: string) => void;
@@ -47,6 +49,7 @@ export function PracticeMissionPanel({
   nextLesson,
   lessonCompletedMissionCount,
   missionStatusMap,
+  selectedLessonSlug,
   selectedMissionSlug,
   completedMissionSlugs,
   onCommandSelect,
@@ -54,6 +57,12 @@ export function PracticeMissionPanel({
   onSelectMission,
   onSelectNextLesson,
 }: PracticeMissionPanelProps) {
+  const missionListRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    missionListRef.current?.scrollTo({ top: 0, behavior: 'auto' });
+  }, [selectedLessonSlug]);
+
   return (
     <>
       {selectedMission ? (
@@ -87,7 +96,6 @@ export function PracticeMissionPanel({
             ) : (
               <p className="muted">{t('추천 명령을 찾지 못했습니다. 아래 힌트를 기준으로 직접 입력해 주세요.')}</p>
             )}
-            <p className="muted">{t('명령을 클릭하면 입력창에 채워지고 터미널 탭으로 전환됩니다.')}</p>
           </section>
 
           <section className="vm-mission-precondition-block">
@@ -197,7 +205,7 @@ export function PracticeMissionPanel({
             {t('판정:')} {selectedMissionStatus.status} · {t(selectedMissionStatus.reason)}
           </p>
         ) : null}
-        <div className="vm-mission-list">
+        <div ref={missionListRef} className="vm-mission-list">
           {lessonMissions.map((mission, index) => {
             const missionStatus = missionStatusMap.get(mission.slug);
             const isSelected = mission.slug === selectedMissionSlug;
