@@ -9,7 +9,7 @@ const contentPath = path.join(rootDir, 'src', 'content', 'v1', 'content.json');
 const outputPath = path.join(rootDir, 'public', 'sitemap.xml');
 
 const defaultSiteUrl = 'https://tmux.midagedev.com';
-const siteUrl = (process.env.TMUX_TUTO_SITE_URL || process.env.VITE_SITE_ORIGIN || defaultSiteUrl).replace(/\/$/, '');
+const rawSiteUrl = process.env.TMUX_TUTO_SITE_URL || process.env.VITE_SITE_ORIGIN || defaultSiteUrl;
 const supportedLanguages = ['ko', 'en', 'ja', 'zh'];
 const hreflangMap = {
   ko: 'ko',
@@ -17,6 +17,19 @@ const hreflangMap = {
   ja: 'ja',
   zh: 'zh-Hans',
 };
+
+function resolveSiteTarget(rawValue) {
+  const normalized = (rawValue || defaultSiteUrl).trim();
+  const withTrailingSlash = normalized.endsWith('/') ? normalized : `${normalized}/`;
+  const parsed = new URL(withTrailingSlash);
+  const pathPrefix = parsed.pathname.replace(/\/+$/, '');
+  return {
+    origin: parsed.origin,
+    pathPrefix,
+  };
+}
+
+const siteTarget = resolveSiteTarget(rawSiteUrl);
 
 function normalizePathname(pathname) {
   if (!pathname || pathname === '/') {
@@ -28,7 +41,8 @@ function normalizePathname(pathname) {
 
 function buildLocalizedUrl(pathname, lang) {
   const normalizedPathname = normalizePathname(pathname);
-  const url = new URL(normalizedPathname, siteUrl);
+  const combinedPath = `${siteTarget.pathPrefix}${normalizedPathname}`.replace(/\/{2,}/g, '/');
+  const url = new URL(combinedPath, siteTarget.origin);
   url.searchParams.set('lang', lang);
   return url.toString();
 }
