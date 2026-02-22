@@ -8,7 +8,7 @@
 - 기본 진입: `/practice`
 - Cheatsheet 바로 실습: `/practice?from=<presetId>`
 - 북마크 스냅샷 복원: `/practice?snapshot=<snapshotId>`
-- 레슨 기본 시나리오 복원: `/practice?lesson=<lessonSlug>`
+- 레슨 기본 시나리오 복원: `/practice/<lessonSlug>`
 
 ## 3. 핵심 조작
 ### 3.1 기본 버튼

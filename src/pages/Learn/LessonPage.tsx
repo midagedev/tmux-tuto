@@ -143,7 +143,7 @@ export function LessonPage() {
           <li className="lesson-pill">{t('학습 목표 {{count}}개', { count: lesson.objectives.length })}</li>
         </ul>
         <div className="inline-actions">
-          <Link className="primary-btn" to={`/practice?lesson=${lesson.slug}`}>
+          <Link className="primary-btn" to={`/practice/${encodeURIComponent(lesson.slug)}`}>
             {t('시뮬레이터에서 레슨 시작')}
           </Link>
           <Link className="secondary-btn" to="/learn">

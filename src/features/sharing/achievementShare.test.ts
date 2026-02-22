@@ -22,7 +22,7 @@ describe('achievementShare', () => {
     expect(isAchievementShareId('workspace_bootstrap')).toBe(true);
 
     const target = resolveAchievementShareTarget('workspace_bootstrap');
-    expect(target.path).toContain('/practice?lesson=basics');
+    expect(target.path).toContain('/practice/basics');
 
     const text = buildAchievementChallengeShareText('세션/윈도우/분할 루틴 완성', 'workspace_bootstrap');
     expect(text).toContain('챌린지');

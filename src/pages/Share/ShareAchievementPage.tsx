@@ -83,7 +83,7 @@ export function ShareAchievementPage() {
           </li>
         </ul>
         <div className="inline-actions">
-          <Link className="primary-btn" to={challengeTarget?.path ?? '/practice?lesson=hello-tmux&mission=hello-tmux-version-check'}>
+          <Link className="primary-btn" to={challengeTarget?.path ?? '/practice/hello-tmux?mission=hello-tmux-version-check'}>
             {t('챌린지 시작')}
           </Link>
         </div>

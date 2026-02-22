@@ -83,8 +83,11 @@ async function selectLessonByTitle(page: Page, title: string, lessonSlug: string
   await expect(row).toHaveClass(/is-active/, { timeout: MISSION_TIMEOUT_MS });
   await expect
     .poll(async () => {
-      const params = new URLSearchParams(await page.evaluate(() => window.location.search));
-      return params.get('lesson');
+      return page.evaluate(() => {
+        const segments = window.location.pathname.split('/').filter(Boolean);
+        const lesson = segments[0] === 'practice' ? segments[1] ?? '' : '';
+        return decodeURIComponent(lesson);
+      });
     })
     .toBe(lessonSlug);
 }
@@ -366,7 +369,7 @@ test.describe('lesson user clearability e2e', () => {
   test('all lessons can be completed through command/shortcut flow', async ({ page }) => {
     test.setTimeout(SUITE_TIMEOUT_MS);
 
-    await page.goto('/practice?lang=ko&lesson=hello-tmux');
+    await page.goto('/practice/hello-tmux?lang=ko');
     await dismissAnalyticsBanner(page);
     await waitForVmReady(page, { timeout: 120_000 });
     await setVmAutoProbe(page, false);

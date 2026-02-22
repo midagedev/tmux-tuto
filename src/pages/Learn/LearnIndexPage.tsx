@@ -117,12 +117,12 @@ export function LearnIndexPage() {
               </p>
               <div className="inline-actions">
                 {learningPathEntry ? (
-                  <Link className="primary-btn" to={`/practice?lesson=${learningPathEntry.slug}`}>
+                  <Link className="primary-btn" to={`/practice/${encodeURIComponent(learningPathEntry.slug)}`}>
                     {t('통합 경로 바로 시작')}
                   </Link>
                 ) : null}
                 {paneNavigationEntry ? (
-                  <Link className="secondary-btn" to={`/practice?lesson=${paneNavigationEntry.slug}`}>
+                  <Link className="secondary-btn" to={`/practice/${encodeURIComponent(paneNavigationEntry.slug)}`}>
                     {t('pane 이동부터 시작')}
                   </Link>
                 ) : null}
@@ -145,7 +145,7 @@ export function LearnIndexPage() {
                 </p>
               </div>
               {learningPathEntry ? (
-                <Link className="primary-btn" to={`/practice?lesson=${learningPathEntry.slug}`}>
+                <Link className="primary-btn" to={`/practice/${encodeURIComponent(learningPathEntry.slug)}`}>
                   {t('처음부터 시작')}
                 </Link>
               ) : null}
@@ -155,7 +155,7 @@ export function LearnIndexPage() {
                 return (
                   <div key={lesson.id} className="curriculum-lesson-row">
                     <h3 className="curriculum-lesson-title">
-                      <Link className="curriculum-lesson-title-link" to={`/practice?lesson=${lesson.slug}`}>
+                      <Link className="curriculum-lesson-title-link" to={`/practice/${encodeURIComponent(lesson.slug)}`}>
                         {t(lesson.title)}
                       </Link>
                     </h3>

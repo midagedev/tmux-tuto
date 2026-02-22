@@ -32,7 +32,7 @@ test.describe('lesson probe bridge regression e2e', () => {
   test.describe.configure({ mode: 'serial' });
 
   test('injectProbeState updates VM metrics snapshot', async ({ page }) => {
-    await page.goto('/practice?lang=ko&lesson=hello-tmux&mission=hello-tmux-version-check');
+    await page.goto('/practice/hello-tmux?lang=ko&mission=hello-tmux-version-check');
     await dismissAnalyticsBanner(page);
     await waitForVmReady(page, { timeout: 120_000 });
     await setVmAutoProbe(page, false);
@@ -78,7 +78,7 @@ test.describe('lesson probe bridge regression e2e', () => {
   });
 
   test('injectCommandHistory can complete shell-history mission rule', async ({ page }) => {
-    await page.goto('/practice?lang=ko&lesson=hello-tmux&mission=hello-tmux-version-check');
+    await page.goto('/practice/hello-tmux?lang=ko&mission=hello-tmux-version-check');
     await dismissAnalyticsBanner(page);
     await waitForVmReady(page, { timeout: 120_000 });
     await setVmAutoProbe(page, false);
@@ -95,7 +95,7 @@ test.describe('lesson probe bridge regression e2e', () => {
   });
 
   test('injectActionHistory appends shortcut telemetry entry', async ({ page }) => {
-    await page.goto('/practice?lang=ko&lesson=basics-shortcuts&mission=session-create-shortcuts');
+    await page.goto('/practice/basics-shortcuts?lang=ko&mission=session-create-shortcuts');
     await dismissAnalyticsBanner(page);
     await waitForVmReady(page, { timeout: 120_000 });
     await setVmAutoProbe(page, false);

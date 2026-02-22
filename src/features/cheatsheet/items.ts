@@ -24,7 +24,7 @@ export const CHEATSHEET_ITEMS: CheatsheetItem[] = [
     examples: ['로그와 쉘을 동시에 보기'],
     relatedActions: ['sim.pane.split.vertical'],
     difficulty: 'beginner',
-    practicePath: '/practice?lesson=split-resize',
+    practicePath: '/practice/split-resize',
   },
   {
     id: 'cs-split-horizontal',
@@ -36,7 +36,7 @@ export const CHEATSHEET_ITEMS: CheatsheetItem[] = [
     examples: ['상단 빌드, 하단 로그'],
     relatedActions: ['sim.pane.split.horizontal'],
     difficulty: 'beginner',
-    practicePath: '/practice?lesson=split-resize',
+    practicePath: '/practice/split-resize',
   },
   {
     id: 'cs-window-new',
@@ -48,7 +48,7 @@ export const CHEATSHEET_ITEMS: CheatsheetItem[] = [
     examples: ['서비스별 window 분리'],
     relatedActions: ['sim.window.new'],
     difficulty: 'beginner',
-    practicePath: '/practice?lesson=basics',
+    practicePath: '/practice/basics',
   },
   {
     id: 'cs-window-next',
@@ -60,7 +60,7 @@ export const CHEATSHEET_ITEMS: CheatsheetItem[] = [
     examples: ['모니터링 window 순환'],
     relatedActions: ['sim.window.next'],
     difficulty: 'daily',
-    practicePath: '/practice?lesson=pane-focus-flow',
+    practicePath: '/practice/pane-focus-flow',
   },
   {
     id: 'cs-copy-mode',
@@ -72,7 +72,7 @@ export const CHEATSHEET_ITEMS: CheatsheetItem[] = [
     examples: ['로그 검색 후 복사'],
     relatedActions: ['sim.copymode.enter'],
     difficulty: 'advanced',
-    practicePath: '/practice?lesson=copy-search',
+    practicePath: '/practice/copy-search',
   },
   {
     id: 'cs-command-mode',
@@ -84,7 +84,7 @@ export const CHEATSHEET_ITEMS: CheatsheetItem[] = [
     examples: ['new-window', 'split-window -h'],
     relatedActions: ['sim.command.execute'],
     difficulty: 'advanced',
-    practicePath: '/practice?lesson=command-subset',
+    practicePath: '/practice/command-subset',
   },
   {
     id: 'cs-session-main',
@@ -96,7 +96,7 @@ export const CHEATSHEET_ITEMS: CheatsheetItem[] = [
     examples: ['원격 서버 접속 직후 실행'],
     relatedActions: ['sim.session.new'],
     difficulty: 'daily',
-    practicePath: '/practice?lesson=attach-detach',
+    practicePath: '/practice/attach-detach',
   },
   {
     id: 'cs-detach',
@@ -108,7 +108,7 @@ export const CHEATSHEET_ITEMS: CheatsheetItem[] = [
     examples: ['SSH를 끊기 전에 안전하게 이탈'],
     relatedActions: ['sim.session.detach'],
     difficulty: 'daily',
-    practicePath: '/practice?lesson=attach-detach-shortcuts',
+    practicePath: '/practice/attach-detach-shortcuts',
   },
   {
     id: 'cs-attach-main',
@@ -120,7 +120,7 @@ export const CHEATSHEET_ITEMS: CheatsheetItem[] = [
     examples: ['점심 후 작업 복구'],
     relatedActions: ['sim.session.attach'],
     difficulty: 'daily',
-    practicePath: '/practice?lesson=attach-detach',
+    practicePath: '/practice/attach-detach',
   },
   {
     id: 'cs-layout-tiled',
@@ -132,7 +132,7 @@ export const CHEATSHEET_ITEMS: CheatsheetItem[] = [
     examples: ['레이아웃이 무너졌을 때 즉시 복구'],
     relatedActions: ['sim.layout.tiled'],
     difficulty: 'daily',
-    practicePath: '/practice?lesson=layout-craft',
+    practicePath: '/practice/layout-craft',
   },
   {
     id: 'cs-list-panes',
@@ -144,7 +144,7 @@ export const CHEATSHEET_ITEMS: CheatsheetItem[] = [
     examples: ['병렬 작업 상태 점검'],
     relatedActions: ['sim.pane.inspect'],
     difficulty: 'advanced',
-    practicePath: '/practice?lesson=workspace-compose',
+    practicePath: '/practice/workspace-compose',
   },
   {
     id: 'cs-capture-pane-tail',
@@ -156,7 +156,7 @@ export const CHEATSHEET_ITEMS: CheatsheetItem[] = [
     examples: ['dev 서버 상태 확인'],
     relatedActions: ['sim.command.capture-pane'],
     difficulty: 'advanced',
-    practicePath: '/practice?lesson=command-subset',
+    practicePath: '/practice/command-subset',
   },
   {
     id: 'cs-escape-time',
@@ -168,7 +168,7 @@ export const CHEATSHEET_ITEMS: CheatsheetItem[] = [
     examples: ['중첩 tmux에서 키 반응 점검'],
     relatedActions: ['sim.keys.escape-time'],
     difficulty: 'advanced',
-    practicePath: '/practice?lesson=command-subset-shortcuts',
+    practicePath: '/practice/command-subset-shortcuts',
   },
   {
     id: 'cs-recommended-config',
@@ -185,7 +185,7 @@ export const CHEATSHEET_ITEMS: CheatsheetItem[] = [
     relatedActions: ['sim.config.apply'],
     difficulty: 'daily',
     playbookSlug: 'recommended-config',
-    practicePath: '/practice?lesson=command-subset',
+    practicePath: '/practice/command-subset',
   },
   {
     id: 'cs-session-persistence',
@@ -197,7 +197,7 @@ export const CHEATSHEET_ITEMS: CheatsheetItem[] = [
     relatedActions: ['sim.session.new', 'sim.window.next'],
     difficulty: 'daily',
     playbookSlug: 'session-persistence',
-    practicePath: '/practice?lesson=attach-detach',
+    practicePath: '/practice/attach-detach',
   },
   {
     id: 'cs-tailscale-ssh',
@@ -209,7 +209,7 @@ export const CHEATSHEET_ITEMS: CheatsheetItem[] = [
     relatedActions: ['sim.command.shell', 'sim.session.new'],
     difficulty: 'advanced',
     playbookSlug: 'tailscale-ssh-workflow',
-    practicePath: '/practice?lesson=attach-detach',
+    practicePath: '/practice/attach-detach',
   },
   {
     id: 'cs-code-log-3pane-loop',
@@ -221,7 +221,7 @@ export const CHEATSHEET_ITEMS: CheatsheetItem[] = [
     relatedActions: ['sim.layout.compose'],
     difficulty: 'daily',
     playbookSlug: 'code-log-3pane-loop',
-    practicePath: '/practice?lesson=layout-craft',
+    practicePath: '/practice/layout-craft',
   },
   {
     id: 'cs-scrollback-clipboard-osc52',
@@ -233,7 +233,7 @@ export const CHEATSHEET_ITEMS: CheatsheetItem[] = [
     relatedActions: ['sim.copymode.copy'],
     difficulty: 'advanced',
     playbookSlug: 'scrollback-clipboard-osc52',
-    practicePath: '/practice?lesson=copy-search',
+    practicePath: '/practice/copy-search',
   },
   {
     id: 'cs-key-input-troubleshooting',
@@ -245,7 +245,7 @@ export const CHEATSHEET_ITEMS: CheatsheetItem[] = [
     relatedActions: ['sim.keys.troubleshoot'],
     difficulty: 'advanced',
     playbookSlug: 'key-input-troubleshooting',
-    practicePath: '/practice?lesson=command-subset-shortcuts',
+    practicePath: '/practice/command-subset-shortcuts',
   },
   {
     id: 'cs-terminal-render-troubleshooting',
@@ -257,7 +257,7 @@ export const CHEATSHEET_ITEMS: CheatsheetItem[] = [
     relatedActions: ['sim.terminal.troubleshoot'],
     difficulty: 'advanced',
     playbookSlug: 'terminal-render-troubleshooting',
-    practicePath: '/practice?lesson=command-subset',
+    practicePath: '/practice/command-subset',
   },
   {
     id: 'cs-claude-worktree-sessions',
@@ -269,7 +269,7 @@ export const CHEATSHEET_ITEMS: CheatsheetItem[] = [
     relatedActions: ['sim.agent.parallel'],
     difficulty: 'advanced',
     playbookSlug: 'claude-worktree-sessions',
-    practicePath: '/practice?lesson=workspace-compose',
+    practicePath: '/practice/workspace-compose',
   },
   {
     id: 'cs-claude-dev-server-split',
@@ -281,7 +281,7 @@ export const CHEATSHEET_ITEMS: CheatsheetItem[] = [
     relatedActions: ['sim.agent.devserver'],
     difficulty: 'advanced',
     playbookSlug: 'claude-dev-server-split',
-    practicePath: '/practice?lesson=command-subset',
+    practicePath: '/practice/command-subset',
   },
   {
     id: 'cs-agent-teams-tmux-mode',
@@ -293,6 +293,6 @@ export const CHEATSHEET_ITEMS: CheatsheetItem[] = [
     relatedActions: ['sim.agent.teams'],
     difficulty: 'advanced',
     playbookSlug: 'agent-teams-tmux-mode',
-    practicePath: '/practice?lesson=workspace-compose-shortcuts',
+    practicePath: '/practice/workspace-compose-shortcuts',
   },
 ];

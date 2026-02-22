@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { SetURLSearchParams } from 'react-router-dom';
+import type { NavigateFunction } from 'react-router-dom';
 import { loadAppContent } from '../../../features/curriculum/contentLoader';
 import type { AppChapter, AppContent, AppLesson, AppMission, AppTrack } from '../../../features/curriculum/contentSchema';
+import { buildPracticeLessonPath } from '../../../features/curriculum/practicePath';
+import { resolveInitialLessonSlugFromQuery } from '../urlState';
 import { buildLessonProgressRows, filterLessonProgressRows, resolveDefaultMissionSlugForLesson, type LessonFilter, type LessonProgressRow } from '../lessonProgress';
 
 type ContentState = {
@@ -10,8 +12,10 @@ type ContentState = {
 };
 
 type UsePracticeLessonSelectionArgs = {
+  pathname: string;
+  lessonSlugParam: string;
   searchParams: URLSearchParams;
-  setSearchParams: SetURLSearchParams;
+  navigate: NavigateFunction;
   completedMissionSlugs: string[];
   startMissionSession: (input: { missionSlug: string; lessonSlug: string }) => void;
 };
@@ -43,8 +47,10 @@ type UsePracticeLessonSelectionResult = {
 };
 
 export function usePracticeLessonSelection({
+  pathname,
+  lessonSlugParam,
   searchParams,
-  setSearchParams,
+  navigate,
   completedMissionSlugs,
   startMissionSession,
 }: UsePracticeLessonSelectionArgs): UsePracticeLessonSelectionResult {
@@ -56,7 +62,7 @@ export function usePracticeLessonSelection({
   const [selectedMissionSlug, setSelectedMissionSlug] = useState('');
   const [lessonFilter, setLessonFilter] = useState<LessonFilter>('all');
 
-  const lessonParam = searchParams.get('lesson') ?? '';
+  const legacyLessonParam = searchParams.get('lesson') ?? '';
   const missionParam = searchParams.get('mission') ?? '';
 
   const content = contentState.content;
@@ -279,17 +285,21 @@ export function usePracticeLessonSelection({
   }, []);
 
   useEffect(() => {
-    if (!content || selectedLessonSlug) {
+    if (!content) {
       return;
     }
 
-    const firstLessonSlug = content.lessons[0]?.slug ?? '';
-    const fromParam = content.lessons.some((lesson) => lesson.slug === lessonParam) ? lessonParam : '';
-    setSelectedLessonSlug(fromParam || firstLessonSlug);
-  }, [content, lessonParam, selectedLessonSlug]);
+    const nextLessonSlug = resolveInitialLessonSlugFromQuery(
+      content,
+      legacyLessonParam,
+      missionParam,
+      lessonSlugParam,
+    );
+    setSelectedLessonSlug((current) => (current === nextLessonSlug ? current : nextLessonSlug));
+  }, [content, lessonSlugParam, legacyLessonParam, missionParam]);
 
   useEffect(() => {
-    if (!content || filteredLessonRows.length === 0) {
+    if (!content || !selectedLessonSlug || filteredLessonRows.length === 0) {
       return;
     }
 
@@ -345,28 +355,45 @@ export function usePracticeLessonSelection({
       return;
     }
 
-    const nextParams = new URLSearchParams(searchParams);
-    let changed = false;
+    if (lessonMissions.length > 0 && !selectedMissionSlug) {
+      return;
+    }
 
-    if (nextParams.get('lesson') !== selectedLessonSlug) {
-      nextParams.set('lesson', selectedLessonSlug);
-      changed = true;
+    const nextParams = new URLSearchParams(searchParams);
+    let queryChanged = false;
+
+    if (nextParams.has('lesson')) {
+      nextParams.delete('lesson');
+      queryChanged = true;
     }
 
     if (selectedMissionSlug) {
       if (nextParams.get('mission') !== selectedMissionSlug) {
         nextParams.set('mission', selectedMissionSlug);
-        changed = true;
+        queryChanged = true;
       }
     } else if (nextParams.has('mission')) {
       nextParams.delete('mission');
-      changed = true;
+      queryChanged = true;
     }
 
-    if (changed) {
-      setSearchParams(nextParams, { replace: true });
+    const targetPathname = buildPracticeLessonPath(selectedLessonSlug);
+    const targetSearch = nextParams.toString();
+    const normalizedCurrentPath = pathname.endsWith('/') && pathname !== '/' ? pathname.slice(0, -1) : pathname;
+    const normalizedTargetPath =
+      targetPathname.endsWith('/') && targetPathname !== '/' ? targetPathname.slice(0, -1) : targetPathname;
+    if (normalizedCurrentPath === normalizedTargetPath && !queryChanged) {
+      return;
     }
-  }, [searchParams, selectedLessonSlug, selectedMissionSlug, setSearchParams]);
+
+    navigate(
+      {
+        pathname: targetPathname,
+        search: targetSearch ? `?${targetSearch}` : '',
+      },
+      { replace: true },
+    );
+  }, [lessonMissions.length, navigate, pathname, searchParams, selectedLessonSlug, selectedMissionSlug]);
 
   return {
     contentState,

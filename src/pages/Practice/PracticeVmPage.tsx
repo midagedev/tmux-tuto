@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { Terminal } from '@xterm/xterm';
 import '@xterm/xterm/css/xterm.css';
@@ -64,7 +64,10 @@ declare global {
 
 export function PracticeVmPage() {
   const { t } = useTranslation();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { lessonSlug: lessonSlugParam = '' } = useParams();
   const [vmEpoch, setVmEpoch] = useState(0);
   const [vmStatus, setVmStatus] = useState<VmStatus>('idle');
   const [vmStatusText, setVmStatusText] = useState(t('대기 중'));
@@ -105,8 +108,10 @@ export function PracticeVmPage() {
     selectMissionForAction: selectMissionForActionBase,
     selectNextLessonForAction: selectNextLessonForActionBase,
   } = usePracticeLessonSelection({
+    pathname: location.pathname,
+    lessonSlugParam,
     searchParams,
-    setSearchParams,
+    navigate,
     completedMissionSlugs,
     startMissionSession,
   });

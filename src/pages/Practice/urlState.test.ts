@@ -11,8 +11,13 @@ describe('resolveInitialLessonSlugFromQuery', () => {
     expect(slug).toBe('hello-tmux');
   });
 
+  it('uses lesson path when mission is not provided', () => {
+    const slug = resolveInitialLessonSlugFromQuery(content, '', '', 'basics');
+    expect(slug).toBe('basics');
+  });
+
   it('prioritizes mission lesson when lesson and mission mismatch', () => {
-    const slug = resolveInitialLessonSlugFromQuery(content, 'basics', 'hello-tmux-session-list');
+    const slug = resolveInitialLessonSlugFromQuery(content, 'basics', 'hello-tmux-session-list', 'split-resize');
     expect(slug).toBe('hello-tmux');
   });
 

@@ -167,7 +167,7 @@ export function AppShell() {
               ))}
             </nav>
             <div className="app-header-controls" aria-label="Header Controls">
-              <Link to="/practice?lesson=hello-tmux" className="primary-btn app-start-btn">
+              <Link to="/practice/hello-tmux" className="primary-btn app-start-btn">
                 {t('실습 시작')}
               </Link>
               <label className="sr-only" htmlFor="app-language-select">

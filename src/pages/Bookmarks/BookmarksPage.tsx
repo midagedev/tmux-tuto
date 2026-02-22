@@ -3,20 +3,29 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { EmptyState } from '../../components/system/EmptyState';
 import { PagePlaceholder } from '../../components/system/PagePlaceholder';
+import { buildPracticeLessonPath, buildPracticePath } from '../../features/curriculum/practicePath';
 import { useBookmarkStore } from '../../features/bookmarks/bookmarkStore';
 import type { BookmarkRecord } from '../../features/storage/types';
 
 function buildBookmarkPracticeLink(bookmark: BookmarkRecord) {
   if (bookmark.type === 'lesson') {
-    return `/practice?lesson=${encodeURIComponent(bookmark.targetId)}`;
+    return buildPracticeLessonPath(bookmark.targetId);
   }
 
   if (bookmark.type === 'snapshot') {
-    return `/practice?snapshot=${encodeURIComponent(bookmark.targetId)}`;
+    return buildPracticePath({
+      query: {
+        snapshot: bookmark.targetId,
+      },
+    });
   }
 
   if (bookmark.type === 'cheatsheet_item' || bookmark.type === 'action_pattern') {
-    return `/practice?from=${encodeURIComponent(bookmark.targetId)}`;
+    return buildPracticePath({
+      query: {
+        from: bookmark.targetId,
+      },
+    });
   }
 
   return null;

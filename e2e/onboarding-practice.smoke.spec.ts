@@ -59,11 +59,11 @@ test.describe('vm practice smoke', () => {
     await page.goto('/learn');
     await dismissAnalyticsBanner(page);
 
-    const entryLink = page.locator('main a[href="/practice?lesson=hello-tmux"]').first();
+    const entryLink = page.locator('main a[href="/practice/hello-tmux"]').first();
     await expect(entryLink).toBeVisible();
     await entryLink.click();
 
-    await expect(page).toHaveURL(/\/practice\?.*lesson=hello-tmux/);
+    await expect(page).toHaveURL(/\/practice\/hello-tmux/);
     await expect(page.locator('.vm-lesson-row.is-active')).toHaveCount(1);
     await expect(page.locator('.vm-mission-row.is-active')).toHaveCount(1);
   });
@@ -73,7 +73,7 @@ test.describe('vm practice smoke', () => {
       window.localStorage.clear();
       window.sessionStorage.clear();
     });
-    await page.goto('/practice?lesson=hello-tmux&mission=hello-tmux-version-check');
+    await page.goto('/practice/hello-tmux?mission=hello-tmux-version-check');
     await dismissAnalyticsBanner(page);
     await waitForVmReadyForSmoke(page);
 
@@ -85,12 +85,12 @@ test.describe('vm practice smoke', () => {
     await sendVmCommand(page, 'tmux -V');
     await expect(page.locator('.vm-mission-row.is-active .vm-mission-row-badge.is-complete')).toBeVisible();
     await page.getByRole('button', { name: /다음 미션|Next mission/ }).first().click();
-    await expect(page).toHaveURL(/\/practice\?.*mission=hello-tmux-session-list/);
+    await expect(page).toHaveURL(/\/practice\/hello-tmux\?.*mission=hello-tmux-session-list/);
 
     await sendVmCommand(page, 'tmux list-sessions');
     await expect(page.locator('.vm-mission-row.is-active .vm-mission-row-badge.is-complete')).toBeVisible();
     await page.getByRole('button', { name: /다음 레슨|Next lesson/ }).first().click();
-    await expect(page).toHaveURL(/\/practice\?.*lesson=basics/);
+    await expect(page).toHaveURL(/\/practice\/basics/);
 
     await expect
       .poll(async () => {

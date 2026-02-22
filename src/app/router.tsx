@@ -100,6 +100,7 @@ export function createAppRouter() {
           { path: 'learn/:trackSlug/:chapterSlug/:lessonSlug', element: renderLazyPage(LessonPage) },
           { path: 'practice', element: renderLazyPage(PracticePage) },
           { path: 'practice/vm', element: renderLazyPage(PracticeVmPage) },
+          { path: 'practice/:lessonSlug', element: renderLazyPage(PracticePage) },
           { path: 'cheatsheet', element: renderLazyPage(CheatsheetPage) },
           { path: 'playbooks', element: renderLazyPage(PlaybookIndexPage) },
           { path: 'playbooks/:playbookSlug', element: renderLazyPage(PlaybookDetailPage) },

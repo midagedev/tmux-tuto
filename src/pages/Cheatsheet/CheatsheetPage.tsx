@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { PagePlaceholder } from '../../components/system/PagePlaceholder';
 import { loadAppContent } from '../../features/curriculum/contentLoader';
+import { buildPracticeLessonPath } from '../../features/curriculum/practicePath';
 import type { AppLesson } from '../../features/curriculum/contentSchema';
 import { CHEATSHEET_ITEMS, type CheatsheetItem } from '../../features/cheatsheet/items';
 import { buildCheatsheetIndex, searchCheatsheet } from '../../features/cheatsheet/search';
@@ -23,7 +24,7 @@ type QuickStartStep = {
   lessonSlug: string;
 };
 
-const DEFAULT_PRACTICE_PATH = '/practice?lesson=hello-tmux';
+const DEFAULT_PRACTICE_PATH = '/practice/hello-tmux';
 const BASIC_CHEATSHEET_ITEMS = CHEATSHEET_ITEMS.filter((item) => item.contentType !== 'playbook');
 
 const BASIC_GUIDE_ITEMS: BasicGuideItem[] = [
@@ -90,7 +91,7 @@ function resolvePracticePath(item: CheatsheetItem) {
 }
 
 function buildLessonPracticePath(lessonSlug: string) {
-  return `/practice?lesson=${encodeURIComponent(lessonSlug)}`;
+  return buildPracticeLessonPath(lessonSlug);
 }
 
 export function CheatsheetPage() {

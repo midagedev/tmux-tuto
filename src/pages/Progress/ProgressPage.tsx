@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { EmptyState } from '../../components/system/EmptyState';
 import { PagePlaceholder } from '../../components/system/PagePlaceholder';
 import { loadAppContent } from '../../features/curriculum/contentLoader';
+import { buildPracticeLessonPath } from '../../features/curriculum/practicePath';
 import type { AppContent, AppMission } from '../../features/curriculum/contentSchema';
 import { listAchievementDefinitions } from '../../features/progress';
 import { useProgressStore } from '../../features/progress/progressStore';
@@ -246,7 +247,7 @@ export function ProgressPage() {
                           {lessonSlug ? (
                             <Link
                               className="secondary-btn"
-                              to={`/practice?lesson=${lessonSlug}&mission=${session.missionSlug}`}
+                              to={buildPracticeLessonPath(lessonSlug, { missionSlug: session.missionSlug })}
                             >
                               {t('이어서 실습')}
                             </Link>

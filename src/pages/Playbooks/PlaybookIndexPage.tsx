@@ -154,13 +154,13 @@ const CLI_TMUX_USE_CASES: UseCaseCard[] = [
 ];
 
 function buildPracticePath(lessonSlug: string) {
-  return `/practice?lesson=${encodeURIComponent(lessonSlug)}`;
+  return `/practice/${encodeURIComponent(lessonSlug)}`;
 }
 
 function firstLessonPath(lessonSlugs: string[]) {
   const firstLesson = lessonSlugs[0];
   if (!firstLesson) {
-    return '/practice?lesson=hello-tmux';
+    return '/practice/hello-tmux';
   }
 
   return buildPracticePath(firstLesson);
@@ -265,7 +265,7 @@ export function PlaybookIndexPage() {
             <Link to="/cheatsheet" className="text-link">
               {t('기본·명령 가이드로 이동')}
             </Link>
-            <Link to="/practice?lesson=hello-tmux" className="text-link">
+            <Link to="/practice/hello-tmux" className="text-link">
               {t('실습 바로 열기')}
             </Link>
           </div>

@@ -20,12 +20,15 @@ async function activeMissionText(page: Page) {
   return (await page.locator('.vm-mission-row.is-active').first().innerText()).trim();
 }
 
-async function currentPracticeQuery(page: Page) {
+async function currentPracticeRoute(page: Page) {
   return page.evaluate(() => {
     const params = new URLSearchParams(window.location.search);
+    const segments = window.location.pathname.split('/').filter(Boolean);
+    const lessonSegment = segments[0] === 'practice' ? segments[1] ?? null : null;
     return {
-      lesson: params.get('lesson'),
+      lesson: lessonSegment ? decodeURIComponent(lessonSegment) : null,
       mission: params.get('mission'),
+      pathname: window.location.pathname,
     };
   });
 }
@@ -84,12 +87,13 @@ test.describe('practice routing + probe', () => {
     await expect.poll(async () => activeMissionText(page), { timeout: RULE_TIMEOUT_MS }).toContain('세션 상태 한 번 확인');
 
     await expect
-      .poll(async () => currentPracticeQuery(page), {
+      .poll(async () => currentPracticeRoute(page), {
         timeout: RULE_TIMEOUT_MS,
       })
       .toEqual({
         lesson: 'hello-tmux',
         mission: 'hello-tmux-session-list',
+        pathname: '/practice/hello-tmux',
       });
   });
 
@@ -102,17 +106,18 @@ test.describe('practice routing + probe', () => {
     await expect.poll(async () => activeMissionText(page), { timeout: RULE_TIMEOUT_MS }).toContain('세션 상태 한 번 확인');
 
     await expect
-      .poll(async () => currentPracticeQuery(page), {
+      .poll(async () => currentPracticeRoute(page), {
         timeout: RULE_TIMEOUT_MS,
       })
       .toEqual({
         lesson: 'hello-tmux',
         mission: 'hello-tmux-session-list',
+        pathname: '/practice/hello-tmux',
       });
   });
 
   test('invalid mission should fall back to selected lesson default mission', async ({ page }) => {
-    await page.goto('/practice?lang=ko&lesson=basics&mission=does-not-exist');
+    await page.goto('/practice/basics?lang=ko&mission=does-not-exist');
     await dismissAnalyticsBanner(page);
     await waitForLessonCatalog(page);
 
@@ -120,19 +125,20 @@ test.describe('practice routing + probe', () => {
     await expect.poll(async () => activeMissionText(page), { timeout: RULE_TIMEOUT_MS }).toContain('첫 세션 만들기');
 
     await expect
-      .poll(async () => currentPracticeQuery(page), {
+      .poll(async () => currentPracticeRoute(page), {
         timeout: RULE_TIMEOUT_MS,
       })
       .toEqual({
         lesson: 'basics',
         mission: 'session-create',
+        pathname: '/practice/basics',
       });
   });
 
-  test('first mission completion auto-advances and second mission completion is detected', async ({ page }) => {
+  test('first mission completion keeps flow and second mission completion is detected', async ({ page }) => {
     test.setTimeout(120_000);
 
-    await page.goto('/practice?lang=ko&lesson=hello-tmux&mission=hello-tmux-version-check');
+    await page.goto('/practice/hello-tmux?lang=ko&mission=hello-tmux-version-check');
     await dismissAnalyticsBanner(page);
     await waitForVmBridgeReady(page);
 
@@ -149,8 +155,9 @@ test.describe('practice routing + probe', () => {
       )
       .toBe(true);
 
+    await page.getByRole('button', { name: /다음 미션|Next mission/ }).first().click();
     await expect
-      .poll(async () => (await currentPracticeQuery(page)).mission, {
+      .poll(async () => (await currentPracticeRoute(page)).mission, {
         timeout: RULE_TIMEOUT_MS,
       })
       .toBe('hello-tmux-session-list');
