@@ -3143,7 +3143,9 @@ a {
 
   .app-shell.app-shell-practice {
     grid-template-columns: 1fr;
-    grid-template-areas: 'main';
+    grid-template-areas:
+      'side'
+      'main';
   }
 
   .app-header {
@@ -3208,6 +3210,33 @@ a {
 }
 
 @media (max-width: 760px) {
+  .app-shell {
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .app-header-brand-row {
+    display: grid;
+    gap: 6px;
+    align-items: start;
+    justify-content: stretch;
+  }
+
+  .app-header-summary {
+    font-size: 0.78rem;
+    line-height: 1.45;
+  }
+
+  .app-header-nav-row {
+    display: grid;
+    gap: 8px;
+    align-items: stretch;
+  }
+
+  .main-nav {
+    width: 100%;
+  }
+
   .left-panel,
   .main-panel,
   .right-panel {
