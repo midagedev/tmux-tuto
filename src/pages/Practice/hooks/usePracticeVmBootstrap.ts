@@ -125,6 +125,7 @@ export function usePracticeVmBootstrap({
     let bootReady = false;
     let bootReadinessRetryCount = 0;
     let bootInstanceRecreateCount = 0;
+    let activeBootSessionId = 0;
     let probeBootstrapTimerId: number | null = null;
     let warmBootstrapTimerId: number | null = null;
     let bootReadinessRetryTimerId: number | null = null;
@@ -249,6 +250,15 @@ export function usePracticeVmBootstrap({
       }
     };
 
+    const nextBootSessionId = () => {
+      activeBootSessionId += 1;
+      return activeBootSessionId;
+    };
+
+    const isActiveBootSession = (sessionId: number) => {
+      return isMounted && sessionId === activeBootSessionId;
+    };
+
     const detachListenersFromEmulator = (emulator: V86) => {
       if (loadedListener) {
         emulator.remove_listener('emulator-loaded', loadedListener);
@@ -323,10 +333,10 @@ export function usePracticeVmBootstrap({
       markBridgeReadyIfNeeded();
     };
 
-    const scheduleBootReadinessRetry = () => {
+    const scheduleBootReadinessRetry = (sessionId: number) => {
       clearBootReadinessRetryTimer();
       bootReadinessRetryTimerId = window.setTimeout(() => {
-        if (!isMounted || !emulatorRef.current || bootReady) {
+        if (!isActiveBootSession(sessionId) || !emulatorRef.current || bootReady) {
           return;
         }
 
@@ -341,14 +351,14 @@ export function usePracticeVmBootstrap({
         );
         emulatorRef.current.serial0_send('\n');
         dispatchBootstrapProbe();
-        scheduleBootReadinessRetry();
+        scheduleBootReadinessRetry(sessionId);
       }, BOOT_READINESS_RETRY_INTERVAL_MS);
     };
 
-    const scheduleBootReadyTimeout = (recreateInstance: () => void) => {
+    const scheduleBootReadyTimeout = (sessionId: number, recreateInstance: () => void) => {
       clearBootReadyTimeoutTimer();
       bootReadyTimeoutTimerId = window.setTimeout(() => {
-        if (!isMounted || bootReady || !emulatorRef.current) {
+        if (!isActiveBootSession(sessionId) || bootReady || !emulatorRef.current) {
           return;
         }
 
@@ -437,6 +447,7 @@ export function usePracticeVmBootstrap({
         return;
       }
 
+      const bootSessionId = nextBootSessionId();
       const previousEmulator = emulatorRef.current;
       clearBootstrapTimers();
       clearBootReadinessRetryTimer();
@@ -457,6 +468,19 @@ export function usePracticeVmBootstrap({
       inputCaptureStateRef.current = createInitialTerminalInputCaptureState();
       vmInternalBridgeReadyRef.current = false;
       vmWarmBannerPendingRef.current = false;
+
+      if (options?.reason === 'recreate') {
+        const recreatedMetrics = createInitialMetrics();
+        setMetrics(recreatedMetrics);
+        metricsRef.current = recreatedMetrics;
+        clearMetricVisualEffects();
+        clearMetricVisualState();
+        setActionHistory([]);
+        setCommandHistory([]);
+        pushDebugLine(
+          `[bootstrap] recreating VM instance ${bootInstanceRecreateCount}/${BOOT_INSTANCE_RECREATE_LIMIT} after readiness timeout`,
+        );
+      }
 
       let useWarmStart = Boolean(cachedWarmInitialState);
       if (options?.forceColdStart) {
@@ -494,23 +518,29 @@ export function usePracticeVmBootstrap({
       emulatorRef.current = emulator;
 
       loadedListener = () => {
+        if (!isActiveBootSession(bootSessionId) || emulatorRef.current !== emulator) {
+          return;
+        }
         setVmStatusText(useWarmStart ? t('빠른 시작 스냅샷 복원 완료') : t('커널 및 루트FS 로딩 완료'));
       };
 
       stopListener = () => {
+        if (!isActiveBootSession(bootSessionId) || emulatorRef.current !== emulator) {
+          return;
+        }
         setVmStatus('stopped');
         setVmStatusText(t('VM이 중지되었습니다'));
       };
 
       serialListener = (value) => {
-        if (typeof value !== 'number') {
+        if (typeof value !== 'number' || !isActiveBootSession(bootSessionId) || emulatorRef.current !== emulator) {
           return;
         }
         writeByte(value);
       };
 
       serialProbeListener = (value) => {
-        if (typeof value !== 'number') {
+        if (typeof value !== 'number' || !isActiveBootSession(bootSessionId) || emulatorRef.current !== emulator) {
           return;
         }
         writeProbeByte(value);
@@ -526,25 +556,25 @@ export function usePracticeVmBootstrap({
 
       const probeBootstrapDelayMs = useWarmStart ? 700 : 2600;
       probeBootstrapTimerId = window.setTimeout(() => {
-        if (!emulatorRef.current || bootReady) {
+        if (!isActiveBootSession(bootSessionId) || !emulatorRef.current || bootReady) {
           return;
         }
         emulatorRef.current.serial0_send('\n');
         if (useWarmStart) {
           warmBootstrapTimerId = window.setTimeout(() => {
-            if (!emulatorRef.current || bootReady) {
+            if (!isActiveBootSession(bootSessionId) || !emulatorRef.current || bootReady) {
               return;
             }
             dispatchBootstrapProbe();
-            scheduleBootReadinessRetry();
+            scheduleBootReadinessRetry(bootSessionId);
           }, 180);
           return;
         }
         dispatchBootstrapProbe();
-        scheduleBootReadinessRetry();
+        scheduleBootReadinessRetry(bootSessionId);
       }, probeBootstrapDelayMs);
 
-      scheduleBootReadyTimeout(() => {
+      scheduleBootReadyTimeout(bootSessionId, () => {
         startEmulatorInstance({
           forceColdStart: true,
           reason: 'recreate',
@@ -577,6 +607,7 @@ export function usePracticeVmBootstrap({
 
     return () => {
       isMounted = false;
+      activeBootSessionId += 1;
 
       inputCaptureStateRef.current = createInitialTerminalInputCaptureState();
       outputEscapeSequenceRef.current = false;
