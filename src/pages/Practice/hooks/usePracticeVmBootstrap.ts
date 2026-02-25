@@ -23,6 +23,7 @@ import {
   DEFAULT_TERMINAL_ROWS,
   loadVmInitialState,
   type VmBootConfig,
+  type VmInitialState,
 } from '../vmBoot';
 import {
   consumeProbeOutputByte,
@@ -74,6 +75,8 @@ type UsePracticeVmBootstrapArgs = {
 
 const BOOT_READINESS_RETRY_LIMIT = 2;
 const BOOT_READINESS_RETRY_INTERVAL_MS = 2200;
+const BOOT_READY_TIMEOUT_MS = 7000;
+const BOOT_INSTANCE_RECREATE_LIMIT = 1;
 
 export function usePracticeVmBootstrap({
   t,
@@ -121,9 +124,14 @@ export function usePracticeVmBootstrap({
     let isMounted = true;
     let bootReady = false;
     let bootReadinessRetryCount = 0;
+    let bootInstanceRecreateCount = 0;
     let probeBootstrapTimerId: number | null = null;
     let warmBootstrapTimerId: number | null = null;
     let bootReadinessRetryTimerId: number | null = null;
+    let bootReadyTimeoutTimerId: number | null = null;
+    let v86Ctor: (new (options: V86Options) => V86) | null = null;
+    let baseOptions: V86Options | null = null;
+    let cachedWarmInitialState: VmInitialState | null = null;
     let serialListener: ((value?: unknown) => void) | null = null;
     let serialProbeListener: ((value?: unknown) => void) | null = null;
     let loadedListener: ((value?: unknown) => void) | null = null;
@@ -223,6 +231,55 @@ export function usePracticeVmBootstrap({
       }
     };
 
+    const clearBootReadyTimeoutTimer = () => {
+      if (bootReadyTimeoutTimerId !== null) {
+        window.clearTimeout(bootReadyTimeoutTimerId);
+        bootReadyTimeoutTimerId = null;
+      }
+    };
+
+    const clearBootstrapTimers = () => {
+      if (probeBootstrapTimerId !== null) {
+        window.clearTimeout(probeBootstrapTimerId);
+        probeBootstrapTimerId = null;
+      }
+      if (warmBootstrapTimerId !== null) {
+        window.clearTimeout(warmBootstrapTimerId);
+        warmBootstrapTimerId = null;
+      }
+    };
+
+    const detachListenersFromEmulator = (emulator: V86) => {
+      if (loadedListener) {
+        emulator.remove_listener('emulator-loaded', loadedListener);
+      }
+      if (stopListener) {
+        emulator.remove_listener('emulator-stopped', stopListener);
+      }
+      if (serialListener) {
+        emulator.remove_listener('serial0-output-byte', serialListener);
+      }
+      if (serialProbeListener) {
+        emulator.remove_listener('serial1-output-byte', serialProbeListener);
+      }
+      loadedListener = null;
+      stopListener = null;
+      serialListener = null;
+      serialProbeListener = null;
+    };
+
+    const disposeEmulator = (emulator: V86 | null) => {
+      if (!emulator) {
+        return;
+      }
+      detachListenersFromEmulator(emulator);
+      if (emulatorRef.current === emulator) {
+        emulatorRef.current = null;
+      }
+      void Promise.resolve(emulator.stop()).catch(() => undefined);
+      void Promise.resolve(emulator.destroy()).catch(() => undefined);
+    };
+
     const markBridgeReadyIfNeeded = () => {
       if (vmInternalBridgeReadyRef.current || !emulatorRef.current) {
         return;
@@ -260,6 +317,7 @@ export function usePracticeVmBootstrap({
       bootReady = true;
       bootReadinessRetryCount = 0;
       clearBootReadinessRetryTimer();
+      clearBootReadyTimeoutTimer();
       setVmStatusText(t('부팅 완료, 명령 입력 가능'));
       setVmStatus('running');
       markBridgeReadyIfNeeded();
@@ -285,6 +343,28 @@ export function usePracticeVmBootstrap({
         dispatchBootstrapProbe();
         scheduleBootReadinessRetry();
       }, BOOT_READINESS_RETRY_INTERVAL_MS);
+    };
+
+    const scheduleBootReadyTimeout = (recreateInstance: () => void) => {
+      clearBootReadyTimeoutTimer();
+      bootReadyTimeoutTimerId = window.setTimeout(() => {
+        if (!isMounted || bootReady || !emulatorRef.current) {
+          return;
+        }
+
+        if (bootInstanceRecreateCount >= BOOT_INSTANCE_RECREATE_LIMIT) {
+          pushDebugLine(
+            `[bootstrap] boot readiness timeout exceeded (${BOOT_READY_TIMEOUT_MS}ms), recreate skipped`,
+          );
+          return;
+        }
+
+        bootInstanceRecreateCount += 1;
+        pushDebugLine(
+          `[bootstrap] boot readiness timeout (${BOOT_READY_TIMEOUT_MS}ms), recreating instance ${bootInstanceRecreateCount}/${BOOT_INSTANCE_RECREATE_LIMIT}`,
+        );
+        recreateInstance();
+      }, BOOT_READY_TIMEOUT_MS);
     };
 
     const writeByte = (value: number) => {
@@ -352,6 +432,126 @@ export function usePracticeVmBootstrap({
       }
     };
 
+    const startEmulatorInstance = (options?: { forceColdStart?: boolean; reason?: 'initial' | 'recreate' }) => {
+      if (!isMounted || !v86Ctor || !baseOptions) {
+        return;
+      }
+
+      const previousEmulator = emulatorRef.current;
+      clearBootstrapTimers();
+      clearBootReadinessRetryTimer();
+      clearBootReadyTimeoutTimer();
+      if (searchProbeTimerRef.current !== null) {
+        window.clearTimeout(searchProbeTimerRef.current);
+        searchProbeTimerRef.current = null;
+      }
+      if (previousEmulator) {
+        disposeEmulator(previousEmulator);
+      }
+
+      bootReady = false;
+      bootReadinessRetryCount = 0;
+      lineBufferRef.current = '';
+      probeLineBufferRef.current = '';
+      outputEscapeSequenceRef.current = false;
+      inputCaptureStateRef.current = createInitialTerminalInputCaptureState();
+      vmInternalBridgeReadyRef.current = false;
+      vmWarmBannerPendingRef.current = false;
+
+      let useWarmStart = Boolean(cachedWarmInitialState);
+      if (options?.forceColdStart) {
+        useWarmStart = false;
+      }
+
+      if (options?.reason === 'recreate') {
+        setVmStatus('booting');
+        setVmStatusText(t('부팅 지연 감지, VM 인스턴스 재생성 중...'));
+      } else if (useWarmStart) {
+        setVmStatusText(t('빠른 시작 스냅샷 로딩 중...'));
+      }
+
+      let emulator: V86;
+      if (useWarmStart) {
+        try {
+          emulator = new v86Ctor({
+            ...baseOptions,
+            initial_state: cachedWarmInitialState ?? undefined,
+          });
+        } catch {
+          useWarmStart = false;
+          setVmStatusText(t('빠른 시작 스냅샷 복원 실패, 일반 부팅으로 전환'));
+          emulator = new v86Ctor(baseOptions);
+        }
+      } else {
+        emulator = new v86Ctor(baseOptions);
+      }
+
+      lastEmulatorOptionsRef.current = {
+        ...baseOptions,
+        ...(useWarmStart ? { initial_state: cachedWarmInitialState ?? undefined } : {}),
+      };
+      vmWarmBannerPendingRef.current = useWarmStart;
+      emulatorRef.current = emulator;
+
+      loadedListener = () => {
+        setVmStatusText(useWarmStart ? t('빠른 시작 스냅샷 복원 완료') : t('커널 및 루트FS 로딩 완료'));
+      };
+
+      stopListener = () => {
+        setVmStatus('stopped');
+        setVmStatusText(t('VM이 중지되었습니다'));
+      };
+
+      serialListener = (value) => {
+        if (typeof value !== 'number') {
+          return;
+        }
+        writeByte(value);
+      };
+
+      serialProbeListener = (value) => {
+        if (typeof value !== 'number') {
+          return;
+        }
+        writeProbeByte(value);
+      };
+
+      emulator.add_listener('emulator-loaded', loadedListener);
+      emulator.add_listener('emulator-stopped', stopListener);
+      emulator.add_listener('serial0-output-byte', serialListener);
+      emulator.add_listener('serial1-output-byte', serialProbeListener);
+
+      setVmStatus('booting');
+      setVmStatusText(options?.reason === 'recreate' ? t('재생성된 VM 부팅 중...') : t('VM 부팅 중...'));
+
+      const probeBootstrapDelayMs = useWarmStart ? 700 : 2600;
+      probeBootstrapTimerId = window.setTimeout(() => {
+        if (!emulatorRef.current || bootReady) {
+          return;
+        }
+        emulatorRef.current.serial0_send('\n');
+        if (useWarmStart) {
+          warmBootstrapTimerId = window.setTimeout(() => {
+            if (!emulatorRef.current || bootReady) {
+              return;
+            }
+            dispatchBootstrapProbe();
+            scheduleBootReadinessRetry();
+          }, 180);
+          return;
+        }
+        dispatchBootstrapProbe();
+        scheduleBootReadinessRetry();
+      }, probeBootstrapDelayMs);
+
+      scheduleBootReadyTimeout(() => {
+        startEmulatorInstance({
+          forceColdStart: true,
+          reason: 'recreate',
+        });
+      });
+    };
+
     (async () => {
       try {
         const module = await import('v86');
@@ -359,95 +559,16 @@ export function usePracticeVmBootstrap({
           return;
         }
 
-        const V86Ctor = module.default;
+        v86Ctor = module.default;
         setVmStatusText(t('VM 시작 이미지 확인 중...'));
 
-        const initialState = disableWarmStart ? null : await loadVmInitialState(bootConfig.initialStatePath);
+        cachedWarmInitialState = disableWarmStart ? null : await loadVmInitialState(bootConfig.initialStatePath);
         if (!isMounted) {
           return;
         }
 
-        let useWarmStart = Boolean(initialState);
-        if (useWarmStart) {
-          setVmStatusText(t('빠른 시작 스냅샷 로딩 중...'));
-        }
-
-        const baseOptions = createVmBaseOptions(bootConfig);
-
-        let emulator: V86;
-        if (useWarmStart) {
-          try {
-            emulator = new V86Ctor({
-              ...baseOptions,
-              initial_state: initialState ?? undefined,
-            });
-          } catch {
-            useWarmStart = false;
-            setVmStatusText(t('빠른 시작 스냅샷 복원 실패, 일반 부팅으로 전환'));
-            emulator = new V86Ctor(baseOptions);
-          }
-        } else {
-          emulator = new V86Ctor(baseOptions);
-        }
-
-        lastEmulatorOptionsRef.current = {
-          ...baseOptions,
-          ...(useWarmStart ? { initial_state: initialState ?? undefined } : {}),
-        };
-        vmWarmBannerPendingRef.current = useWarmStart;
-
-        emulatorRef.current = emulator;
-
-        loadedListener = () => {
-          setVmStatusText(useWarmStart ? t('빠른 시작 스냅샷 복원 완료') : t('커널 및 루트FS 로딩 완료'));
-        };
-
-        stopListener = () => {
-          setVmStatus('stopped');
-          setVmStatusText(t('VM이 중지되었습니다'));
-        };
-
-        serialListener = (value) => {
-          if (typeof value !== 'number') {
-            return;
-          }
-          writeByte(value);
-        };
-
-        serialProbeListener = (value) => {
-          if (typeof value !== 'number') {
-            return;
-          }
-          writeProbeByte(value);
-        };
-
-        emulator.add_listener('emulator-loaded', loadedListener);
-        emulator.add_listener('emulator-stopped', stopListener);
-        emulator.add_listener('serial0-output-byte', serialListener);
-        emulator.add_listener('serial1-output-byte', serialProbeListener);
-
-        setVmStatus('booting');
-        setVmStatusText(t('VM 부팅 중...'));
-
-        const probeBootstrapDelayMs = useWarmStart ? 700 : 2600;
-        probeBootstrapTimerId = window.setTimeout(() => {
-          if (!emulatorRef.current || bootReady) {
-            return;
-          }
-          emulatorRef.current.serial0_send('\n');
-          if (useWarmStart) {
-            warmBootstrapTimerId = window.setTimeout(() => {
-              if (!emulatorRef.current || bootReady) {
-                return;
-              }
-              dispatchBootstrapProbe();
-              scheduleBootReadinessRetry();
-            }, 180);
-            return;
-          }
-          dispatchBootstrapProbe();
-          scheduleBootReadinessRetry();
-        }, probeBootstrapDelayMs);
+        baseOptions = createVmBaseOptions(bootConfig);
+        startEmulatorInstance({ forceColdStart: false, reason: 'initial' });
       } catch {
         setVmStatus('error');
         setVmStatusText(t('v86 초기화 실패 (bios/wasm 경로 확인 필요)'));
@@ -462,15 +583,9 @@ export function usePracticeVmBootstrap({
       probeLineBufferRef.current = '';
       terminalInputBridgeRef.current = null;
       shortcutTelemetryStateRef.current = createTmuxShortcutTelemetryState();
-      if (probeBootstrapTimerId !== null) {
-        window.clearTimeout(probeBootstrapTimerId);
-        probeBootstrapTimerId = null;
-      }
-      if (warmBootstrapTimerId !== null) {
-        window.clearTimeout(warmBootstrapTimerId);
-        warmBootstrapTimerId = null;
-      }
+      clearBootstrapTimers();
       clearBootReadinessRetryTimer();
+      clearBootReadyTimeoutTimer();
       if (searchProbeTimerRef.current !== null) {
         window.clearTimeout(searchProbeTimerRef.current);
         searchProbeTimerRef.current = null;
@@ -487,23 +602,7 @@ export function usePracticeVmBootstrap({
       const emulator = emulatorRef.current;
       emulatorRef.current = null;
 
-      if (emulator) {
-        if (loadedListener) {
-          emulator.remove_listener('emulator-loaded', loadedListener);
-        }
-        if (stopListener) {
-          emulator.remove_listener('emulator-stopped', stopListener);
-        }
-        if (serialListener) {
-          emulator.remove_listener('serial0-output-byte', serialListener);
-        }
-        if (serialProbeListener) {
-          emulator.remove_listener('serial1-output-byte', serialProbeListener);
-        }
-
-        void Promise.resolve(emulator.stop()).catch(() => undefined);
-        void Promise.resolve(emulator.destroy()).catch(() => undefined);
-      }
+      disposeEmulator(emulator);
     };
   }, [
     bootConfig,
