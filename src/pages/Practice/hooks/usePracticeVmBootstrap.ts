@@ -72,6 +72,9 @@ type UsePracticeVmBootstrapArgs = {
   bootConfig: VmBootConfig;
 };
 
+const BOOT_READINESS_RETRY_LIMIT = 2;
+const BOOT_READINESS_RETRY_INTERVAL_MS = 2200;
+
 export function usePracticeVmBootstrap({
   t,
   contentReady,
@@ -116,6 +119,11 @@ export function usePracticeVmBootstrap({
     }
 
     let isMounted = true;
+    let bootReady = false;
+    let bootReadinessRetryCount = 0;
+    let probeBootstrapTimerId: number | null = null;
+    let warmBootstrapTimerId: number | null = null;
+    let bootReadinessRetryTimerId: number | null = null;
     let serialListener: ((value?: unknown) => void) | null = null;
     let serialProbeListener: ((value?: unknown) => void) | null = null;
     let loadedListener: ((value?: unknown) => void) | null = null;
@@ -208,6 +216,13 @@ export function usePracticeVmBootstrap({
       forwardTerminalInput(data);
     });
 
+    const clearBootReadinessRetryTimer = () => {
+      if (bootReadinessRetryTimerId !== null) {
+        window.clearTimeout(bootReadinessRetryTimerId);
+        bootReadinessRetryTimerId = null;
+      }
+    };
+
     const markBridgeReadyIfNeeded = () => {
       if (vmInternalBridgeReadyRef.current || !emulatorRef.current) {
         return;
@@ -219,6 +234,57 @@ export function usePracticeVmBootstrap({
       }
       sendInternalCommand(terminalGeometrySyncCommand);
       requestBootstrapProbe();
+    };
+
+    const dispatchBootstrapProbe = () => {
+      if (!emulatorRef.current || bootReady) {
+        return;
+      }
+
+      if (vmWarmBannerPendingRef.current) {
+        emulatorRef.current.serial0_send(`${BANNER_TRIGGER_COMMAND}\n`);
+        vmWarmBannerPendingRef.current = false;
+      }
+
+      if (!vmInternalBridgeReadyRef.current) {
+        vmInternalBridgeReadyRef.current = true;
+      }
+      sendInternalCommand(terminalGeometrySyncCommand);
+      requestBootstrapProbe();
+    };
+
+    const markBootReady = () => {
+      if (bootReady) {
+        return;
+      }
+      bootReady = true;
+      bootReadinessRetryCount = 0;
+      clearBootReadinessRetryTimer();
+      setVmStatusText(t('부팅 완료, 명령 입력 가능'));
+      setVmStatus('running');
+      markBridgeReadyIfNeeded();
+    };
+
+    const scheduleBootReadinessRetry = () => {
+      clearBootReadinessRetryTimer();
+      bootReadinessRetryTimerId = window.setTimeout(() => {
+        if (!isMounted || !emulatorRef.current || bootReady) {
+          return;
+        }
+
+        if (bootReadinessRetryCount >= BOOT_READINESS_RETRY_LIMIT) {
+          pushDebugLine(`[bootstrap] readiness probe retries exhausted (${BOOT_READINESS_RETRY_LIMIT})`);
+          return;
+        }
+
+        bootReadinessRetryCount += 1;
+        pushDebugLine(
+          `[bootstrap] readiness probe retry ${bootReadinessRetryCount}/${BOOT_READINESS_RETRY_LIMIT}`,
+        );
+        emulatorRef.current.serial0_send('\n');
+        dispatchBootstrapProbe();
+        scheduleBootReadinessRetry();
+      }, BOOT_READINESS_RETRY_INTERVAL_MS);
     };
 
     const writeByte = (value: number) => {
@@ -235,9 +301,7 @@ export function usePracticeVmBootstrap({
       const promptLine = stripAnsi(outputCaptureResult.nextState.lineBuffer).replace(/\r/g, '');
       const hasPromptInBuffer = /[#$]\s*$/.test(promptLine.trimEnd());
       if (hasPromptInBuffer) {
-        setVmStatusText(t('부팅 완료, 명령 입력 가능'));
-        setVmStatus('running');
-        markBridgeReadyIfNeeded();
+        markBootReady();
       }
 
       if (outputCaptureResult.completedLine === null) {
@@ -247,12 +311,14 @@ export function usePracticeVmBootstrap({
       const completedLine = outputCaptureResult.completedLine;
       const probeState = parseProbeStateFromLine(completedLine);
       if (probeState) {
+        markBootReady();
         updateMetricsByProbeState(probeState);
         return;
       }
 
       const probeMetric = parseProbeMetricFromLine(completedLine);
       if (probeMetric) {
+        markBootReady();
         updateMetricByProbe(probeMetric);
         return;
       }
@@ -260,15 +326,9 @@ export function usePracticeVmBootstrap({
       pushDebugLine(completedLine);
 
       const plainLine = stripAnsi(completedLine).replace(/\r/g, '');
-      const normalizedLine = plainLine.toLowerCase();
       const hasShellPrompt = /[#$]\s*$/.test(plainLine.trimEnd());
-      if (normalizedLine.includes('login:') || hasShellPrompt) {
-        setVmStatusText(t('부팅 완료, 명령 입력 가능'));
-        setVmStatus('running');
-      }
-
       if (hasShellPrompt) {
-        markBridgeReadyIfNeeded();
+        markBootReady();
       }
     };
 
@@ -280,12 +340,14 @@ export function usePracticeVmBootstrap({
       }
       const probeState = parseProbeStateFromLine(probeCaptureResult.completedLine);
       if (probeState) {
+        markBootReady();
         updateMetricsByProbeState(probeState);
         return;
       }
 
       const probeMetric = parseProbeMetricFromLine(probeCaptureResult.completedLine);
       if (probeMetric) {
+        markBootReady();
         updateMetricByProbe(probeMetric);
       }
     };
@@ -368,23 +430,23 @@ export function usePracticeVmBootstrap({
         setVmStatusText(t('VM 부팅 중...'));
 
         const probeBootstrapDelayMs = useWarmStart ? 700 : 2600;
-        window.setTimeout(() => {
-          if (!emulatorRef.current) {
+        probeBootstrapTimerId = window.setTimeout(() => {
+          if (!emulatorRef.current || bootReady) {
             return;
           }
           emulatorRef.current.serial0_send('\n');
           if (useWarmStart) {
-            window.setTimeout(() => {
-              if (!emulatorRef.current) {
+            warmBootstrapTimerId = window.setTimeout(() => {
+              if (!emulatorRef.current || bootReady) {
                 return;
               }
-              emulatorRef.current.serial0_send(`${BANNER_TRIGGER_COMMAND}\n`);
-              sendInternalCommand(terminalGeometrySyncCommand);
-              requestBootstrapProbe();
-              vmInternalBridgeReadyRef.current = true;
-              vmWarmBannerPendingRef.current = false;
+              dispatchBootstrapProbe();
+              scheduleBootReadinessRetry();
             }, 180);
+            return;
           }
+          dispatchBootstrapProbe();
+          scheduleBootReadinessRetry();
         }, probeBootstrapDelayMs);
       } catch {
         setVmStatus('error');
@@ -400,6 +462,15 @@ export function usePracticeVmBootstrap({
       probeLineBufferRef.current = '';
       terminalInputBridgeRef.current = null;
       shortcutTelemetryStateRef.current = createTmuxShortcutTelemetryState();
+      if (probeBootstrapTimerId !== null) {
+        window.clearTimeout(probeBootstrapTimerId);
+        probeBootstrapTimerId = null;
+      }
+      if (warmBootstrapTimerId !== null) {
+        window.clearTimeout(warmBootstrapTimerId);
+        warmBootstrapTimerId = null;
+      }
+      clearBootReadinessRetryTimer();
       if (searchProbeTimerRef.current !== null) {
         window.clearTimeout(searchProbeTimerRef.current);
         searchProbeTimerRef.current = null;
